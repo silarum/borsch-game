@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Крипто Борщ Тапалка</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 60%, #F4A460 100%);
+            overflow: hidden;
+        }
+        /* Море */
+        .sea {
+            position: absolute;
+            bottom: 40%;
+            left: 0; right: 0;
+            height: 60%;
+            background: linear-gradient(180deg, #1E90FF, #4169E1);
+            animation: waves 3s infinite ease-in-out;
+        }
+        @keyframes waves {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        /* Пальма */
+        .palm {
+            position: absolute;
+            left: -20px; top: 10%;
+            width: 100px; height: 200px;
+        }
+        .palm-trunk {
+            position: absolute;
+            bottom: 0; left: 30px;
+            width: 12px; height: 120px;
+            background: #8B4513;
+            border-radius: 5px;
+            transform: rotate(5deg);
+        }
+        .palm-leaves {
+            position: absolute;
+            top: 20px; left: 0;
+            width: 100px; height: 80px;
+        }
+        .palm-leaf {
+            position: absolute;
+            width: 60px; height: 12px;
+            background: #228B22;
+            border-radius: 50%;
+            transform-origin: left center;
+        }
+        .palm-leaf:nth-child(1) { transform: rotate(-20deg); top: 10px; left: 10px; }
+        .palm-leaf:nth-child(2) { transform: rotate(-40deg); top: 25px; left: 5px; }
+        .palm-leaf:nth-child(3) { transform: rotate(15deg); top: 15px; left: 20px; }
+        /* Яхта */
+        .yacht {
+            position: absolute;
+            right: 15%; bottom: 35%;
+            width: 60px; height: 100px;
+            animation: float 4s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .yacht-body {
+            position: absolute;
+            bottom: 0; left: 5px;
+            width: 50px; height: 20px;
+            background: white;
+            border-radius: 50% 50% 0 0;
+        }
+        .yacht-sail {
+            position: absolute;
+            bottom: 20px; left: 25px;
+            width: 0; height: 0;
+            border-left: 25px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 50px solid white;
+        }
+        /* Стеклянная стена */
+        .glass-wall {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 35%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            border-bottom: 3px solid rgba(255,255,255,0.6);
+            pointer-events: none;
+        }
+        /* Кухонный стол */
+        .table {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 38%;
+            background: linear-gradient(180deg, #DEB887, #A0522D);
+            border-top: 8px solid #8B4513;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        /* Печь */
+        .stove {
+            position: absolute;
+            bottom: 15%; left: 50%;
+            transform: translateX(-50%);
+            width: 80%; height: 40%;
+            background: linear-gradient(180deg, #F5F5F5, #D3D3D3);
+            border-radius: 15px 15px 5px 5px;
+            border: 4px solid #A9A9A9;
+        }
+        /* Кастрюля */
+        .pot {
+            position: absolute;
+            top: -25px; left: 50%;
+            transform: translateX(-50%);
+            width: 55%; height: 55%;
+            background: linear-gradient(180deg, #C0C0C0, #708090);
+            border-radius: 0 0 30px 30px;
+            border: 4px solid #2F4F4F;
+        }
+        .pot::after {
+            content: '';
+            position: absolute;
+            top: -15px; left: -5px; right: -5px;
+            height: 15px;
+            background: #A9A9A9;
+            border-radius: 5px;
+        }
+        .steam {
+            position: absolute;
+            top: -20px; left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 30px;
+        }
+        .steam-particle {
+            position: absolute;
+            width: 15px; height: 15px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            animation: rise 2s infinite;
+        }
+        .steam-particle:nth-child(1) { left: 20%; animation-delay: 0s; }
+        .steam-particle:nth-child(2) { left: 50%; animation-delay: 0.7s; }
+        .steam-particle:nth-child(3) { left: 70%; animation-delay: 1.4s; }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0.7; }
+            100% { transform: translateY(-30px) scale(2); opacity: 0; }
+        }
+        /* Доска 3x3 */
+        .board {
+            position: absolute;
+            bottom: 30%; left: 50%;
+            transform: translateX(-50%);
+            width: 85%; height: 50%;
+            background: #DEB887;
+            border-radius: 10px;
+            border: 6px solid #8B4513;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+            z-index: 10;
+        }
+        .hole {
+            background: radial-gradient(circle, #2F1B0E, #1A0F07);
+            border-radius: 50%;
+            border: 3px solid #3D2B1F;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.1s;
+        }
+        .hole:active { transform: scale(0.9); }
+        .veg {
+            font-size: 2.5rem;
+            pointer-events: none;
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        /* Монеты RUM */
+        .coin-burst {
+            position: absolute;
+            pointer-events: none;
+            font-weight: bold;
+            color: gold;
+            font-size: 1.2rem;
+            animation: coinFly 1s ease-out forwards;
+            z-index: 20;
+        }
+        @keyframes coinFly {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-40px) scale(1.5); opacity: 1; }
+            100% { transform: translateY(-80px) scale(0.5); opacity: 0; }
+        }
+        .fail-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            color: red;
+            animation: failShake 0.5s ease-out;
+            z-index: 20;
+        }
+        @keyframes failShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        /* Верхняя панель */
+        .top-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 30;
+            pointer-events: none;
+        }
+        .rum-counter, .energy-bar, .timer {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .crate-icon {
+            font-size: 1.5rem;
+        }
+        /* Кнопка Старт */
+        .start-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: linear-gradient(180deg, #FF6347, #DC143C);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 25;
+            font-weight: bold;
+        }
+        .start-btn:disabled {
+            background: #808080;
+            cursor: not-allowed;
+        }
+        /* Нижняя панель */
+        .bottom-panel {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            right: 5px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 30;
+        }
+        .nav-btn {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <!-- Море -->
+    <div class="sea"></div>
+    <!-- Пальма -->
+    <div class="palm">
+        <div class="palm-leaves">
+            <div class="palm-leaf"></div>
+            <div class="palm-leaf"></div>
+            <div class="palm-leaf"></div>
+        </div>
+        <div class="palm-trunk"></div>
+    </div>
+    <!-- Яхта -->
+    <div class="yacht">
+        <div class="yacht-sail"></div>
+        <div class="yacht-body"></div>
+    </div>
+    <!-- Стеклянная стена -->
+    <div class="glass-wall"></div>
+    <!-- Стол (кухня) -->
+    <div class="table"></div>
+    <!-- Печь -->
+    <div class="stove"></div>
+    <!-- Кастрюля -->
+    <div class="pot">
+        <div class="steam">
+            <div class="steam-particle"></div>
+            <div class="steam-particle"></div>
+            <div class="steam-particle"></div>
+        </div>
+    </div>
+
+    <!-- Доска 3x3 -->
+    <div class="board" id="board">
+        <div class="hole" data-hole="0"></div>
+        <div class="hole" data-hole="1"></div>
+        <div class="hole" data-hole="2"></div>
+        <div class="hole" data-hole="3"></div>
+        <div class="hole" data-hole="4"></div>
+        <div class="hole" data-hole="5"></div>
+        <div class="hole" data-hole="6"></div>
+        <div class="hole" data-hole="7"></div>
+        <div class="hole" data-hole="8"></div>
+    </div>
+
+    <!-- Верхняя панель -->
+    <div class="top-panel">
+        <div>
+            <div class="rum-counter">💰 <span id="rum">0</span> RUM</div>
+            <div class="timer" id="timer" style="display:none;">60</div>
+        </div>
+        <div>
+            <div class="energy-bar">⚡ <span id="energy-text">60/60</span></div>
+            <div class="crate-icon">📦 <span id="crate-timer">08:00:00</span></div>
+        </div>
+    </div>
+
+    <!-- Кнопка Старт -->
+    <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
+
+    <!-- Нижняя панель -->
+    <div class="bottom-panel">
+        <button class="nav-btn">🏟️<br>Арена</button>
+        <button class="nav-btn">📈<br>Инвестиции</button>
+        <button class="nav-btn">📋<br>Задания</button>
+        <button class="nav-btn">⚡<br>Энергия</button>
+        <button class="nav-btn">👛<br>Кошелёк</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // --- СОСТОЯНИЕ ---
+        const VEGGIES = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+        let rum = 0;
+        let energy = 60;
+        let maxEnergy = 60;
+        let gameActive = false;
+        let gameTimer = null;
+        let gameTimeLeft = 60;
+        let vegSpawnInterval = null;
+        let currentVegPositions = {};
+
+        // --- DOM ---
+        const boardEl = document.getElementById('board');
+        const rumEl = document.getElementById('rum');
+        const energyText = document.getElementById('energy-text');
+        const timerEl = document.getElementById('timer');
+        const startBtn = document.getElementById('start-btn');
+        const holes = document.querySelectorAll('.hole');
+
+        // --- ФУНКЦИИ ---
+        function updateUI() {
+            rumEl.textContent = rum;
+            energyText.textContent = `${energy}/${maxEnergy}`;
+            if (energy === maxEnergy && !gameActive) {
+                startBtn.disabled = false;
+                startBtn.textContent = '🥘 НАЧАТЬ';
+                startBtn.style.display = 'block';
+            } else if (gameActive) {
+                startBtn.style.display = 'none';
+            } else {
+                startBtn.disabled = true;
+                startBtn.textContent = `⏳ ${Math.ceil((maxEnergy - energy) * 6 / 60)} мин`;
+                startBtn.style.display = 'block';
+            }
+        }
+
+        function showCoinBurst(x, y) {
+            const el = document.createElement('div');
+            el.className = 'coin-burst';
+            el.textContent = '+10';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.getElementById('game-container').appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        function showFailEffect(x, y) {
+            const el = document.createElement('div');
+            el.className = 'fail-effect';
+            el.textContent = '✖';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            document.getElementById('game-container').appendChild(el);
+            setTimeout(() => el.remove(), 500);
+        }
+
+        function spawnVeggies() {
+            // Очищаем старые овощи
+            holes.forEach(h => {
+                if (h.children.length > 0 && h.children[0].classList.contains('veg')) {
+                    h.innerHTML = '';
+                }
+            });
+            currentVegPositions = {};
+
+            // Спавним 1-4 овоща случайно
+            const count = Math.floor(Math.random() * 4) + 1;
+            const availableHoles = [...Array(9).keys()];
+            for (let i = 0; i < count; i++) {
+                if (availableHoles.length === 0) break;
+                const idx = Math.floor(Math.random() * availableHoles.length);
+                const holeNum = availableHoles.splice(idx, 1)[0];
+                const veggie = VEGGIES[Math.floor(Math.random() * VEGGIES.length)];
+                holes[holeNum].innerHTML = `<span class="veg">${veggie}</span>`;
+                currentVegPositions[holeNum] = veggie;
+            }
+        }
+
+        function handleTap(e) {
+            if (!gameActive) return;
+            const holeEl = e.target.closest('.hole');
+            if (!holeEl) {
+                // Промах мимо доски
+                rum = Math.max(0, rum - 5);
+                const rect = boardEl.getBoundingClientRect();
+                showFailEffect(e.clientX - rect.left, e.clientY - rect.top - 50);
+                updateUI();
+                return;
+            }
+
+            const holeNum = parseInt(holeEl.dataset.hole);
+            if (currentVegPositions[holeNum] !== undefined) {
+                // Попадание
+                rum += 10;
+                const rect = holeEl.getBoundingClientRect();
+                const boardRect = boardEl.getBoundingClientRect();
+                showCoinBurst(
+                    rect.left - boardRect.left + rect.width/2,
+                    rect.top - boardRect.top - 10
+                );
+                // Звук успеха (короткий beep)
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = 880;
+                gain.gain.value = 0.1;
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+
+                holeEl.innerHTML = '';
+                delete currentVegPositions[holeNum];
+                updateUI();
+            } else {
+                // Промах по пустой лунке
+                rum = Math.max(0, rum - 5);
+                const rect = holeEl.getBoundingClientRect();
+                const boardRect = boardEl.getBoundingClientRect();
+                showFailEffect(
+                    rect.left - boardRect.left + rect.width/2,
+                    rect.top - boardRect.top - 30
+                );
+                // Звук провала
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.frequency.value = 200;
+                gain.gain.value = 0.1;
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                updateUI();
+            }
+        }
+
+        function startGame() {
+            if (energy < maxEnergy || gameActive) return;
+            gameActive = true;
+            gameTimeLeft = 60;
+            energy = maxEnergy;
+            timerEl.style.display = 'block';
+            timerEl.textContent = gameTimeLeft;
+            updateUI();
+
+            // Спавн овощей с ускорением
+            let intervalTime = 2000;
+            spawnVeggies();
+            vegSpawnInterval = setInterval(() => {
+                if (!gameActive) return;
+                spawnVeggies();
+                intervalTime = Math.max(500, intervalTime - 100);
+                clearInterval(vegSpawnInterval);
+                vegSpawnInterval = setInterval(() => {
+                    if (!gameActive) return;
+                    spawnVeggies();
+                }, intervalTime);
+            }, intervalTime);
+
+            // Игровой таймер
+            gameTimer = setInterval(() => {
+                gameTimeLeft--;
+                energy--;
+                timerEl.textContent = gameTimeLeft;
+                updateUI();
+                if (gameTimeLeft <= 0 || energy <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            clearInterval(vegSpawnInterval);
+            timerEl.style.display = 'none';
+            holes.forEach(h => h.innerHTML = '');
+            currentVegPositions = {};
+            startBtn.style.display = 'block';
+            updateUI();
+            startRecovery();
+        }
+
+        function startRecovery() {
+            if (gameActive) return;
+            const recoverInterval = setInterval(() => {
+                if (gameActive || energy >= maxEnergy) {
+                    if (energy >= maxEnergy) clearInterval(recoverInterval);
+                    return;
+                }
+                energy = Math.min(maxEnergy, energy + 1);
+                updateUI();
+                if (energy >= maxEnergy) clearInterval(recoverInterval);
+            }, 6000);
+        }
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        boardEl.addEventListener('click', handleTap);
+        startBtn.addEventListener('click', startGame);
+        updateUI();
+        startRecovery();
+
+        // Нижние кнопки (заглушки)
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                alert('Раздел в разработке. Скоро!');
+            });
+        });
+
+        // Отключаем скролл и зум
+        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    })();
+</script>
+</body>
+</html>
