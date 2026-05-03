@@ -26,6 +26,17 @@
             background: linear-gradient(180deg, #87CEEB 0%, #98FB98 60%, #F4A460 100%);
             overflow: hidden;
         }
+        /* ЭКРАНЫ */
+        .screen {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+        }
+        .screen.active {
+            display: block;
+        }
+        /* ГЛАВНЫЙ ЭКРАН (тапалка) */
+        #main-screen { display: block; }
         /* Море */
         .sea {
             position: absolute;
@@ -250,6 +261,21 @@
         .crate-icon {
             font-size: 1.5rem;
         }
+        .rating-icon {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: gold;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            z-index: 35;
+            cursor: pointer;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
         /* Кнопка Старт */
         .start-btn {
             position: absolute;
@@ -292,115 +318,227 @@
             flex-direction: column;
             align-items: center;
             gap: 2px;
+            transition: background 0.2s;
+        }
+        .nav-btn.active {
+            background: rgba(255,215,0,0.7);
+            color: black;
+            font-weight: bold;
+        }
+        /* Внутренние экраны (заглушки) */
+        .inner-screen {
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .back-btn {
+            position: absolute;
+            top: 15px; left: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 40;
+            font-size: 1rem;
+        }
+        .leaderboard {
+            width: 100%;
+            max-width: 350px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
     </style>
 </head>
 <body>
 <div id="game-container">
-    <!-- Море -->
-    <div class="sea"></div>
-    <!-- Пальма -->
-    <div class="palm">
-        <div class="palm-leaves">
-            <div class="palm-leaf"></div>
-            <div class="palm-leaf"></div>
-            <div class="palm-leaf"></div>
-        </div>
-        <div class="palm-trunk"></div>
-    </div>
-    <!-- Яхта -->
-    <div class="yacht">
-        <div class="yacht-sail"></div>
-        <div class="yacht-body"></div>
-    </div>
-    <!-- Стеклянная стена -->
-    <div class="glass-wall"></div>
-    <!-- Стол (кухня) -->
-    <div class="table"></div>
-    <!-- Печь -->
-    <div class="stove"></div>
-    <!-- Кастрюля -->
-    <div class="pot">
-        <div class="steam">
-            <div class="steam-particle"></div>
-            <div class="steam-particle"></div>
-            <div class="steam-particle"></div>
-        </div>
-    </div>
+    <!-- ИКОНКА РЕЙТИНГА -->
+    <div class="rating-icon" id="rating-icon">🏆 Топ-100 <span id="online-count">1 203</span> онлайн</div>
 
-    <!-- Доска 3x3 -->
-    <div class="board" id="board">
-        <div class="hole" data-hole="0"></div>
-        <div class="hole" data-hole="1"></div>
-        <div class="hole" data-hole="2"></div>
-        <div class="hole" data-hole="3"></div>
-        <div class="hole" data-hole="4"></div>
-        <div class="hole" data-hole="5"></div>
-        <div class="hole" data-hole="6"></div>
-        <div class="hole" data-hole="7"></div>
-        <div class="hole" data-hole="8"></div>
-    </div>
-
-    <!-- Верхняя панель -->
-    <div class="top-panel">
-        <div>
-            <div class="rum-counter">💰 <span id="rum">0</span> RUM</div>
-            <div class="timer" id="timer" style="display:none;">60</div>
+    <!-- ЭКРАНЫ -->
+    <!-- Главный экран (тапалка) -->
+    <div class="screen active" id="main-screen">
+        <div class="sea"></div>
+        <div class="palm">
+            <div class="palm-leaves">
+                <div class="palm-leaf"></div><div class="palm-leaf"></div><div class="palm-leaf"></div>
+            </div>
+            <div class="palm-trunk"></div>
         </div>
-        <div>
-            <div class="energy-bar">⚡ <span id="energy-text">60/60</span></div>
-            <div class="crate-icon">📦 <span id="crate-timer">08:00:00</span></div>
+        <div class="yacht">
+            <div class="yacht-sail"></div><div class="yacht-body"></div>
+        </div>
+        <div class="glass-wall"></div>
+        <div class="table"></div>
+        <div class="stove"></div>
+        <div class="pot">
+            <div class="steam">
+                <div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div>
+            </div>
+        </div>
+        <div class="board" id="board">
+            <div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div>
+            <div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div>
+            <div class="hole" data-hole="6"></div><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div>
+        </div>
+        <div class="top-panel">
+            <div>
+                <div class="rum-counter">💰 <span id="rum">0</span> RUM</div>
+                <div class="timer" id="timer" style="display:none;">60</div>
+            </div>
+            <div>
+                <div class="energy-bar">⚡ <span id="energy-text">60/60</span></div>
+                <div class="crate-icon">📦 <span id="crate-timer">08:00:00</span></div>
+            </div>
+        </div>
+        <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
+        <div class="bottom-panel">
+            <button class="nav-btn" data-screen="arena">🏟️<br>Арена</button>
+            <button class="nav-btn" data-screen="invest">📈<br>Инвестиции</button>
+            <button class="nav-btn" data-screen="tasks">📋<br>Задания</button>
+            <button class="nav-btn" data-screen="energy">⚡<br>Энергия</button>
+            <button class="nav-btn" data-screen="wallet">👛<br>Кошелёк</button>
         </div>
     </div>
 
-    <!-- Кнопка Старт -->
-    <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
+    <!-- Экран Арены -->
+    <div class="screen" id="arena-screen">
+        <div class="inner-screen">
+            <button class="back-btn">← Назад</button>
+            <h2>🏟️ Арена</h2>
+            <p style="margin-top:20px;">Платные PvP-пулы «Крипто Беспредел»</p>
+            <div style="margin-top:20px; display:flex; gap:10px; flex-direction:column; width:80%;">
+                <button style="padding:15px; background:gold; border:none; border-radius:10px; font-weight:bold;">Личный майнинг</button>
+                <button style="padding:15px; background:silver; border:none; border-radius:10px; font-weight:bold;">Командный 5×5</button>
+                <button style="padding:15px; background:#CD7F32; border:none; border-radius:10px;">Турниры</button>
+            </div>
+            <p style="margin-top:20px;">🥇 Рейтинг бойцов (скоро)</p>
+        </div>
+    </div>
 
-    <!-- Нижняя панель -->
-    <div class="bottom-panel">
-        <button class="nav-btn">🏟️<br>Арена</button>
-        <button class="nav-btn">📈<br>Инвестиции</button>
-        <button class="nav-btn">📋<br>Задания</button>
-        <button class="nav-btn">⚡<br>Энергия</button>
-        <button class="nav-btn">👛<br>Кошелёк</button>
+    <!-- Экран Инвестиции -->
+    <div class="screen" id="invest-screen">
+        <div class="inner-screen">
+            <button class="back-btn">← Назад</button>
+            <h2>📈 Инвестиции</h2>
+            <p>Вкладывай RUM в виртуальные стартапы и получай долю прибыли.</p>
+            <div style="margin-top:20px; background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; width:90%;">
+                <p>🚀 Стартап «Борщ на блокчейне»</p>
+                <p>Цель: 10 000 RUM | Собрано: 2 350 RUM</p>
+                <button style="margin-top:10px; padding:10px; background:#4CAF50; border:none; border-radius:5px; color:white;">Инвестировать RUM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран Задания -->
+    <div class="screen" id="tasks-screen">
+        <div class="inner-screen">
+            <button class="back-btn">← Назад</button>
+            <h2>📋 Задания</h2>
+            <p>Выполняй задания и получай RUM</p>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button style="padding:10px; background:#2196F3; border:none; border-radius:5px; color:white;">Выполнить</button>
+                <button style="padding:10px; background:#FF9800; border:none; border-radius:5px;">Разместить</button>
+            </div>
+            <ul style="margin-top:15px; text-align:left; width:90%;">
+                <li>✅ Подписаться на канал — 50 RUM</li>
+                <li>🔄 Репост — 100 RUM</li>
+                <li>👥 Пригласить друга — 200 RUM</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Экран Энергия (бусты) -->
+    <div class="screen" id="energy-screen">
+        <div class="inner-screen">
+            <button class="back-btn">← Назад</button>
+            <h2>⚡ Энергия и бусты</h2>
+            <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px; width:80%;">
+                <button style="padding:15px; background:#FF5722; border:none; border-radius:10px; color:white;">⚡ ×2 на 24ч — 1 SRUM</button>
+                <button style="padding:15px; background:#FF9800; border:none; border-radius:10px;">⚡ ×3 на 24ч — 2 SRUM</button>
+                <button style="padding:15px; background:#FFC107; border:none; border-radius:10px;">⚡ ×5 на 24ч — 3 SRUM</button>
+                <button style="padding:15px; background:#9C27B0; border:none; border-radius:10px; color:white;">🔋 Безлимит на 1ч — TON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран Кошелёк -->
+    <div class="screen" id="wallet-screen">
+        <div class="inner-screen">
+            <button class="back-btn">← Назад</button>
+            <h2>👛 Кошелёк</h2>
+            <p>Привяжи TON-кошелёк для вывода средств.</p>
+            <button style="margin-top:20px; padding:15px 30px; background:#0088CC; border:none; border-radius:10px; color:white; font-weight:bold;">🔗 Привязать TON кошелёк</button>
+            <p style="margin-top:15px;">Баланс SRUM: 0 | TON: 0.00</p>
+        </div>
+    </div>
+
+    <!-- Экран Рейтинг (открывается по иконке) -->
+    <div class="screen" id="rating-screen">
+        <div class="inner-screen">
+            <button class="back-btn">← Назад</button>
+            <h2>🏆 Рейтинг игроков</h2>
+            <div class="leaderboard">
+                <div class="leaderboard-item"><span>1. КриптоБосс</span><span>125 000 RUM</span></div>
+                <div class="leaderboard-item"><span>2. Борщевар3000</span><span>98 200 RUM</span></div>
+                <div class="leaderboard-item"><span>3. ТокенМаг</span><span>87 500 RUM</span></div>
+                <div class="leaderboard-item"><span>...</span></div>
+                <div class="leaderboard-item"><span>99. Ты</span><span id="player-rank">750 RUM</span></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     (function() {
-        // --- СОСТОЯНИЕ ---
+        // --- СОСТОЯНИЕ ИГРЫ ---
         const VEGGIES = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
         let rum = 0;
         let energy = 60;
-        let maxEnergy = 60;
+        const maxEnergy = 60;
         let gameActive = false;
         let gameTimer = null;
         let gameTimeLeft = 60;
         let vegSpawnInterval = null;
         let currentVegPositions = {};
 
-        // --- DOM ---
+        // --- DOM игры ---
+        const mainScreen = document.getElementById('main-screen');
         const boardEl = document.getElementById('board');
         const rumEl = document.getElementById('rum');
         const energyText = document.getElementById('energy-text');
         const timerEl = document.getElementById('timer');
         const startBtn = document.getElementById('start-btn');
-        const holes = document.querySelectorAll('.hole');
+        const holes = document.querySelectorAll('#main-screen .hole');
+        const ratingIcon = document.getElementById('rating-icon');
+        const ratingScreen = document.getElementById('rating-screen');
+        const playerRankSpan = document.getElementById('player-rank');
 
-        // --- ФУНКЦИИ ---
+        // --- ФУНКЦИИ ИГРЫ ---
         function updateUI() {
             rumEl.textContent = rum;
             energyText.textContent = `${energy}/${maxEnergy}`;
             if (energy === maxEnergy && !gameActive) {
                 startBtn.disabled = false;
                 startBtn.textContent = '🥘 НАЧАТЬ';
-                startBtn.style.display = 'block';
             } else if (gameActive) {
                 startBtn.style.display = 'none';
             } else {
                 startBtn.disabled = true;
                 startBtn.textContent = `⏳ ${Math.ceil((maxEnergy - energy) * 6 / 60)} мин`;
-                startBtn.style.display = 'block';
             }
         }
 
@@ -410,7 +548,7 @@
             el.textContent = '+10';
             el.style.left = x + 'px';
             el.style.top = y + 'px';
-            document.getElementById('game-container').appendChild(el);
+            mainScreen.appendChild(el);
             setTimeout(() => el.remove(), 1000);
         }
 
@@ -420,97 +558,46 @@
             el.textContent = '✖';
             el.style.left = x + 'px';
             el.style.top = y + 'px';
-            document.getElementById('game-container').appendChild(el);
+            mainScreen.appendChild(el);
             setTimeout(() => el.remove(), 500);
         }
 
         function spawnVeggies() {
-            // Очищаем старые овощи
-            holes.forEach(h => {
-                if (h.children.length > 0 && h.children[0].classList.contains('veg')) {
-                    h.innerHTML = '';
-                }
-            });
+            holes.forEach(h => { if (h.firstChild?.classList.contains('veg')) h.innerHTML = ''; });
             currentVegPositions = {};
-
-            // Спавним 1-4 овоща случайно
             const count = Math.floor(Math.random() * 4) + 1;
-            const availableHoles = [...Array(9).keys()];
+            const available = [...Array(9).keys()];
             for (let i = 0; i < count; i++) {
-                if (availableHoles.length === 0) break;
-                const idx = Math.floor(Math.random() * availableHoles.length);
-                const holeNum = availableHoles.splice(idx, 1)[0];
-                const veggie = VEGGIES[Math.floor(Math.random() * VEGGIES.length)];
-                holes[holeNum].innerHTML = `<span class="veg">${veggie}</span>`;
-                currentVegPositions[holeNum] = veggie;
+                if (available.length === 0) break;
+                const idx = Math.floor(Math.random() * available.length);
+                const holeNum = available.splice(idx, 1)[0];
+                holes[holeNum].innerHTML = `<span class="veg">${VEGGIES[Math.floor(Math.random() * VEGGIES.length)]}</span>`;
+                currentVegPositions[holeNum] = true;
             }
         }
 
         function handleTap(e) {
             if (!gameActive) return;
-            const holeEl = e.target.closest('.hole');
-            if (!holeEl) {
-                // Промах мимо доски
-                rum = Math.max(0, rum - 5);
-                const rect = boardEl.getBoundingClientRect();
-                showFailEffect(e.clientX - rect.left, e.clientY - rect.top - 50);
-                updateUI();
-                return;
-            }
-
-            const holeNum = parseInt(holeEl.dataset.hole);
-            if (currentVegPositions[holeNum] !== undefined) {
-                // Попадание
+            const hole = e.target.closest('.hole');
+            if (!hole) { rum = Math.max(0, rum - 5); updateUI(); return; }
+            const holeNum = parseInt(hole.dataset.hole);
+            if (currentVegPositions[holeNum]) {
                 rum += 10;
-                const rect = holeEl.getBoundingClientRect();
-                const boardRect = boardEl.getBoundingClientRect();
-                showCoinBurst(
-                    rect.left - boardRect.left + rect.width/2,
-                    rect.top - boardRect.top - 10
-                );
-                // Звук успеха (короткий beep)
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.frequency.value = 880;
-                gain.gain.value = 0.1;
-                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-
-                holeEl.innerHTML = '';
+                showCoinBurst(e.clientX - boardEl.getBoundingClientRect().left, e.clientY - boardEl.getBoundingClientRect().top);
+                hole.innerHTML = '';
                 delete currentVegPositions[holeNum];
-                updateUI();
             } else {
-                // Промах по пустой лунке
                 rum = Math.max(0, rum - 5);
-                const rect = holeEl.getBoundingClientRect();
-                const boardRect = boardEl.getBoundingClientRect();
-                showFailEffect(
-                    rect.left - boardRect.left + rect.width/2,
-                    rect.top - boardRect.top - 30
-                );
-                // Звук провала
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.frequency.value = 200;
-                gain.gain.value = 0.1;
-                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-                updateUI();
+                showFailEffect(e.clientX - boardEl.getBoundingClientRect().left, e.clientY - boardEl.getBoundingClientRect().top);
             }
+            updateUI();
         }
 
         function startGame() {
             if (energy < maxEnergy || gameActive) return;
-            gameActive = true;
-            gameTimeLeft = 60;
-            energy = maxEnergy;
-            timerEl.style.display = 'block';
-            timerEl.textContent = gameTimeLeft;
+            gameActive = true; gameTimeLeft = 60; energy = maxEnergy;
+            timerEl.style.display = 'block'; timerEl.textContent = gameTimeLeft;
             updateUI();
-
-            // Спавн овощей с ускорением
             let intervalTime = 2000;
             spawnVeggies();
             vegSpawnInterval = setInterval(() => {
@@ -518,28 +605,19 @@
                 spawnVeggies();
                 intervalTime = Math.max(500, intervalTime - 100);
                 clearInterval(vegSpawnInterval);
-                vegSpawnInterval = setInterval(() => {
-                    if (!gameActive) return;
-                    spawnVeggies();
-                }, intervalTime);
+                vegSpawnInterval = setInterval(() => { if (gameActive) spawnVeggies(); }, intervalTime);
             }, intervalTime);
-
-            // Игровой таймер
             gameTimer = setInterval(() => {
-                gameTimeLeft--;
-                energy--;
+                gameTimeLeft--; energy--;
                 timerEl.textContent = gameTimeLeft;
                 updateUI();
-                if (gameTimeLeft <= 0 || energy <= 0) {
-                    endGame();
-                }
+                if (gameTimeLeft <= 0) endGame();
             }, 1000);
         }
 
         function endGame() {
             gameActive = false;
-            clearInterval(gameTimer);
-            clearInterval(vegSpawnInterval);
+            clearInterval(gameTimer); clearInterval(vegSpawnInterval);
             timerEl.style.display = 'none';
             holes.forEach(h => h.innerHTML = '');
             currentVegPositions = {};
@@ -549,33 +627,50 @@
         }
 
         function startRecovery() {
-            if (gameActive) return;
-            const recoverInterval = setInterval(() => {
-                if (gameActive || energy >= maxEnergy) {
-                    if (energy >= maxEnergy) clearInterval(recoverInterval);
-                    return;
-                }
+            const int = setInterval(() => {
+                if (gameActive || energy >= maxEnergy) { if (energy >= maxEnergy) clearInterval(int); return; }
                 energy = Math.min(maxEnergy, energy + 1);
                 updateUI();
-                if (energy >= maxEnergy) clearInterval(recoverInterval);
+                if (energy >= maxEnergy) clearInterval(int);
             }, 6000);
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
+        // --- НАВИГАЦИЯ ---
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId + '-screen');
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.querySelector(`.nav-btn[data-screen="${screenId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // --- СОБЫТИЯ ---
         boardEl.addEventListener('click', handleTap);
         startBtn.addEventListener('click', startGame);
-        updateUI();
-        startRecovery();
 
-        // Нижние кнопки (заглушки)
+        // Рейтинг иконка
+        ratingIcon.addEventListener('click', () => switchScreen('rating'));
+        // Кнопка "Назад" на внутренних экранах
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchScreen('main'));
+        });
+        // Нижние кнопки
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                alert('Раздел в разработке. Скоро!');
+                const screen = e.currentTarget.dataset.screen;
+                switchScreen(screen);
             });
         });
 
-        // Отключаем скролл и зум
+        // Обновление ранга игрока в рейтинге
+        setInterval(() => {
+            playerRankSpan.textContent = rum + ' RUM';
+            document.getElementById('online-count').textContent = (1200 + Math.floor(Math.random() * 100)) + ' онлайн';
+        }, 5000);
+
+        updateUI();
+        startRecovery();
         document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
     })();
 </script>
