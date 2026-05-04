@@ -19,7 +19,6 @@
             background:linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #4682B4 70%);
             overflow:hidden;
         }
-        /* === ФОН === */
         .sky { position:absolute; top:0; left:0; right:0; height:40%; }
         .horizon { position:absolute; top:35%; left:0; right:0; height:2px; background:rgba(255,255,255,0.5); }
         .sea {
@@ -28,12 +27,10 @@
             animation:waves 3s infinite ease-in-out;
         }
         @keyframes waves { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
-
         .yacht { position:absolute; right:10%; top:38%; width:70px; height:100px; animation:float 4s infinite ease-in-out; }
         @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
         .yacht-body { position:absolute; bottom:0; left:5px; width:60px; height:20px; background:white; border-radius:50% 50% 0 0; }
         .yacht-sail { position:absolute; bottom:20px; left:25px; width:0; height:0; border-left:25px solid transparent; border-right:10px solid transparent; border-bottom:50px solid white; }
-
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot {
@@ -42,15 +39,11 @@
             z-index:6;
         }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
-
-        /* Фиолетовый фон за столом */
         .purple-bg {
             position:absolute; bottom:0; left:0; right:0; top:70%;
             background:purple;
             z-index:1;
         }
-
-        /* === КУХНЯ === */
         .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
         .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
@@ -69,15 +62,11 @@
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.7; } 100%{ transform:translateY(-20px) scale(1.5); opacity:0; } }
-
-        /* Энергия внутри кастрюли */
         .energy-on-pot {
             background:rgba(0,0,0,0.7); color:#FFD700; padding:2px 10px; border-radius:10px;
             font-size:0.75rem; font-weight:bold; z-index:4;
             margin-top:5px;
         }
-
-        /* Кнопка Начать внутри кастрюли */
         .pot .start-btn {
             background:linear-gradient(180deg, #FF6347, #DC143C);
             color:white; border:none; padding:8px 18px;
@@ -85,8 +74,6 @@
             cursor:pointer; z-index:4; margin-top:4px;
         }
         .pot .start-btn:disabled { background:#808080; cursor:not-allowed; }
-
-        /* === ДОСКА (поднята, отверстия крупнее) === */
         .board {
             position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
             width:88%; background:#DEB887; border-radius:10px;
@@ -106,8 +93,6 @@
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
-
-        /* === ВЕРХНИЕ ПАНЕЛИ === */
         .top-left-buttons {
             position:absolute; top:5px; left:5px; display:flex; gap:4px; z-index:35; flex-wrap:wrap;
         }
@@ -122,8 +107,6 @@
             background:rgba(0,0,0,0.75); color:white; padding:3px 10px; border-radius:12px;
             font-size:0.7rem; font-weight:bold;
         }
-
-        /* === НИЖНЯЯ ПАНЕЛЬ (крупные кнопки) === */
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
         .nav-btn {
             background:rgba(0,0,0,0.75); color:white; border:none; padding:10px 6px; border-radius:10px;
@@ -131,13 +114,9 @@
             flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px;
         }
         .nav-btn.active { background:rgba(255,215,0,0.8); color:black; }
-
-        /* Экраны */
         .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; }
         .screen.active { display:flex; }
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
-
-        /* Анимация полёта овоща в кастрюлю */
         .flying-veg {
             position:absolute; z-index:20; pointer-events:none;
             animation: flyToPot 0.5s ease-in forwards;
@@ -195,7 +174,7 @@
         </div>
     </div>
 
-    <!-- Верхние иконки (слева) -->
+    <!-- Верхние иконки -->
     <div class="top-left-buttons">
         <div class="item" id="top-tappers">🏆 Топ</div>
         <div class="item" id="top-miners">⛏️ Майнеры</div>
@@ -203,7 +182,7 @@
         <div class="item" id="about-icon">📖 О проекте</div>
     </div>
 
-    <!-- Балансы (справа) -->
+    <!-- Балансы -->
     <div class="balances">
         <div id="rum-balance">💰 RUM: 0</div>
         <div id="invest-balance">📈 Инвест: 0</div>
@@ -223,7 +202,16 @@
     <!-- Экраны-заглушки -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button>🐺 Майнинг клуб «Голодные волки»</div>
-    <div class="screen" id="tasks-screen"><button class="back-btn">← Назад</button>📋 Задания</div>
+    <div class="screen" id="tasks-screen">
+        <button class="back-btn">← Назад</button>
+        <h2>📋 Задания</h2>
+        <div style="display:flex; gap:10px; margin:15px 0;">
+            <button id="tasks-available-btn" style="padding:8px 16px; background:#FFD700; border:none; border-radius:8px; color:black; font-weight:bold;">Доступные</button>
+            <button id="tasks-create-btn" style="padding:8px 16px; background:#4CAF50; border:none; border-radius:8px;">Создать</button>
+            <button id="tasks-my-btn" style="padding:8px 16px; background:#2196F3; border:none; border-radius:8px;">Мои</button>
+        </div>
+        <div id="tasks-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
+    </div>
     <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button>📈 Инвестиции</div>
     <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button>👛 Кошелёк</div>
     <div class="screen" id="shop-screen"><button class="back-btn">← Назад</button>🛍️ Магазин</div>
@@ -238,10 +226,34 @@
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
 
-    let rum = 0, invest = 0, srum = 0.0;
-    let energy = 60, maxEnergy = 60;
+    // --- СОСТОЯНИЕ ---
+    let rum = parseInt(localStorage.getItem('rum') || '0');
+    let invest = parseInt(localStorage.getItem('invest') || '0');
+    let srum = parseFloat(localStorage.getItem('srum') || '0');
+    let energy = parseInt(localStorage.getItem('energy') || '60');
+    const maxEnergy = 60;
     let gameActive = false, gameTimer = null, gameTimeLeft = 60;
     let spawnInterval = null, currentVeg = {};
+
+    // Задания
+    let officialTasks = JSON.parse(localStorage.getItem('officialTasks')) || [
+        { id:1, desc:'Подписаться на канал', reward:50, completed:false },
+        { id:2, desc:'Сделать репост', reward:100, completed:false },
+        { id:3, desc:'Пригласить друга', reward:200, completed:false },
+        { id:4, desc:'Сыграть 5 раундов', reward:300, completed:false }
+    ];
+    let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
+    let myCompletedTasks = JSON.parse(localStorage.getItem('myCompletedTasks')) || [];
+
+    function saveState() {
+        localStorage.setItem('rum', rum);
+        localStorage.setItem('invest', invest);
+        localStorage.setItem('srum', srum);
+        localStorage.setItem('energy', energy);
+        localStorage.setItem('officialTasks', JSON.stringify(officialTasks));
+        localStorage.setItem('userTasks', JSON.stringify(userTasks));
+        localStorage.setItem('myCompletedTasks', JSON.stringify(myCompletedTasks));
+    }
 
     const pot = document.getElementById('pot');
     const board = document.getElementById('board');
@@ -251,6 +263,10 @@
     const energyOnPot = document.getElementById('energy-on-pot');
     const startBtn = document.getElementById('start-btn');
     const holes = document.querySelectorAll('.hole');
+    const tasksContent = document.getElementById('tasks-content');
+    const tasksAvailableBtn = document.getElementById('tasks-available-btn');
+    const tasksCreateBtn = document.getElementById('tasks-create-btn');
+    const tasksMyBtn = document.getElementById('tasks-my-btn');
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -266,6 +282,7 @@
             startBtn.textContent = `⏳ ${Math.ceil((maxEnergy-energy)*6/60)} мин`;
             startBtn.style.display = 'block';
         }
+        saveState();
     }
 
     function spawnAll() {
@@ -294,7 +311,6 @@
         const vegData = currentVeg[num];
         if (vegData.type === 'good') {
             rum += 10;
-            // Запускаем анимацию полёта овоща в кастрюлю
             flyVegToPot(hole, vegData.emoji);
             showEffect(e, '+10', 'gold');
         } else {
@@ -310,12 +326,10 @@
         const holeRect = hole.getBoundingClientRect();
         const potRect = pot.getBoundingClientRect();
         const containerRect = document.getElementById('game-container').getBoundingClientRect();
-
         const startX = holeRect.left + holeRect.width/2 - containerRect.left;
         const startY = holeRect.top + holeRect.height/2 - containerRect.top;
         const endX = potRect.left + potRect.width/2 - containerRect.left;
         const endY = potRect.top + potRect.height*0.3 - containerRect.top;
-
         const vegEl = document.createElement('div');
         vegEl.className = 'flying-veg';
         vegEl.textContent = emoji;
@@ -325,7 +339,6 @@
         vegEl.style.setProperty('--dy', -50 + 'px');
         vegEl.style.setProperty('--ex', (endX - startX) + 'px');
         vegEl.style.setProperty('--ey', (endY - startY) + 'px');
-
         document.getElementById('game-container').appendChild(vegEl);
         vegEl.addEventListener('animationend', () => vegEl.remove());
     }
@@ -354,7 +367,6 @@
             clearInterval(spawnInterval);
             spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
         }, interval);
-
         gameTimer = setInterval(() => {
             gameTimeLeft--; energy--;
             updateUI();
@@ -381,15 +393,74 @@
         }, 6000);
     }
 
-    // Навигация
+    // --- ЗАДАНИЯ ---
+    function renderAvailableTasks() {
+        let html = '';
+        officialTasks.forEach(task => {
+            html += `<div style="background:rgba(255,255,255,0.1); padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                <span>${task.desc} (+${task.reward} RUM)</span>
+                <button data-task-id="${task.id}" class="complete-task-btn" style="padding:5px 12px; background:#FFD700; border:none; border-radius:5px; color:black;">Выполнить</button>
+            </div>`;
+        });
+        tasksContent.innerHTML = html;
+        document.querySelectorAll('.complete-task-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const taskId = parseInt(e.target.dataset.taskId);
+                const task = officialTasks.find(t => t.id === taskId);
+                if (task && !task.completed) {
+                    task.completed = true;
+                    rum += task.reward;
+                    updateUI();
+                    renderAvailableTasks();
+                }
+            });
+        });
+    }
+
+    function renderCreateTask() {
+        tasksContent.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <input id="task-desc" placeholder="Описание задания" style="padding:10px; border-radius:8px; border:none;">
+                <input id="task-reward" type="number" placeholder="Награда RUM" style="padding:10px; border-radius:8px; border:none;">
+                <button id="publish-task-btn" style="padding:10px; background:#4CAF50; border:none; border-radius:8px; color:white; font-weight:bold;">Опубликовать</button>
+            </div>
+        `;
+        document.getElementById('publish-task-btn').addEventListener('click', () => {
+            const desc = document.getElementById('task-desc').value.trim();
+            const reward = parseInt(document.getElementById('task-reward').value);
+            if (desc && reward > 0 && rum >= reward) {
+                rum -= reward;
+                const newTask = { id: Date.now(), desc, reward, author: 'Ты', completed: false };
+                userTasks.push(newTask);
+                updateUI();
+                renderCreateTask();
+                alert('Задание опубликовано!');
+            } else {
+                alert('Недостаточно RUM или неверные данные');
+            }
+        });
+    }
+
+    function renderMyTasks() {
+        let html = '<h3>Выполненные</h3>';
+        officialTasks.filter(t => t.completed).forEach(t => html += `<div>✅ ${t.desc} (+${t.reward})</div>`);
+        html += '<h3>Созданные</h3>';
+        userTasks.forEach(t => html += `<div>📌 ${t.desc} (${t.reward} RUM)</div>`);
+        tasksContent.innerHTML = html;
+    }
+
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (screenId !== 'main') {
+        if (screenId === 'tasks') {
+            document.getElementById('tasks-screen').classList.add('active');
+            renderAvailableTasks();
+        } else if (screenId !== 'main') {
             const target = document.getElementById(screenId+'-screen');
             if (target) target.classList.add('active');
         }
     }
 
+    // События
     board.addEventListener('click', handleTap);
     startBtn.addEventListener('click', startGame);
 
@@ -410,6 +481,10 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         });
     });
+
+    tasksAvailableBtn.addEventListener('click', renderAvailableTasks);
+    tasksCreateBtn.addEventListener('click', renderCreateTask);
+    tasksMyBtn.addEventListener('click', renderMyTasks);
 
     updateUI();
     startRecovery();
