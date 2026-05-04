@@ -19,7 +19,7 @@
             background:linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #4682B4 70%);
             overflow:hidden;
         }
-        /* === ФОН: море, горизонт, небо === */
+        /* === ФОН === */
         .sky { position:absolute; top:0; left:0; right:0; height:40%; }
         .horizon { position:absolute; top:35%; left:0; right:0; height:2px; background:rgba(255,255,255,0.5); }
         .sea {
@@ -29,7 +29,6 @@
         }
         @keyframes waves { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
 
-        /* === ПАЛЬМА, ЯХТА, ПРИСТАНЬ === */
         .palm { position:absolute; left:3%; top:5%; width:90px; height:120px; }
         .palm-trunk { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:10px; height:70px; background:#8B4513; border-radius:5px; }
         .palm-leaves { position:absolute; top:0; left:50%; transform:translateX(-50%); width:90px; height:50px; }
@@ -45,13 +44,12 @@
 
         .pier { position:absolute; left:20%; top:45%; width:40px; height:8px; background:#8B4513; border-radius:4px; }
 
-        /* === СТЕКЛЯННАЯ СТЕНА и ПОДОКОННИК === */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; }
         .flower-pot { position:absolute; bottom:32%; left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
 
-        /* === КУХНЯ: СТОЛ, ПЛИТА, КАСТРЮЛЯ === */
+        /* === КУХНЯ === */
         .kitchen-area { position:absolute; bottom:35%; left:0; right:0; height:35%; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
         .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
@@ -64,71 +62,96 @@
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.7; } 100%{ transform:translateY(-20px) scale(1.5); opacity:0; } }
 
-        /* === ДОСКА 3x3 === */
-        .board { position:absolute; bottom:5%; left:50%; transform:translateX(-50%); width:92%; height:40%; background:#DEB887; border-radius:10px; border:4px solid #8B4513; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:4px; padding:6px; z-index:10; }
-        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; }
+        /* === СЧЁТЧИК ЭНЕРГИИ НА КАСТРЮЛЕ === */
+        .energy-on-pot {
+            position:absolute; top:25%; left:50%; transform:translate(-50%,-50%);
+            background:rgba(0,0,0,0.7); color:#FFD700; padding:2px 12px; border-radius:12px;
+            font-size:0.8rem; font-weight:bold; z-index:15; white-space:nowrap;
+        }
+
+        /* === ДОСКА 5+4 === */
+        .board {
+            position:absolute; bottom:5%; left:50%; transform:translateX(-50%);
+            width:78%; height:auto; background:#DEB887; border-radius:10px;
+            border:3px solid #8B4513; display:grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: auto auto;
+            gap:5px; padding:6px;
+            z-index:10;
+        }
+        .hole {
+            background:radial-gradient(circle, #2F1B0E, #1A0F07);
+            border-radius:50%; border:2px solid #3D2B1F;
+            display:flex; justify-content:center; align-items:center;
+            cursor:pointer; position:relative; transition:transform 0.1s;
+            aspect-ratio: 1;
+        }
         .hole:active { transform:scale(0.85); }
-        .veg { font-size:2rem; pointer-events:none; animation:popIn 0.3s ease-out; }
+        .veg { font-size:1.6rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
-        .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.7rem; }
+        .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
 
-        /* === ВЕРХНЯЯ ИНФОРМАЦИОННАЯ ПАНЕЛЬ === */
-        .top-bar { position:absolute; top:0; left:0; right:0; padding:5px; display:flex; flex-wrap:wrap; justify-content:space-between; z-index:30; pointer-events:auto; }
-        .top-bar .item { background:rgba(0,0,0,0.65); color:white; padding:3px 8px; border-radius:12px; font-size:0.7rem; margin:2px; display:flex; align-items:center; gap:4px; }
-        /* Счётчики валют */
-        .balances { position:absolute; top:5px; right:5px; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
-        .balances div { background:rgba(0,0,0,0.7); color:white; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:bold; }
-        /* Энергия */
-        .energy-wrapper { position:absolute; bottom:38%; left:5%; right:5%; height:8px; background:rgba(0,0,0,0.5); border-radius:4px; z-index:25; }
-        .energy-fill { height:100%; background:#FFD700; border-radius:4px; }
-        .energy-text { position:absolute; bottom:40%; left:50%; transform:translateX(-50%); font-size:0.8rem; color:white; text-shadow:1px 1px 2px black; z-index:25; }
-
-        /* === КНОПКА НАЧАТЬ === */
-        .start-btn { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); padding:12px 30px; font-size:1rem; background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; border-radius:20px; cursor:pointer; z-index:25; font-weight:bold; }
+        /* === ВЕРХНИЕ ПАНЕЛИ === */
+        .top-left-buttons {
+            position:absolute; top:5px; left:5px; display:flex; gap:4px; z-index:35; flex-wrap:wrap;
+        }
+        .top-left-buttons .item {
+            background:rgba(0,0,0,0.65); color:white; padding:3px 8px; border-radius:12px;
+            font-size:0.65rem; display:flex; align-items:center; gap:3px; cursor:pointer;
+        }
+        .balances {
+            position:absolute; top:5px; right:5px; display:flex; flex-direction:column; align-items:flex-end; gap:3px; z-index:35;
+        }
+        .balances div {
+            background:rgba(0,0,0,0.75); color:white; padding:3px 10px; border-radius:12px;
+            font-size:0.7rem; font-weight:bold;
+        }
+        .start-btn {
+            position:absolute; top:42%; left:50%; transform:translate(-50%,-50%);
+            padding:12px 30px; font-size:1rem;
+            background:linear-gradient(180deg, #FF6347, #DC143C);
+            color:white; border:none; border-radius:20px; cursor:pointer; z-index:25; font-weight:bold;
+        }
         .start-btn:disabled { background:#808080; cursor:not-allowed; }
 
-        /* === НИЖНЯЯ ПАНЕЛЬ (6 кнопок) === */
+        /* === НИЖНЯЯ ПАНЕЛЬ === */
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
-        .nav-btn { background:rgba(0,0,0,0.7); color:white; border:none; padding:5px 6px; border-radius:8px; font-size:0.65rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px; flex:1; margin:1px; }
+        .nav-btn {
+            background:rgba(0,0,0,0.7); color:white; border:none; padding:5px 4px; border-radius:8px;
+            font-size:0.6rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px;
+            flex:1; margin:1px;
+        }
         .nav-btn.active { background:rgba(255,215,0,0.8); color:black; font-weight:bold; }
 
-        /* === РАЗДЕЛЫ (заглушки) === */
+        /* === Экраны-заглушки === */
         .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; }
         .screen.active { display:flex; }
-        .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; }
+        .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
     </style>
 </head>
 <body>
 <div id="game-container">
-    <!-- Небо -->
+    <!-- Фон -->
     <div class="sky"></div>
-    <!-- Горизонт -->
     <div class="horizon"></div>
-    <!-- Море -->
     <div class="sea"></div>
-    <!-- Пальма -->
     <div class="palm">
         <div class="palm-leaves">
             <div class="palm-leaf"></div><div class="palm-leaf"></div><div class="palm-leaf"></div>
         </div>
         <div class="palm-trunk"></div>
     </div>
-    <!-- Яхта -->
     <div class="yacht">
         <div class="yacht-sail"></div>
         <div class="yacht-body"></div>
     </div>
-    <!-- Пристань -->
     <div class="pier"></div>
-    <!-- Стеклянная стена -->
     <div class="glass-wall"></div>
-    <!-- Подоконник -->
     <div class="window-sill"></div>
-    <!-- Горшок с цветами -->
     <div class="flower-pot"></div>
 
-    <!-- Кухня: стол, плита, кастрюля -->
+    <!-- Кухня -->
     <div class="kitchen-area">
         <div class="table"></div>
         <div class="stove">
@@ -136,41 +159,41 @@
                 <div class="steam">
                     <div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div>
                 </div>
+                <!-- Счётчик энергии прямо на кастрюле -->
+                <div class="energy-on-pot" id="energy-on-pot">⚡ 60/60</div>
             </div>
         </div>
     </div>
 
-    <!-- Энергия -->
-    <div class="energy-wrapper"><div class="energy-fill" id="energy-fill" style="width:100%"></div></div>
-    <div class="energy-text" id="energy-text">60/60</div>
-
-    <!-- Доска -->
+    <!-- Доска 5+4 -->
     <div class="board" id="board">
-        <div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div>
-        <div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div>
-        <div class="hole" data-hole="6"></div><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div>
+        <div class="hole" data-hole="0"></div>
+        <div class="hole" data-hole="1"></div>
+        <div class="hole" data-hole="2"></div>
+        <div class="hole" data-hole="3"></div>
+        <div class="hole" data-hole="4"></div>
+        <div class="hole" data-hole="5" style="grid-column: 2;"></div>
+        <div class="hole" data-hole="6"></div>
+        <div class="hole" data-hole="7"></div>
+        <div class="hole" data-hole="8"></div>
     </div>
 
     <!-- Кнопка НАЧАТЬ -->
     <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
 
-    <!-- Верхняя панель: счётчики, иконки -->
-    <div class="top-bar">
-        <div class="item" id="days-counter">🗓️ День 47</div>
-        <div class="item" id="clock">🕐 12:00</div>
-        <div class="item" id="referral-icon">👥 Рефералы</div>
+    <!-- Верхние иконки слева -->
+    <div class="top-left-buttons">
+        <div class="item" id="top-tappers">🏆 Тапалки</div>
+        <div class="item" id="top-miners">⛏️ Майнеры</div>
+        <div class="item" id="referral-icon">👥</div>
         <div class="item" id="about-icon">📖 О проекте</div>
     </div>
+
+    <!-- Балансы справа -->
     <div class="balances">
         <div id="rum-balance">💰 RUM: 0</div>
         <div id="invest-balance">📈 Инвест: 0</div>
         <div id="srum-balance">💎 SRUM: 0.00</div>
-    </div>
-
-    <!-- Иконки топов (как отдельные кнопки поверх) -->
-    <div style="position:absolute; top:5px; left:5px; display:flex; gap:5px; z-index:35;">
-        <div class="item" id="top-tappers">🏆 Топ тапалок</div>
-        <div class="item" id="top-miners">⛏️ Топ майнеров</div>
     </div>
 
     <!-- Нижняя панель -->
@@ -183,7 +206,7 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- Экраны-заглушки -->
+    <!-- Экраны -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button>🐺 Майнинг клуб «Голодные волки»</div>
     <div class="screen" id="tasks-screen"><button class="back-btn">← Назад</button>📋 Задания</div>
@@ -192,7 +215,7 @@
     <div class="screen" id="shop-screen"><button class="back-btn">← Назад</button>🛍️ Магазин</div>
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button>🏆 Топ игроков в тапалке</div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button>⛏️ Топ майнеров</div>
-    <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button>👥 Реферальная программа</div>
+    <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button>👥 Рефералы</div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button>📖 О проекте и дорожная карта</div>
 </div>
 
@@ -206,13 +229,11 @@
     let gameActive = false, gameTimer = null, gameTimeLeft = 60;
     let spawnInterval = null, currentVeg = {};
 
-    // DOM
     const board = document.getElementById('board');
     const rumBal = document.getElementById('rum-balance');
     const investBal = document.getElementById('invest-balance');
     const srumBal = document.getElementById('srum-balance');
-    const energyText = document.getElementById('energy-text');
-    const energyFill = document.getElementById('energy-fill');
+    const energyOnPot = document.getElementById('energy-on-pot');
     const startBtn = document.getElementById('start-btn');
     const holes = document.querySelectorAll('.hole');
 
@@ -220,28 +241,30 @@
         rumBal.textContent = `💰 RUM: ${rum}`;
         investBal.textContent = `📈 Инвест: ${invest}`;
         srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
-        energyText.textContent = `${energy}/${maxEnergy}`;
-        energyFill.style.width = `${(energy/maxEnergy)*100}%`;
+        energyOnPot.textContent = `⚡ ${energy}/${maxEnergy}`;
         if (energy === maxEnergy && !gameActive) {
             startBtn.disabled = false; startBtn.textContent = '🥘 НАЧАТЬ'; startBtn.style.display = 'block';
         } else if (gameActive) {
             startBtn.style.display = 'none';
         } else {
-            startBtn.disabled = true; startBtn.textContent = `⏳ ${Math.ceil((maxEnergy-energy)*6/60)} мин`; startBtn.style.display = 'block';
+            startBtn.disabled = true;
+            startBtn.textContent = `⏳ ${Math.ceil((maxEnergy-energy)*6/60)} мин`;
+            startBtn.style.display = 'block';
         }
     }
 
     function spawnAll() {
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
-        for (let i=0; i<9; i++) {
+        const holeElements = [...holes];
+        for (let i = 0; i < holeElements.length; i++) {
             const isBad = Math.random() < 0.25;
             const pool = isBad ? BAD : GOOD;
             const emoji = pool[Math.floor(Math.random() * pool.length)];
             const el = document.createElement('span');
             el.className = 'veg' + (isBad ? ' rotten' : '');
             el.textContent = emoji;
-            holes[i].appendChild(el);
+            holeElements[i].appendChild(el);
             currentVeg[i] = { type: isBad ? 'bad' : 'good', emoji };
         }
     }
@@ -250,8 +273,8 @@
         if (!gameActive) return;
         const hole = e.target.closest('.hole');
         if (!hole) { rum = Math.max(0, rum-5); updateUI(); return; }
-        const num = parseInt(hole.dataset.hole);
-        if (!currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
+        const num = [...holes].indexOf(hole);
+        if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
 
         if (currentVeg[num].type === 'good') {
             rum += 10;
@@ -261,7 +284,7 @@
             showEffect(e, '✖', 'red');
         }
         delete currentVeg[num];
-        holes[num].innerHTML = '';
+        hole.innerHTML = '';
         updateUI();
     }
 
@@ -325,17 +348,14 @@
         }
     }
 
-    // События
     board.addEventListener('click', handleTap);
     startBtn.addEventListener('click', startGame);
 
-    // Кнопки верхней панели
     document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
     document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
     document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
     document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
 
-    // Нижние кнопки
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const screen = e.currentTarget.dataset.screen;
@@ -343,23 +363,19 @@
         });
     });
 
-    // Кнопки "Назад"
     document.querySelectorAll('.back-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         });
     });
 
-    // Часы и дни
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('clock').textContent = `🕐 ${now.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
-        const startDate = new Date('2026-04-01');
-        const days = Math.floor((now - startDate) / (1000*60*60*24));
-        document.getElementById('days-counter').textContent = `🗓️ День ${days}`;
+    // Часы и дни оставим незаметно в консоли, но можно добавить в about
+    const startDate = new Date('2026-04-01');
+    function updateDays() {
+        const days = Math.floor((new Date() - startDate) / (1000*60*60*24));
+        // Можно отображать где-то, если нужно
     }
-    updateClock();
-    setInterval(updateClock, 60000);
+    updateDays();
 
     updateUI();
     startRecovery();
