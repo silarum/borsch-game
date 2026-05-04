@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Крипто Борщ Тапалка</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Крипто Борщ</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            background:#0a0a2e;
+            background:#000;
             display:flex; justify-content:center; align-items:center;
             height:100vh; overflow:hidden;
             font-family:'Arial',sans-serif;
@@ -16,191 +16,121 @@
         }
         #game-container {
             position:relative; width:100%; max-width:420px; height:100vh;
-            background:linear-gradient(180deg, #87CEEB 0%, #B0E0E6 45%, #4682B4 100%);
+            background:linear-gradient(180deg, #87CEEB 0%, #B0E0E6 40%, #4682B4 70%);
             overflow:hidden;
         }
-        /* === ПЕЙЗАЖ (всегда виден) === */
-        .sky { position:absolute; top:0; left:0; right:0; height:55%; }
+        /* === ФОН: море, горизонт, небо === */
+        .sky { position:absolute; top:0; left:0; right:0; height:40%; }
+        .horizon { position:absolute; top:35%; left:0; right:0; height:2px; background:rgba(255,255,255,0.5); }
         .sea {
-            position:absolute; top:55%; left:0; right:0; bottom:35%;
+            position:absolute; top:35%; left:0; right:0; bottom:30%;
             background:linear-gradient(180deg, #1E90FF, #4169E1);
             animation:waves 3s infinite ease-in-out;
         }
-        @keyframes waves { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
-        .palm {
-            position:absolute; left:5%; top:15%;
-            width:80px; height:120px;
-        }
-        .palm-trunk {
-            position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-            width:10px; height:70px; background:#8B4513; border-radius:5px;
-        }
-        .palm-leaves {
-            position:absolute; top:0; left:50%; transform:translateX(-50%);
-            width:80px; height:50px;
-        }
-        .palm-leaf {
-            position:absolute; background:#228B22; height:10px; border-radius:50%;
-            transform-origin:left center;
-        }
-        .palm-leaf:nth-child(1){ width:50px; transform:rotate(-30deg); top:5px; left:10px; }
-        .palm-leaf:nth-child(2){ width:45px; transform:rotate(-50deg); top:18px; left:15px; }
-        .palm-leaf:nth-child(3){ width:40px; transform:rotate(10deg); top:10px; left:25px; }
-        .yacht {
-            position:absolute; right:12%; top:58%;
-            width:50px; height:80px;
-            animation:float 4s infinite ease-in-out;
-        }
-        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
-        .yacht-body {
-            position:absolute; bottom:0; left:5px;
-            width:40px; height:15px; background:white; border-radius:50% 50% 0 0;
-        }
-        .yacht-sail {
-            position:absolute; bottom:15px; left:20px;
-            width:0; height:0;
-            border-left:20px solid transparent;
-            border-right:8px solid transparent;
-            border-bottom:40px solid white;
-        }
-        .glass-wall {
-            position:absolute; top:0; left:0; right:0; bottom:35%;
-            background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.2));
-            border-bottom:2px solid rgba(255,255,255,0.5);
-            pointer-events:none;
-        }
+        @keyframes waves { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
 
-        /* === КУХНЯ (компактно сверху) === */
-        .kitchen-area {
-            position:absolute; bottom:20%; left:0; right:0; height:45%;
-            display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-        }
-        .stove {
-            width:75%; height:35%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3);
-            border-radius:15px 15px 5px 5px; border:4px solid #A9A9A9;
-            position:relative; display:flex; justify-content:center; align-items:flex-start;
-        }
-        .pot {
-            width:55%; height:80%; background:linear-gradient(180deg, #C0C0C0, #708090);
-            border-radius:0 0 25px 25px; border:4px solid #2F4F4F;
-            position:absolute; top:-20px;
-        }
-        .pot::after {
-            content:''; position:absolute; top:-12px; left:-4px; right:-4px;
-            height:12px; background:#A9A9A9; border-radius:5px;
-        }
-        .steam {
-            position:absolute; top:-25px; left:50%; transform:translateX(-50%);
-            width:80%; height:20px;
-        }
-        .steam-particle {
-            position:absolute; width:12px; height:12px;
-            background:rgba(255,255,255,0.7); border-radius:50%;
-            animation:rise 2s infinite;
-        }
+        /* === ПАЛЬМА, ЯХТА, ПРИСТАНЬ === */
+        .palm { position:absolute; left:3%; top:5%; width:90px; height:120px; }
+        .palm-trunk { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:10px; height:70px; background:#8B4513; border-radius:5px; }
+        .palm-leaves { position:absolute; top:0; left:50%; transform:translateX(-50%); width:90px; height:50px; }
+        .palm-leaf { position:absolute; background:#228B22; height:12px; border-radius:50%; transform-origin:left center; }
+        .palm-leaf:nth-child(1){ width:60px; transform:rotate(-30deg); top:5px; left:10px; }
+        .palm-leaf:nth-child(2){ width:55px; transform:rotate(-50deg); top:20px; left:15px; }
+        .palm-leaf:nth-child(3){ width:45px; transform:rotate(10deg); top:10px; left:30px; }
+
+        .yacht { position:absolute; right:10%; top:42%; width:55px; height:80px; animation:float 4s infinite ease-in-out; }
+        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
+        .yacht-body { position:absolute; bottom:0; left:5px; width:45px; height:16px; background:white; border-radius:50% 50% 0 0; }
+        .yacht-sail { position:absolute; bottom:16px; left:22px; width:0; height:0; border-left:22px solid transparent; border-right:8px solid transparent; border-bottom:45px solid white; }
+
+        .pier { position:absolute; left:20%; top:45%; width:40px; height:8px; background:#8B4513; border-radius:4px; }
+
+        /* === СТЕКЛЯННАЯ СТЕНА и ПОДОКОННИК === */
+        .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; }
+        .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; }
+        .flower-pot { position:absolute; bottom:32%; left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; }
+        .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
+
+        /* === КУХНЯ: СТОЛ, ПЛИТА, КАСТРЮЛЯ === */
+        .kitchen-area { position:absolute; bottom:35%; left:0; right:0; height:35%; }
+        .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
+        .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
+        .pot { position:absolute; top:5%; left:50%; transform:translateX(-50%); width:55%; height:60%; background:linear-gradient(180deg, #C0C0C0, #708090); border-radius:0 0 25px 25px; border:3px solid #2F4F4F; }
+        .pot::after { content:''; position:absolute; top:-10px; left:-3px; right:-3px; height:10px; background:#A9A9A9; border-radius:5px; }
+        .steam { position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:70%; height:18px; }
+        .steam-particle { position:absolute; width:10px; height:10px; background:rgba(255,255,255,0.7); border-radius:50%; animation:rise 2s infinite; }
         .steam-particle:nth-child(1){ left:20%; animation-delay:0s; }
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
-        @keyframes rise {
-            0%{ transform:translateY(0) scale(1); opacity:0.7; }
-            100%{ transform:translateY(-25px) scale(1.8); opacity:0; }
-        }
+        @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.7; } 100%{ transform:translateY(-20px) scale(1.5); opacity:0; } }
 
-        /* === ДОСКА (внизу, не перекрывает вид) === */
-        .board {
-            position:absolute; bottom:3%; left:50%; transform:translateX(-50%);
-            width:90%; height:42%; /* было 85% на 50%, теперь занимает нижнюю часть */
-            background:#DEB887; border-radius:10px; border:5px solid #8B4513;
-            display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
-            gap:6px; padding:8px; z-index:10;
-        }
-        .hole {
-            background:radial-gradient(circle, #2F1B0E, #1A0F07);
-            border-radius:50%; border:3px solid #3D2B1F;
-            display:flex; justify-content:center; align-items:center;
-            cursor:pointer; position:relative; transition:transform 0.1s;
-        }
+        /* === ДОСКА 3x3 === */
+        .board { position:absolute; bottom:5%; left:50%; transform:translateX(-50%); width:92%; height:40%; background:#DEB887; border-radius:10px; border:4px solid #8B4513; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:4px; padding:6px; z-index:10; }
+        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; }
         .hole:active { transform:scale(0.85); }
-        .veg {
-            font-size:2.2rem; pointer-events:none;
-            animation:popIn 0.3s ease-out;
-        }
-        @keyframes popIn {
-            0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); }
-        }
-        /* Червивый овощ — красноватая подсветка */
-        .rotten {
-            filter:brightness(0.8) sepia(0.6) hue-rotate(-20deg);
-            position:relative;
-        }
-        .rotten::after {
-            content:'🪱'; position:absolute; top:-8px; right:-8px; font-size:0.8rem;
-        }
+        .veg { font-size:2rem; pointer-events:none; animation:popIn 0.3s ease-out; }
+        @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
+        .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
+        .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.7rem; }
 
-        /* === ИНТЕРФЕЙС === */
-        .top-panel {
-            position:absolute; top:10px; left:10px; right:10px;
-            display:flex; justify-content:space-between; z-index:30; pointer-events:none;
-        }
-        .rum-counter, .energy-bar, .timer {
-            background:rgba(0,0,0,0.7); color:white; padding:5px 12px;
-            border-radius:15px; font-size:0.85rem; font-weight:bold;
-        }
-        .crate-icon { font-size:1.4rem; }
-        .rating-icon {
-            position:absolute; top:10px; left:10px;
-            background:rgba(0,0,0,0.7); color:gold; padding:5px 10px;
-            border-radius:15px; font-weight:bold; z-index:35; cursor:pointer;
-            pointer-events:auto; display:flex; align-items:center; gap:5px;
-        }
-        .start-btn {
-            position:absolute; top:45%; left:50%; transform:translate(-50%,-50%);
-            padding:14px 35px; font-size:1.1rem;
-            background:linear-gradient(180deg, #FF6347, #DC143C);
-            color:white; border:none; border-radius:25px;
-            cursor:pointer; z-index:25; font-weight:bold;
-        }
+        /* === ВЕРХНЯЯ ИНФОРМАЦИОННАЯ ПАНЕЛЬ === */
+        .top-bar { position:absolute; top:0; left:0; right:0; padding:5px; display:flex; flex-wrap:wrap; justify-content:space-between; z-index:30; pointer-events:auto; }
+        .top-bar .item { background:rgba(0,0,0,0.65); color:white; padding:3px 8px; border-radius:12px; font-size:0.7rem; margin:2px; display:flex; align-items:center; gap:4px; }
+        /* Счётчики валют */
+        .balances { position:absolute; top:5px; right:5px; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+        .balances div { background:rgba(0,0,0,0.7); color:white; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:bold; }
+        /* Энергия */
+        .energy-wrapper { position:absolute; bottom:38%; left:5%; right:5%; height:8px; background:rgba(0,0,0,0.5); border-radius:4px; z-index:25; }
+        .energy-fill { height:100%; background:#FFD700; border-radius:4px; }
+        .energy-text { position:absolute; bottom:40%; left:50%; transform:translateX(-50%); font-size:0.8rem; color:white; text-shadow:1px 1px 2px black; z-index:25; }
+
+        /* === КНОПКА НАЧАТЬ === */
+        .start-btn { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); padding:12px 30px; font-size:1rem; background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; border-radius:20px; cursor:pointer; z-index:25; font-weight:bold; }
         .start-btn:disabled { background:#808080; cursor:not-allowed; }
-        .bottom-panel {
-            position:absolute; bottom:2px; left:5px; right:5px;
-            display:flex; justify-content:space-around; z-index:30;
-        }
-        .nav-btn {
-            background:rgba(0,0,0,0.65); color:white; border:none;
-            padding:6px 8px; border-radius:10px; font-size:0.7rem;
-            cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
-        }
-        .nav-btn.active { background:rgba(255,215,0,0.7); color:black; font-weight:bold; }
-        .inner-screen {
-            background:rgba(0,0,0,0.85); color:white; padding:20px;
-            display:flex; flex-direction:column; align-items:center; justify-content:center;
-            height:100%;
-        }
-        .back-btn {
-            position:absolute; top:15px; left:15px;
-            background:rgba(255,255,255,0.2); border:none; color:white;
-            padding:8px 15px; border-radius:10px; cursor:pointer; z-index:40;
-        }
+
+        /* === НИЖНЯЯ ПАНЕЛЬ (6 кнопок) === */
+        .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
+        .nav-btn { background:rgba(0,0,0,0.7); color:white; border:none; padding:5px 6px; border-radius:8px; font-size:0.65rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px; flex:1; margin:1px; }
+        .nav-btn.active { background:rgba(255,215,0,0.8); color:black; font-weight:bold; }
+
+        /* === РАЗДЕЛЫ (заглушки) === */
+        .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; }
+        .screen.active { display:flex; }
+        .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; }
     </style>
 </head>
 <body>
 <div id="game-container">
-    <!-- Пейзаж -->
+    <!-- Небо -->
     <div class="sky"></div>
+    <!-- Горизонт -->
+    <div class="horizon"></div>
+    <!-- Море -->
     <div class="sea"></div>
+    <!-- Пальма -->
     <div class="palm">
         <div class="palm-leaves">
             <div class="palm-leaf"></div><div class="palm-leaf"></div><div class="palm-leaf"></div>
         </div>
         <div class="palm-trunk"></div>
     </div>
+    <!-- Яхта -->
     <div class="yacht">
-        <div class="yacht-sail"></div><div class="yacht-body"></div>
+        <div class="yacht-sail"></div>
+        <div class="yacht-body"></div>
     </div>
+    <!-- Пристань -->
+    <div class="pier"></div>
+    <!-- Стеклянная стена -->
     <div class="glass-wall"></div>
+    <!-- Подоконник -->
+    <div class="window-sill"></div>
+    <!-- Горшок с цветами -->
+    <div class="flower-pot"></div>
 
-    <!-- Кухня и кастрюля (сверху) -->
+    <!-- Кухня: стол, плита, кастрюля -->
     <div class="kitchen-area">
+        <div class="table"></div>
         <div class="stove">
             <div class="pot">
                 <div class="steam">
@@ -210,69 +140,88 @@
         </div>
     </div>
 
-    <!-- Доска внизу -->
+    <!-- Энергия -->
+    <div class="energy-wrapper"><div class="energy-fill" id="energy-fill" style="width:100%"></div></div>
+    <div class="energy-text" id="energy-text">60/60</div>
+
+    <!-- Доска -->
     <div class="board" id="board">
         <div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div>
         <div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div>
         <div class="hole" data-hole="6"></div><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div>
     </div>
 
-    <!-- Верхняя панель -->
-    <div class="top-panel">
-        <div>
-            <div class="rum-counter">💰 <span id="rum">0</span> RUM</div>
-            <div class="timer" id="timer" style="display:none;">60</div>
-        </div>
-        <div>
-            <div class="energy-bar">⚡ <span id="energy-text">60/60</span></div>
-            <div class="crate-icon">📦 08:00</div>
-        </div>
-    </div>
-    <!-- Иконка рейтинга -->
-    <div class="rating-icon" id="rating-icon">🏆 <span id="online-count">1 203</span></div>
-
+    <!-- Кнопка НАЧАТЬ -->
     <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
+
+    <!-- Верхняя панель: счётчики, иконки -->
+    <div class="top-bar">
+        <div class="item" id="days-counter">🗓️ День 47</div>
+        <div class="item" id="clock">🕐 12:00</div>
+        <div class="item" id="referral-icon">👥 Рефералы</div>
+        <div class="item" id="about-icon">📖 О проекте</div>
+    </div>
+    <div class="balances">
+        <div id="rum-balance">💰 RUM: 0</div>
+        <div id="invest-balance">📈 Инвест: 0</div>
+        <div id="srum-balance">💎 SRUM: 0.00</div>
+    </div>
+
+    <!-- Иконки топов (как отдельные кнопки поверх) -->
+    <div style="position:absolute; top:5px; left:5px; display:flex; gap:5px; z-index:35;">
+        <div class="item" id="top-tappers">🏆 Топ тапалок</div>
+        <div class="item" id="top-miners">⛏️ Топ майнеров</div>
+    </div>
 
     <!-- Нижняя панель -->
     <div class="bottom-panel">
         <button class="nav-btn" data-screen="arena">🏟️<br>Арена</button>
-        <button class="nav-btn" data-screen="invest">📈<br>Инвест</button>
+        <button class="nav-btn" data-screen="mining-club">🐺<br>Клуб</button>
         <button class="nav-btn" data-screen="tasks">📋<br>Задания</button>
-        <button class="nav-btn" data-screen="energy">⚡<br>Энергия</button>
+        <button class="nav-btn" data-screen="invest">📈<br>Инвест</button>
         <button class="nav-btn" data-screen="wallet">👛<br>Кошелёк</button>
+        <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- Разделы (заглушки) -->
-    <div class="screen" id="arena-screen" style="display:none;"><div class="inner-screen"><button class="back-btn">←</button>🏟️ Арена</div></div>
-    <div class="screen" id="invest-screen" style="display:none;"><div class="inner-screen"><button class="back-btn">←</button>📈 Инвестиции</div></div>
-    <div class="screen" id="tasks-screen" style="display:none;"><div class="inner-screen"><button class="back-btn">←</button>📋 Задания</div></div>
-    <div class="screen" id="energy-screen" style="display:none;"><div class="inner-screen"><button class="back-btn">←</button>⚡ Бусты</div></div>
-    <div class="screen" id="wallet-screen" style="display:none;"><div class="inner-screen"><button class="back-btn">←</button>👛 Кошелёк</div></div>
-    <div class="screen" id="rating-screen" style="display:none;"><div class="inner-screen"><button class="back-btn">←</button>🏆 Рейтинг</div></div>
+    <!-- Экраны-заглушки -->
+    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
+    <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button>🐺 Майнинг клуб «Голодные волки»</div>
+    <div class="screen" id="tasks-screen"><button class="back-btn">← Назад</button>📋 Задания</div>
+    <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button>📈 Инвестиции</div>
+    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button>👛 Кошелёк</div>
+    <div class="screen" id="shop-screen"><button class="back-btn">← Назад</button>🛍️ Магазин</div>
+    <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button>🏆 Топ игроков в тапалке</div>
+    <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button>⛏️ Топ майнеров</div>
+    <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button>👥 Реферальная программа</div>
+    <div class="screen" id="about-screen"><button class="back-btn">← Назад</button>📖 О проекте и дорожная карта</div>
 </div>
 
 <script>
 (function() {
-    // === ОВОЩИ ===
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
-    const BAD = ['💩','🪱','🧀','🥀','🍄']; // червивые/гнилые
+    const BAD = ['💩','🪱','🧀','🥀','🍄'];
 
-    let rum = 0, energy = 60, maxEnergy = 60;
+    let rum = 0, invest = 0, srum = 0.0;
+    let energy = 60, maxEnergy = 60;
     let gameActive = false, gameTimer = null, gameTimeLeft = 60;
-    let spawnInterval = null, currentVeg = {}; // holeNum -> {type:'good'|'bad', emoji}
+    let spawnInterval = null, currentVeg = {};
 
     // DOM
     const board = document.getElementById('board');
-    const rumEl = document.getElementById('rum');
+    const rumBal = document.getElementById('rum-balance');
+    const investBal = document.getElementById('invest-balance');
+    const srumBal = document.getElementById('srum-balance');
     const energyText = document.getElementById('energy-text');
-    const timerEl = document.getElementById('timer');
+    const energyFill = document.getElementById('energy-fill');
     const startBtn = document.getElementById('start-btn');
     const holes = document.querySelectorAll('.hole');
-    const ratingIcon = document.getElementById('rating-icon');
 
     function updateUI() {
-        rumEl.textContent = rum;
+        rumBal.textContent = `💰 RUM: ${rum}`;
+        investBal.textContent = `📈 Инвест: ${invest}`;
+        srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
         energyText.textContent = `${energy}/${maxEnergy}`;
+        energyFill.style.width = `${(energy/maxEnergy)*100}%`;
         if (energy === maxEnergy && !gameActive) {
             startBtn.disabled = false; startBtn.textContent = '🥘 НАЧАТЬ'; startBtn.style.display = 'block';
         } else if (gameActive) {
@@ -283,12 +232,10 @@
     }
 
     function spawnAll() {
-        // очищаем
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
-        // заполняем все 9 лунок
-        for (let i = 0; i < 9; i++) {
-            const isBad = Math.random() < 0.25; // 25% шанс на гнилой
+        for (let i=0; i<9; i++) {
+            const isBad = Math.random() < 0.25;
             const pool = isBad ? BAD : GOOD;
             const emoji = pool[Math.floor(Math.random() * pool.length)];
             const el = document.createElement('span');
@@ -302,62 +249,49 @@
     function handleTap(e) {
         if (!gameActive) return;
         const hole = e.target.closest('.hole');
-        if (!hole) { rum = Math.max(0, rum - 5); updateUI(); return; }
-        const holeNum = parseInt(hole.dataset.hole);
-        if (!currentVeg[holeNum]) { rum = Math.max(0, rum - 5); updateUI(); return; }
+        if (!hole) { rum = Math.max(0, rum-5); updateUI(); return; }
+        const num = parseInt(hole.dataset.hole);
+        if (!currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
 
-        if (currentVeg[holeNum].type === 'good') {
+        if (currentVeg[num].type === 'good') {
             rum += 10;
-            // эффект монет
-            showCoinBurst(e);
+            showEffect(e, '+10', 'gold');
         } else {
-            rum = Math.max(0, rum - 5);
-            showFail(e);
+            rum = Math.max(0, rum-5);
+            showEffect(e, '✖', 'red');
         }
-        delete currentVeg[holeNum];
-        holes[holeNum].innerHTML = '';
+        delete currentVeg[num];
+        holes[num].innerHTML = '';
         updateUI();
     }
 
-    function showCoinBurst(e) {
+    function showEffect(e, text, color) {
         const el = document.createElement('div');
-        el.style.cssText = 'position:absolute; pointer-events:none; color:gold; font-weight:bold; z-index:100; animation:coinFly 1s ease-out forwards;';
-        el.textContent = '+10';
-        el.style.left = (e.clientX - board.getBoundingClientRect().left) + 'px';
-        el.style.top = (e.clientY - board.getBoundingClientRect().top) + 'px';
+        el.style.cssText = `position:absolute; pointer-events:none; color:${color}; font-weight:bold; z-index:100; animation:fly 1s ease-out forwards;`;
+        el.textContent = text;
+        const rect = board.getBoundingClientRect();
+        el.style.left = (e.clientX - rect.left) + 'px';
+        el.style.top = (e.clientY - rect.top) + 'px';
         document.getElementById('game-container').appendChild(el);
         setTimeout(() => el.remove(), 1000);
-    }
-
-    function showFail(e) {
-        const el = document.createElement('div');
-        el.style.cssText = 'position:absolute; pointer-events:none; color:red; font-size:1.8rem; z-index:100; animation:failShake 0.5s ease-out;';
-        el.textContent = '✖';
-        el.style.left = (e.clientX - board.getBoundingClientRect().left) + 'px';
-        el.style.top = (e.clientY - board.getBoundingClientRect().top) + 'px';
-        document.getElementById('game-container').appendChild(el);
-        setTimeout(() => el.remove(), 500);
     }
 
     function startGame() {
         if (energy < maxEnergy || gameActive) return;
         gameActive = true; gameTimeLeft = 60; energy = maxEnergy;
-        timerEl.style.display = 'block'; timerEl.textContent = gameTimeLeft;
         updateUI();
         spawnAll();
-        // Ускоренное обновление
         let interval = 1800;
         spawnInterval = setInterval(() => {
             if (!gameActive) return;
             spawnAll();
-            interval = Math.max(450, interval - 80);
+            interval = Math.max(450, interval-80);
             clearInterval(spawnInterval);
             spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
         }, interval);
 
         gameTimer = setInterval(() => {
             gameTimeLeft--; energy--;
-            timerEl.textContent = gameTimeLeft;
             updateUI();
             if (gameTimeLeft <= 0) endGame();
         }, 1000);
@@ -366,7 +300,6 @@
     function endGame() {
         gameActive = false;
         clearInterval(gameTimer); clearInterval(spawnInterval);
-        timerEl.style.display = 'none';
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
         startBtn.style.display = 'block';
@@ -377,7 +310,7 @@
     function startRecovery() {
         const int = setInterval(() => {
             if (gameActive || energy >= maxEnergy) { if (energy >= maxEnergy) clearInterval(int); return; }
-            energy = Math.min(maxEnergy, energy + 1);
+            energy = Math.min(maxEnergy, energy+1);
             updateUI();
             if (energy >= maxEnergy) clearInterval(int);
         }, 6000);
@@ -385,26 +318,49 @@
 
     // Навигация
     function switchScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        const main = document.getElementById('main-screen') || document.querySelector('.board').parentNode;
-        if (screenId === 'main') {
-            main.style.display = 'block';
-        } else {
-            const target = document.getElementById(screenId + '-screen');
-            if (target) target.style.display = 'block';
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (screenId !== 'main') {
+            const target = document.getElementById(screenId+'-screen');
+            if (target) target.classList.add('active');
         }
     }
-    ratingIcon.addEventListener('click', () => switchScreen('rating'));
-    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', () => switchScreen('main')));
-    document.querySelectorAll('.nav-btn').forEach(b => {
-        b.addEventListener('click', (e) => {
-            const s = e.currentTarget.dataset.screen;
-            switchScreen(s);
+
+    // События
+    board.addEventListener('click', handleTap);
+    startBtn.addEventListener('click', startGame);
+
+    // Кнопки верхней панели
+    document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
+    document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
+    document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
+    document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
+
+    // Нижние кнопки
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const screen = e.currentTarget.dataset.screen;
+            switchScreen(screen);
         });
     });
 
-    board.addEventListener('click', handleTap);
-    startBtn.addEventListener('click', startGame);
+    // Кнопки "Назад"
+    document.querySelectorAll('.back-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        });
+    });
+
+    // Часы и дни
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').textContent = `🕐 ${now.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
+        const startDate = new Date('2026-04-01');
+        const days = Math.floor((now - startDate) / (1000*60*60*24));
+        document.getElementById('days-counter').textContent = `🗓️ День ${days}`;
+    }
+    updateClock();
+    setInterval(updateClock, 60000);
+
     updateUI();
     startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
