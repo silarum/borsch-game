@@ -34,18 +34,34 @@
         .yacht-body { position:absolute; bottom:0; left:5px; width:60px; height:20px; background:white; border-radius:50% 50% 0 0; }
         .yacht-sail { position:absolute; bottom:20px; left:25px; width:0; height:0; border-left:25px solid transparent; border-right:10px solid transparent; border-bottom:50px solid white; }
 
-        .pier { position:absolute; left:15%; top:48%; width:50px; height:8px; background:#8B4513; border-radius:4px; }
-
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; }
-        .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; }
-        .flower-pot { position:absolute; bottom:32%; left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; }
+        .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
+        .flower-pot {
+            position:absolute; bottom:calc(30% + 12px); left:5%;
+            width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513;
+            z-index:6;
+        }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
 
-        /* === КУХНЯ (опущена, чтобы не закрывать яхту) === */
-        .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; }
+        /* Фиолетовый фон за столом */
+        .purple-bg {
+            position:absolute; bottom:0; left:0; right:0; top:70%;
+            background:purple;
+            z-index:1;
+        }
+
+        /* === КУХНЯ === */
+        .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
         .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
-        .pot { position:absolute; top:5%; left:50%; transform:translateX(-50%); width:55%; height:60%; background:linear-gradient(180deg, #C0C0C0, #708090); border-radius:0 0 25px 25px; border:3px solid #2F4F4F; }
+        .pot {
+            position:absolute; top:5%; left:50%; transform:translateX(-50%);
+            width:55%; height:60%;
+            background:linear-gradient(180deg, #C0C0C0, #708090);
+            border-radius:0 0 25px 25px; border:3px solid #2F4F4F;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            z-index:3;
+        }
         .pot::after { content:''; position:absolute; top:-10px; left:-3px; right:-3px; height:10px; background:#A9A9A9; border-radius:5px; }
         .steam { position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:70%; height:18px; }
         .steam-particle { position:absolute; width:10px; height:10px; background:rgba(255,255,255,0.7); border-radius:50%; animation:rise 2s infinite; }
@@ -54,32 +70,39 @@
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.7; } 100%{ transform:translateY(-20px) scale(1.5); opacity:0; } }
 
-        /* Счётчик энергии на кастрюле */
+        /* Энергия внутри кастрюли */
         .energy-on-pot {
-            position:absolute; top:25%; left:50%; transform:translate(-50%,-50%);
-            background:rgba(0,0,0,0.7); color:#FFD700; padding:2px 12px; border-radius:12px;
-            font-size:0.8rem; font-weight:bold; z-index:15; white-space:nowrap;
+            background:rgba(0,0,0,0.7); color:#FFD700; padding:2px 10px; border-radius:10px;
+            font-size:0.75rem; font-weight:bold; z-index:4;
+            margin-top:5px;
         }
 
-        /* === ДОСКА (два ряда, симметричные отступы) === */
+        /* Кнопка Начать внутри кастрюли */
+        .pot .start-btn {
+            background:linear-gradient(180deg, #FF6347, #DC143C);
+            color:white; border:none; padding:8px 18px;
+            border-radius:15px; font-weight:bold; font-size:0.9rem;
+            cursor:pointer; z-index:4; margin-top:4px;
+        }
+        .pot .start-btn:disabled { background:#808080; cursor:not-allowed; }
+
+        /* === ДОСКА (поднята, отверстия крупнее) === */
         .board {
-            position:absolute; bottom:4%; left:50%; transform:translateX(-50%);
-            width:85%; background:#DEB887; border-radius:10px;
+            position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
+            width:88%; background:#DEB887; border-radius:10px;
             border:3px solid #8B4513; display:flex; flex-direction:column;
-            padding:6px; gap:5px; z-index:10;
+            padding:8px; gap:8px; z-index:10;
         }
-        .row {
-            display:flex; justify-content:space-around;
-        }
+        .row { display:flex; justify-content:space-around; }
         .hole {
             background:radial-gradient(circle, #2F1B0E, #1A0F07);
             border-radius:50%; border:2px solid #3D2B1F;
             display:flex; justify-content:center; align-items:center;
             cursor:pointer; position:relative; transition:transform 0.1s;
-            width:45px; height:45px; /* уменьшили размер, чтобы влезало */
+            width:55px; height:55px;
         }
         .hole:active { transform:scale(0.85); }
-        .veg { font-size:1.5rem; pointer-events:none; animation:popIn 0.3s ease-out; }
+        .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
@@ -99,15 +122,8 @@
             background:rgba(0,0,0,0.75); color:white; padding:3px 10px; border-radius:12px;
             font-size:0.7rem; font-weight:bold;
         }
-        .start-btn {
-            position:absolute; top:42%; left:50%; transform:translate(-50%,-50%);
-            padding:12px 30px; font-size:1rem;
-            background:linear-gradient(180deg, #FF6347, #DC143C);
-            color:white; border:none; border-radius:20px; cursor:pointer; z-index:25; font-weight:bold;
-        }
-        .start-btn:disabled { background:#808080; cursor:not-allowed; }
 
-        /* === НИЖНЯЯ ПАНЕЛЬ (кнопки крупнее) === */
+        /* === НИЖНЯЯ ПАНЕЛЬ (крупные кнопки) === */
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
         .nav-btn {
             background:rgba(0,0,0,0.75); color:white; border:none; padding:10px 6px; border-radius:10px;
@@ -116,10 +132,21 @@
         }
         .nav-btn.active { background:rgba(255,215,0,0.8); color:black; }
 
-        /* Экраны-заглушки */
+        /* Экраны */
         .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; }
         .screen.active { display:flex; }
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
+
+        /* Анимация полёта овоща в кастрюлю */
+        .flying-veg {
+            position:absolute; z-index:20; pointer-events:none;
+            animation: flyToPot 0.5s ease-in forwards;
+        }
+        @keyframes flyToPot {
+            0% { transform: translate(0, 0) scale(1); opacity:1; }
+            50% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity:1; }
+            100% { transform: translate(var(--ex), var(--ey)) scale(0.5); opacity:0; }
+        }
     </style>
 </head>
 <body>
@@ -128,25 +155,25 @@
     <div class="sky"></div>
     <div class="horizon"></div>
     <div class="sea"></div>
-    <!-- Яхта (стала лучше видна) -->
     <div class="yacht">
         <div class="yacht-sail"></div>
         <div class="yacht-body"></div>
     </div>
-    <div class="pier"></div>
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
     <div class="flower-pot"></div>
+    <div class="purple-bg"></div>
 
     <!-- Кухня -->
     <div class="kitchen-area">
         <div class="table"></div>
         <div class="stove">
-            <div class="pot">
+            <div class="pot" id="pot">
                 <div class="steam">
                     <div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div>
                 </div>
                 <div class="energy-on-pot" id="energy-on-pot">⚡ 60/60</div>
+                <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
             </div>
         </div>
     </div>
@@ -168,18 +195,15 @@
         </div>
     </div>
 
-    <!-- Кнопка НАЧАТЬ -->
-    <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
-
-    <!-- Верхние иконки -->
+    <!-- Верхние иконки (слева) -->
     <div class="top-left-buttons">
-        <div class="item" id="top-tappers">🏆 Тапалки</div>
+        <div class="item" id="top-tappers">🏆 Топ</div>
         <div class="item" id="top-miners">⛏️ Майнеры</div>
         <div class="item" id="referral-icon">👥</div>
         <div class="item" id="about-icon">📖 О проекте</div>
     </div>
 
-    <!-- Балансы -->
+    <!-- Балансы (справа) -->
     <div class="balances">
         <div id="rum-balance">💰 RUM: 0</div>
         <div id="invest-balance">📈 Инвест: 0</div>
@@ -196,14 +220,14 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- Экраны -->
+    <!-- Экраны-заглушки -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button>🐺 Майнинг клуб «Голодные волки»</div>
     <div class="screen" id="tasks-screen"><button class="back-btn">← Назад</button>📋 Задания</div>
     <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button>📈 Инвестиции</div>
     <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button>👛 Кошелёк</div>
     <div class="screen" id="shop-screen"><button class="back-btn">← Назад</button>🛍️ Магазин</div>
-    <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button>🏆 Топ игроков в тапалке</div>
+    <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button>🏆 Топ игроков</div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button>⛏️ Топ майнеров</div>
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button>👥 Рефералы</div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button>📖 О проекте и дорожная карта</div>
@@ -219,6 +243,7 @@
     let gameActive = false, gameTimer = null, gameTimeLeft = 60;
     let spawnInterval = null, currentVeg = {};
 
+    const pot = document.getElementById('pot');
     const board = document.getElementById('board');
     const rumBal = document.getElementById('rum-balance');
     const investBal = document.getElementById('invest-balance');
@@ -266,8 +291,11 @@
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
 
-        if (currentVeg[num].type === 'good') {
+        const vegData = currentVeg[num];
+        if (vegData.type === 'good') {
             rum += 10;
+            // Запускаем анимацию полёта овоща в кастрюлю
+            flyVegToPot(hole, vegData.emoji);
             showEffect(e, '+10', 'gold');
         } else {
             rum = Math.max(0, rum-5);
@@ -276,6 +304,30 @@
         delete currentVeg[num];
         hole.innerHTML = '';
         updateUI();
+    }
+
+    function flyVegToPot(hole, emoji) {
+        const holeRect = hole.getBoundingClientRect();
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+
+        const startX = holeRect.left + holeRect.width/2 - containerRect.left;
+        const startY = holeRect.top + holeRect.height/2 - containerRect.top;
+        const endX = potRect.left + potRect.width/2 - containerRect.left;
+        const endY = potRect.top + potRect.height*0.3 - containerRect.top;
+
+        const vegEl = document.createElement('div');
+        vegEl.className = 'flying-veg';
+        vegEl.textContent = emoji;
+        vegEl.style.left = startX + 'px';
+        vegEl.style.top = startY + 'px';
+        vegEl.style.setProperty('--dx', (endX - startX) / 2 + 'px');
+        vegEl.style.setProperty('--dy', -50 + 'px');
+        vegEl.style.setProperty('--ex', (endX - startX) + 'px');
+        vegEl.style.setProperty('--ey', (endY - startY) + 'px');
+
+        document.getElementById('game-container').appendChild(vegEl);
+        vegEl.addEventListener('animationend', () => vegEl.remove());
     }
 
     function showEffect(e, text, color) {
