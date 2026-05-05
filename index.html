@@ -236,23 +236,43 @@
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
 
-    // === ТЕРМИНАЛ (Canvas) ===
+    // === ГРАФИК (всегда активен) ===
     const canvas = document.getElementById('chartCanvas');
     let ctx = canvas.getContext('2d');
     let chartData = []; // { time, price }
-    let currentCoin = 'bitcoin';
+    let demoInterval = null;
 
     function resizeCanvas() {
         const container = document.getElementById('chart-container');
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
+        canvas.width = container.clientWidth || 400;
+        canvas.height = container.clientHeight || 200;
+        drawChart();
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    async function fetchMarketData() {
+    // Демо-данные для мгновенного отображения
+    function startDemoData() {
+        chartData = [];
+        let price = 60000 + Math.random() * 10000;
+        for (let i = 0; i < 30; i++) {
+            price += (Math.random() - 0.5) * 200;
+            chartData.push({ time: Date.now() - (30-i)*1000, price: Math.max(10000, price) });
+        }
+        drawChart();
+        // каждые 800 мс добавляем новую точку
+        demoInterval = setInterval(() => {
+            const last = chartData[chartData.length-1];
+            const newPrice = Math.max(10000, last.price + (Math.random() - 0.5) * 300);
+            chartData.push({ time: Date.now(), price: newPrice });
+            if (chartData.length > 60) chartData.shift();
+            drawChart();
+        }, 800);
+    }
+
+    async function fetchRealData() {
         try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,toncoin,solana,dogecoin&order=market_cap_desc&sparkline=false`);
+            const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,toncoin,solana,dogecoin&order=market_cap_desc&sparkline=false');
             const data = await res.json();
             const tickerBar = document.getElementById('ticker-bar');
             let html = '';
@@ -264,18 +284,21 @@
                     <span>$${coin.current_price.toLocaleString()}</span>
                     <span class="change ${changeClass}">${change}%</span>
                 </div>`;
-                if (coin.id === currentCoin) {
-                    // обновляем данные графика
-                    chartData.push({ time: Date.now(), price: coin.current_price });
-                    if (chartData.length > 100) chartData.shift();
+                // обновляем график только для биткоина
+                if (coin.id === 'bitcoin') {
+                    if (!chartData.length || Math.abs(chartData[chartData.length-1].price - coin.current_price) > 1) {
+                        chartData.push({ time: Date.now(), price: coin.current_price });
+                        if (chartData.length > 60) chartData.shift();
+                    }
                 }
             });
             tickerBar.innerHTML = html;
+            drawChart();
         } catch(e) {}
-        drawChart();
     }
 
     function drawChart() {
+        if (!ctx || canvas.width === 0) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (chartData.length < 2) return;
         const prices = chartData.map(d => d.price);
@@ -293,15 +316,17 @@
             else ctx.lineTo(x, y);
         });
         ctx.stroke();
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.05)';
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.08)';
         ctx.lineTo(canvas.width, canvas.height);
         ctx.lineTo(0, canvas.height);
         ctx.closePath();
         ctx.fill();
     }
 
-    fetchMarketData();
-    setInterval(fetchMarketData, 15000);
+    // Запускаем демо сразу, потом подключаем реальные данные
+    startDemoData();
+    fetchRealData();
+    setInterval(fetchRealData, 30000);
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -438,7 +463,7 @@
         }, 6000);
     }
 
-    // Задания (те же функции)
+    // Задания
     function findTaskById(id, type) {
         if (type === 'borsch') return officialRumTasks.find(t => t.id === id);
         if (type === 'srum') return officialSrumTasks.find(t => t.id === id);
