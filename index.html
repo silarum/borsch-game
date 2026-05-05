@@ -19,26 +19,34 @@
             background:linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             overflow:hidden;
         }
-        /* Область графика */
-        #chart-area {
+        /* Терминал */
+        #terminal {
             position:absolute; top:0; left:0; right:0; bottom:30%;
-            background:#0f172a;
+            background:#0b0e14;
             display:flex; flex-direction:column;
         }
-        .price-ticker {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            display: flex; justify-content: space-between; align-items: baseline;
-            z-index: 2;
-            color: white; font-weight: bold; text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        .ticker-bar {
+            display:flex; justify-content:space-around; padding: 5px;
+            background: #111; color: white; font-size: 0.65rem; font-weight: bold;
+            flex-wrap: wrap; gap: 4px;
         }
-        .price-ticker .current-price { font-size: 1.5rem; }
-        .price-ticker .change { font-size: 0.9rem; }
-        #chart-svg { flex: 1; width: 100%; opacity: 0.8; }
-        .yacht { position:absolute; right:10%; top:38%; width:70px; height:100px; animation:float 4s infinite ease-in-out; z-index:2; }
-        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
-        .yacht-body { position:absolute; bottom:0; left:5px; width:60px; height:20px; background:white; border-radius:50% 50% 0 0; }
-        .yacht-sail { position:absolute; bottom:20px; left:25px; width:0; height:0; border-left:25px solid transparent; border-right:10px solid transparent; border-bottom:50px solid white; }
-        .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
+        .ticker-item {
+            display:flex; align-items:center; gap:4px;
+            background: #1a1e27; padding: 4px 8px; border-radius: 6px;
+        }
+        .ticker-item .symbol { color:#FFD700; }
+        .ticker-item .change.positive { color:#4CAF50; }
+        .ticker-item .change.negative { color:#F44336; }
+        #chart-container {
+            flex:1; min-height:0; position:relative;
+        }
+        #chartCanvas { width:100%; height:100%; display:block; }
+        .glass-wall {
+            position:absolute; top:0; left:0; right:0; bottom:30%;
+            background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.1));
+            border-bottom:2px solid rgba(255,255,255,0.5);
+            pointer-events:none; z-index:3;
+        }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
@@ -76,11 +84,7 @@
         .screen.active { display:flex; }
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
         .flying-veg { position:absolute; z-index:20; pointer-events:none; animation: flyToPot 0.5s ease-in forwards; }
-        @keyframes flyToPot {
-            0% { transform: translate(0, 0) scale(1); opacity:1; }
-            50% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity:1; }
-            100% { transform: translate(var(--ex), var(--ey)) scale(0.5); opacity:0; }
-        }
+        @keyframes flyToPot { 0% { transform: translate(0, 0) scale(1); opacity:1; } 50% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform: translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
         .coin-fountain { position:absolute; pointer-events:none; animation: coinUp 1s ease-out forwards; z-index:25; }
         @keyframes coinUp { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-60px) scale(0.3); opacity:0; } }
         .task-item { background:rgba(255,255,255,0.1); padding:10px; margin:8px 0; border-radius:8px; display:flex; flex-direction:column; gap:8px; }
@@ -97,16 +101,12 @@
 </head>
 <body>
 <div id="game-container">
-    <div id="chart-area">
-        <div class="price-ticker">
-            <span id="current-price">$63,000.00</span>
-            <span id="price-change" style="color:#4CAF50;">+2.34%</span>
+    <!-- Терминал -->
+    <div id="terminal">
+        <div class="ticker-bar" id="ticker-bar"></div>
+        <div id="chart-container">
+            <canvas id="chartCanvas"></canvas>
         </div>
-        <svg id="chart-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-    </div>
-    <div class="yacht">
-        <div class="yacht-sail"></div>
-        <div class="yacht-body"></div>
     </div>
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
@@ -183,8 +183,8 @@
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button>🏆 Топ игроков</div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button>⛏️ Топ майнеров</div>
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button>👥 Рефералы</div>
-    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила игры</h2><div style="text-align:left; max-width:350px;"><p>🥘 <b>Крипто Борщ</b> — тапай овощи, кидай их в кастрюлю и зарабатывай RUM!</p><p>⚡ <b>Энергия:</b> 60 секунд. Восстановление +1/6с.</p><p>💰 Попадание +10 RUM, промах или гнилой овощ −5 RUM.</p><p>📋 <b>Задания:</b> выполняй и получай награды. Комиссия проекта 30%.</p><p>🏆 Следи за топом игроков.</p><p>Приятной игры!</p></div></div>
-    <div class="screen" id="about-screen"><button class="back-btn">← Назад</button>📖 О проекте и дорожная карта</div>
+    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила игры</h2><div><p>🥘 Крипто Борщ — тапай овощи, зарабатывай RUM!</p><p>⚡ Энергия 60 сек.</p><p>📋 Выполняй задания, получай награды.</p></div></div>
+    <div class="screen" id="about-screen"><button class="back-btn">← Назад</button>📖 О проекте</div>
 </div>
 
 <script>
@@ -201,7 +201,7 @@
     let spawnInterval = null, currentVeg = {};
 
     let officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
-        { id:1, desc:'Подписаться на канал', reward:50, link:'https://t.me/crypto_borsch', maxCompletions:100, completionsDone:0, checking:false },
+        { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:2, desc:'Сделать репост', reward:100, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:3, desc:'Пригласить друга', reward:200, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:4, desc:'Сыграть 5 раундов', reward:300, link:'', maxCompletions:100, completionsDone:0, checking:false }
@@ -236,32 +236,72 @@
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
 
-    // График
-    let chartData = Array.from({length: 50}, (_, i) => ({ x: i, y: 50 + Math.sin(i * 0.3) * 20 + (Math.random() - 0.5) * 10 }));
-    function renderChart() {
-        const svg = document.getElementById('chart-svg');
-        let pathD = '';
-        const maxY = Math.max(...chartData.map(d => d.y)) + 10;
-        const minY = Math.min(...chartData.map(d => d.y)) - 10;
-        chartData.forEach((point, i) => {
-            const x = (i / (chartData.length - 1)) * 100;
-            const y = 100 - ((point.y - minY) / (maxY - minY)) * 100;
-            pathD += `${i === 0 ? 'M' : 'L'} ${x} ${y} `;
-        });
-        svg.innerHTML = `<path d="${pathD}" fill="none" stroke="#FFD700" stroke-width="1.5" />`;
-        document.getElementById('current-price').textContent = `$${chartData[chartData.length-1].y.toFixed(2)}`;
-        const change = (chartData[chartData.length-1].y - chartData[0].y).toFixed(2);
-        const changeEl = document.getElementById('price-change');
-        changeEl.textContent = `${change > 0 ? '+' : ''}${change}%`;
-        changeEl.style.color = change >= 0 ? '#4CAF50' : '#F44336';
+    // === ТЕРМИНАЛ (Canvas) ===
+    const canvas = document.getElementById('chartCanvas');
+    let ctx = canvas.getContext('2d');
+    let chartData = []; // { time, price }
+    let currentCoin = 'bitcoin';
+
+    function resizeCanvas() {
+        const container = document.getElementById('chart-container');
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
     }
-    setInterval(() => {
-        const last = chartData[chartData.length - 1];
-        chartData.push({ x: last.x + 1, y: Math.max(10, last.y + (Math.random() - 0.5) * 8) });
-        if (chartData.length > 60) chartData.shift();
-        renderChart();
-    }, 1000);
-    renderChart();
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    async function fetchMarketData() {
+        try {
+            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,toncoin,solana,dogecoin&order=market_cap_desc&sparkline=false`);
+            const data = await res.json();
+            const tickerBar = document.getElementById('ticker-bar');
+            let html = '';
+            data.forEach(coin => {
+                const change = coin.price_change_percentage_24h?.toFixed(2) || '0.00';
+                const changeClass = change >= 0 ? 'positive' : 'negative';
+                html += `<div class="ticker-item">
+                    <span class="symbol">${coin.symbol.toUpperCase()}</span>
+                    <span>$${coin.current_price.toLocaleString()}</span>
+                    <span class="change ${changeClass}">${change}%</span>
+                </div>`;
+                if (coin.id === currentCoin) {
+                    // обновляем данные графика
+                    chartData.push({ time: Date.now(), price: coin.current_price });
+                    if (chartData.length > 100) chartData.shift();
+                }
+            });
+            tickerBar.innerHTML = html;
+        } catch(e) {}
+        drawChart();
+    }
+
+    function drawChart() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (chartData.length < 2) return;
+        const prices = chartData.map(d => d.price);
+        const minPrice = Math.min(...prices) * 0.999;
+        const maxPrice = Math.max(...prices) * 1.001;
+        const range = maxPrice - minPrice || 1;
+        const stepX = canvas.width / (chartData.length - 1);
+        ctx.beginPath();
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        chartData.forEach((d, i) => {
+            const x = i * stepX;
+            const y = canvas.height - ((d.price - minPrice) / range) * canvas.height;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.05)';
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    fetchMarketData();
+    setInterval(fetchMarketData, 15000);
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -398,24 +438,21 @@
         }, 6000);
     }
 
-    // --- ЗАДАНИЯ ---
+    // Задания (те же функции)
     function findTaskById(id, type) {
         if (type === 'borsch') return officialRumTasks.find(t => t.id === id);
         if (type === 'srum') return officialSrumTasks.find(t => t.id === id);
         if (type === 'private_rum' || type === 'private_srum') return globalUserTasks.find(t => t.id === id);
         return null;
     }
-
     function renderAvailableTasks() {
         subTabs.forEach(tab => tab.classList.remove('active'));
         document.querySelector(`.sub-tab[data-tab="${currentTasksTab}"]`).classList.add('active');
-
         let tasks = [];
         if (currentTasksTab === 'borsch') tasks = officialRumTasks.filter(t => t.completionsDone < t.maxCompletions);
         else if (currentTasksTab === 'srum') tasks = officialSrumTasks.filter(t => t.completionsDone < t.maxCompletions);
         else if (currentTasksTab === 'private_rum') tasks = globalUserTasks.filter(t => !t.completed && t.author !== 'Ты' && t.currency === 'RUM');
         else if (currentTasksTab === 'private_srum') tasks = globalUserTasks.filter(t => !t.completed && t.author !== 'Ты' && t.currency === 'SRUM');
-
         let html = '';
         if (tasks.length === 0) html = '<p>Нет доступных заданий.</p>';
         tasks.forEach(task => {
@@ -423,18 +460,13 @@
             const statusHtml = task.checking ? '<span class="task-status checking">⏳</span>' : '';
             const linkBtn = task.link ? `<button class="open-link-btn" data-url="${task.link}">🔗 Выполнить</button>` : '';
             const completeBtn = (task.checking || task.completed) ? '' : `<button class="verify-btn" data-task-id="${task.id}" data-type="${currentTasksTab}">Я выполнил</button>`;
-            html += `<div class="task-item">
-                <span>${task.desc} (${rewardText}) ${statusHtml}</span>
-                <div style="display:flex; gap:8px;">${linkBtn} ${completeBtn}</div>
-            </div>`;
+            html += `<div class="task-item"><span>${task.desc} (${rewardText}) ${statusHtml}</span><div style="display:flex; gap:8px;">${linkBtn} ${completeBtn}</div></div>`;
         });
         tasksContent.innerHTML = html;
-
         document.querySelectorAll('.open-link-btn').forEach(btn => btn.addEventListener('click', (e) => {
             const url = e.target.dataset.url;
             if (url) { if (window.Telegram?.WebApp?.openLink) window.Telegram.WebApp.openLink(url); else window.open(url, '_blank'); }
         }));
-
         document.querySelectorAll('.verify-btn').forEach(btn => btn.addEventListener('click', (e) => {
             const taskId = parseInt(e.target.dataset.taskId);
             const type = e.target.dataset.type;
@@ -452,21 +484,17 @@
             }, 3000);
         }));
     }
-
     function renderCreateTask() {
         const max = (officialRumTasks.every(t => t.completionsDone >= t.maxCompletions) && officialSrumTasks.every(t => t.completionsDone >= t.maxCompletions)) ? 33 : 3;
         const currentCount = userTasks.length;
         const canCreate = currentCount < max;
         tasksContent.innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <p>Лимит созданных: ${currentCount}/${max}</p>
-                <input id="task-desc" placeholder="Описание задания" ${canCreate ? '' : 'disabled'}>
-                <input id="task-reward" type="number" placeholder="Награда" ${canCreate ? '' : 'disabled'}>
-                <select id="task-currency" ${canCreate ? '' : 'disabled'}><option value="RUM">RUM</option><option value="SRUM">SRUM</option></select>
-                <input id="task-link" type="url" placeholder="Ссылка на задание" ${canCreate ? '' : 'disabled'}>
-                <button id="publish-task-btn" style="background:#4CAF50; color:white; padding:10px; border:none; border-radius:8px;" ${canCreate ? '' : 'disabled'}>Опубликовать</button>
-            </div>
-        `;
+            <div style="display:flex; flex-direction:column; gap:10px;"><p>Лимит созданных: ${currentCount}/${max}</p>
+            <input id="task-desc" placeholder="Описание задания" ${canCreate ? '' : 'disabled'}>
+            <input id="task-reward" type="number" placeholder="Награда" ${canCreate ? '' : 'disabled'}>
+            <select id="task-currency" ${canCreate ? '' : 'disabled'}><option value="RUM">RUM</option><option value="SRUM">SRUM</option></select>
+            <input id="task-link" type="url" placeholder="Ссылка на задание" ${canCreate ? '' : 'disabled'}>
+            <button id="publish-task-btn" style="background:#4CAF50; color:white; padding:10px; border:none; border-radius:8px;" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
         if (canCreate) {
             document.getElementById('publish-task-btn').addEventListener('click', () => {
                 const desc = document.getElementById('task-desc').value.trim();
@@ -484,7 +512,6 @@
             });
         }
     }
-
     function renderMyTasks() {
         let html = '<h3>Выполненные официальные</h3>';
         officialRumTasks.concat(officialSrumTasks).forEach(t => {
@@ -497,68 +524,46 @@
         if (userTasks.length === 0) html += '<p>Нет созданных заданий</p>';
         userTasks.forEach(t => {
             html += `<div class="task-item" id="my-task-${t.id}">
-                <div class="editable">
-                    <input id="desc-${t.id}" value="${t.desc}" />
-                    <input id="reward-${t.id}" type="number" value="${t.reward}" />
-                    <input id="link-${t.id}" value="${t.link || ''}" />
-                </div>
-                <div style="display:flex; gap:8px; justify-content: space-between;">
-                    <span>${t.reward} ${t.currency}</span>
-                    <div>
-                        <button class="edit-task-btn" data-task-id="${t.id}">✏️</button>
-                        <button class="delete-task-btn" data-task-id="${t.id}">🗑️</button>
-                    </div>
-                </div>
-            </div>`;
+                <div class="editable"><input id="desc-${t.id}" value="${t.desc}" /><input id="reward-${t.id}" type="number" value="${t.reward}" /><input id="link-${t.id}" value="${t.link || ''}" /></div>
+                <div style="display:flex; gap:8px; justify-content: space-between;"><span>${t.reward} ${t.currency}</span>
+                    <div><button class="edit-task-btn" data-task-id="${t.id}">✏️</button><button class="delete-task-btn" data-task-id="${t.id}">🗑️</button></div></div></div>`;
         });
         tasksContent.innerHTML = html;
-
-        document.querySelectorAll('.edit-task-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const taskId = parseInt(e.target.dataset.taskId);
-                const task = userTasks.find(t => t.id === taskId);
-                if (!task) return;
-                const newDesc = document.getElementById(`desc-${taskId}`).value.trim();
-                const newReward = parseFloat(document.getElementById(`reward-${taskId}`).value);
-                const newLink = document.getElementById(`link-${taskId}`).value.trim();
-                if (!newDesc || newReward <= 0) return alert('Неверное описание или награда');
-                const diff = newReward - task.reward;
-                if (diff > 0) {
-                    if (task.currency === 'RUM' && rum >= diff) rum -= Math.ceil(diff);
-                    else if (task.currency === 'SRUM' && srum >= diff) srum -= diff;
-                    else return alert('Недостаточно средств');
-                } else if (diff < 0) {
-                    if (task.currency === 'RUM') rum += Math.ceil(-diff);
-                    else srum += -diff;
-                }
-                task.desc = newDesc; task.reward = newReward; task.link = newLink;
-                updateUI(); renderMyTasks(); alert('Задание обновлено!');
-            });
-        });
-
-        document.querySelectorAll('.delete-task-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const taskId = parseInt(e.target.dataset.taskId);
-                const taskIndex = userTasks.findIndex(t => t.id === taskId);
-                if (taskIndex === -1) return;
-                const task = userTasks[taskIndex];
-                if (task.currency === 'RUM') rum += Math.ceil(task.reward);
-                else srum += task.reward;
-                userTasks.splice(taskIndex, 1);
-                const globalIndex = globalUserTasks.findIndex(t => t.id === taskId);
-                if (globalIndex !== -1) globalUserTasks.splice(globalIndex, 1);
-                updateUI(); renderMyTasks(); alert('Задание удалено, средства возвращены');
-            });
-        });
+        document.querySelectorAll('.edit-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const taskId = parseInt(e.target.dataset.taskId);
+            const task = userTasks.find(t => t.id === taskId);
+            if (!task) return;
+            const newDesc = document.getElementById(`desc-${taskId}`).value.trim();
+            const newReward = parseFloat(document.getElementById(`reward-${taskId}`).value);
+            const newLink = document.getElementById(`link-${taskId}`).value.trim();
+            if (!newDesc || newReward <= 0) return alert('Неверное описание или награда');
+            const diff = newReward - task.reward;
+            if (diff > 0) {
+                if (task.currency === 'RUM' && rum >= diff) rum -= Math.ceil(diff);
+                else if (task.currency === 'SRUM' && srum >= diff) srum -= diff;
+                else return alert('Недостаточно средств');
+            } else if (diff < 0) {
+                if (task.currency === 'RUM') rum += Math.ceil(-diff);
+                else srum += -diff;
+            }
+            task.desc = newDesc; task.reward = newReward; task.link = newLink;
+            updateUI(); renderMyTasks(); alert('Задание обновлено!');
+        }));
+        document.querySelectorAll('.delete-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const taskId = parseInt(e.target.dataset.taskId);
+            const taskIndex = userTasks.findIndex(t => t.id === taskId);
+            if (taskIndex === -1) return;
+            const task = userTasks[taskIndex];
+            if (task.currency === 'RUM') rum += Math.ceil(task.reward);
+            else srum += task.reward;
+            userTasks.splice(taskIndex, 1);
+            const globalIndex = globalUserTasks.findIndex(t => t.id === taskId);
+            if (globalIndex !== -1) globalUserTasks.splice(globalIndex, 1);
+            updateUI(); renderMyTasks(); alert('Задание удалено, средства возвращены');
+        }));
     }
 
-    subTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            currentTasksTab = tab.dataset.tab;
-            renderAvailableTasks();
-        });
-    });
-
+    subTabs.forEach(tab => tab.addEventListener('click', () => { currentTasksTab = tab.dataset.tab; renderAvailableTasks(); }));
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); currentTasksTab = 'borsch'; renderAvailableTasks(); }
@@ -574,12 +579,8 @@
     document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
     document.getElementById('rules-btn').addEventListener('click', ()=> switchScreen('rules'));
     document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => { const screen = e.currentTarget.dataset.screen; switchScreen(screen); });
-    });
-    document.querySelectorAll('.back-btn').forEach(btn => {
-        btn.addEventListener('click', () => { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); });
-    });
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => switchScreen(e.currentTarget.dataset.screen)));
+    document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', () => document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))));
     document.getElementById('tasks-available-btn').addEventListener('click', () => { currentTasksTab = 'borsch'; renderAvailableTasks(); });
     document.getElementById('tasks-create-btn').addEventListener('click', renderCreateTask);
     document.getElementById('tasks-my-btn').addEventListener('click', renderMyTasks);
