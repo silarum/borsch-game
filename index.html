@@ -114,7 +114,7 @@
             flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px;
         }
         .nav-btn.active { background:rgba(255,215,0,0.8); color:black; }
-        .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; }
+        .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; overflow-y:auto; }
         .screen.active { display:flex; }
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
         .flying-veg {
@@ -125,6 +125,27 @@
             0% { transform: translate(0, 0) scale(1); opacity:1; }
             50% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity:1; }
             100% { transform: translate(var(--ex), var(--ey)) scale(0.5); opacity:0; }
+        }
+        .coin-fountain {
+            position:absolute;
+            pointer-events:none;
+            animation: coinUp 1s ease-out forwards;
+            z-index:25;
+        }
+        @keyframes coinUp {
+            0% { transform:translateY(0) scale(1); opacity:1; }
+            100% { transform:translateY(-60px) scale(0.3); opacity:0; }
+        }
+        .task-item {
+            background:rgba(255,255,255,0.1); padding:10px; margin:8px 0; border-radius:8px;
+            display:flex; flex-direction:column; gap:8px;
+        }
+        .task-item input {
+            padding:8px; border-radius:5px; border:none; width:100%;
+        }
+        .task-item button {
+            padding:8px 12px; border:none; border-radius:5px; font-weight:bold;
+            background:#FFD700; color:black;
         }
     </style>
 </head>
@@ -237,13 +258,12 @@
 
     // Задания
     let officialTasks = JSON.parse(localStorage.getItem('officialTasks')) || [
-        { id:1, desc:'Подписаться на канал', reward:50, completed:false },
-        { id:2, desc:'Сделать репост', reward:100, completed:false },
-        { id:3, desc:'Пригласить друга', reward:200, completed:false },
-        { id:4, desc:'Сыграть 5 раундов', reward:300, completed:false }
+        { id:1, desc:'Подписаться на канал', reward:50, link:'', completed:false },
+        { id:2, desc:'Сделать репост', reward:100, link:'', completed:false },
+        { id:3, desc:'Пригласить друга', reward:200, link:'', completed:false },
+        { id:4, desc:'Сыграть 5 раундов', reward:300, link:'', completed:false }
     ];
     let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
-    let myCompletedTasks = JSON.parse(localStorage.getItem('myCompletedTasks')) || [];
 
     function saveState() {
         localStorage.setItem('rum', rum);
@@ -252,7 +272,6 @@
         localStorage.setItem('energy', energy);
         localStorage.setItem('officialTasks', JSON.stringify(officialTasks));
         localStorage.setItem('userTasks', JSON.stringify(userTasks));
-        localStorage.setItem('myCompletedTasks', JSON.stringify(myCompletedTasks));
     }
 
     const pot = document.getElementById('pot');
@@ -301,25 +320,66 @@
         }
     }
 
-    function handleTap(e) {
+    function showCoinFountain() {
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        const centerX = potRect.left + potRect.width/2 - containerRect.left;
+        const centerY = potRect.top - containerRect.top;
+
+        for (let i=0; i<7; i++) {
+            const coin = document.createElement('div');
+            coin.className = 'coin-fountain';
+            coin.textContent = '💰';
+            coin.style.left = (centerX + (Math.random()-0.5)*40) + 'px';
+            coin.style.top = (centerY + (Math.random()-0.5)*10) + 'px';
+            coin.style.animationDuration = (0.8 + Math.random()*0.5) + 's';
+            document.getElementById('game-container').appendChild(coin);
+            coin.addEventListener('animationend', () => coin.remove());
+        }
+    }
+
+    function processHit(hole, touch) {
         if (!gameActive) return;
-        const hole = e.target.closest('.hole');
-        if (!hole) { rum = Math.max(0, rum-5); updateUI(); return; }
         const num = [...holes].indexOf(hole);
-        if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
+        if (num === -1 || !currentVeg[num]) {
+            // промах по пустой лунке
+            rum = Math.max(0, rum-5);
+            updateUI();
+            return;
+        }
 
         const vegData = currentVeg[num];
         if (vegData.type === 'good') {
             rum += 10;
             flyVegToPot(hole, vegData.emoji);
-            showEffect(e, '+10', 'gold');
+            showCoinFountain();
+            showEffect(touch.clientX, touch.clientY, '+10', 'gold');
         } else {
             rum = Math.max(0, rum-5);
-            showEffect(e, '✖', 'red');
+            showEffect(touch.clientX, touch.clientY, '✖', 'red');
         }
         delete currentVeg[num];
         hole.innerHTML = '';
         updateUI();
+    }
+
+    function handleTouchStart(e) {
+        e.preventDefault();
+        if (!gameActive) return;
+
+        const touches = e.changedTouches;
+        for (let i=0; i<touches.length; i++) {
+            const touch = touches[i];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const hole = target ? target.closest('.hole') : null;
+            if (hole) {
+                processHit(hole, touch);
+            } else {
+                // палец не по доске — штраф
+                rum = Math.max(0, rum-5);
+                updateUI();
+            }
+        }
     }
 
     function flyVegToPot(hole, emoji) {
@@ -343,13 +403,13 @@
         vegEl.addEventListener('animationend', () => vegEl.remove());
     }
 
-    function showEffect(e, text, color) {
+    function showEffect(clientX, clientY, text, color) {
         const el = document.createElement('div');
         el.style.cssText = `position:absolute; pointer-events:none; color:${color}; font-weight:bold; z-index:100; animation:fly 1s ease-out forwards;`;
         el.textContent = text;
-        const rect = board.getBoundingClientRect();
-        el.style.left = (e.clientX - rect.left) + 'px';
-        el.style.top = (e.clientY - rect.top) + 'px';
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        el.style.left = (clientX - containerRect.left) + 'px';
+        el.style.top = (clientY - containerRect.top) + 'px';
         document.getElementById('game-container').appendChild(el);
         setTimeout(() => el.remove(), 1000);
     }
@@ -396,13 +456,29 @@
     // --- ЗАДАНИЯ ---
     function renderAvailableTasks() {
         let html = '';
-        officialTasks.forEach(task => {
-            html += `<div style="background:rgba(255,255,255,0.1); padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+        officialTasks.forEach((task, index) => {
+            const disabled = task.completed ? 'disabled' : '';
+            html += `<div class="task-item">
                 <span>${task.desc} (+${task.reward} RUM)</span>
-                <button data-task-id="${task.id}" class="complete-task-btn" style="padding:5px 12px; background:#FFD700; border:none; border-radius:5px; color:black;">Выполнить</button>
+                <input type="url" placeholder="Вставь ссылку" value="${task.link || ''}" data-task-id="${task.id}" ${disabled}>
+                <button data-task-id="${task.id}" class="complete-task-btn" ${disabled}>Я выполнил</button>
             </div>`;
         });
         tasksContent.innerHTML = html;
+
+        // Обработка ввода ссылки
+        document.querySelectorAll('.task-item input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const taskId = parseInt(e.target.dataset.taskId);
+                const task = officialTasks.find(t => t.id === taskId);
+                if (task) {
+                    task.link = e.target.value;
+                    saveState();
+                }
+            });
+        });
+
+        // Кнопка "Я выполнил"
         document.querySelectorAll('.complete-task-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const taskId = parseInt(e.target.dataset.taskId);
@@ -430,7 +506,7 @@
             const reward = parseInt(document.getElementById('task-reward').value);
             if (desc && reward > 0 && rum >= reward) {
                 rum -= reward;
-                const newTask = { id: Date.now(), desc, reward, author: 'Ты', completed: false };
+                const newTask = { id: Date.now(), desc, reward, author: 'Ты', completed: false, link:'' };
                 userTasks.push(newTask);
                 updateUI();
                 renderCreateTask();
@@ -442,9 +518,9 @@
     }
 
     function renderMyTasks() {
-        let html = '<h3>Выполненные</h3>';
+        let html = '<h3>Выполненные официальные</h3>';
         officialTasks.filter(t => t.completed).forEach(t => html += `<div>✅ ${t.desc} (+${t.reward})</div>`);
-        html += '<h3>Созданные</h3>';
+        html += '<h3>Созданные мной</h3>';
         userTasks.forEach(t => html += `<div>📌 ${t.desc} (${t.reward} RUM)</div>`);
         tasksContent.innerHTML = html;
     }
@@ -461,7 +537,8 @@
     }
 
     // События
-    board.addEventListener('click', handleTap);
+    board.addEventListener('touchstart', handleTouchStart, {passive: false});
+    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
     startBtn.addEventListener('click', startGame);
 
     document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
