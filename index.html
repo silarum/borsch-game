@@ -114,7 +114,7 @@
             flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px;
         }
         .nav-btn.active { background:rgba(255,215,0,0.8); color:black; }
-        .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:center; z-index:40; overflow-y:auto; }
+        .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:flex-start; z-index:40; overflow-y:auto; }
         .screen.active { display:flex; }
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
         .flying-veg {
@@ -195,15 +195,16 @@
         </div>
     </div>
 
-    <!-- Верхние иконки -->
+    <!-- Верхние иконки (слева) -->
     <div class="top-left-buttons">
         <div class="item" id="top-tappers">🏆 Топ</div>
         <div class="item" id="top-miners">⛏️ Майнеры</div>
         <div class="item" id="referral-icon">👥</div>
+        <div class="item" id="rules-btn">📜 Правила</div>
         <div class="item" id="about-icon">📖 О проекте</div>
     </div>
 
-    <!-- Балансы -->
+    <!-- Балансы (справа) -->
     <div class="balances">
         <div id="rum-balance">💰 RUM: 0</div>
         <div id="invest-balance">📈 Инвест: 0</div>
@@ -220,7 +221,7 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- Экраны-заглушки -->
+    <!-- Экраны -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button>🐺 Майнинг клуб «Голодные волки»</div>
     <div class="screen" id="tasks-screen">
@@ -239,6 +240,22 @@
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button>🏆 Топ игроков</div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button>⛏️ Топ майнеров</div>
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button>👥 Рефералы</div>
+    <div class="screen" id="rules-screen">
+        <button class="back-btn">← Назад</button>
+        <h2>📜 Правила игры</h2>
+        <div style="text-align:left; max-width:350px;">
+            <p>🥘 <b>Крипто Борщ</b> — тапай овощи, кидай их в кастрюлю и зарабатывай RUM!</p>
+            <p>⚡ <b>Энергия:</b> у тебя есть 60 секунд энергии. Играть можно, только когда энергия полная. Восстанавливается +1 каждые 6 секунд.</p>
+            <p>💰 <b>RUM:</b> основная валюта. За попадание +10, за промах или гнилой овощ −5.</p>
+            <p>🐛 <b>Червивые овощи:</b> отличимы по виду, дают штраф.</p>
+            <p>📦 <b>Крипто-ящик:</b> открывается раз в 8 часов, если выполнены задания.</p>
+            <p>📋 <b>Задания:</b> выполняй официальные задания (до 100 раз каждое), создавай свои. Лимит на создание: 3, после выполнения всех официальных — 33.</                 p>
+            <p>🏆 <b>Топы:</b> смотри рейтинг игроков и майнеров.</p>
+            <p>👥 <b>Рефералы:</b> приглашай друзей.</p>
+            <p>📖 <b>О проекте:</b> дорожная карта и команда.</p>
+            <p>Приятной игры, борщевар!</p>
+        </div>
+    </div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button>📖 О проекте и дорожная карта</div>
 </div>
 
@@ -256,14 +273,48 @@
     let gameActive = false, gameTimer = null, gameTimeLeft = 60;
     let spawnInterval = null, currentVeg = {};
 
-    // Задания
-    let officialTasks = JSON.parse(localStorage.getItem('officialTasks')) || [
-        { id:1, desc:'Подписаться на канал', reward:50, link:'', completed:false },
-        { id:2, desc:'Сделать репост', reward:100, link:'', completed:false },
-        { id:3, desc:'Пригласить друга', reward:200, link:'', completed:false },
-        { id:4, desc:'Сыграть 5 раундов', reward:300, link:'', completed:false }
-    ];
+    // Задания: миграция старых данных
+    let officialTasks = [];
+    const stored = localStorage.getItem('officialTasks');
+    if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            if (typeof parsed[0].completed !== 'undefined' && typeof parsed[0].completionsDone === 'undefined') {
+                // старая версия, конвертируем
+                officialTasks = parsed.map(t => ({
+                    id: t.id,
+                    desc: t.desc,
+                    reward: t.reward,
+                    link: t.link || '',
+                    maxCompletions: 100,
+                    completionsDone: t.completed ? 100 : 0
+                }));
+            } else {
+                officialTasks = parsed;
+            }
+        } else {
+            officialTasks = getDefaultTasks();
+        }
+    } else {
+        officialTasks = getDefaultTasks();
+    }
+
+    function getDefaultTasks() {
+        return [
+            { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0 },
+            { id:2, desc:'Сделать репост', reward:100, link:'', maxCompletions:100, completionsDone:0 },
+            { id:3, desc:'Пригласить друга', reward:200, link:'', maxCompletions:100, completionsDone:0 },
+            { id:4, desc:'Сыграть 5 раундов', reward:300, link:'', maxCompletions:100, completionsDone:0 }
+        ];
+    }
+
     let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
+
+    // Лимит создаваемых заданий
+    function getMaxUserTasks() {
+        const allOfficialCompleted = officialTasks.every(t => t.completionsDone >= t.maxCompletions);
+        return allOfficialCompleted ? 33 : 3;
+    }
 
     function saveState() {
         localStorage.setItem('rum', rum);
@@ -342,7 +393,6 @@
         if (!gameActive) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) {
-            // промах по пустой лунке
             rum = Math.max(0, rum-5);
             updateUI();
             return;
@@ -375,7 +425,6 @@
             if (hole) {
                 processHit(hole, touch);
             } else {
-                // палец не по доске — штраф
                 rum = Math.max(0, rum-5);
                 updateUI();
             }
@@ -456,17 +505,20 @@
     // --- ЗАДАНИЯ ---
     function renderAvailableTasks() {
         let html = '';
-        officialTasks.forEach((task, index) => {
-            const disabled = task.completed ? 'disabled' : '';
+        const available = officialTasks.filter(t => t.completionsDone < t.maxCompletions);
+        if (available.length === 0) {
+            html = '<p>Все официальные задания выполнены (100 раз).</p>';
+        }
+        available.forEach(task => {
+            const remaining = task.maxCompletions - task.completionsDone;
             html += `<div class="task-item">
-                <span>${task.desc} (+${task.reward} RUM)</span>
-                <input type="url" placeholder="Вставь ссылку" value="${task.link || ''}" data-task-id="${task.id}" ${disabled}>
-                <button data-task-id="${task.id}" class="complete-task-btn" ${disabled}>Я выполнил</button>
+                <span>${task.desc} (+${task.reward} RUM) [Осталось: ${remaining}]</span>
+                <input type="url" placeholder="Вставь ссылку" value="${task.link || ''}" data-task-id="${task.id}">
+                <button data-task-id="${task.id}" class="complete-task-btn">Я выполнил</button>
             </div>`;
         });
         tasksContent.innerHTML = html;
 
-        // Обработка ввода ссылки
         document.querySelectorAll('.task-item input').forEach(input => {
             input.addEventListener('input', (e) => {
                 const taskId = parseInt(e.target.dataset.taskId);
@@ -478,14 +530,16 @@
             });
         });
 
-        // Кнопка "Я выполнил"
         document.querySelectorAll('.complete-task-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const taskId = parseInt(e.target.dataset.taskId);
                 const task = officialTasks.find(t => t.id === taskId);
-                if (task && !task.completed) {
-                    task.completed = true;
+                if (task && task.completionsDone < task.maxCompletions) {
+                    task.completionsDone++;
                     rum += task.reward;
+                    if (task.completionsDone >= task.maxCompletions) {
+                        // задание исчезнет при следующем рендере
+                    }
                     updateUI();
                     renderAvailableTasks();
                 }
@@ -494,34 +548,49 @@
     }
 
     function renderCreateTask() {
+        const max = getMaxUserTasks();
+        const currentCount = userTasks.length;
+        const canCreate = currentCount < max;
         tasksContent.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <input id="task-desc" placeholder="Описание задания" style="padding:10px; border-radius:8px; border:none;">
-                <input id="task-reward" type="number" placeholder="Награда RUM" style="padding:10px; border-radius:8px; border:none;">
-                <button id="publish-task-btn" style="padding:10px; background:#4CAF50; border:none; border-radius:8px; color:white; font-weight:bold;">Опубликовать</button>
+                <p>Лимит созданных заданий: ${currentCount}/${max}</p>
+                <input id="task-desc" placeholder="Описание задания" style="padding:10px; border-radius:8px; border:none;" ${canCreate ? '' : 'disabled'}>
+                <input id="task-reward" type="number" placeholder="Награда RUM" style="padding:10px; border-radius:8px; border:none;" ${canCreate ? '' : 'disabled'}>
+                <input id="task-link" type="url" placeholder="Ссылка на задание" style="padding:10px; border-radius:8px; border:none;" ${canCreate ? '' : 'disabled'}>
+                <button id="publish-task-btn" style="padding:10px; background:#4CAF50; border:none; border-radius:8px; color:white; font-weight:bold;" ${canCreate ? '' : 'disabled'}>Опубликовать</button>
             </div>
         `;
-        document.getElementById('publish-task-btn').addEventListener('click', () => {
-            const desc = document.getElementById('task-desc').value.trim();
-            const reward = parseInt(document.getElementById('task-reward').value);
-            if (desc && reward > 0 && rum >= reward) {
-                rum -= reward;
-                const newTask = { id: Date.now(), desc, reward, author: 'Ты', completed: false, link:'' };
-                userTasks.push(newTask);
-                updateUI();
-                renderCreateTask();
-                alert('Задание опубликовано!');
-            } else {
-                alert('Недостаточно RUM или неверные данные');
-            }
-        });
+        if (canCreate) {
+            document.getElementById('publish-task-btn').addEventListener('click', () => {
+                const desc = document.getElementById('task-desc').value.trim();
+                const reward = parseInt(document.getElementById('task-reward').value);
+                const link = document.getElementById('task-link').value.trim();
+                if (desc && reward > 0 && rum >= reward) {
+                    rum -= reward;
+                    const newTask = { id: Date.now(), desc, reward, author: 'Ты', link, completed: false };
+                    userTasks.push(newTask);
+                    updateUI();
+                    renderCreateTask();
+                    alert('Задание опубликовано!');
+                } else {
+                    alert('Недостаточно RUM или неверные данные');
+                }
+            });
+        }
     }
 
     function renderMyTasks() {
         let html = '<h3>Выполненные официальные</h3>';
-        officialTasks.filter(t => t.completed).forEach(t => html += `<div>✅ ${t.desc} (+${t.reward})</div>`);
+        officialTasks.forEach(t => {
+            if (t.completionsDone > 0) {
+                html += `<div>✅ ${t.desc} — ${t.completionsDone}/${t.maxCompletions} раз, заработано ${t.completionsDone * t.reward} RUM</div>`;
+            }
+        });
         html += '<h3>Созданные мной</h3>';
-        userTasks.forEach(t => html += `<div>📌 ${t.desc} (${t.reward} RUM)</div>`);
+        if (userTasks.length === 0) html += '<p>Нет созданных заданий</p>';
+        userTasks.forEach(t => {
+            html += `<div>📌 ${t.desc} (${t.reward} RUM) <a href="${t.link}" target="_blank">Ссылка</a></div>`;
+        });
         tasksContent.innerHTML = html;
     }
 
@@ -530,6 +599,8 @@
         if (screenId === 'tasks') {
             document.getElementById('tasks-screen').classList.add('active');
             renderAvailableTasks();
+        } else if (screenId === 'rules') {
+            document.getElementById('rules-screen').classList.add('active');
         } else if (screenId !== 'main') {
             const target = document.getElementById(screenId+'-screen');
             if (target) target.classList.add('active');
@@ -544,6 +615,7 @@
     document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
     document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
     document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
+    document.getElementById('rules-btn').addEventListener('click', ()=> switchScreen('rules'));
     document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
