@@ -19,44 +19,46 @@
             background:linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             overflow:hidden;
         }
+        /* Терминал – теперь от кнопок до кастрюли */
         #terminal {
-            position:absolute; top:0; left:0; right:0; bottom:30%;
+            position:absolute; top:35px; left:0; right:0; bottom:47%; /* верх кастрюли */
             background:#0b0e14; display:flex; flex-direction:column;
+            padding-top:5px; /* чтобы тикер не прилипал */
         }
         .ticker-bar {
-            display:flex; justify-content:space-around; padding: 4px 8px;
-            background:#111; color:white; font-size:0.65rem; font-weight:bold;
-            flex-wrap:wrap; gap:4px;
+            display:flex; justify-content:space-between; align-items:center;
+            padding: 2px 6px; background:#111; color:white;
+            font-size:0.6rem; font-weight:bold; gap:4px;
+            flex-wrap:wrap; min-height:24px;
         }
+        .ticker-left { display:flex; gap:4px; flex-wrap:wrap; }
         .ticker-item {
-            display:flex; align-items:center; gap:4px;
-            background:#1a1e27; padding:3px 6px; border-radius:4px;
+            display:flex; align-items:center; gap:3px;
+            background:#1a1e27; padding:2px 5px; border-radius:3px; white-space:nowrap;
         }
         .ticker-item .sym { color:#FFD700; }
         .ticker-item .change.positive { color:#4CAF50; }
         .ticker-item .change.negative { color:#F44336; }
         .coin-tabs {
-            display:flex; gap:4px; padding:4px 8px; background:#0d1117;
+            display:flex; gap:3px; flex-shrink:0;
         }
         .coin-tab {
-            padding:4px 10px; border:none; background:#1a1e27;
-            color:#ccc; border-radius:8px; font-size:0.65rem; cursor:pointer;
+            padding:2px 6px; border:none; background:#1a1e27;
+            color:#ccc; border-radius:4px; font-size:0.55rem; cursor:pointer;
         }
         .coin-tab.active { background:#FFD700; color:black; font-weight:bold; }
         #chart-container { flex:1; display:flex; position:relative; }
         #chartCanvas { flex:1; display:block; }
         .order-book {
-            width:80px; background:rgba(255,255,255,0.03); font-size:0.55rem;
+            width:120px; background:rgba(255,255,255,0.03); font-size:0.55rem;
             display:flex; flex-direction:column; padding:4px; gap:2px;
             color:white; border-left:1px solid #333;
         }
         .order-row { display:flex; justify-content:space-between; }
-        .ask { color:#F44336; } .bid { color:#4CAF50; }
-        .glass-wall {
-            position:absolute; top:0; left:0; right:0; bottom:30%;
-            background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08));
-            border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3;
-        }
+        .ask { color:#F44336; }
+        .bid { color:#4CAF50; }
+        /* Остальной интерфейс без изменений */
+        .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
@@ -107,14 +109,18 @@
 </head>
 <body>
 <div id="game-container">
+    <!-- Терминал (уже сдвинут) -->
     <div id="terminal">
-        <div class="ticker-bar" id="ticker-bar"></div>
-        <div class="coin-tabs" id="coin-tabs">
-            <button class="coin-tab active" data-coin="bitcoin">BTC</button>
-            <button class="coin-tab" data-coin="ethereum">ETH</button>
-            <button class="coin-tab" data-coin="toncoin">TON</button>
-            <button class="coin-tab" data-coin="solana">SOL</button>
-            <button class="coin-tab" data-coin="dogecoin">DOGE</button>
+        <div class="ticker-bar">
+            <div class="ticker-left" id="ticker-left"></div>
+            <div class="coin-tabs" id="coin-tabs">
+                <button class="coin-tab active" data-coin="bitcoin">BTC</button>
+                <button class="coin-tab" data-coin="ethereum">ETH</button>
+                <button class="coin-tab" data-coin="toncoin">TON</button>
+                <button class="coin-tab" data-coin="solana">SOL</button>
+                <button class="coin-tab" data-coin="dogecoin">DOGE</button>
+                <button class="coin-tab" data-coin="srum">SRUM</button>
+            </div>
         </div>
         <div id="chart-container">
             <canvas id="chartCanvas"></canvas>
@@ -169,7 +175,8 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- КЛУБ -->
+    <!-- Экраны -->
+    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button>
         <h2>🐺 Бойцовский клуб «Голодные волки»</h2>
@@ -181,8 +188,6 @@
         <div id="club-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
     </div>
 
-    <!-- Остальные экраны (задачи, арена и т.д.) -->
-    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button>🏟️ Арена (турниры)</div>
     <div class="screen" id="tasks-screen">
         <button class="back-btn">← Назад</button>
         <h2>📋 Задания</h2>
@@ -211,7 +216,7 @@
 
 <script>
 (function() {
-    // --- ИГРОВОЕ ЯДРО (без изменений) ---
+    // Игровое ядро
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
     let rum = parseInt(localStorage.getItem('rum') || '0');
@@ -233,8 +238,6 @@
     ];
     let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks')) || [];
     let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
-
-    // Клубы
     let clubs = JSON.parse(localStorage.getItem('clubs')) || [];
     let myClubId = localStorage.getItem('myClubId') || null;
 
@@ -265,7 +268,7 @@
         energyOnPot.textContent = `⚡ ${energy}/${maxEnergy}`;
         if (energy === maxEnergy && !gameActive) {
             startBtn.disabled = false; startBtn.textContent = '🥘 НАЧАТЬ'; startBtn.style.display = 'block';
-        } else if (gameActive) { startBtn.style.display = 'none'; }
+        } else if (gameActive) startBtn.style.display = 'none';
         else { startBtn.disabled = true; startBtn.textContent = `⏳ ${Math.ceil((maxEnergy-energy)*6/60)} мин`; startBtn.style.display = 'block'; }
         saveAll();
     }
@@ -273,12 +276,17 @@
     function spawnAll() {
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
-        [...holes].forEach((h,i) => {
-            const bad = Math.random() < 0.25;
-            const emoji = (bad ? BAD : GOOD)[Math.floor(Math.random() * (bad ? BAD : GOOD).length)];
-            h.innerHTML = `<span class="veg${bad ? ' rotten' : ''}">${emoji}</span>`;
-            currentVeg[i] = { type: bad ? 'bad' : 'good', emoji };
-        });
+        const holeElements = [...holes];
+        for (let i = 0; i < holeElements.length; i++) {
+            const isBad = Math.random() < 0.25;
+            const pool = isBad ? BAD : GOOD;
+            const emoji = pool[Math.floor(Math.random() * pool.length)];
+            const el = document.createElement('span');
+            el.className = 'veg' + (isBad ? ' rotten' : '');
+            el.textContent = emoji;
+            holeElements[i].appendChild(el);
+            currentVeg[i] = { type: isBad ? 'bad' : 'good', emoji };
+        }
     }
 
     function showCoinFountain() {
@@ -359,26 +367,29 @@
         gameActive = false;
         clearInterval(gameTimer); clearInterval(spawnInterval);
         holes.forEach(h => h.innerHTML = '');
-        currentVeg = {}; startBtn.style.display = 'block'; updateUI(); startRecovery();
+        currentVeg = {};
+        startBtn.style.display = 'block';
+        updateUI();
+        startRecovery();
     }
 
     function startRecovery() {
         const int = setInterval(() => {
             if (gameActive || energy >= maxEnergy) { if (energy >= maxEnergy) clearInterval(int); return; }
-            energy = Math.min(maxEnergy, energy+1); updateUI();
+            energy = Math.min(maxEnergy, energy+1);
+            updateUI();
             if (energy >= maxEnergy) clearInterval(int);
         }, 6000);
     }
 
-    // --- ГРАФИК (улучшенный) ---
+    // --- ТЕРМИНАЛ (график + стакан) ---
     const canvas = document.getElementById('chartCanvas');
     const ctx = canvas.getContext('2d');
     let chartData = [], currentCoin = 'bitcoin', lastPrice = 0;
-    const coinPrices = { bitcoin: 60000, ethereum: 3000, toncoin: 5, solana: 150, dogecoin: 0.2 };
-
+    const coinPrices = { bitcoin: 60000, ethereum: 3000, toncoin: 5, solana: 150, dogecoin: 0.2, srum: 1.0 };
     function resizeCanvas() {
         const container = document.getElementById('chart-container');
-        canvas.width = container.clientWidth - 80;
+        canvas.width = container.clientWidth - 120;
         canvas.height = container.clientHeight || 200;
         drawChart();
     }
@@ -388,19 +399,29 @@
     function startDemo() {
         chartData = [];
         let price = coinPrices[currentCoin] || 60000;
-        for (let i=0; i<30; i++) {
-            price += (Math.random()-0.5)* (price*0.005);
-            chartData.push({ time: Date.now() - (30-i)*2000, price });
+        const isSrum = currentCoin === 'srum';
+        for (let i=0; i<40; i++) {
+            if (isSrum) price += 0.002 + Math.random()*0.001; // всегда рост
+            else price += (Math.random()-0.5) * (price*0.005);
+            chartData.push({ time: Date.now() - (40-i)*1500, price });
         }
         drawChart();
-        setInterval(() => {
+        const demoInterval = setInterval(() => {
+            if (currentCoin !== document.querySelector('.coin-tab.active')?.dataset.coin) {
+                clearInterval(demoInterval); return;
+            }
+            if (!chartData.length) return;
             const last = chartData[chartData.length-1];
-            const newPrice = last.price + (Math.random()-0.5) * (last.price*0.003);
+            let newPrice;
+            if (isSrum) newPrice = last.price + 0.002 + Math.random()*0.001;
+            else newPrice = last.price + (Math.random()-0.5) * (last.price*0.003);
             chartData.push({ time: Date.now(), price: newPrice });
-            if (chartData.length > 80) chartData.shift();
+            if (chartData.length > 100) chartData.shift();
             drawChart();
             updateOrderBook(newPrice);
-        }, 1200);
+        }, 800);
+        // сохраним интервал для очистки
+        canvas.demoInterval = demoInterval;
     }
 
     function drawChart() {
@@ -409,71 +430,97 @@
         const prices = chartData.map(d => d.price);
         const min = Math.min(...prices)*0.999, max = Math.max(...prices)*1.001, r = max-min || 1;
         const stepX = canvas.width / (chartData.length-1);
+        // Свечи
+        for (let i=1; i<chartData.length; i++) {
+            const open = chartData[i-1].price, close = chartData[i].price;
+            const x = (i-1)*stepX + stepX*0.1;
+            const w = stepX*0.8;
+            const yOpen = canvas.height - ((open-min)/r)*canvas.height;
+            const yClose = canvas.height - ((close-min)/r)*canvas.height;
+            ctx.fillStyle = close >= open ? '#4CAF50' : '#F44336';
+            ctx.fillRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose - yOpen) || 1);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose - yOpen) || 1);
+        }
+        // Линия скользящей средней (простая)
         ctx.beginPath();
-        ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2;
-        chartData.forEach((d,i) => {
-            const x = i*stepX, y = canvas.height - ((d.price-min)/r)*canvas.height;
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 1.5;
+        for (let i=0; i<chartData.length; i++) {
+            const x = i*stepX;
+            let sum = 0, count = 0;
+            for (let j=Math.max(0,i-5); j<=i; j++) { sum += chartData[j].price; count++; }
+            const avg = sum/count;
+            const y = canvas.height - ((avg-min)/r)*canvas.height;
             if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-        });
+        }
         ctx.stroke();
-        ctx.fillStyle = 'rgba(255,215,0,0.05)';
-        ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(0, canvas.height); ctx.closePath(); ctx.fill();
-        // Price line
+        // Текущая цена
         const last = chartData[chartData.length-1];
         const ly = canvas.height - ((last.price-min)/r)*canvas.height;
-        ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#aaa';
         ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(canvas.width, ly); ctx.stroke();
-        ctx.fillStyle = '#fff'; ctx.font = '10px Arial';
-        ctx.fillText(last.price.toFixed(2), canvas.width-60, ly-5);
+        ctx.fillStyle = '#fff'; ctx.font = '9px Arial';
+        ctx.fillText(last.price.toFixed(currentCoin==='srum'?4:2), canvas.width-65, ly-6);
     }
 
     function updateOrderBook(price) {
         const book = document.getElementById('order-book');
-        const spread = price * 0.001;
+        const spread = price * 0.0005;
         let html = '<div style="font-weight:bold;margin-bottom:4px;">Стакан</div>';
-        for (let i=0; i<4; i++) {
-            html += `<div class="order-row ask"><span>${ (price + spread*(i+1)).toFixed(2) }</span><span>${Math.floor(Math.random()*10)}</span></div>`;
+        for (let i=14; i>=1; i--) {
+            html += `<div class="order-row ask"><span>${(price + spread*i).toFixed(currentCoin==='srum'?4:2)}</span><span>${Math.floor(Math.random()*15)}</span></div>`;
         }
-        html += `<div class="order-row" style="color:#FFD700;">${price.toFixed(2)}</div>`;
-        for (let i=0; i<4; i++) {
-            html += `<div class="order-row bid"><span>${ (price - spread*(i+1)).toFixed(2) }</span><span>${Math.floor(Math.random()*10)}</span></div>`;
+        html += `<div class="order-row" style="color:#FFD700;font-weight:bold;">${price.toFixed(currentCoin==='srum'?4:2)}</div>`;
+        for (let i=1; i<=15; i++) {
+            html += `<div class="order-row bid"><span>${(price - spread*i).toFixed(currentCoin==='srum'?4:2)}</span><span>${Math.floor(Math.random()*15)}</span></div>`;
         }
         book.innerHTML = html;
     }
 
     async function fetchRealData() {
+        if (currentCoin === 'srum') return; // SRUM локальный
         try {
             const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,toncoin,solana,dogecoin');
             const data = await res.json();
-            const ticker = document.getElementById('ticker-bar');
+            const tickerLeft = document.getElementById('ticker-left');
             let html = '';
             data.forEach(coin => {
                 const ch = coin.price_change_percentage_24h?.toFixed(2)||'0';
                 html += `<div class="ticker-item"><span class="sym">${coin.symbol.toUpperCase()}</span> $${coin.current_price.toLocaleString()} <span class="change ${ch>=0?'positive':'negative'}">${ch}%</span></div>`;
                 if (coin.id === currentCoin) {
                     chartData.push({ time: Date.now(), price: coin.current_price });
-                    if (chartData.length > 80) chartData.shift();
+                    if (chartData.length > 100) chartData.shift();
                     drawChart();
                     updateOrderBook(coin.current_price);
                 }
             });
-            ticker.innerHTML = html;
+            // добавим SRUM в тикер, если его нет
+            if (!data.find(c => c.id === 'srum')) {
+                const srumPrice = chartData.length ? chartData[chartData.length-1].price : 1.0;
+                html += `<div class="ticker-item"><span class="sym">SRUM</span> $${srumPrice.toFixed(4)} <span class="change positive">+0.5%</span></div>`;
+            }
+            tickerLeft.innerHTML = html;
         } catch(e) {}
     }
+
+    function switchCoin(coin) {
+        if (canvas.demoInterval) clearInterval(canvas.demoInterval);
+        currentCoin = coin;
+        document.querySelectorAll('.coin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.coin-tab[data-coin="${coin}"]`).classList.add('active');
+        startDemo();
+        fetchRealData();
+    }
+
+    document.querySelectorAll('.coin-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchCoin(tab.dataset.coin));
+    });
 
     startDemo();
     fetchRealData();
     setInterval(fetchRealData, 30000);
-
-    document.querySelectorAll('.coin-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.coin-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentCoin = tab.dataset.coin;
-            chartData = []; // перезапустим демо
-            startDemo();
-        });
-    });
 
     // --- ЗАДАНИЯ (сохранены) ---
     const tasksContent = document.getElementById('tasks-content');
@@ -515,46 +562,228 @@
             }, 3000);
         }));
     }
-    function renderCreateTask() { /* ... как раньше ... */ }
-    function renderMyTasks() { /* ... как раньше ... */ }
+    function renderCreateTask() {
+        const max = (officialRumTasks.every(t => t.completionsDone >= t.maxCompletions) && officialSrumTasks.every(t => t.completionsDone >= t.maxCompletions)) ? 33 : 3;
+        const currentCount = userTasks.length;
+        const canCreate = currentCount < max;
+        tasksContent.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:10px;"><p>Лимит созданных: ${currentCount}/${max}</p>
+            <input id="task-desc" placeholder="Описание задания" ${canCreate ? '' : 'disabled'}>
+            <input id="task-reward" type="number" placeholder="Награда" ${canCreate ? '' : 'disabled'}>
+            <select id="task-currency" ${canCreate ? '' : 'disabled'}><option value="RUM">RUM</option><option value="SRUM">SRUM</option></select>
+            <input id="task-link" type="url" placeholder="Ссылка на задание" ${canCreate ? '' : 'disabled'}>
+            <button id="publish-task-btn" style="background:#4CAF50; color:white; padding:10px; border:none; border-radius:8px;" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
+        if (canCreate) {
+            document.getElementById('publish-task-btn').addEventListener('click', () => {
+                const desc = document.getElementById('task-desc').value.trim();
+                const reward = parseFloat(document.getElementById('task-reward').value);
+                const currency = document.getElementById('task-currency').value;
+                const link = document.getElementById('task-link').value.trim();
+                if (desc && reward > 0) {
+                    if (currency === 'RUM' && rum >= reward) rum -= Math.ceil(reward);
+                    else if (currency === 'SRUM' && srum >= reward) srum -= reward;
+                    else { alert('Недостаточно средств'); return; }
+                    const newTask = { id: Date.now(), desc, reward, currency, link, author: 'Ты', completed: false, checking: false };
+                    userTasks.push(newTask); globalUserTasks.push(newTask);
+                    updateUI(); renderCreateTask(); alert('Задание опубликовано!');
+                } else alert('Неверные данные');
+            });
+        }
+    }
+    function renderMyTasks() {
+        let html = '<h3>Выполненные официальные</h3>';
+        officialRumTasks.concat(officialSrumTasks).forEach(t => {
+            if (t.completionsDone > 0) {
+                const type = officialRumTasks.includes(t) ? 'RUM' : 'SRUM';
+                html += `<div>✅ ${t.desc} — ${t.completionsDone} раз (${(t.completionsDone * t.reward).toFixed(type==='SRUM'?2:0)} ${type})</div>`;
+            }
+        });
+        html += '<h3>Созданные мной</h3>';
+        if (userTasks.length === 0) html += '<p>Нет созданных заданий</p>';
+        userTasks.forEach(t => {
+            html += `<div class="task-item" id="my-task-${t.id}">
+                <div class="editable"><input id="desc-${t.id}" value="${t.desc}" /><input id="reward-${t.id}" type="number" value="${t.reward}" /><input id="link-${t.id}" value="${t.link || ''}" /></div>
+                <div style="display:flex; gap:8px; justify-content: space-between;"><span>${t.reward} ${t.currency}</span>
+                    <div><button class="edit-task-btn" data-task-id="${t.id}">✏️</button><button class="delete-task-btn" data-task-id="${t.id}">🗑️</button></div></div></div>`;
+        });
+        tasksContent.innerHTML = html;
+        document.querySelectorAll('.edit-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const taskId = parseInt(e.target.dataset.taskId);
+            const task = userTasks.find(t => t.id === taskId);
+            if (!task) return;
+            const newDesc = document.getElementById(`desc-${taskId}`).value.trim();
+            const newReward = parseFloat(document.getElementById(`reward-${taskId}`).value);
+            const newLink = document.getElementById(`link-${taskId}`).value.trim();
+            if (!newDesc || newReward <= 0) return alert('Неверное описание или награда');
+            const diff = newReward - task.reward;
+            if (diff > 0) {
+                if (task.currency === 'RUM' && rum >= diff) rum -= Math.ceil(diff);
+                else if (task.currency === 'SRUM' && srum >= diff) srum -= diff;
+                else return alert('Недостаточно средств');
+            } else if (diff < 0) {
+                if (task.currency === 'RUM') rum += Math.ceil(-diff);
+                else srum += -diff;
+            }
+            task.desc = newDesc; task.reward = newReward; task.link = newLink;
+            updateUI(); renderMyTasks(); alert('Задание обновлено!');
+        }));
+        document.querySelectorAll('.delete-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const taskId = parseInt(e.target.dataset.taskId);
+            const taskIndex = userTasks.findIndex(t => t.id === taskId);
+            if (taskIndex === -1) return;
+            const task = userTasks[taskIndex];
+            if (task.currency === 'RUM') rum += Math.ceil(task.reward);
+            else srum += task.reward;
+            userTasks.splice(taskIndex, 1);
+            const globalIndex = globalUserTasks.findIndex(t => t.id === taskId);
+            if (globalIndex !== -1) globalUserTasks.splice(globalIndex, 1);
+            updateUI(); renderMyTasks(); alert('Задание удалено, средства возвращены');
+        }));
+    }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // --- КЛУБЫ (новое) ---
+    // --- БОЙЦОВСКИЙ КЛУБ (расширенный) ---
     const clubContent = document.getElementById('club-content');
+    function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
-        if (!myClubId || !clubs.find(c => c.id == myClubId)) {
-            clubContent.innerHTML = '<p>Вы не состоите в клубе.</p>';
-            return;
+        const club = getMyClub();
+        if (!club) { clubContent.innerHTML = '<p>Вы не состоите в клубе.</p>'; return; }
+        const amIMaster = club.master === 'Игрок';
+        const amIOfficer = club.officers?.includes('Игрок');
+        let html = `<h3>${club.emoji||'🐺'} ${club.name}</h3><p>${club.desc||''}</p>`;
+        html += `<p><b>Глава:</b> ${club.master||'—'}</p>`;
+        html += '<p><b>Офицеры:</b> ' + (club.officers?.join(', ') || 'нет') + '</p>';
+        html += '<p><b>Бойцы:</b> ' + (club.members?.join(', ') || 'нет') + '</p>';
+
+        // Кнопки управления
+        html += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;">';
+        if (amIMaster) {
+            html += '<button id="edit-club-btn">✏️ Редактировать</button>';
+            html += '<button id="invite-member-btn">👥 Пригласить</button>';
+            html += '<button id="manage-officers-btn">🛡️ Офицеры</button>';
+            html += '<button id="delete-club-btn">🗑️ Распустить</button>';
+        } else if (amIOfficer) {
+            html += '<button id="invite-member-btn">👥 Пригласить</button>';
+            html += '<button id="leave-club-btn">🚪 Покинуть</button>';
+        } else {
+            html += '<button id="leave-club-btn">🚪 Покинуть</button>';
         }
-        const club = clubs.find(c => c.id == myClubId);
-        let html = `<h3>${club.emoji||'🐺'} ${club.name}</h3><p>${club.desc||''}</p><p>Участники: ${club.members.join(', ') || 'нет'}</p>`;
+        html += '</div>';
         clubContent.innerHTML = html;
+
+        // Обработчики
+        if (amIMaster) {
+            document.getElementById('edit-club-btn').addEventListener('click', () => {
+                clubContent.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <input id="edit-name" value="${club.name}">
+                        <input id="edit-emoji" value="${club.emoji}">
+                        <input id="edit-desc" value="${club.desc}">
+                        <button id="save-club-btn" style="background:#4CAF50; padding:10px;">Сохранить</button>
+                    </div>`;
+                document.getElementById('save-club-btn').addEventListener('click', () => {
+                    club.name = document.getElementById('edit-name').value.trim() || club.name;
+                    club.emoji = document.getElementById('edit-emoji').value.trim() || club.emoji;
+                    club.desc = document.getElementById('edit-desc').value.trim();
+                    saveAll(); renderMyClub();
+                });
+            });
+            document.getElementById('invite-member-btn').addEventListener('click', () => {
+                const name = prompt('Введите имя бойца:');
+                if (name) {
+                    if (!club.members) club.members = [];
+                    club.members.push(name);
+                    saveAll(); renderMyClub();
+                }
+            });
+            document.getElementById('manage-officers-btn').addEventListener('click', () => {
+                let list = '<div style="display:flex; flex-direction:column; gap:6px;">';
+                list += '<p><b>Назначить офицера из бойцов:</b></p>';
+                const fighters = club.members?.filter(m => m !== club.master && !club.officers?.includes(m)) || [];
+                if (fighters.length === 0) list += '<p>Нет доступных бойцов.</p>';
+                else fighters.forEach(f => {
+                    list += `<button class="promote-btn" data-name="${f}" style="background:#2196F3; padding:5px; margin:2px;">${f} 👆</button>`;
+                });
+                list += '<p><b>Разжаловать офицера:</b></p>';
+                if (!club.officers || club.officers.length === 0) list += '<p>Нет офицеров.</p>';
+                else club.officers.forEach(o => {
+                    list += `<button class="demote-btn" data-name="${o}" style="background:#F44336; padding:5px; margin:2px;">${o} 👇</button>`;
+                });
+                list += '</div>';
+                clubContent.innerHTML = list;
+                document.querySelectorAll('.promote-btn').forEach(b => b.addEventListener('click', (e) => {
+                    const name = e.target.dataset.name;
+                    if (!club.officers) club.officers = [];
+                    club.officers.push(name);
+                    saveAll(); renderMyClub();
+                }));
+                document.querySelectorAll('.demote-btn').forEach(b => b.addEventListener('click', (e) => {
+                    const name = e.target.dataset.name;
+                    club.officers = club.officers.filter(o => o !== name);
+                    saveAll(); renderMyClub();
+                }));
+            });
+            document.getElementById('delete-club-btn').addEventListener('click', () => {
+                if (confirm('Распустить клуб навсегда?')) {
+                    clubs = clubs.filter(c => c.id != myClubId);
+                    myClubId = null;
+                    saveAll(); renderMyClub();
+                }
+            });
+        } else {
+            // Офицер или боец
+            if (document.getElementById('invite-member-btn')) {
+                document.getElementById('invite-member-btn').addEventListener('click', () => {
+                    const name = prompt('Введите имя бойца:');
+                    if (name) {
+                        if (!club.members) club.members = [];
+                        club.members.push(name);
+                        saveAll(); renderMyClub();
+                    }
+                });
+            }
+            if (document.getElementById('leave-club-btn')) {
+                document.getElementById('leave-club-btn').addEventListener('click', () => {
+                    if (confirm('Покинуть клуб?')) {
+                        club.members = club.members.filter(m => m !== 'Игрок');
+                        if (club.officers?.includes('Игрок')) club.officers = club.officers.filter(o => o !== 'Игрок');
+                        myClubId = null;
+                        saveAll(); renderMyClub();
+                    }
+                });
+            }
+        }
     }
+
     function renderAllClubs() {
-        if (clubs.length === 0) { clubContent.innerHTML = '<p>Нет созданных клубов.</p>'; return; }
+        if (clubs.length === 0) { clubContent.innerHTML = '<p>Нет клубов.</p>'; return; }
         let html = '';
         clubs.forEach(c => {
             const isMember = myClubId == c.id;
-            html += `<div class="task-item"><strong>${c.emoji||'🐺'} ${c.name}</strong> (${c.members.length} уч.)<br>${c.desc||''}<br>
-                <button ${isMember ? 'disabled' : 'data-join="'+c.id+'"'}>${isMember ? 'Вы в клубе' : 'Вступить'}</button></div>`;
+            html += `<div class="task-item"><strong>${c.emoji||'🐺'} ${c.name}</strong> (${c.members?.length||0} уч.)<br>${c.desc||''}<br>`;
+            if (!isMember) html += `<button data-join="${c.id}">Вступить</button>`;
+            else html += '<span>✅ Вы в клубе</span>';
+            html += '</div>';
         });
         clubContent.innerHTML = html;
         document.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', e => {
             const clubId = e.target.dataset.join;
             const club = clubs.find(c => c.id == clubId);
-            if (!club) return;
-            if (!club.members.includes('Игрок')) club.members.push('Игрок');
+            if (!club || myClubId) return;
+            if (!club.members) club.members = [];
+            club.members.push('Игрок');
             myClubId = clubId;
-            saveAll();
-            renderAllClubs();
+            saveAll(); renderAllClubs();
         }));
     }
+
     function showCreateClub() {
         clubContent.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <input id="club-name" placeholder="Название клуба">
                 <input id="club-emoji" placeholder="Эмодзи (🐺)">
                 <input id="club-desc" placeholder="Описание">
+                <p>Стоимость создания: 100 RUM</p>
                 <button id="club-create-submit" style="background:#4CAF50; padding:10px; border:none; border-radius:8px; color:white;">Создать клуб</button>
             </div>`;
         document.getElementById('club-create-submit').addEventListener('click', () => {
@@ -562,11 +791,18 @@
             const emoji = document.getElementById('club-emoji').value.trim() || '🐺';
             const desc = document.getElementById('club-desc').value.trim();
             if (!name) return alert('Введите название');
-            const newClub = { id: Date.now(), name, emoji, desc, members: ['Игрок'] };
+            if (rum < 100) return alert('Недостаточно RUM (нужно 100)');
+            rum -= 100;
+            const newClub = {
+                id: Date.now(),
+                name, emoji, desc,
+                master: 'Игрок',
+                officers: [],
+                members: ['Игрок']
+            };
             clubs.push(newClub);
             myClubId = newClub.id;
-            saveAll();
-            renderMyClub();
+            saveAll(); updateUI(); renderMyClub();
         });
     }
 
@@ -579,7 +815,6 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
         else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
-        else if (screenId === 'rules') document.getElementById('rules-screen').classList.add('active');
         else if (screenId !== 'main') { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
     }
 
