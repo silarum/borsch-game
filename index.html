@@ -19,10 +19,36 @@
             background:linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             overflow:hidden;
         }
+        /* Переключатель фон */
+        #view-switch {
+            position:absolute; left:5px; top:45%;
+            transform:translateY(-50%);
+            background:rgba(0,0,0,0.7); color:white;
+            border:none; border-radius:8px; padding:6px;
+            font-size:0.8rem; cursor:pointer; z-index:40;
+            display:flex; flex-direction:column; align-items:center; gap:4px;
+        }
+        #view-switch span { font-size:0.6rem; }
+        /* Море (вид) */
+        #sea-view {
+            display:none;
+            position:absolute; top:35px; left:0; right:0; bottom:50%;
+            background:linear-gradient(180deg, #1E90FF, #4169E1);
+            animation:waves 3s infinite ease-in-out;
+        }
+        #sea-view .yacht {
+            position:absolute; right:10%; top:42%; width:70px; height:100px;
+            animation:float 4s infinite ease-in-out;
+        }
+        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+        .yacht-body { position:absolute; bottom:0; left:5px; width:60px; height:20px; background:white; border-radius:50% 50% 0 0; }
+        .yacht-sail { position:absolute; bottom:20px; left:25px; width:0; height:0; border-left:25px solid transparent; border-right:10px solid transparent; border-bottom:50px solid white; }
+
         /* Терминал */
         #terminal {
-            position:absolute; top:35px; left:0; right:0; bottom:50%; /* точно до кастрюли */
-            background:#0b0e14; display:flex; flex-direction:column;
+            display:flex;
+            position:absolute; top:35px; left:0; right:0; bottom:50%;
+            background:#0b0e14; flex-direction:column;
         }
         .ticker-bar {
             display:flex; justify-content:space-between; align-items:center;
@@ -38,9 +64,7 @@
         .ticker-item .sym { color:#FFD700; }
         .ticker-item .change.positive { color:#4CAF50; }
         .ticker-item .change.negative { color:#F44336; }
-        .coin-tabs {
-            display:flex; gap:3px; flex-shrink:0;
-        }
+        .coin-tabs { display:flex; gap:3px; flex-shrink:0; }
         .coin-tab {
             padding:2px 6px; border:none; background:#1a1e27;
             color:#ccc; border-radius:4px; font-size:0.55rem; cursor:pointer;
@@ -56,11 +80,19 @@
         .order-row { display:flex; justify-content:space-between; }
         .ask { color:#F44336; }
         .bid { color:#4CAF50; }
+
         /* Остальной интерфейс */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
+        .boost-display {
+            position:absolute; bottom:calc(30% + 12px + 26px); left:5%;
+            display:flex; flex-direction:column; align-items:center;
+            gap:2px; z-index:10; font-size:0.6rem; color:white;
+            text-shadow:0 0 4px black;
+        }
+        .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .purple-bg { position:absolute; bottom:0; left:0; right:0; top:70%; background:purple; z-index:1; }
         .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
@@ -96,15 +128,8 @@
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
         .flying-veg { position:absolute; z-index:20; pointer-events:none; animation: flyToPot 0.5s ease-in forwards; }
         @keyframes flyToPot { 0% { transform: translate(0, 0) scale(1); opacity:1; } 50% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform: translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
-        .coin-fountain {
-            position:absolute; pointer-events:none; z-index:25;
-            animation: coinUp 0.8s ease-out forwards;
-            font-size:1rem; font-weight:bold;
-        }
-        @keyframes coinUp {
-            0% { transform:translateY(0) scale(1); opacity:1; }
-            100% { transform:translateY(-80px) scale(0.5); opacity:0; }
-        }
+        .coin-fountain { position:absolute; pointer-events:none; z-index:25; animation: coinUp 0.8s ease-out forwards; font-size:1rem; font-weight:bold; }
+        @keyframes coinUp { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-80px) scale(0.5); opacity:0; } }
         .task-item { background:rgba(255,255,255,0.1); padding:10px; margin:8px 0; border-radius:8px; display:flex; flex-direction:column; gap:8px; }
         .task-item input, .task-item select { padding:8px; border-radius:5px; border:none; width:100%; background: rgba(255,255,255,0.15); color: white; }
         .task-item button { padding:8px 12px; border:none; border-radius:5px; font-weight:bold; background:#FFD700; color:black; }
@@ -115,6 +140,18 @@
 </head>
 <body>
 <div id="game-container">
+    <!-- Переключатель Море/Биржа -->
+    <button id="view-switch" onclick="toggleView()">📈<br><span>Биржа</span></button>
+
+    <!-- Море (скрыто) -->
+    <div id="sea-view">
+        <div class="yacht">
+            <div class="yacht-sail"></div>
+            <div class="yacht-body"></div>
+        </div>
+    </div>
+
+    <!-- Терминал (показан) -->
     <div id="terminal">
         <div class="ticker-bar">
             <div class="ticker-left" id="ticker-left"></div>
@@ -132,9 +169,12 @@
             <div class="order-book" id="order-book"></div>
         </div>
     </div>
+
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
     <div class="flower-pot"></div>
+    <div class="boost-display" id="boost-display"></div>
+
     <div class="purple-bg"></div>
 
     <div class="kitchen-area">
@@ -157,7 +197,6 @@
         </div>
     </div>
 
-    <!-- Верхние кнопки и балансы -->
     <div class="top-left-buttons">
         <div class="item" id="top-tappers">🏆 Топ</div>
         <div class="item" id="top-miners">⛏️ Майнеры</div>
@@ -165,13 +204,13 @@
         <div class="item" id="rules-btn">📜 Правила</div>
         <div class="item" id="about-icon">📖 О проекте</div>
     </div>
+
     <div class="balances">
         <div id="rum-balance">💰 RUM: 0</div>
         <div id="invest-balance">📈 Инвест: 0</div>
         <div id="srum-balance">💎 SRUM: 0.00</div>
     </div>
 
-    <!-- Нижняя панель -->
     <div class="bottom-panel">
         <button class="nav-btn" data-screen="arena">🏟️<br>Арена</button>
         <button class="nav-btn" data-screen="mining-club">🐺<br>Клуб</button>
@@ -181,16 +220,8 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- ВСЕ ЭКРАНЫ (теперь заполнены) -->
-    <div class="screen" id="arena-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>🏟️ Арена</h2>
-        <div style="display:flex; flex-direction:column; gap:10px; width:80%;">
-            <button style="padding:15px; background:gold; border:none; border-radius:10px; font-weight:bold;">Личный майнинг</button>
-            <button style="padding:15px; background:silver; border:none; border-radius:10px;">Командный 5×5</button>
-            <p>Турниры (скоро)</p>
-        </div>
-    </div>
+    <!-- Экраны -->
+    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><div><button>Личный майнинг</button><button>Командный 5×5</button></div></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button>
         <h2>🐺 Бойцовский клуб «Голодные волки»</h2>
@@ -217,96 +248,42 @@
         </div>
         <div id="tasks-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
     </div>
-    <div class="screen" id="invest-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>📈 Инвестиции</h2>
-        <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; width:90%;">
-            <p>🚀 Стартап «Борщ на блокчейне»</p>
-            <p>Цель: 10 000 RUM | Собрано: 2 350 RUM</p>
-            <button style="margin-top:10px; padding:10px; background:#4CAF50; border:none; border-radius:5px; color:white;">Инвестировать RUM</button>
-        </div>
-    </div>
-    <div class="screen" id="wallet-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>👛 Кошелёк</h2>
-        <p>Привяжи TON-кошелёк для вывода средств и покупок.</p>
-        <button style="margin:20px; padding:15px 30px; background:#0088CC; border:none; border-radius:10px; color:white; font-weight:bold;">🔗 Привязать TON кошелёк</button>
-        <p>Баланс TON: 0.00</p>
-    </div>
+    <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><div><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button>Инвестировать RUM</button></div></div>
+    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>Привязать TON кошелёк (скоро)</p><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p></div>
     <div class="screen" id="shop-screen">
         <button class="back-btn">← Назад</button>
         <h2>🛍️ Магазин</h2>
-        <div class="task-item">
-            <p>🎫 NFT-пропуск в майнинг</p><p>Цена: 100 RUM</p>
-            <button>Купить</button>
-        </div>
-        <div class="task-item">
-            <p>🐺 Лицензия клуба</p><p>Цена: 5 USDT (скоро)</p>
-            <button disabled>TON</button>
-        </div>
-        <div class="task-item">
-            <p>⚡ Бустер ×2 на 24ч</p><p>Цена: 50 RUM</p>
-            <button>Купить</button>
-        </div>
+        <div class="task-item"><p>⚡ Бустер ×2 (24ч)</p><p>1 SRUM</p><button id="buy-boost-x2">Купить</button></div>
+        <div class="task-item"><p>⚡ Бустер ×3 (24ч)</p><p>2 SRUM</p><button id="buy-boost-x3">Купить</button></div>
+        <div class="task-item"><p>⚡ Бустер ×5 (24ч)</p><p>3 SRUM</p><button id="buy-boost-x5">Купить</button></div>
+        <div class="task-item"><p>💱 Купить SRUM за TON</p><p>1 TON = 2 SRUM</p><button id="buy-srum-ton">Купить</button></div>
+        <div class="task-item"><p>💱 Купить SRUM за USDT</p><p>1 USDT = 1 SRUM</p><button id="buy-srum-usdt">Купить</button></div>
+        <div class="task-item"><p>💱 Обменять SRUM на TON</p><p>1 SRUM = 0.5 TON</p><button id="swap-srum-ton">Обменять</button></div>
+        <div class="task-item"><p>💱 Обменять SRUM на USDT</p><p>1 SRUM = 1 USDT</p><button id="swap-srum-usdt">Обменять</button></div>
     </div>
-    <div class="screen" id="top-tappers-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>🏆 Топ игроков</h2>
-        <p>1. КриптоБосс — 125 000 RUM</p>
-        <p>2. Борщевар — 98 200 RUM</p>
-        <p>3. ТокенМаг — 87 500 RUM</p>
-        <p>...</p>
-    </div>
-    <div class="screen" id="top-miners-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>⛏️ Топ майнеров</h2>
-        <p>1. Майнер777 — 45 000 SRUM</p>
-        <p>2. ХэшКинг — 32 100 SRUM</p>
-    </div>
-    <div class="screen" id="referral-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>👥 Рефералы</h2>
-        <p>Пригласи друга и получи 500 RUM!</p>
-        <input value="https://t.me/crypto_borsch_bot?start=ref123" readonly style="width:100%; padding:10px; margin:10px 0; background:#333; color:white; border:none; border-radius:5px;">
-        <p>Приглашённые: 0</p>
-    </div>
-    <div class="screen" id="rules-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>📜 Правила</h2>
-        <p>🥘 Тапай овощи, зарабатывай RUM.</p>
-        <p>🐺 Создавай клубы и участвуй в майнинге.</p>
-        <p>🎫 Покупай NFT и бусты в магазине.</p>
-    </div>
-    <div class="screen" id="about-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>📖 О проекте</h2>
-        <p>Крипто Борщ — GameFi-экосистема на TON.</p>
-        <p>Дорожная карта: запуск тапалки, арены, маркетплейс, токен $BORSCH.</p>
-    </div>
-    <!-- Экран Энергии (бусты) -->
-    <div class="screen" id="energy-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>⚡ Энергия и бусты</h2>
-        <div style="display:flex; flex-direction:column; gap:15px; margin-top:20px; width:80%;">
-            <button style="padding:15px; background:#FF5722; border:none; border-radius:10px; color:white;">⚡ ×2 на 24ч — 1 SRUM</button>
-            <button style="padding:15px; background:#FF9800; border:none; border-radius:10px;">⚡ ×3 на 24ч — 2 SRUM</button>
-            <button style="padding:15px; background:#FFC107; border:none; border-radius:10px;">⚡ ×5 на 24ч — 3 SRUM</button>
-            <button style="padding:15px; background:#9C27B0; border:none; border-radius:10px; color:white;">🔋 Безлимит на 1ч — TON</button>
-        </div>
-    </div>
+    <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button><h2>🏆 Топ игроков</h2><p>1. ...</p></div>
+    <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button><h2>⛏️ Топ майнеров</h2><p>1. ...</p></div>
+    <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button><h2>👥 Рефералы</h2><input readonly value="https://..."></div>
+    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила</h2><p>...</p></div>
+    <div class="screen" id="about-screen"><button class="back-btn">← Назад</button><h2>📖 О проекте</h2><p>...</p></div>
 </div>
 
 <script>
 (function() {
-    // Игровое ядро
+    // --- Игровое ядро ---
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
     let rum = parseInt(localStorage.getItem('rum') || '0');
     let invest = parseInt(localStorage.getItem('invest') || '0');
     let srum = parseFloat(localStorage.getItem('srum') || '0');
+    let ton = parseFloat(localStorage.getItem('ton') || '0');
+    let usdt = parseFloat(localStorage.getItem('usdt') || '0');
     let energy = parseInt(localStorage.getItem('energy') || '60');
     const maxEnergy = 60;
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
+
+    // Буст
+    let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
 
     let officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
@@ -324,8 +301,13 @@
     let myClubId = localStorage.getItem('myClubId') || null;
 
     function saveAll() {
-        localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum);
+        localStorage.setItem('rum', rum);
+        localStorage.setItem('invest', invest);
+        localStorage.setItem('srum', srum);
+        localStorage.setItem('ton', ton);
+        localStorage.setItem('usdt', usdt);
         localStorage.setItem('energy', energy);
+        localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
         localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
         localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
         localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
@@ -347,13 +329,33 @@
         rumBal.textContent = `💰 RUM: ${rum}`;
         investBal.textContent = `📈 Инвест: ${invest}`;
         srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
+        document.getElementById('ton-balance').textContent = ton.toFixed(2);
+        document.getElementById('usdt-balance').textContent = usdt.toFixed(2);
         energyOnPot.textContent = `⚡ ${energy}/${maxEnergy}`;
         if (energy === maxEnergy && !gameActive) {
             startBtn.disabled = false; startBtn.textContent = '🥘 НАЧАТЬ'; startBtn.style.display = 'block';
         } else if (gameActive) startBtn.style.display = 'none';
         else { startBtn.disabled = true; startBtn.textContent = `⏳ ${Math.ceil((maxEnergy-energy)*6/60)} мин`; startBtn.style.display = 'block'; }
+        // Обновление бустов на горшке
+        updateBoostDisplay();
         saveAll();
     }
+
+    function updateBoostDisplay() {
+        const display = document.getElementById('boost-display');
+        if (activeBoost && activeBoost.endTime > Date.now()) {
+            const remain = Math.max(0, Math.ceil((activeBoost.endTime - Date.now()) / 1000));
+            const h = Math.floor(remain/3600), m = Math.floor((remain%3600)/60), s = remain%60;
+            display.innerHTML = `<div class="boost-icon">🚀 x${activeBoost.type} ${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</div>`;
+        } else {
+            display.innerHTML = '';
+            if (activeBoost && activeBoost.endTime <= Date.now()) {
+                activeBoost = null;
+                saveAll();
+            }
+        }
+    }
+    setInterval(updateBoostDisplay, 1000);
 
     function spawnAll() {
         holes.forEach(h => h.innerHTML = '');
@@ -387,8 +389,15 @@
         if (!gameActive) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
-        if (currentVeg[num].type === 'good') { rum += 10; flyVegToPot(hole, hole.querySelector('.veg').textContent); showCoinFountain(); }
-        else { rum = Math.max(0, rum-5); }
+        if (currentVeg[num].type === 'good') {
+            let gain = 10;
+            if (activeBoost && activeBoost.endTime > Date.now()) gain *= activeBoost.type;
+            rum += gain;
+            flyVegToPot(hole, hole.querySelector('.veg').textContent);
+            showCoinFountain();
+        } else {
+            rum = Math.max(0, rum-5);
+        }
         delete currentVeg[num]; hole.innerHTML = ''; updateUI();
     }
 
@@ -450,11 +459,12 @@
         }, 6000);
     }
 
-    // --- ГРАФИК ---
+    // --- Терминал (график + стакан) ---
     const canvas = document.getElementById('chartCanvas');
     const ctx = canvas.getContext('2d');
     let chartData = [], currentCoin = 'bitcoin';
     const coinPrices = { bitcoin: 60000, ethereum: 3000, toncoin: 5, solana: 150, dogecoin: 0.2, srum: 1.0 };
+
     function resizeCanvas() {
         const container = document.getElementById('chart-container');
         canvas.width = container.clientWidth - 120;
@@ -474,7 +484,6 @@
             chartData.push({ time: Date.now() - (50-i)*1500, price });
         }
         drawChart();
-        let prevPrice = price;
         const int = setInterval(() => {
             if (currentCoin !== document.querySelector('.coin-tab.active')?.dataset.coin) { clearInterval(int); return; }
             if (!chartData.length) return;
@@ -496,7 +505,6 @@
         const prices = chartData.map(d => d.price);
         const min = Math.min(...prices)*0.999, max = Math.max(...prices)*1.001, r = max-min || 1;
         const stepX = canvas.width / (chartData.length-1);
-        // Свечи
         for (let i=1; i<chartData.length; i++) {
             const open = chartData[i-1].price, close = chartData[i].price;
             const high = Math.max(open, close) * (1 + (Math.random()-0.5)*0.002);
@@ -509,19 +517,15 @@
             const yClose = canvas.height - ((close-min)/r)*canvas.height;
             ctx.fillStyle = close >= open ? '#4CAF50' : '#F44336';
             ctx.fillRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose - yOpen) || 1);
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
             ctx.strokeRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose - yOpen) || 1);
-            // wick
             ctx.beginPath();
             ctx.moveTo(x + w/2, yHigh);
             ctx.lineTo(x + w/2, yLow);
             ctx.stroke();
         }
-        // Скользящая средняя
         ctx.beginPath();
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1.5;
         for (let i=0; i<chartData.length; i++) {
             const x = i*stepX;
             let sum = 0, count = 0;
@@ -531,11 +535,9 @@
             if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
         }
         ctx.stroke();
-        // Цена
         const last = chartData[chartData.length-1];
         const ly = canvas.height - ((last.price-min)/r)*canvas.height;
-        ctx.fillStyle = '#fff';
-        ctx.font = '9px Arial';
+        ctx.fillStyle = '#fff'; ctx.font = '9px Arial';
         ctx.fillText(last.price.toFixed(currentCoin==='srum'?4:2), canvas.width-65, ly-6);
     }
 
@@ -588,7 +590,59 @@
     fetchRealData();
     setInterval(fetchRealData, 30000);
 
-    // --- ЗАДАНИЯ (без изменений) ---
+    // Переключение Море/Биржа
+    window.toggleView = function() {
+        const terminal = document.getElementById('terminal');
+        const sea = document.getElementById('sea-view');
+        const btn = document.getElementById('view-switch');
+        if (terminal.style.display === 'none') {
+            terminal.style.display = 'flex';
+            sea.style.display = 'none';
+            btn.innerHTML = '📈<br><span>Биржа</span>';
+        } else {
+            terminal.style.display = 'none';
+            sea.style.display = 'block';
+            btn.innerHTML = '🌊<br><span>Море</span>';
+        }
+    };
+
+    // --- Магазин (бусты, SRUM, обмен) ---
+    document.getElementById('buy-boost-x2').addEventListener('click', ()=> buyBoost(2, 1));
+    document.getElementById('buy-boost-x3').addEventListener('click', ()=> buyBoost(3, 2));
+    document.getElementById('buy-boost-x5').addEventListener('click', ()=> buyBoost(5, 3));
+    function buyBoost(type, cost) {
+        if (srum < cost) return alert('Недостаточно SRUM');
+        srum -= cost;
+        activeBoost = { type, endTime: Date.now() + 24*60*60*1000 };
+        updateUI();
+    }
+
+    document.getElementById('buy-srum-ton').addEventListener('click', ()=>{
+        if (ton < 1) return alert('Нужен 1 TON');
+        ton -= 1;
+        srum += 2;
+        updateUI();
+    });
+    document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{
+        if (usdt < 1) return alert('Нужен 1 USDT');
+        usdt -= 1;
+        srum += 1;
+        updateUI();
+    });
+    document.getElementById('swap-srum-ton').addEventListener('click', ()=>{
+        if (srum < 1) return alert('Минимум 1 SRUM');
+        srum -= 1;
+        ton += 0.5;
+        updateUI();
+    });
+    document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{
+        if (srum < 1) return alert('Минимум 1 SRUM');
+        srum -= 1;
+        usdt += 1;
+        updateUI();
+    });
+
+    // Задания, клуб, навигация (без изменений)
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -708,7 +762,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // --- КЛУБ ---
+    // --- Клуб ---
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
