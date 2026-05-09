@@ -29,20 +29,13 @@
             display:flex; flex-direction:column; align-items:center; gap:4px;
         }
         #view-switch span { font-size:0.6rem; }
-        /* Море */
-        #sea-view {
+
+        /* Вид со смайликами */
+        #smile-view {
             display:none;
             position:absolute; top:35px; left:0; right:0; bottom:50%;
-            background:linear-gradient(180deg, #1E90FF, #4169E1);
-            animation:waves 3s infinite ease-in-out;
         }
-        #sea-view .yacht {
-            position:absolute; right:10%; top:42%; width:70px; height:100px;
-            animation:float 4s infinite ease-in-out;
-        }
-        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
-        .yacht-body { position:absolute; bottom:0; left:5px; width:60px; height:20px; background:white; border-radius:50% 50% 0 0; }
-        .yacht-sail { position:absolute; bottom:20px; left:25px; width:0; height:0; border-left:25px solid transparent; border-right:10px solid transparent; border-bottom:50px solid white; }
+        #smileCanvas { width:100%; height:100%; display:block; }
 
         /* Терминал */
         #terminal {
@@ -86,7 +79,7 @@
         .ask { color:#F44336; }
         .bid { color:#4CAF50; }
 
-        /* Вид Нью-Йорк */
+        /* Нью-Йорк (ч/б) */
         #nyc-view {
             display:none;
             position:absolute; top:35px; left:0; right:0; bottom:50%;
@@ -107,7 +100,7 @@
         }
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .energy-display {
-            position:absolute; bottom:calc(30% + 12px + 26px + 30px); left:5%;
+            position:absolute; bottom:30%; right:5%; /* на подоконнике справа */
             display:flex; flex-direction:column; align-items:center;
             gap:2px; z-index:10; font-size:0.65rem; color:#FFD700;
             text-shadow:0 0 4px black;
@@ -117,14 +110,41 @@
         .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
         .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
-        .pot { position:absolute; top:5%; left:50%; transform:translateX(-50%); width:55%; height:60%; background:linear-gradient(180deg, #C0C0C0, #708090); border-radius:0 0 25px 25px; border:3px solid #2F4F4F; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:3; }
-        .pot::after { content:''; position:absolute; top:-10px; left:-3px; right:-3px; height:10px; background:#A9A9A9; border-radius:5px; }
-        .steam { position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:70%; height:18px; }
-        .steam-particle { position:absolute; width:10px; height:10px; background:rgba(255,255,255,0.7); border-radius:50%; animation:rise 2s infinite; }
+        /* Новая красивая кастрюля */
+        .pot {
+            position:absolute; top:5%; left:50%; transform:translateX(-50%);
+            width:60%; height:55%;
+            background:linear-gradient(180deg, #FFD700, #B8860B);
+            border-radius:0 0 40px 40px;
+            border:4px solid #8B6508;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.5);
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            z-index:3;
+        }
+        .pot::before {
+            content:'';
+            position:absolute;
+            top:-15px; left:-5px; right:-5px;
+            height:15px;
+            background:linear-gradient(180deg, #FFD700, #DAA520);
+            border-radius:5px 5px 0 0;
+            border:3px solid #8B6508;
+            border-bottom:none;
+        }
+        .pot::after {
+            content:'';
+            position:absolute;
+            top:-25px; left:50%; transform:translateX(-50%);
+            width:20px; height:10px;
+            background:#8B6508;
+            border-radius:10px 10px 0 0;
+        }
+        .steam { position:absolute; top:-25px; left:50%; transform:translateX(-50%); width:80%; height:18px; }
+        .steam-particle { position:absolute; width:12px; height:12px; background:rgba(255,255,255,0.8); border-radius:50%; animation:rise 2s infinite; }
         .steam-particle:nth-child(1){ left:20%; animation-delay:0s; }
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
-        @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.7; } 100%{ transform:translateY(-20px) scale(1.5); opacity:0; } }
+        @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.8; } 100%{ transform:translateY(-20px) scale(1.8); opacity:0; } }
         .pot .start-btn { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:8px 18px; border-radius:15px; font-weight:bold; font-size:0.9rem; cursor:pointer; z-index:4; margin-top:4px; }
         .pot .start-btn:disabled { background:#808080; cursor:not-allowed; }
         .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513; display:flex; flex-direction:column; padding:8px; gap:8px; z-index:10; }
@@ -165,12 +185,11 @@
 </head>
 <body>
 <div id="game-container">
-    <!-- Переключатель видов -->
     <button id="view-switch" onclick="cycleView()">📈<br><span>Биржа</span></button>
 
     <!-- Виды -->
-    <div id="sea-view"><div class="yacht"><div class="yacht-sail"></div><div class="yacht-body"></div></div></div>
     <div id="nyc-view"><canvas id="nycCanvas"></canvas></div>
+    <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
     <div id="terminal">
         <div class="ticker-bar">
             <div class="ticker-left" id="ticker-left"></div>
@@ -239,7 +258,7 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- Экраны (все) -->
+    <!-- Экраны -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button>Личный майнинг</button><button>Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button>
@@ -289,7 +308,7 @@
 
 <script>
 (function() {
-    // Игровое ядро
+    // --- Игровое ядро ---
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
     let rum = parseInt(localStorage.getItem('rum') || '0');
@@ -343,8 +362,6 @@
         rumBal.textContent = `💰 RUM: ${rum}`;
         investBal.textContent = `📈 Инвест: ${invest}`;
         srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
-        document.getElementById('ton-balance').textContent = ton.toFixed(2);
-        document.getElementById('usdt-balance').textContent = usdt.toFixed(2);
         if (games > 0) {
             energyDisplay.innerHTML = `<div class="energy-icon">⚡ ${games}/${maxGames} игр</div>`;
         } else {
@@ -496,24 +513,83 @@
     }
 
     // Переключение видов
-    let currentView = 'terminal'; // terminal, sea, nyc
+    let currentView = 'terminal'; // terminal, smile, nyc
     function showView(view) {
         document.getElementById('terminal').style.display = view === 'terminal' ? 'flex' : 'none';
-        document.getElementById('sea-view').style.display = view === 'sea' ? 'block' : 'none';
+        document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
         document.getElementById('nyc-view').style.display = view === 'nyc' ? 'block' : 'none';
         const btn = document.getElementById('view-switch');
-        if (view === 'sea') btn.innerHTML = '🌊<br><span>Море</span>';
+        if (view === 'smile') btn.innerHTML = '😊<br><span>Смайлы</span>';
         else if (view === 'nyc') btn.innerHTML = '🏙️<br><span>Нью-Йорк</span>';
         else btn.innerHTML = '📈<br><span>Биржа</span>';
         currentView = view;
         if (view === 'nyc') drawNycBackground();
+        if (view === 'smile') startSmileAnimation();
         if (view === 'terminal') { resizeCanvas(); drawChart(); }
     }
     window.cycleView = function() {
-        if (currentView === 'terminal') showView('sea');
-        else if (currentView === 'sea') showView('nyc');
+        if (currentView === 'terminal') showView('smile');
+        else if (currentView === 'smile') showView('nyc');
         else showView('terminal');
     };
+
+    // Смайлики
+    const smileCanvas = document.getElementById('smileCanvas');
+    const smileCtx = smileCanvas.getContext('2d');
+    let smileParticles = [];
+    const emojis = ['😊','😂','😎','🥳','😍','🤩','😇'];
+    function startSmileAnimation() {
+        smileCanvas.width = smileCanvas.parentElement.clientWidth;
+        smileCanvas.height = smileCanvas.parentElement.clientHeight;
+        smileParticles = [];
+        for (let i = 0; i < 20; i++) {
+            smileParticles.push({
+                x: Math.random() * smileCanvas.width,
+                y: smileCanvas.height + Math.random() * 100,
+                speed: 0.5 + Math.random() * 1.5,
+                size: 16 + Math.random() * 14,
+                emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                opacity: 1,
+                popping: false
+            });
+        }
+        if (!window.smileInterval) {
+            window.smileInterval = setInterval(drawSmile, 50);
+        }
+    }
+    function drawSmile() {
+        if (currentView !== 'smile') return;
+        smileCtx.clearRect(0, 0, smileCanvas.width, smileCanvas.height);
+        smileParticles.forEach(p => {
+            if (!p.popping) {
+                p.y -= p.speed;
+                if (p.y < -20) {
+                    p.y = smileCanvas.height + 20;
+                    p.x = Math.random() * smileCanvas.width;
+                }
+            }
+            smileCtx.font = `${p.size}px Arial`;
+            smileCtx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`;
+            smileCtx.fillText(p.emoji, p.x, p.y);
+            // Лопание (просто эффект исчезновения)
+            if (p.popping) {
+                p.opacity -= 0.02;
+                p.size += 1;
+                if (p.opacity <= 0) {
+                    p.y = smileCanvas.height + 20;
+                    p.x = Math.random() * smileCanvas.width;
+                    p.opacity = 1;
+                    p.size = 16 + Math.random() * 14;
+                    p.popping = false;
+                }
+            }
+        });
+        // Случайно "лопаем" смайлик по клику или каждый 2 сек
+        if (Math.random() < 0.02) {
+            const randomP = smileParticles[Math.floor(Math.random() * smileParticles.length)];
+            if (randomP && !randomP.popping) randomP.popping = true;
+        }
+    }
 
     // Нью-Йорк (ч/б)
     const nycCanvas = document.getElementById('nycCanvas');
@@ -522,13 +598,11 @@
         nycCanvas.width = nycCanvas.parentElement.clientWidth;
         nycCanvas.height = nycCanvas.parentElement.clientHeight;
         nycCtx.clearRect(0, 0, nycCanvas.width, nycCanvas.height);
-        // Небо
         const grad = nycCtx.createLinearGradient(0, 0, 0, nycCanvas.height);
         grad.addColorStop(0, '#111');
         grad.addColorStop(1, '#000');
         nycCtx.fillStyle = grad;
         nycCtx.fillRect(0, 0, nycCanvas.width, nycCanvas.height);
-        // Здания
         for (let i = 0; i < 20; i++) {
             const w = 15 + Math.random() * 25;
             const h = 80 + Math.random() * 120;
@@ -700,7 +774,7 @@
     document.getElementById('swap-srum-ton').addEventListener('click', ()=> { if (srum < 1) return alert('Минимум 1 SRUM'); srum -= 1; ton += 0.5; updateUI(); });
     document.getElementById('swap-srum-usdt').addEventListener('click', ()=> { if (srum < 1) return alert('Минимум 1 SRUM'); srum -= 1; usdt += 1; updateUI(); });
 
-    // Задания и клуб (аналогично предыдущему коду, без изменений)
+    // Задания и клуб (без изменений)
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
