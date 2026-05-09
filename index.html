@@ -7,55 +7,40 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            background:#000;
-            display:flex; justify-content:center; align-items:center;
-            height:100vh; overflow:hidden;
-            font-family:'Arial',sans-serif;
-            touch-action:manipulation; user-select:none;
-            -webkit-tap-highlight-color:transparent;
+            background:#000; display:flex; justify-content:center; align-items:center;
+            height:100vh; overflow:hidden; font-family:'Arial',sans-serif;
+            touch-action:manipulation; user-select:none; -webkit-tap-highlight-color:transparent;
         }
         #game-container {
             position:relative; width:100%; max-width:420px; height:100vh;
-            background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%);
-            overflow:hidden;
+            background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden;
         }
-
         /* Матрица */
-        #matrix-bg {
-            position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px);
-            z-index:0;
-        }
+        #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; }
         #matrixCanvas { width:100%; height:100%; display:block; }
-
-        /* Мини-график (биржевые свечи) в левом верхнем углу */
+        /* Мини-график */
         #mini-chart {
-            position:absolute; top:35px; left:5px;
-            width:90px; height:60px; /* примерно 3x2 см */
-            background:rgba(0,0,0,0.6);
-            border-radius:6px;
-            z-index:5;
-            display:block;
+            position:absolute; top:55px; left:5px;
+            width:56px; height:42px; /* 2 см x 1.5 см */
+            background:rgba(0,0,0,0.6); border-radius:6px; z-index:5;
         }
         #miniChartCanvas { width:100%; height:100%; display:block; }
-
         /* Интерфейс */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
         .boost-display {
-            position:absolute; bottom:calc(30% + 12px + 26px); left:5%;
-            display:flex; flex-direction:column; align-items:center;
-            gap:2px; z-index:10; font-size:0.6rem; color:white;
-            text-shadow:0 0 4px black;
+            position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:5%;
+            display:flex; flex-direction:column; align-items:center; gap:2px; z-index:10;
+            font-size:0.6rem; color:white; text-shadow:0 0 4px black;
         }
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .rules-btn-bottom {
-            position:absolute; bottom:30%; left:12%;
+            position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:15%;
             background:rgba(0,0,0,0.7); color:white; border:none;
-            padding:4px 8px; border-radius:8px; font-size:0.6rem;
-            cursor:pointer; z-index:10; backdrop-filter: blur(5px);
-            top: calc(30% + 16px); /* чуть ниже горшка */
+            padding:2px 6px; border-radius:6px; font-size:0.55rem;
+            cursor:pointer; z-index:10; backdrop-filter:blur(5px);
         }
         .purple-bg { position:absolute; bottom:0; left:0; right:0; top:70%; background:purple; z-index:1; }
         .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
@@ -65,11 +50,9 @@
             position:absolute; top:5%; left:50%; transform:translateX(-50%);
             width:60%; height:55%;
             background:linear-gradient(180deg, #FFD700, #B8860B);
-            border-radius:0 0 40px 40px;
-            border:4px solid #8B6508;
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.5);
-            display:flex; flex-direction:column; align-items:center; justify-content:center;
-            z-index:3;
+            border-radius:0 0 40px 40px; border:4px solid #8B6508;
+            box-shadow:inset 0 4px 8px rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.5);
+            display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:3;
         }
         .pot::before {
             content:''; position:absolute; top:-15px; left:-5px; right:-5px; height:15px;
@@ -86,72 +69,65 @@
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.8; } 100%{ transform:translateY(-20px) scale(1.8); opacity:0; } }
-
-        /* Кнопка Начать / таймер над кастрюлей */
+        /* Кнопка Начать (опущена) */
         .start-btn-container {
-            position:absolute; top:10%; left:50%; transform:translateX(-50%);
+            position:absolute; top:calc(10% + 56px); left:50%; transform:translateX(-50%);
             z-index:25; display:flex; align-items:center; justify-content:center;
         }
         .start-btn, .timer-placeholder {
-            background:linear-gradient(180deg, #FF6347, #DC143C);
-            color:white; border:none; padding:12px 25px; border-radius:20px;
-            font-weight:bold; font-size:1rem; cursor:pointer;
-            box-shadow: 0 0 20px rgba(255,69,0,0.7);
-            animation: pulse 1.5s infinite;
+            background:linear-gradient(180deg, #FF6347, #DC143C); color:white;
+            border:none; padding:12px 25px; border-radius:20px; font-weight:bold;
+            font-size:1rem; cursor:pointer; box-shadow:0 0 20px rgba(255,69,0,0.7);
+            animation:pulse 1.5s infinite;
         }
         .start-btn:disabled, .timer-placeholder {
             background:#808080; animation:none; box-shadow:none;
         }
         .timer-placeholder {
-            animation:none;
-            background:rgba(0,0,0,0.7);
-            box-shadow:none;
-            padding:8px 15px;
-            font-size:0.9rem;
+            animation:none; background:rgba(0,0,0,0.7); box-shadow:none;
+            padding:8px 15px; font-size:0.9rem;
         }
-
-        .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513; display:flex; flex-direction:column; padding:8px; gap:8px; z-index:10; }
+        /* Доска 3-4-5 */
+        .board {
+            position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
+            width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513;
+            display:flex; flex-direction:column; padding:8px; gap:6px; z-index:10;
+        }
         .row { display:flex; justify-content:space-around; }
-        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; width:55px; height:55px; }
+        .hole {
+            background:radial-gradient(circle, #2F1B0E, #1A0F07);
+            border-radius:50%; border:2px solid #3D2B1F;
+            display:flex; justify-content:center; align-items:center;
+            cursor:pointer; position:relative; transition:transform 0.1s;
+            width:48px; height:48px;
+        }
         .hole:active { transform:scale(0.85); }
         .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
-
-        /* Верхние компактные кнопки */
-        .top-panel {
-            position:absolute; top:5px; left:5px; right:5px;
-            display:flex; justify-content:space-between;
-            z-index:35; pointer-events:none;
-        }
-        .top-left-buttons {
-            display:flex; gap:4px; flex-wrap:wrap; pointer-events:auto;
-        }
+        /* Верхние панели */
+        .top-panel { position:absolute; top:5px; left:5px; right:5px; display:flex; justify-content:space-between; z-index:35; pointer-events:none; }
+        .top-left-buttons { display:flex; gap:4px; flex-wrap:wrap; pointer-events:auto; }
         .top-left-buttons .item {
             background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px;
             font-size:0.55rem; display:flex; align-items:center; gap:2px; cursor:pointer;
-            backdrop-filter: blur(5px);
+            backdrop-filter:blur(5px);
         }
-        .balances-right {
-            display:flex; flex-direction:column; gap:4px; align-items:flex-end;
-            pointer-events:auto;
-        }
+        .balances-right { display:flex; flex-direction:column; gap:4px; align-items:flex-end; pointer-events:auto; }
         .balances-right div {
             background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px;
-            font-size:0.55rem; font-weight:bold; backdrop-filter: blur(5px);
+            font-size:0.55rem; font-weight:bold; backdrop-filter:blur(5px);
         }
         #rum-balance { background:rgba(255,215,0,0.7); color:black; }
         #srum-balance { background:rgba(192,192,192,0.7); color:black; }
         #invest-balance-right { background:rgba(76,175,80,0.7); color:white; }
-
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
         .nav-btn {
             color:white; border:none; padding:10px 6px; border-radius:10px;
             font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column;
             align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold;
-            letter-spacing:0.5px; transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            letter-spacing:0.5px; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.5);
         }
         .nav-btn:nth-child(1) { background:linear-gradient(180deg, #e74c3c, #c0392b); }
         .nav-btn:nth-child(2) { background:linear-gradient(180deg, #8e44ad, #6c3483); }
@@ -160,31 +136,21 @@
         .nav-btn:nth-child(5) { background:linear-gradient(180deg, #2980b9, #2471a3); }
         .nav-btn:nth-child(6) { background:linear-gradient(180deg, #f1c40f, #d4ac0d); color:black; }
         .nav-btn:active { transform:scale(0.95); }
-        .nav-btn.active { filter:brightness(1.2); }
-
         .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:flex-start; z-index:40; overflow-y:auto; }
         .screen.active { display:flex; }
         .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
-        .flying-veg { position:absolute; z-index:20; pointer-events:none; animation: flyToPot 0.5s ease-in forwards; }
-        @keyframes flyToPot { 0% { transform: translate(0, 0) scale(1); opacity:1; } 50% { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform: translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
-        .coin-fountain { position:absolute; pointer-events:none; z-index:25; animation: coinUp 0.8s ease-out forwards; font-size:1rem; font-weight:bold; }
+        .flying-veg { position:absolute; z-index:20; pointer-events:none; animation:flyToPot 0.5s ease-in forwards; }
+        @keyframes flyToPot { 0% { transform:translate(0,0) scale(1); opacity:1; } 50% { transform:translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform:translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
+        .coin-fountain { position:absolute; pointer-events:none; z-index:25; animation:coinUp 0.8s ease-out forwards; font-size:1rem; font-weight:bold; }
         @keyframes coinUp { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-80px) scale(0.5); opacity:0; } }
-        .task-item { background:rgba(255,255,255,0.1); padding:10px; margin:8px 0; border-radius:8px; display:flex; flex-direction:column; gap:8px; }
-        .task-item input, .task-item select { padding:8px; border-radius:5px; border:none; width:100%; background: rgba(255,255,255,0.15); color: white; }
-        .task-item button { padding:8px 12px; border:none; border-radius:5px; font-weight:bold; background:#FFD700; color:black; }
-        .sub-tab { padding:8px 14px; border:none; border-radius:20px; font-weight:bold; font-size:0.75rem; cursor:pointer; background:#333; color:#aaa; transition: all 0.2s; box-shadow: 0 0 5px rgba(255,255,255,0.2); }
-        .sub-tab.active { background: linear-gradient(135deg, #FFD700, #FF8C00); color:black; animation: pulse 1.5s infinite; box-shadow: 0 0 15px rgba(255,215,0,0.8); }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 <div id="game-container">
     <!-- Матрица -->
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
-
-    <!-- Мини-график (биржевые свечи, без стакана) -->
+    <!-- Мини-график -->
     <div id="mini-chart"><canvas id="miniChartCanvas"></canvas></div>
-
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
     <div class="flower-pot"></div>
@@ -201,21 +167,34 @@
         </div>
     </div>
 
-    <!-- Кнопка Начать / таймер над кастрюлей -->
+    <!-- Кнопка Начать / таймер -->
     <div class="start-btn-container" id="start-btn-container">
         <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
     </div>
 
+    <!-- Доска 3-4-5 -->
     <div class="board" id="board">
         <div class="row">
-            <div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div><div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div>
+            <div class="hole" data-hole="0"></div>
+            <div class="hole" data-hole="1"></div>
+            <div class="hole" data-hole="2"></div>
         </div>
         <div class="row">
-            <div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div>
+            <div class="hole" data-hole="3"></div>
+            <div class="hole" data-hole="4"></div>
+            <div class="hole" data-hole="5"></div>
+            <div class="hole" data-hole="6"></div>
+        </div>
+        <div class="row">
+            <div class="hole" data-hole="7"></div>
+            <div class="hole" data-hole="8"></div>
+            <div class="hole" data-hole="9"></div>
+            <div class="hole" data-hole="10"></div>
+            <div class="hole" data-hole="11"></div>
         </div>
     </div>
 
-    <!-- Верхняя панель -->
+    <!-- Верхние панели -->
     <div class="top-panel">
         <div class="top-left-buttons">
             <div class="item" id="top-tappers" style="background:#FFD700; color:black;">🏆 Топ игроков</div>
@@ -231,6 +210,7 @@
         </div>
     </div>
 
+    <!-- Нижние кнопки -->
     <div class="bottom-panel">
         <button class="nav-btn" data-screen="arena">🏟️ Арена</button>
         <button class="nav-btn" data-screen="mining-club">🐺 Клуб</button>
@@ -239,7 +219,7 @@
         <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
     </div>
 
-    <!-- Экраны -->
+    <!-- Остальные экраны (скрыты) -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button>Личный майнинг</button><button>Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
@@ -267,7 +247,7 @@
         <div id="tasks-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
     </div>
     <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button>Инвестировать RUM</button></div>
-    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>Привязать TON кошелёк</p><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p></div>
+    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p></div>
     <div class="screen" id="shop-screen">
         <button class="back-btn">← Назад</button>
         <h2>🛍️ Магазин</h2>
@@ -288,7 +268,7 @@
 
 <script>
 (function() {
-    // Игровое ядро
+    // --- Игровые переменные ---
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
     let rum = parseInt(localStorage.getItem('rum') || '0');
@@ -302,7 +282,7 @@
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
 
-    // ... остальные переменные tasks, clubs и т.д. без изменений
+    // --- Задания ---
     let officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:2, desc:'Сделать репост', reward:100, link:'', maxCompletions:100, completionsDone:0, checking:false },
@@ -320,8 +300,7 @@
 
     function saveAll() {
         localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
-        localStorage.setItem('games', games);
-        localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
+        localStorage.setItem('games', games); localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
         localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
         localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
         localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
@@ -346,15 +325,12 @@
         if (document.getElementById('ton-balance')) document.getElementById('ton-balance').textContent = ton.toFixed(2);
         if (document.getElementById('usdt-balance')) document.getElementById('usdt-balance').textContent = usdt.toFixed(2);
 
-        // Кнопка Начать или таймер
         if (games > 0 && !gameActive) {
             startBtnContainer.innerHTML = '<button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>';
-            const newStartBtn = document.getElementById('start-btn');
-            newStartBtn.addEventListener('click', startGame);
+            document.getElementById('start-btn').addEventListener('click', startGame);
         } else if (gameActive) {
             startBtnContainer.innerHTML = '';
         } else {
-            // игры кончились, показываем таймер
             const now = Date.now();
             const last = window.lastGameTime || now;
             const elapsed = (now - last) / 1000;
@@ -363,7 +339,6 @@
             const secs = Math.floor(remaining % 60);
             startBtnContainer.innerHTML = `<div class="timer-placeholder">⏳ ${mins}:${secs.toString().padStart(2,'0')}</div>`;
         }
-
         updateBoostDisplay();
         saveAll();
     }
@@ -385,12 +360,12 @@
     function spawnAll() {
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
-        [...holes].forEach((h,i) => {
+        for (let i=0; i<holes.length; i++) {
             const isBad = Math.random() < 0.25;
             const pool = isBad ? BAD : GOOD;
-            h.innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
+            holes[i].innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
             currentVeg[i] = { type: isBad ? 'bad' : 'good' };
-        });
+        }
     }
 
     function showCoinFountain() {
@@ -399,9 +374,7 @@
         const cx = potRect.left + potRect.width/2 - containerRect.left;
         const cy = potRect.top - containerRect.top;
         for (let i=0; i<10; i++) {
-            const coin = document.createElement('div');
-            coin.className = 'coin-fountain';
-            coin.textContent = '💰';
+            const coin = document.createElement('div'); coin.className = 'coin-fountain'; coin.textContent = '💰';
             coin.style.left = (cx + (Math.random()-0.5)*60) + 'px';
             coin.style.top = (cy + (Math.random()-0.5)*20) + 'px';
             coin.style.animationDuration = (0.7 + Math.random()*0.5) + 's';
@@ -451,8 +424,7 @@
     function startGame() {
         if (games <= 0 || gameActive) return;
         gameActive = true; gameTimeLeft = 60;
-        updateUI();
-        spawnAll();
+        updateUI(); spawnAll();
         let interval = 1800;
         spawnInterval = setInterval(() => {
             if (!gameActive) return;
@@ -496,81 +468,52 @@
         matrixCanvas.width = matrixCanvas.parentElement.clientWidth;
         matrixCanvas.height = matrixCanvas.parentElement.clientHeight;
         matrixParticles = [];
-        for (let i=0; i<150; i++) {
-            matrixParticles.push({
-                x: Math.random() * matrixCanvas.width,
-                y: Math.random() * matrixCanvas.height,
-                speed: 1 + Math.random() * 2,
-                char: String.fromCharCode(0x30A0 + Math.random() * 96),
-                opacity: Math.random()
-            });
-        }
+        for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
     }
     function drawMatrix() {
         matrixCtx.fillStyle = 'rgba(0,0,0,0.05)';
-        matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-        matrixCtx.fillStyle = '#0F0';
-        matrixCtx.font = '14px monospace';
-        matrixParticles.forEach(p => {
-            matrixCtx.fillText(p.char, p.x, p.y);
-            p.y -= p.speed;
-            if (p.y < -20) { p.y = matrixCanvas.height + 20; p.x = Math.random() * matrixCanvas.width; }
-        });
+        matrixCtx.fillRect(0,0,matrixCanvas.width, matrixCanvas.height);
+        matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
+        matrixParticles.forEach(p => { matrixCtx.fillText(p.char, p.x, p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
     }
-    startMatrix();
-    setInterval(drawMatrix, 50);
+    startMatrix(); setInterval(drawMatrix, 50);
     window.addEventListener('resize', startMatrix);
 
-    // Мини-график (японские свечи)
+    // Мини-график
     const miniCanvas = document.getElementById('miniChartCanvas');
     const miniCtx = miniCanvas.getContext('2d');
     let miniChartData = [];
-    let miniCurrentCoin = 'bitcoin';
     function updateMiniChart() {
         miniCanvas.width = miniCanvas.parentElement.clientWidth;
         miniCanvas.height = miniCanvas.parentElement.clientHeight;
         if (miniChartData.length < 2) return;
-        miniCtx.clearRect(0, 0, miniCanvas.width, miniCanvas.height);
-        const prices = miniChartData.map(d => d.price);
-        const min = Math.min(...prices)*0.999, max = Math.max(...prices)*1.001, r = max-min || 1;
-        const stepX = miniCanvas.width / (miniChartData.length - 1);
+        miniCtx.clearRect(0,0, miniCanvas.width, miniCanvas.height);
+        const prices = miniChartData.map(d=>d.price);
+        const min = Math.min(...prices)*0.999, max = Math.max(...prices)*1.001, r = max-min||1;
+        const stepX = miniCanvas.width/(miniChartData.length-1);
         for (let i=1; i<miniChartData.length; i++) {
             const open = miniChartData[i-1].price, close = miniChartData[i].price;
-            const x = (i-1)*stepX + stepX*0.1, w = stepX*0.8;
+            const x = (i-1)*stepX+stepX*0.1, w = stepX*0.8;
             const yOpen = miniCanvas.height - ((open-min)/r)*miniCanvas.height;
             const yClose = miniCanvas.height - ((close-min)/r)*miniCanvas.height;
-            miniCtx.fillStyle = close >= open ? '#4CAF50' : '#F44336';
-            miniCtx.fillRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose - yOpen) || 1);
+            miniCtx.fillStyle = close>=open ? '#4CAF50' : '#F44336';
+            miniCtx.fillRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose-yOpen)||1);
         }
     }
-    function generateMiniData() {
-        let price = 60000;
-        miniChartData = [];
-        for (let i=0; i<20; i++) {
-            price += (Math.random()-0.5) * 200;
-            miniChartData.push({ price });
-        }
-    }
-    generateMiniData();
-    setInterval(() => {
-        const last = miniChartData[miniChartData.length-1];
-        const newPrice = last.price + (Math.random()-0.5) * 150;
-        miniChartData.push({ price: newPrice });
-        if (miniChartData.length > 30) miniChartData.shift();
-        updateMiniChart();
-    }, 1500);
+    function generateMiniData() { let price=60000; miniChartData=[]; for(let i=0;i<20;i++){ price+=(Math.random()-0.5)*200; miniChartData.push({price}); } }
+    generateMiniData(); setInterval(()=>{ const last=miniChartData[miniChartData.length-1]; miniChartData.push({price:last.price+(Math.random()-0.5)*150}); if(miniChartData.length>30) miniChartData.shift(); updateMiniChart(); },1500);
     updateMiniChart();
 
     // Магазин
-    document.getElementById('buy-boost-x2').addEventListener('click', ()=> { if (srum < 1) return alert('Мало SRUM'); srum -= 1; activeBoost = { type:2, endTime: Date.now() + 86400000 }; updateUI(); });
-    document.getElementById('buy-boost-x3').addEventListener('click', ()=> { if (srum < 2) return alert('Мало SRUM'); srum -= 2; activeBoost = { type:3, endTime: Date.now() + 86400000 }; updateUI(); });
-    document.getElementById('buy-boost-x5').addEventListener('click', ()=> { if (srum < 3) return alert('Мало SRUM'); srum -= 3; activeBoost = { type:5, endTime: Date.now() + 86400000 }; updateUI(); });
-    document.getElementById('buy-srum-ton').addEventListener('click', ()=> { if (ton < 1) return alert('Нужен 1 TON'); ton -= 1; srum += 2; updateUI(); });
-    document.getElementById('buy-srum-usdt').addEventListener('click', ()=> { if (usdt < 1) return alert('Нужен 1 USDT'); usdt -= 1; srum += 1; updateUI(); });
-    document.getElementById('swap-srum-ton').addEventListener('click', ()=> { if (srum < 1) return alert('Минимум 1 SRUM'); srum -= 1; ton += 0.5; updateUI(); });
-    document.getElementById('swap-srum-usdt').addEventListener('click', ()=> { if (srum < 1) return alert('Минимум 1 SRUM'); srum -= 1; usdt += 1; updateUI(); });
+    document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if (srum<1) return alert('Мало SRUM'); srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if (srum<2) return alert('Мало SRUM'); srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if (srum<3) return alert('Мало SRUM'); srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-srum-ton').addEventListener('click', ()=>{ if (ton<1) return alert('Нужен 1 TON'); ton-=1; srum+=2; updateUI(); });
+    document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{ if (usdt<1) return alert('Нужен 1 USDT'); usdt-=1; srum+=1; updateUI(); });
+    document.getElementById('swap-srum-ton').addEventListener('click', ()=>{ if (srum<1) return alert('Минимум 1 SRUM'); srum-=1; ton+=0.5; updateUI(); });
+    document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{ if (srum<1) return alert('Минимум 1 SRUM'); srum-=1; usdt+=1; updateUI(); });
 
-    // Кнопки навигации
+    // Навигация
     document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
     document.getElementById('invest-nav-btn').addEventListener('click', ()=> switchScreen('invest'));
     document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
@@ -582,7 +525,8 @@
 
     board.addEventListener('touchstart', handleTouchStart, {passive: false});
     board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    // Стартовая кнопка будет добавляться динамически, начальный запуск
+
+    // Запуск
     updateUI();
     window.lastGameTime = Date.now();
     if (games < maxGames) startRecovery();
@@ -595,7 +539,7 @@
         else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
     }
 
-    // Задания и клуб (перенесены без изменений, но для экономии места опущены – они полностью рабочие)
+    // Задания (используем существующие переменные)
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -637,8 +581,7 @@
     }
     function renderCreateTask() {
         const max = (officialRumTasks.every(t => t.completionsDone >= t.maxCompletions) && officialSrumTasks.every(t => t.completionsDone >= t.maxCompletions)) ? 33 : 3;
-        const currentCount = userTasks.length;
-        const canCreate = currentCount < max;
+        const currentCount = userTasks.length; const canCreate = currentCount < max;
         tasksContent.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:10px;"><p>Лимит созданных: ${currentCount}/${max}</p>
             <input id="task-desc" placeholder="Описание задания" ${canCreate ? '' : 'disabled'}>
@@ -715,7 +658,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // Клуб
+    // Клуб (те же функции)
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
