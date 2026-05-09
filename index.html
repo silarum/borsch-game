@@ -19,6 +19,7 @@
             background:linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             overflow:hidden;
         }
+        /* Переключатель видов */
         #view-switch {
             position:absolute; left:5px; top:45%;
             transform:translateY(-50%);
@@ -28,6 +29,7 @@
             display:flex; flex-direction:column; align-items:center; gap:4px;
         }
         #view-switch span { font-size:0.6rem; }
+        /* Море */
         #sea-view {
             display:none;
             position:absolute; top:35px; left:0; right:0; bottom:50%;
@@ -42,7 +44,7 @@
         .yacht-body { position:absolute; bottom:0; left:5px; width:60px; height:20px; background:white; border-radius:50% 50% 0 0; }
         .yacht-sail { position:absolute; bottom:20px; left:25px; width:0; height:0; border-left:25px solid transparent; border-right:10px solid transparent; border-bottom:50px solid white; }
 
-        /* Терминал с пиксельным городом */
+        /* Терминал */
         #terminal {
             display:flex;
             position:absolute; top:35px; left:0; right:0; bottom:50%;
@@ -71,7 +73,7 @@
         #chart-container {
             flex:1;
             display:flex;
-            margin: 60px 0; /* 1.5 см */
+            margin: 60px 0;
             position:relative;
         }
         #chartCanvas { flex:1; display:block; }
@@ -84,7 +86,15 @@
         .ask { color:#F44336; }
         .bid { color:#4CAF50; }
 
-        /* Остальной интерфейс */
+        /* Вид Нью-Йорк */
+        #nyc-view {
+            display:none;
+            position:absolute; top:35px; left:0; right:0; bottom:50%;
+            background:#000;
+        }
+        #nycCanvas { width:100%; height:100%; display:block; }
+
+        /* Интерфейс */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
@@ -97,7 +107,7 @@
         }
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .energy-display {
-            position:absolute; bottom:calc(30% + 12px + 26px + 30px); left:5%; /* ниже бустов */
+            position:absolute; bottom:calc(30% + 12px + 26px + 30px); left:5%;
             display:flex; flex-direction:column; align-items:center;
             gap:2px; z-index:10; font-size:0.65rem; color:#FFD700;
             text-shadow:0 0 4px black;
@@ -115,12 +125,7 @@
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.7; } 100%{ transform:translateY(-20px) scale(1.5); opacity:0; } }
-        .pot .start-btn {
-            background:linear-gradient(180deg, #FF6347, #DC143C);
-            color:white; border:none; padding:8px 18px;
-            border-radius:15px; font-weight:bold; font-size:0.9rem;
-            cursor:pointer; z-index:4; margin-top:4px;
-        }
+        .pot .start-btn { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:8px 18px; border-radius:15px; font-weight:bold; font-size:0.9rem; cursor:pointer; z-index:4; margin-top:4px; }
         .pot .start-btn:disabled { background:#808080; cursor:not-allowed; }
         .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513; display:flex; flex-direction:column; padding:8px; gap:8px; z-index:10; }
         .row { display:flex; justify-content:space-around; }
@@ -160,15 +165,12 @@
 </head>
 <body>
 <div id="game-container">
-    <button id="view-switch" onclick="toggleView()">📈<br><span>Биржа</span></button>
+    <!-- Переключатель видов -->
+    <button id="view-switch" onclick="cycleView()">📈<br><span>Биржа</span></button>
 
-    <div id="sea-view">
-        <div class="yacht">
-            <div class="yacht-sail"></div>
-            <div class="yacht-body"></div>
-        </div>
-    </div>
-
+    <!-- Виды -->
+    <div id="sea-view"><div class="yacht"><div class="yacht-sail"></div><div class="yacht-body"></div></div></div>
+    <div id="nyc-view"><canvas id="nycCanvas"></canvas></div>
     <div id="terminal">
         <div class="ticker-bar">
             <div class="ticker-left" id="ticker-left"></div>
@@ -187,6 +189,7 @@
         </div>
     </div>
 
+    <!-- Интерфейс -->
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
     <div class="flower-pot"></div>
@@ -236,7 +239,7 @@
         <button class="nav-btn" data-screen="shop">🛍️<br>Магазин</button>
     </div>
 
-    <!-- Экраны (полные) -->
+    <!-- Экраны (все) -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button>Личный майнинг</button><button>Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button>
@@ -294,12 +297,9 @@
     let srum = parseFloat(localStorage.getItem('srum') || '0');
     let ton = parseFloat(localStorage.getItem('ton') || '0');
     let usdt = parseFloat(localStorage.getItem('usdt') || '0');
-
-    // Энергия: теперь количество игр
     let games = parseInt(localStorage.getItem('games') || '3');
     const maxGames = 3;
-    const gameRecoveryTime = 600; // 10 минут в секундах
-
+    const gameRecoveryTime = 600;
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
 
@@ -345,19 +345,14 @@
         srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
         document.getElementById('ton-balance').textContent = ton.toFixed(2);
         document.getElementById('usdt-balance').textContent = usdt.toFixed(2);
-
-        // Отображение оставшихся игр на горшочке
         if (games > 0) {
             energyDisplay.innerHTML = `<div class="energy-icon">⚡ ${games}/${maxGames} игр</div>`;
         } else {
-            // показать таймер восстановления
             const nextGameIn = Math.ceil((gameRecoveryTime - (Date.now() - (window.lastGameTime || Date.now()))) / 1000);
             const m = Math.floor(nextGameIn / 60);
             const s = nextGameIn % 60;
             energyDisplay.innerHTML = `<div class="energy-icon">⏳ ${m}:${s.toString().padStart(2,'0')}</div>`;
         }
-
-        // Кнопка старта
         if (games > 0 && !gameActive) {
             startBtn.disabled = false;
             startBtn.textContent = `🥘 Играть (${games})`;
@@ -369,7 +364,6 @@
             startBtn.textContent = '⏳ Жди';
             startBtn.style.display = 'block';
         }
-
         updateBoostDisplay();
         saveAll();
     }
@@ -386,7 +380,7 @@
         }
     }
     setInterval(updateBoostDisplay, 1000);
-    setInterval(updateUI, 1000); // для таймера восстановления
+    setInterval(updateUI, 1000);
 
     function spawnAll() {
         holes.forEach(h => h.innerHTML = '');
@@ -482,24 +476,16 @@
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
         startBtn.style.display = 'block';
-
-        // Потратить одну игру
         games = Math.max(0, games - 1);
         window.lastGameTime = Date.now();
-
         updateUI();
-        // Запуск восстановления, если игр < maxGames
         if (games < maxGames) startRecovery();
     }
 
     function startRecovery() {
-        // Проверяем, не запущен ли уже таймер
         if (window.recoveryInterval) clearInterval(window.recoveryInterval);
         window.recoveryInterval = setInterval(() => {
-            if (games >= maxGames) {
-                clearInterval(window.recoveryInterval);
-                return;
-            }
+            if (games >= maxGames) { clearInterval(window.recoveryInterval); return; }
             if (Date.now() - (window.lastGameTime || 0) >= gameRecoveryTime * 1000) {
                 games = Math.min(maxGames, games + 1);
                 window.lastGameTime = Date.now();
@@ -509,7 +495,56 @@
         }, 1000);
     }
 
-    // График с пиксельным Нью-Йорком
+    // Переключение видов
+    let currentView = 'terminal'; // terminal, sea, nyc
+    function showView(view) {
+        document.getElementById('terminal').style.display = view === 'terminal' ? 'flex' : 'none';
+        document.getElementById('sea-view').style.display = view === 'sea' ? 'block' : 'none';
+        document.getElementById('nyc-view').style.display = view === 'nyc' ? 'block' : 'none';
+        const btn = document.getElementById('view-switch');
+        if (view === 'sea') btn.innerHTML = '🌊<br><span>Море</span>';
+        else if (view === 'nyc') btn.innerHTML = '🏙️<br><span>Нью-Йорк</span>';
+        else btn.innerHTML = '📈<br><span>Биржа</span>';
+        currentView = view;
+        if (view === 'nyc') drawNycBackground();
+        if (view === 'terminal') { resizeCanvas(); drawChart(); }
+    }
+    window.cycleView = function() {
+        if (currentView === 'terminal') showView('sea');
+        else if (currentView === 'sea') showView('nyc');
+        else showView('terminal');
+    };
+
+    // Нью-Йорк (ч/б)
+    const nycCanvas = document.getElementById('nycCanvas');
+    const nycCtx = nycCanvas.getContext('2d');
+    function drawNycBackground() {
+        nycCanvas.width = nycCanvas.parentElement.clientWidth;
+        nycCanvas.height = nycCanvas.parentElement.clientHeight;
+        nycCtx.clearRect(0, 0, nycCanvas.width, nycCanvas.height);
+        // Небо
+        const grad = nycCtx.createLinearGradient(0, 0, 0, nycCanvas.height);
+        grad.addColorStop(0, '#111');
+        grad.addColorStop(1, '#000');
+        nycCtx.fillStyle = grad;
+        nycCtx.fillRect(0, 0, nycCanvas.width, nycCanvas.height);
+        // Здания
+        for (let i = 0; i < 20; i++) {
+            const w = 15 + Math.random() * 25;
+            const h = 80 + Math.random() * 120;
+            const x = i * 22 - 5;
+            nycCtx.fillStyle = '#000';
+            nycCtx.fillRect(x, nycCanvas.height - h, w, h);
+            nycCtx.fillStyle = '#fff';
+            for (let wy = nycCanvas.height - h + 5; wy < nycCanvas.height - 2; wy += 8) {
+                for (let wx = x + 2; wx < x + w - 2; wx += 5) {
+                    if (Math.random() > 0.5) nycCtx.fillRect(wx, wy, 3, 3);
+                }
+            }
+        }
+    }
+
+    // График
     const canvas = document.getElementById('chartCanvas');
     const ctx = canvas.getContext('2d');
     let chartData = [], currentCoin = 'bitcoin';
@@ -655,22 +690,6 @@
     startDemo();
     fetchRealData();
     setInterval(fetchRealData, 30000);
-
-    window.toggleView = function() {
-        const terminal = document.getElementById('terminal');
-        const sea = document.getElementById('sea-view');
-        const btn = document.getElementById('view-switch');
-        if (terminal.style.display === 'none') {
-            terminal.style.display = 'flex';
-            sea.style.display = 'none';
-            btn.innerHTML = '📈<br><span>Биржа</span>';
-            resizeCanvas();
-        } else {
-            terminal.style.display = 'none';
-            sea.style.display = 'block';
-            btn.innerHTML = '🌊<br><span>Море</span>';
-        }
-    };
 
     // Магазин
     document.getElementById('buy-boost-x2').addEventListener('click', ()=> { if (srum < 1) return alert('Мало SRUM'); srum -= 1; activeBoost = { type:2, endTime: Date.now() + 86400000 }; updateUI(); });
@@ -909,7 +928,7 @@
     document.getElementById('tasks-my-btn').addEventListener('click', renderMyTasks);
 
     updateUI();
-    window.lastGameTime = Date.now(); // чтобы восстановление корректно работало
+    window.lastGameTime = Date.now();
     if (games < maxGames) startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 })();
