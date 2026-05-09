@@ -21,33 +21,34 @@
         }
         /* Переключатель видов */
         #view-switch {
-            position:absolute; left:5px; top:45%;
-            transform:translateY(-50%);
-            background:rgba(0,0,0,0.7); color:white;
-            border:none; border-radius:8px; padding:6px;
-            font-size:0.8rem; cursor:pointer; z-index:40;
-            display:flex; flex-direction:column; align-items:center; gap:4px;
+            position:absolute; left:50%; top:18px; transform:translateX(-50%);
+            background:rgba(0,0,0,0.8); color:white;
+            backdrop-filter: blur(10px);
+            border:1px solid rgba(255,255,255,0.2);
+            border-radius:20px; padding:4px 8px;
+            font-size:0.7rem; cursor:pointer; z-index:40;
+            display:flex; align-items:center; gap:4px;
         }
         #view-switch span { font-size:0.6rem; }
 
         /* Вид со смайликами */
         #smile-view {
             display:none;
-            position:absolute; top:35px; left:0; right:0; bottom:50%;
+            position:absolute; top:0; left:0; right:0; bottom:50%;
         }
         #smileCanvas { width:100%; height:100%; display:block; }
 
         /* Терминал */
         #terminal {
             display:flex;
-            position:absolute; top:35px; left:0; right:0; bottom:50%;
+            position:absolute; top:0; left:0; right:0; bottom:50%;
             background:#0b0e14; flex-direction:column;
         }
         .ticker-bar {
             display:flex; justify-content:space-between; align-items:center;
             padding: 2px 6px; background:#111; color:white;
             font-size:0.6rem; font-weight:bold; gap:4px;
-            flex-wrap:wrap; min-height:24px;
+            flex-wrap:wrap; min-height:24px; margin-top:28px; /* отступ под кнопки */
         }
         .ticker-left { display:flex; gap:4px; flex-wrap:wrap; }
         .ticker-item {
@@ -82,13 +83,18 @@
         /* Нью-Йорк (ч/б) */
         #nyc-view {
             display:none;
-            position:absolute; top:35px; left:0; right:0; bottom:50%;
+            position:absolute; top:0; left:0; right:0; bottom:50%;
             background:#000;
         }
         #nycCanvas { width:100%; height:100%; display:block; }
 
         /* Интерфейс */
-        .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
+        .glass-wall {
+            position:absolute; top:0; left:0; right:0; bottom:30%;
+            background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+            border-bottom:2px solid rgba(255,255,255,0.5);
+            pointer-events:none; z-index:3;
+        }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
@@ -100,7 +106,7 @@
         }
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .energy-display {
-            position:absolute; bottom:30%; right:5%; /* на подоконнике справа */
+            position:absolute; bottom:30%; right:5%;
             display:flex; flex-direction:column; align-items:center;
             gap:2px; z-index:10; font-size:0.65rem; color:#FFD700;
             text-shadow:0 0 4px black;
@@ -110,7 +116,6 @@
         .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
         .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
-        /* Новая красивая кастрюля */
         .pot {
             position:absolute; top:5%; left:50%; transform:translateX(-50%);
             width:60%; height:55%;
@@ -145,18 +150,50 @@
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.8; } 100%{ transform:translateY(-20px) scale(1.8); opacity:0; } }
-        .pot .start-btn { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:8px 18px; border-radius:15px; font-weight:bold; font-size:0.9rem; cursor:pointer; z-index:4; margin-top:4px; }
-        .pot .start-btn:disabled { background:#808080; cursor:not-allowed; }
-        .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513; display:flex; flex-direction:column; padding:8px; gap:8px; z-index:10; }
+
+        .board {
+            position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
+            width:88%; background:#DEB887; border-radius:10px;
+            border:3px solid #8B4513; display:flex; flex-direction:column;
+            padding:8px; gap:8px; z-index:10;
+        }
         .row { display:flex; justify-content:space-around; }
-        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; width:55px; height:55px; }
+        .hole {
+            background:radial-gradient(circle, #2F1B0E, #1A0F07);
+            border-radius:50%; border:2px solid #3D2B1F;
+            display:flex; justify-content:center; align-items:center;
+            cursor:pointer; position:relative; transition:transform 0.1s;
+            width:55px; height:55px;
+        }
         .hole:active { transform:scale(0.85); }
         .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
-        .top-left-buttons { position:absolute; top:5px; left:5px; display:flex; gap:4px; z-index:35; flex-wrap:wrap; }
-        .top-left-buttons .item { background:rgba(0,0,0,0.65); color:white; padding:3px 8px; border-radius:12px; font-size:0.65rem; display:flex; align-items:center; gap:3px; cursor:pointer; }
+
+        /* Стили для кнопки старт на доске */
+        .start-btn {
+            background:linear-gradient(180deg, #FF6347, #DC143C);
+            color:white; border:none;
+            padding:12px 20px; border-radius:15px;
+            font-weight:bold; font-size:1rem;
+            cursor:pointer; z-index:25;
+            margin: 5px auto;
+            display: block;
+            width: fit-content;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+        .start-btn:disabled { background:#808080; cursor:not-allowed; }
+
+        /* ВЕРХНИЕ ПАНЕЛИ (разделены) */
+        .top-left-buttons {
+            position:absolute; top:5px; left:5px;
+            display:flex; gap:4px; z-index:35; flex-wrap:wrap;
+        }
+        .top-left-buttons .item {
+            background:rgba(0,0,0,0.65); color:white; padding:3px 8px; border-radius:12px;
+            font-size:0.65rem; display:flex; align-items:center; gap:3px; cursor:pointer;
+        }
         .balances {
             position:absolute; top:5px; right:5px;
             display:flex; gap:4px; z-index:35; flex-wrap:wrap; align-items:flex-end;
@@ -165,6 +202,7 @@
             background:rgba(0,0,0,0.75); color:white; padding:3px 8px; border-radius:12px;
             font-size:0.65rem; font-weight:bold;
         }
+
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
         .nav-btn { background:rgba(0,0,0,0.75); color:white; border:none; padding:10px 6px; border-radius:10px; font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px; }
         .nav-btn.active { background:rgba(255,215,0,0.8); color:black; }
@@ -185,6 +223,7 @@
 </head>
 <body>
 <div id="game-container">
+    <!-- Переключатель видов -->
     <button id="view-switch" onclick="cycleView()">📈<br><span>Биржа</span></button>
 
     <!-- Виды -->
@@ -221,7 +260,6 @@
         <div class="stove">
             <div class="pot" id="pot">
                 <div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div>
-                <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
             </div>
         </div>
     </div>
@@ -233,6 +271,8 @@
         <div class="row">
             <div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div>
         </div>
+        <!-- Кнопка старт теперь на доске -->
+        <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
     </div>
 
     <div class="top-left-buttons">
@@ -373,13 +413,11 @@
         if (games > 0 && !gameActive) {
             startBtn.disabled = false;
             startBtn.textContent = `🥘 Играть (${games})`;
-            startBtn.style.display = 'block';
         } else if (gameActive) {
             startBtn.style.display = 'none';
         } else {
             startBtn.disabled = true;
             startBtn.textContent = '⏳ Жди';
-            startBtn.style.display = 'block';
         }
         updateBoostDisplay();
         saveAll();
@@ -513,7 +551,7 @@
     }
 
     // Переключение видов
-    let currentView = 'terminal'; // terminal, smile, nyc
+    let currentView = 'terminal';
     function showView(view) {
         document.getElementById('terminal').style.display = view === 'terminal' ? 'flex' : 'none';
         document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
@@ -542,7 +580,7 @@
         smileCanvas.width = smileCanvas.parentElement.clientWidth;
         smileCanvas.height = smileCanvas.parentElement.clientHeight;
         smileParticles = [];
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 25; i++) {
             smileParticles.push({
                 x: Math.random() * smileCanvas.width,
                 y: smileCanvas.height + Math.random() * 100,
@@ -571,7 +609,6 @@
             smileCtx.font = `${p.size}px Arial`;
             smileCtx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`;
             smileCtx.fillText(p.emoji, p.x, p.y);
-            // Лопание (просто эффект исчезновения)
             if (p.popping) {
                 p.opacity -= 0.02;
                 p.size += 1;
@@ -584,7 +621,6 @@
                 }
             }
         });
-        // Случайно "лопаем" смайлик по клику или каждый 2 сек
         if (Math.random() < 0.02) {
             const randomP = smileParticles[Math.floor(Math.random() * smileParticles.length)];
             if (randomP && !randomP.popping) randomP.popping = true;
