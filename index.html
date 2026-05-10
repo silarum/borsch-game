@@ -6,129 +6,54 @@
     <title>Крипто Борщ</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            background:#000; display:flex; justify-content:center; align-items:center;
-            height:100vh; overflow:hidden; font-family:'Arial',sans-serif;
-            touch-action:manipulation; user-select:none; -webkit-tap-highlight-color:transparent;
-        }
-        #game-container {
-            position:relative; width:100%; max-width:420px; height:100vh;
-            background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden;
-        }
-        /* Матрица */
+        body { background:#000; display:flex; justify-content:center; align-items:center; height:100vh; overflow:hidden; font-family:'Arial',sans-serif; touch-action:manipulation; user-select:none; -webkit-tap-highlight-color:transparent; }
+        #game-container { position:relative; width:100%; max-width:420px; height:100vh; background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden; }
         #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; }
         #matrixCanvas { width:100%; height:100%; display:block; }
-        /* Мини-график */
-        #mini-chart {
-            position:absolute; top:55px; left:5px;
-            width:56px; height:42px; /* 2 см x 1.5 см */
-            background:rgba(0,0,0,0.6); border-radius:6px; z-index:5;
-        }
+        #mini-chart { position:absolute; top:65px; left:5px; width:86px; height:52px; background:rgba(0,0,0,0.6); border-radius:6px; z-index:5; }
         #miniChartCanvas { width:100%; height:100%; display:block; }
-        /* Интерфейс */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
-        .boost-display {
-            position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:5%;
-            display:flex; flex-direction:column; align-items:center; gap:2px; z-index:10;
-            font-size:0.6rem; color:white; text-shadow:0 0 4px black;
-        }
+        .boost-display { position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:5%; display:flex; flex-direction:column; align-items:center; gap:2px; z-index:10; font-size:0.6rem; color:white; text-shadow:0 0 4px black; }
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
-        .rules-btn-bottom {
-            position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:15%;
-            background:rgba(0,0,0,0.7); color:white; border:none;
-            padding:2px 6px; border-radius:6px; font-size:0.55rem;
-            cursor:pointer; z-index:10; backdrop-filter:blur(5px);
-        }
+        .rules-btn-bottom { position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:15%; background:rgba(0,0,0,0.7); color:white; border:none; padding:2px 6px; border-radius:6px; font-size:0.55rem; cursor:pointer; z-index:10; backdrop-filter:blur(5px); }
         .purple-bg { position:absolute; bottom:0; left:0; right:0; top:70%; background:purple; z-index:1; }
-        .kitchen-area { position:absolute; bottom:18%; left:0; right:0; height:35%; z-index:2; }
+        .kitchen-area { position:absolute; bottom:22%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
         .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
-        .pot {
-            position:absolute; top:5%; left:50%; transform:translateX(-50%);
-            width:60%; height:55%;
-            background:linear-gradient(180deg, #FFD700, #B8860B);
-            border-radius:0 0 40px 40px; border:4px solid #8B6508;
-            box-shadow:inset 0 4px 8px rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.5);
-            display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:3;
-        }
-        .pot::before {
-            content:''; position:absolute; top:-15px; left:-5px; right:-5px; height:15px;
-            background:linear-gradient(180deg, #FFD700, #DAA520);
-            border-radius:5px 5px 0 0; border:3px solid #8B6508; border-bottom:none;
-        }
-        .pot::after {
-            content:''; position:absolute; top:-25px; left:50%; transform:translateX(-50%);
-            width:20px; height:10px; background:#8B6508; border-radius:10px 10px 0 0;
-        }
+        .pot { position:absolute; top:5%; left:50%; transform:translateX(-50%); width:60%; height:55%; background:linear-gradient(180deg, #FFD700, #B8860B); border-radius:0 0 40px 40px; border:4px solid #8B6508; box-shadow:inset 0 4px 8px rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:3; }
+        .pot::before { content:''; position:absolute; top:-15px; left:-5px; right:-5px; height:15px; background:linear-gradient(180deg, #FFD700, #DAA520); border-radius:5px 5px 0 0; border:3px solid #8B6508; border-bottom:none; }
+        .pot::after { content:''; position:absolute; top:-25px; left:50%; transform:translateX(-50%); width:20px; height:10px; background:#8B6508; border-radius:10px 10px 0 0; }
         .steam { position:absolute; top:-25px; left:50%; transform:translateX(-50%); width:80%; height:18px; }
         .steam-particle { position:absolute; width:12px; height:12px; background:rgba(255,255,255,0.8); border-radius:50%; animation:rise 2s infinite; }
         .steam-particle:nth-child(1){ left:20%; animation-delay:0s; }
         .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
         .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
         @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.8; } 100%{ transform:translateY(-20px) scale(1.8); opacity:0; } }
-        /* Кнопка Начать (опущена) */
-        .start-btn-container {
-            position:absolute; top:calc(10% + 56px); left:50%; transform:translateX(-50%);
-            z-index:25; display:flex; align-items:center; justify-content:center;
-        }
-        .start-btn, .timer-placeholder {
-            background:linear-gradient(180deg, #FF6347, #DC143C); color:white;
-            border:none; padding:12px 25px; border-radius:20px; font-weight:bold;
-            font-size:1rem; cursor:pointer; box-shadow:0 0 20px rgba(255,69,0,0.7);
-            animation:pulse 1.5s infinite;
-        }
-        .start-btn:disabled, .timer-placeholder {
-            background:#808080; animation:none; box-shadow:none;
-        }
-        .timer-placeholder {
-            animation:none; background:rgba(0,0,0,0.7); box-shadow:none;
-            padding:8px 15px; font-size:0.9rem;
-        }
-        /* Доска 3-4-5 */
-        .board {
-            position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
-            width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513;
-            display:flex; flex-direction:column; padding:8px; gap:6px; z-index:10;
-        }
+        .start-btn-container { position:absolute; top:calc(10% + 56px); left:50%; transform:translateX(-50%); z-index:25; display:flex; align-items:center; justify-content:center; }
+        .start-btn, .timer-placeholder { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; font-size:1rem; cursor:pointer; box-shadow:0 0 20px rgba(255,69,0,0.7); animation:pulse 1.5s infinite; }
+        .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
+        .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
+        .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513; display:flex; flex-direction:column; padding:8px; gap:6px; z-index:10; }
         .row { display:flex; justify-content:space-around; }
-        .hole {
-            background:radial-gradient(circle, #2F1B0E, #1A0F07);
-            border-radius:50%; border:2px solid #3D2B1F;
-            display:flex; justify-content:center; align-items:center;
-            cursor:pointer; position:relative; transition:transform 0.1s;
-            width:48px; height:48px;
-        }
+        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; width:48px; height:48px; }
         .hole:active { transform:scale(0.85); }
         .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
-        /* Верхние панели */
         .top-panel { position:absolute; top:5px; left:5px; right:5px; display:flex; justify-content:space-between; z-index:35; pointer-events:none; }
         .top-left-buttons { display:flex; gap:4px; flex-wrap:wrap; pointer-events:auto; }
-        .top-left-buttons .item {
-            background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px;
-            font-size:0.55rem; display:flex; align-items:center; gap:2px; cursor:pointer;
-            backdrop-filter:blur(5px);
-        }
+        .top-left-buttons .item { background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; display:flex; align-items:center; gap:2px; cursor:pointer; backdrop-filter:blur(5px); }
         .balances-right { display:flex; flex-direction:column; gap:4px; align-items:flex-end; pointer-events:auto; }
-        .balances-right div {
-            background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px;
-            font-size:0.55rem; font-weight:bold; backdrop-filter:blur(5px);
-        }
+        .balances-right div { background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; font-weight:bold; backdrop-filter:blur(5px); }
         #rum-balance { background:rgba(255,215,0,0.7); color:black; }
         #srum-balance { background:rgba(192,192,192,0.7); color:black; }
         #invest-balance-right { background:rgba(76,175,80,0.7); color:white; }
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
-        .nav-btn {
-            color:white; border:none; padding:10px 6px; border-radius:10px;
-            font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column;
-            align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold;
-            letter-spacing:0.5px; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.5);
-        }
+        .nav-btn { color:white; border:none; padding:10px 6px; border-radius:10px; font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
         .nav-btn:nth-child(1) { background:linear-gradient(180deg, #e74c3c, #c0392b); }
         .nav-btn:nth-child(2) { background:linear-gradient(180deg, #8e44ad, #6c3483); }
         .nav-btn:nth-child(3) { background:linear-gradient(180deg, #f39c12, #d68910); }
@@ -143,13 +68,22 @@
         @keyframes flyToPot { 0% { transform:translate(0,0) scale(1); opacity:1; } 50% { transform:translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform:translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
         .coin-fountain { position:absolute; pointer-events:none; z-index:25; animation:coinUp 0.8s ease-out forwards; font-size:1rem; font-weight:bold; }
         @keyframes coinUp { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-80px) scale(0.5); opacity:0; } }
+        .poop-fountain { position:absolute; pointer-events:none; z-index:25; animation:poopDown 0.8s ease-out forwards; font-size:1rem; }
+        @keyframes poopDown { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(30px) scale(0.5); opacity:0; } }
+        .task-item { background:rgba(255,255,255,0.1); padding:10px; margin:8px 0; border-radius:8px; display:flex; flex-direction:column; gap:8px; }
+        .task-item input, .task-item select { padding:8px; border-radius:5px; border:none; width:100%; background:rgba(255,255,255,0.15); color:white; }
+        .task-item button { padding:12px 16px; border:none; border-radius:8px; font-weight:bold; background:linear-gradient(180deg, #FFD700, #FF8C00); color:black; box-shadow:0 4px 8px rgba(255,140,0,0.4); cursor:pointer; }
+        .shop-btn { padding:14px 20px; border:none; border-radius:10px; font-weight:bold; font-size:1rem; background:linear-gradient(180deg, #00E5FF, #00B8D4); color:#000; box-shadow:0 4px 12px rgba(0,229,255,0.5); margin:6px 0; cursor:pointer; width:90%; }
+        .club-btn { padding:12px 18px; border:none; border-radius:8px; font-weight:bold; background:linear-gradient(180deg, #E040FB, #AA00FF); color:white; box-shadow:0 4px 10px rgba(224,64,251,0.5); margin:4px; cursor:pointer; }
+        .sub-tab { padding:8px 14px; border:none; border-radius:20px; font-weight:bold; font-size:0.75rem; cursor:pointer; background:#333; color:#aaa; transition:all 0.2s; box-shadow:0 0 5px rgba(255,255,255,0.2); }
+        .sub-tab.active { background:linear-gradient(135deg, #FFD700, #FF8C00); color:black; animation:pulse 1.5s infinite; box-shadow:0 0 15px rgba(255,215,0,0.8); }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 <div id="game-container">
-    <!-- Матрица -->
+    <!-- Виды фона скрыты, активна Матрица -->
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
-    <!-- Мини-график -->
     <div id="mini-chart"><canvas id="miniChartCanvas"></canvas></div>
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
@@ -167,34 +101,22 @@
         </div>
     </div>
 
-    <!-- Кнопка Начать / таймер -->
     <div class="start-btn-container" id="start-btn-container">
         <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
     </div>
 
-    <!-- Доска 3-4-5 -->
     <div class="board" id="board">
         <div class="row">
-            <div class="hole" data-hole="0"></div>
-            <div class="hole" data-hole="1"></div>
-            <div class="hole" data-hole="2"></div>
+            <div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div>
         </div>
         <div class="row">
-            <div class="hole" data-hole="3"></div>
-            <div class="hole" data-hole="4"></div>
-            <div class="hole" data-hole="5"></div>
-            <div class="hole" data-hole="6"></div>
+            <div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div>
         </div>
         <div class="row">
-            <div class="hole" data-hole="7"></div>
-            <div class="hole" data-hole="8"></div>
-            <div class="hole" data-hole="9"></div>
-            <div class="hole" data-hole="10"></div>
-            <div class="hole" data-hole="11"></div>
+            <div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div>
         </div>
     </div>
 
-    <!-- Верхние панели -->
     <div class="top-panel">
         <div class="top-left-buttons">
             <div class="item" id="top-tappers" style="background:#FFD700; color:black;">🏆 Топ игроков</div>
@@ -210,7 +132,6 @@
         </div>
     </div>
 
-    <!-- Нижние кнопки -->
     <div class="bottom-panel">
         <button class="nav-btn" data-screen="arena">🏟️ Арена</button>
         <button class="nav-btn" data-screen="mining-club">🐺 Клуб</button>
@@ -219,14 +140,15 @@
         <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
     </div>
 
-    <!-- Остальные экраны (скрыты) -->
-    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button>Личный майнинг</button><button>Командный 5×5</button></div>
+    <!-- Экраны -->
+    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button class="shop-btn">Личный майнинг</button><button class="shop-btn">Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
-        <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
+        <button class="back-btn">← Назад</button>
+        <h2>🐺 Бойцовский клуб</h2>
         <div style="display:flex; gap:8px; margin:10px 0;">
-            <button id="club-my-btn" style="padding:8px 12px; background:#FFD700; border:none; border-radius:8px; color:black;">Мой клуб</button>
-            <button id="club-all-btn" style="padding:8px 12px; background:#2196F3; border:none; border-radius:8px;">Все клубы</button>
-            <button id="club-create-btn" style="padding:8px 12px; background:#4CAF50; border:none; border-radius:8px;">Создать</button>
+            <button id="club-my-btn" class="club-btn">Мой клуб</button>
+            <button id="club-all-btn" class="club-btn">Все клубы</button>
+            <button id="club-create-btn" class="club-btn">Создать</button>
         </div>
         <div id="club-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
     </div>
@@ -246,18 +168,18 @@
         </div>
         <div id="tasks-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
     </div>
-    <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button>Инвестировать RUM</button></div>
-    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p></div>
+    <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn">Инвестировать RUM</button></div>
+    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn">Привязать TON кошелёк</button></div>
     <div class="screen" id="shop-screen">
         <button class="back-btn">← Назад</button>
         <h2>🛍️ Магазин</h2>
-        <div class="task-item"><p>⚡ Бустер ×2 (24ч) - 1 SRUM</p><button id="buy-boost-x2">Купить</button></div>
-        <div class="task-item"><p>⚡ Бустер ×3 (24ч) - 2 SRUM</p><button id="buy-boost-x3">Купить</button></div>
-        <div class="task-item"><p>⚡ Бустер ×5 (24ч) - 3 SRUM</p><button id="buy-boost-x5">Купить</button></div>
-        <div class="task-item"><p>💱 Купить SRUM за TON</p><button id="buy-srum-ton">Купить</button></div>
-        <div class="task-item"><p>💱 Купить SRUM за USDT</p><button id="buy-srum-usdt">Купить</button></div>
-        <div class="task-item"><p>💱 Обменять SRUM на TON</p><button id="swap-srum-ton">Обменять</button></div>
-        <div class="task-item"><p>💱 Обменять SRUM на USDT</p><button id="swap-srum-usdt">Обменять</button></div>
+        <button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button>
+        <button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button>
+        <button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button>
+        <button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button>
+        <button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button>
+        <button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button>
+        <button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button>
     </div>
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button><h2>🏆 Топ игроков</h2><p>1. ...</p></div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button><h2>⛏️ Топ майнеров</h2><p>1. ...</p></div>
@@ -268,7 +190,6 @@
 
 <script>
 (function() {
-    // --- Игровые переменные ---
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
     let rum = parseInt(localStorage.getItem('rum') || '0');
@@ -282,14 +203,14 @@
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
 
-    // --- Задания ---
-    let officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
+    // ... задания, клубы (без изменений)
+    const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:2, desc:'Сделать репост', reward:100, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:3, desc:'Пригласить друга', reward:200, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:4, desc:'Сыграть 5 раундов', reward:300, link:'', maxCompletions:100, completionsDone:0, checking:false }
     ];
-    let officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
+    const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
         { id:101, desc:'Подпишись на Twitter', reward:0.1, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:102, desc:'Поставь лайк проекту', reward:0.15, link:'', maxCompletions:100, completionsDone:0, checking:false }
     ];
@@ -322,9 +243,8 @@
         rumBal.textContent = `💰 RUM: ${rum}`;
         srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
         investBalRight.textContent = `📈 Инвест: ${invest}`;
-        if (document.getElementById('ton-balance')) document.getElementById('ton-balance').textContent = ton.toFixed(2);
-        if (document.getElementById('usdt-balance')) document.getElementById('usdt-balance').textContent = usdt.toFixed(2);
-
+        document.getElementById('ton-balance') && (document.getElementById('ton-balance').textContent = ton.toFixed(2));
+        document.getElementById('usdt-balance') && (document.getElementById('usdt-balance').textContent = usdt.toFixed(2));
         if (games > 0 && !gameActive) {
             startBtnContainer.innerHTML = '<button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>';
             document.getElementById('start-btn').addEventListener('click', startGame);
@@ -342,20 +262,15 @@
         updateBoostDisplay();
         saveAll();
     }
-
     function updateBoostDisplay() {
         const display = document.getElementById('boost-display');
         if (activeBoost && activeBoost.endTime > Date.now()) {
             const remain = Math.max(0, Math.ceil((activeBoost.endTime - Date.now()) / 1000));
             const h = Math.floor(remain/3600), m = Math.floor((remain%3600)/60), s = remain%60;
             display.innerHTML = `<div class="boost-icon">🚀 x${activeBoost.type} ${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</div>`;
-        } else {
-            display.innerHTML = '';
-            if (activeBoost && activeBoost.endTime <= Date.now()) activeBoost = null;
-        }
+        } else { display.innerHTML = ''; if (activeBoost && activeBoost.endTime <= Date.now()) activeBoost = null; }
     }
-    setInterval(updateBoostDisplay, 1000);
-    setInterval(updateUI, 1000);
+    setInterval(updateBoostDisplay, 1000); setInterval(updateUI, 1000);
 
     function spawnAll() {
         holes.forEach(h => h.innerHTML = '');
@@ -372,28 +287,51 @@
         const potRect = pot.getBoundingClientRect();
         const containerRect = document.getElementById('game-container').getBoundingClientRect();
         const cx = potRect.left + potRect.width/2 - containerRect.left;
-        const cy = potRect.top - containerRect.top;
+        const cy = potRect.top - containerRect.top + 8;
         for (let i=0; i<10; i++) {
             const coin = document.createElement('div'); coin.className = 'coin-fountain'; coin.textContent = '💰';
             coin.style.left = (cx + (Math.random()-0.5)*60) + 'px';
-            coin.style.top = (cy + (Math.random()-0.5)*20) + 'px';
-            coin.style.animationDuration = (0.7 + Math.random()*0.5) + 's';
+            coin.style.top = cy + 'px';
+            coin.style.animationDuration = (0.7 + Math.random()*0.3) + 's';
             document.getElementById('game-container').appendChild(coin);
             coin.addEventListener('animationend', () => coin.remove());
+        }
+    }
+
+    function showPoopFountain() {
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        const cx = potRect.left + potRect.width/2 - containerRect.left;
+        const cy = potRect.top - containerRect.top + 8;
+        for (let i=0; i<5; i++) {
+            const poop = document.createElement('div'); poop.className = 'poop-fountain'; poop.textContent = '💩';
+            poop.style.left = (cx + (Math.random()-0.5)*60) + 'px';
+            poop.style.top = cy + 'px';
+            poop.style.animationDuration = (0.6 + Math.random()*0.3) + 's';
+            document.getElementById('game-container').appendChild(poop);
+            poop.addEventListener('animationend', () => poop.remove());
         }
     }
 
     function processHit(hole, touch) {
         if (!gameActive) return;
         const num = [...holes].indexOf(hole);
-        if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum-5); updateUI(); return; }
+        if (num === -1 || !currentVeg[num]) {
+            rum = Math.max(0, rum-5);
+            showPoopFountain();
+            updateUI();
+            return;
+        }
         if (currentVeg[num].type === 'good') {
             let gain = 10;
             if (activeBoost && activeBoost.endTime > Date.now()) gain *= activeBoost.type;
             rum += gain;
             flyVegToPot(hole, hole.querySelector('.veg').textContent);
             showCoinFountain();
-        } else { rum = Math.max(0, rum-5); }
+        } else {
+            rum = Math.max(0, rum-5);
+            showPoopFountain();
+        }
         delete currentVeg[num]; hole.innerHTML = ''; updateUI();
     }
 
@@ -402,7 +340,8 @@
         if (!gameActive) return;
         [...e.changedTouches].forEach(touch => {
             const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
-            if (hole) processHit(hole, touch); else { rum = Math.max(0, rum-5); updateUI(); }
+            if (hole) processHit(hole, touch);
+            else { rum = Math.max(0, rum-5); showPoopFountain(); updateUI(); }
         });
     }
 
@@ -414,9 +353,9 @@
         vegEl.style.left = (holeRect.left + holeRect.width/2 - containerRect.left) + 'px';
         vegEl.style.top = (holeRect.top + holeRect.height/2 - containerRect.top) + 'px';
         vegEl.style.setProperty('--dx', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
-        vegEl.style.setProperty('--dy', '-50px');
+        vegEl.style.setProperty('--dy', '-60px');
         vegEl.style.setProperty('--ex', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) + 'px');
-        vegEl.style.setProperty('--ey', (potRect.top + potRect.height*0.3 - containerRect.top - parseFloat(vegEl.style.top)) + 'px');
+        vegEl.style.setProperty('--ey', (potRect.top - containerRect.top + 5 - parseFloat(vegEl.style.top)) + 'px');
         document.getElementById('game-container').appendChild(vegEl);
         vegEl.addEventListener('animationend', () => vegEl.remove());
     }
@@ -435,7 +374,6 @@
         }, interval);
         gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
     }
-
     function endGame() {
         gameActive = false;
         clearInterval(gameTimer); clearInterval(spawnInterval);
@@ -446,7 +384,6 @@
         updateUI();
         if (games < maxGames) startRecovery();
     }
-
     function startRecovery() {
         if (window.recoveryInterval) clearInterval(window.recoveryInterval);
         window.recoveryInterval = setInterval(() => {
@@ -471,8 +408,7 @@
         for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
     }
     function drawMatrix() {
-        matrixCtx.fillStyle = 'rgba(0,0,0,0.05)';
-        matrixCtx.fillRect(0,0,matrixCanvas.width, matrixCanvas.height);
+        matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0,0,matrixCanvas.width, matrixCanvas.height);
         matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
         matrixParticles.forEach(p => { matrixCtx.fillText(p.char, p.x, p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
     }
@@ -500,8 +436,8 @@
             miniCtx.fillRect(x, Math.min(yOpen, yClose), w, Math.abs(yClose-yOpen)||1);
         }
     }
-    function generateMiniData() { let price=60000; miniChartData=[]; for(let i=0;i<20;i++){ price+=(Math.random()-0.5)*200; miniChartData.push({price}); } }
-    generateMiniData(); setInterval(()=>{ const last=miniChartData[miniChartData.length-1]; miniChartData.push({price:last.price+(Math.random()-0.5)*150}); if(miniChartData.length>30) miniChartData.shift(); updateMiniChart(); },1500);
+    function generateMiniData() { let price=60000; miniChartData=[]; for(let i=0;i<30;i++){ price+=(Math.random()-0.5)*200; miniChartData.push({price}); } }
+    generateMiniData(); setInterval(()=>{ const last=miniChartData[miniChartData.length-1]; miniChartData.push({price:last.price+(Math.random()-0.5)*150}); if(miniChartData.length>50) miniChartData.shift(); updateMiniChart(); },1500);
     updateMiniChart();
 
     // Магазин
@@ -526,7 +462,6 @@
     board.addEventListener('touchstart', handleTouchStart, {passive: false});
     board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 
-    // Запуск
     updateUI();
     window.lastGameTime = Date.now();
     if (games < maxGames) startRecovery();
@@ -539,7 +474,7 @@
         else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
     }
 
-    // Задания (используем существующие переменные)
+    // Задания
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -588,7 +523,7 @@
             <input id="task-reward" type="number" placeholder="Награда" ${canCreate ? '' : 'disabled'}>
             <select id="task-currency" ${canCreate ? '' : 'disabled'}><option value="RUM">RUM</option><option value="SRUM">SRUM</option></select>
             <input id="task-link" type="url" placeholder="Ссылка на задание" ${canCreate ? '' : 'disabled'}>
-            <button id="publish-task-btn" style="background:#4CAF50; color:white; padding:10px; border:none; border-radius:8px;" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
+            <button id="publish-task-btn" style="padding:14px; background:#4CAF50; border:none; border-radius:10px; font-weight:bold; color:white; box-shadow:0 4px 12px rgba(76,175,80,0.5);" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
         if (canCreate) {
             document.getElementById('publish-task-btn').addEventListener('click', () => {
                 const desc = document.getElementById('task-desc').value.trim();
@@ -620,7 +555,7 @@
             html += `<div class="task-item" id="my-task-${t.id}">
                 <div class="editable"><input id="desc-${t.id}" value="${t.desc}" /><input id="reward-${t.id}" type="number" value="${t.reward}" /><input id="link-${t.id}" value="${t.link || ''}" /></div>
                 <div style="display:flex; gap:8px; justify-content: space-between;"><span>${t.reward} ${t.currency}</span>
-                    <div><button class="edit-task-btn" data-task-id="${t.id}">✏️</button><button class="delete-task-btn" data-task-id="${t.id}">🗑️</button></div></div></div>`;
+                    <div><button class="edit-task-btn" data-task-id="${t.id}" style="padding:8px 14px; background:#2196F3; border:none; border-radius:6px; color:white; font-weight:bold;">✏️</button><button class="delete-task-btn" data-task-id="${t.id}" style="padding:8px 14px; background:#F44336; border:none; border-radius:6px; color:white; font-weight:bold;">🗑️</button></div></div></div>`;
         });
         tasksContent.innerHTML = html;
         document.querySelectorAll('.edit-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
@@ -658,7 +593,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // Клуб (те же функции)
+    // Клуб
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
@@ -670,10 +605,10 @@
         html += `<p><b>Глава:</b> ${club.master||'—'}</p><p><b>Офицеры:</b> ${club.officers?.join(', ')||'нет'}</p><p><b>Бойцы:</b> ${club.members?.join(', ')||'нет'}</p>`;
         html += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;">';
         if (amIMaster) {
-            html += '<button id="edit-club-btn">✏️</button><button id="invite-member-btn">👥</button><button id="manage-officers-btn">🛡️</button><button id="delete-club-btn">🗑️</button>';
+            html += '<button class="club-btn" id="edit-club-btn">✏️</button><button class="club-btn" id="invite-member-btn">👥</button><button class="club-btn" id="manage-officers-btn">🛡️</button><button class="club-btn" id="delete-club-btn">🗑️</button>';
         } else if (amIOfficer) {
-            html += '<button id="invite-member-btn">👥</button><button id="leave-club-btn">🚪</button>';
-        } else { html += '<button id="leave-club-btn">🚪</button>'; }
+            html += '<button class="club-btn" id="invite-member-btn">👥</button><button class="club-btn" id="leave-club-btn">🚪</button>';
+        } else { html += '<button class="club-btn" id="leave-club-btn">🚪</button>'; }
         html += '</div>';
         clubContent.innerHTML = html;
         if (amIMaster) {
@@ -686,26 +621,21 @@
                     saveAll(); renderMyClub();
                 });
             });
-            document.getElementById('invite-member-btn').addEventListener('click', () => {
-                const name = prompt('Введите имя бойца:');
-                if (name) { if (!club.members) club.members = []; club.members.push(name); saveAll(); renderMyClub(); }
-            });
+            document.getElementById('invite-member-btn').addEventListener('click', () => { const name = prompt('Введите имя бойца:'); if (name) { if (!club.members) club.members = []; club.members.push(name); saveAll(); renderMyClub(); } });
             document.getElementById('manage-officers-btn').addEventListener('click', () => {
                 let list = '<div><p><b>Назначить офицера:</b></p>';
                 const fighters = club.members?.filter(m => m !== club.master && !club.officers?.includes(m)) || [];
-                if (fighters.length) fighters.forEach(f => list += `<button class="promote-btn" data-name="${f}">${f} 👆</button> `);
+                if (fighters.length) fighters.forEach(f => list += `<button class="club-btn" data-name="${f}">${f} 👆</button> `);
                 else list += '<p>Нет бойцов.</p>';
                 list += '<p><b>Разжаловать:</b></p>';
-                if (club.officers?.length) club.officers.forEach(o => list += `<button class="demote-btn" data-name="${o}">${o} 👇</button> `);
+                if (club.officers?.length) club.officers.forEach(o => list += `<button class="club-btn" data-name="${o}">${o} 👇</button> `);
                 else list += '<p>Нет офицеров.</p>';
                 list += '</div>';
                 clubContent.innerHTML = list;
-                document.querySelectorAll('.promote-btn').forEach(b => b.addEventListener('click', e => { if (!club.officers) club.officers = []; club.officers.push(e.target.dataset.name); saveAll(); renderMyClub(); }));
-                document.querySelectorAll('.demote-btn').forEach(b => b.addEventListener('click', e => { club.officers = club.officers.filter(o => o !== e.target.dataset.name); saveAll(); renderMyClub(); }));
+                document.querySelectorAll('.promote-btn') . forEach(b => b.addEventListener('click', e => { if (!club.officers) club.officers = []; club.officers.push(e.target.dataset.name); saveAll(); renderMyClub(); }));
+                document.querySelectorAll('.demote-btn') . forEach(b => b.addEventListener('click', e => { club.officers = club.officers.filter(o => o !== e.target.dataset.name); saveAll(); renderMyClub(); }));
             });
-            document.getElementById('delete-club-btn').addEventListener('click', () => {
-                if (confirm('Распустить клуб?')) { clubs = clubs.filter(c => c.id != myClubId); myClubId = null; saveAll(); renderMyClub(); }
-            });
+            document.getElementById('delete-club-btn').addEventListener('click', () => { if (confirm('Распустить клуб?')) { clubs = clubs.filter(c => c.id != myClubId); myClubId = null; saveAll(); renderMyClub(); } });
         } else {
             if (document.getElementById('invite-member-btn')) document.getElementById('invite-member-btn').addEventListener('click', () => { const name = prompt('Введите имя бойца:'); if (name) { if (!club.members) club.members = []; club.members.push(name); saveAll(); renderMyClub(); } });
             if (document.getElementById('leave-club-btn')) document.getElementById('leave-club-btn').addEventListener('click', () => {
@@ -718,7 +648,7 @@
         let html = '';
         clubs.forEach(c => {
             const isMember = myClubId == c.id;
-            html += `<div class="task-item"><strong>${c.emoji||'🐺'} ${c.name}</strong> (${c.members?.length||0} уч.)<br>${c.desc||''}<br>${isMember ? '<span>✅ Вы в клубе</span>' : `<button data-join="${c.id}">Вступить</button>`}</div>`;
+            html += `<div class="task-item"><strong>${c.emoji||'🐺'} ${c.name}</strong> (${c.members?.length||0} уч.)<br>${c.desc||''}<br>${isMember ? '<span>✅ Вы в клубе</span>' : `<button class="club-btn" data-join="${c.id}">Вступить</button>`}</div>`;
         });
         clubContent.innerHTML = html;
         document.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', e => {
@@ -728,7 +658,7 @@
         }));
     }
     function showCreateClub() {
-        clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><input id="club-name" placeholder="Название"><input id="club-emoji" placeholder="Эмодзи"><input id="club-desc" placeholder="Описание"><p>Стоимость: 100 RUM</p><button id="club-create-submit" style="background:#4CAF50;">Создать клуб</button></div>`;
+        clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><input id="club-name" placeholder="Название"><input id="club-emoji" placeholder="Эмодзи"><input id="club-desc" placeholder="Описание"><p>Стоимость: 100 RUM</p><button id="club-create-submit" class="club-btn" style="background:#4CAF50;">Создать клуб</button></div>`;
         document.getElementById('club-create-submit').addEventListener('click', () => {
             const name = document.getElementById('club-name').value.trim();
             const emoji = document.getElementById('club-emoji').value.trim() || '🐺';
