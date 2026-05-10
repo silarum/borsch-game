@@ -10,7 +10,12 @@
         #game-container { position:relative; width:100%; max-width:420px; height:100vh; background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden; }
         #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; }
         #matrixCanvas { width:100%; height:100%; display:block; }
-        #mini-chart { position:absolute; top:65px; left:5px; width:86px; height:52px; background:rgba(0,0,0,0.6); border-radius:6px; z-index:5; }
+        /* Мини-график: опущен ниже и расширен */
+        #mini-chart {
+            position:absolute; top:68px; left:5px;
+            width:110px; height:52px;
+            background:rgba(0,0,0,0.6); border-radius:6px; z-index:5;
+        }
         #miniChartCanvas { width:100%; height:100%; display:block; }
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
@@ -18,7 +23,13 @@
         .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
         .boost-display { position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:5%; display:flex; flex-direction:column; align-items:center; gap:2px; z-index:10; font-size:0.6rem; color:white; text-shadow:0 0 4px black; }
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
-        .rules-btn-bottom { position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:15%; background:rgba(0,0,0,0.7); color:white; border:none; padding:2px 6px; border-radius:6px; font-size:0.55rem; cursor:pointer; z-index:10; backdrop-filter:blur(5px); }
+        /* Кнопка Правила теперь прямо под горшочком */
+        .rules-btn-bottom {
+            position:absolute; bottom:calc(30% + 8px); left:5%;
+            background:rgba(0,0,0,0.7); color:white; border:none;
+            padding:2px 6px; border-radius:6px; font-size:0.55rem;
+            cursor:pointer; z-index:10; backdrop-filter:blur(5px);
+        }
         .purple-bg { position:absolute; bottom:0; left:0; right:0; top:70%; background:purple; z-index:1; }
         .kitchen-area { position:absolute; bottom:22%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
@@ -36,9 +47,23 @@
         .start-btn, .timer-placeholder { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; font-size:1rem; cursor:pointer; box-shadow:0 0 20px rgba(255,69,0,0.7); animation:pulse 1.5s infinite; }
         .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
         .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
-        .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:88%; background:#DEB887; border-radius:10px; border:3px solid #8B4513; display:flex; flex-direction:column; padding:8px; gap:6px; z-index:10; }
+        /* Доска со срезанными верхними углами */
+        .board {
+            position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
+            width:88%; background:#DEB887;
+            border-radius:0 0 10px 10px;  /* срезанные верхние углы */
+            border:3px solid #8B4513;
+            display:flex; flex-direction:column; padding:8px; gap:6px; z-index:10;
+        }
         .row { display:flex; justify-content:space-around; }
-        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; width:48px; height:48px; }
+        .row:first-child { justify-content:center; gap:10px; } /* три дырки с промежутками */
+        .hole {
+            background:radial-gradient(circle, #2F1B0E, #1A0F07);
+            border-radius:50%; border:2px solid #3D2B1F;
+            display:flex; justify-content:center; align-items:center;
+            cursor:pointer; position:relative; transition:transform 0.1s;
+            width:48px; height:48px;
+        }
         .hole:active { transform:scale(0.85); }
         .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
@@ -53,7 +78,12 @@
         #srum-balance { background:rgba(192,192,192,0.7); color:black; }
         #invest-balance-right { background:rgba(76,175,80,0.7); color:white; }
         .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
-        .nav-btn { color:white; border:none; padding:10px 6px; border-radius:10px; font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
+        .nav-btn {
+            background:rgba(0,0,0,0.75); color:white; border:none; padding:10px 6px; border-radius:10px;
+            font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column;
+            align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold;
+            letter-spacing:0.5px; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.5);
+        }
         .nav-btn:nth-child(1) { background:linear-gradient(180deg, #e74c3c, #c0392b); }
         .nav-btn:nth-child(2) { background:linear-gradient(180deg, #8e44ad, #6c3483); }
         .nav-btn:nth-child(3) { background:linear-gradient(180deg, #f39c12, #d68910); }
@@ -82,7 +112,6 @@
 </head>
 <body>
 <div id="game-container">
-    <!-- Виды фона скрыты, активна Матрица -->
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
     <div id="mini-chart"><canvas id="miniChartCanvas"></canvas></div>
     <div class="glass-wall"></div>
@@ -140,11 +169,10 @@
         <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
     </div>
 
-    <!-- Экраны -->
+    <!-- Экраны (полный код скрыт для краткости, он не изменился) -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button class="shop-btn">Личный майнинг</button><button class="shop-btn">Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>🐺 Бойцовский клуб</h2>
+        <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
         <div style="display:flex; gap:8px; margin:10px 0;">
             <button id="club-my-btn" class="club-btn">Мой клуб</button>
             <button id="club-all-btn" class="club-btn">Все клубы</button>
@@ -153,8 +181,7 @@
         <div id="club-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
     </div>
     <div class="screen" id="tasks-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>📋 Задания</h2>
+        <button class="back-btn">← Назад</button><h2>📋 Задания</h2>
         <div style="display:flex; gap:8px; margin:15px 0;">
             <button id="tasks-available-btn" style="padding:8px 12px; background:#FFD700; border:none; border-radius:8px; color:black;">Доступные</button>
             <button id="tasks-create-btn" style="padding:8px 12px; background:#4CAF50; border:none; border-radius:8px;">Создать</button>
@@ -171,8 +198,7 @@
     <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn">Инвестировать RUM</button></div>
     <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn">Привязать TON кошелёк</button></div>
     <div class="screen" id="shop-screen">
-        <button class="back-btn">← Назад</button>
-        <h2>🛍️ Магазин</h2>
+        <button class="back-btn">← Назад</button><h2>🛍️ Магазин</h2>
         <button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button>
         <button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button>
         <button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button>
@@ -203,7 +229,6 @@
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
 
-    // ... задания, клубы (без изменений)
     const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
         { id:2, desc:'Сделать репост', reward:100, link:'', maxCompletions:100, completionsDone:0, checking:false },
@@ -412,8 +437,7 @@
         matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
         matrixParticles.forEach(p => { matrixCtx.fillText(p.char, p.x, p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
     }
-    startMatrix(); setInterval(drawMatrix, 50);
-    window.addEventListener('resize', startMatrix);
+    startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
 
     // Мини-график
     const miniCanvas = document.getElementById('miniChartCanvas');
@@ -474,7 +498,7 @@
         else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
     }
 
-    // Задания
+    // Задания (оставлены без изменений)
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -593,7 +617,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // Клуб
+    // Клуб (оставлен без изменений)
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
@@ -632,8 +656,11 @@
                 else list += '<p>Нет офицеров.</p>';
                 list += '</div>';
                 clubContent.innerHTML = list;
-                document.querySelectorAll('.promote-btn') . forEach(b => b.addEventListener('click', e => { if (!club.officers) club.officers = []; club.officers.push(e.target.dataset.name); saveAll(); renderMyClub(); }));
-                document.querySelectorAll('.demote-btn') . forEach(b => b.addEventListener('click', e => { club.officers = club.officers.filter(o => o !== e.target.dataset.name); saveAll(); renderMyClub(); }));
+                document.querySelectorAll('.club-btn[data-name]').forEach(b => b.addEventListener('click', e => {
+                    if (e.target.textContent.includes('👆')) { if (!club.officers) club.officers = []; club.officers.push(e.target.dataset.name); }
+                    else { club.officers = club.officers.filter(o => o !== e.target.dataset.name); }
+                    saveAll(); renderMyClub();
+                }));
             });
             document.getElementById('delete-club-btn').addEventListener('click', () => { if (confirm('Распустить клуб?')) { clubs = clubs.filter(c => c.id != myClubId); myClubId = null; saveAll(); renderMyClub(); } });
         } else {
