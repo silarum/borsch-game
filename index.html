@@ -15,6 +15,7 @@
             position:relative; width:100%; max-width:420px; height:100vh;
             background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden;
         }
+        /* Переключатель видов */
         #view-switch {
             position:absolute; left:5px; top:45%;
             transform:translateY(-50%);
@@ -23,11 +24,15 @@
             font-size:0.7rem; cursor:pointer; z-index:45;
             display:flex; flex-direction:column; align-items:center; gap:4px;
         }
+        /* Фоны */
         #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:block; }
         #matrixCanvas { width:100%; height:100%; display:block; }
         #smile-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
         #smileCanvas { width:100%; height:100%; display:block; }
+        #veggie-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
+        #veggieCanvas { width:100%; height:100%; display:block; }
 
+        /* Интерфейс */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
@@ -40,8 +45,8 @@
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .rules-btn-bottom {
             position:absolute;
-            bottom: calc(30% + 12px + 4px);
-            left: 5%;
+            bottom: calc(30% + 4px);
+            right: 5%;
             background:rgba(0,0,0,0.7); color:white; border:none;
             padding:2px 6px; border-radius:6px; font-size:0.55rem;
             cursor:pointer; z-index:11; backdrop-filter:blur(5px);
@@ -71,12 +76,12 @@
         .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
         .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
 
-        /* Доска с овальными краями */
+        /* Доска со срезанными верхними углами */
         .board {
             position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
             width:80%;
             background:#DEB887;
-            border-radius: 15px;
+            clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
             border:3px solid #8B4513;
             display:flex; flex-direction:column;
             padding:8px; gap:6px; z-index:10;
@@ -142,10 +147,11 @@
 </head>
 <body>
 <div id="game-container">
-    <button id="view-switch" onclick="toggleView()">🟢 Матрица</button>
+    <button id="view-switch" onclick="cycleView()">🟢 Матрица</button>
 
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
     <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
+    <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
 
     <div class="glass-wall"></div>
     <div class="window-sill"></div>
@@ -211,7 +217,7 @@
         <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
     </div>
 
-    <!-- Экраны разделов (без изменений) -->
+    <!-- Экраны разделов -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button class="shop-btn">Личный майнинг</button><button class="shop-btn">Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
@@ -487,23 +493,24 @@
         }, 1000);
     }
 
-    window.currentView = 'matrix';
-    window.toggleView = function() {
-        if (window.currentView === 'matrix') {
-            document.getElementById('matrix-bg').style.display = 'none';
-            document.getElementById('smile-view').style.display = 'block';
-            document.getElementById('view-switch').innerHTML = '😊 Смайлы';
-            window.currentView = 'smile';
-            startSmileAnimation();
-        } else {
-            document.getElementById('matrix-bg').style.display = 'block';
-            document.getElementById('smile-view').style.display = 'none';
-            document.getElementById('view-switch').innerHTML = '🟢 Матрица';
-            window.currentView = 'matrix';
-            if (window.smileInterval) { clearInterval(window.smileInterval); window.smileInterval = null; }
-        }
+    // --- Фоны ---
+    const views = ['matrix', 'smile', 'veggie'];
+    let currentViewIndex = 0;
+    window.cycleView = function() {
+        if (window.smileInterval) { clearInterval(window.smileInterval); window.smileInterval = null; }
+        if (window.veggieInterval) { clearInterval(window.veggieInterval); window.veggieInterval = null; }
+        currentViewIndex = (currentViewIndex + 1) % views.length;
+        const view = views[currentViewIndex];
+        document.getElementById('matrix-bg').style.display = view === 'matrix' ? 'block' : 'none';
+        document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
+        document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
+        const btn = document.getElementById('view-switch');
+        if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
+        else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
+        else if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
     };
 
+    // Матрица
     const matrixCanvas = document.getElementById('matrixCanvas');
     const matrixCtx = matrixCanvas.getContext('2d');
     let matrixParticles = [];
@@ -514,12 +521,14 @@
         for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
     }
     function drawMatrix() {
+        if (views[currentViewIndex] !== 'matrix') return;
         matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
         matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
         matrixParticles.forEach(p => { matrixCtx.fillText(p.char,p.x,p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
     }
     startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
 
+    // Смайлы
     const smileCanvas = document.getElementById('smileCanvas');
     const smileCtx = smileCanvas.getContext('2d');
     let smileParticles = [];
@@ -529,23 +538,13 @@
         smileCanvas.height = smileCanvas.parentElement.clientHeight;
         smileParticles = [];
         for (let i = 0; i < 25; i++) {
-            smileParticles.push({
-                x: Math.random() * smileCanvas.width,
-                y: smileCanvas.height + Math.random() * 100,
-                speed: 0.5 + Math.random() * 1.5,
-                size: 16 + Math.random() * 14,
-                emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                opacity: 1,
-                popping: false
-            });
+            smileParticles.push({ x: Math.random()*smileCanvas.width, y: smileCanvas.height+Math.random()*100, speed: 0.5+Math.random()*1.5, size: 16+Math.random()*14, emoji: emojis[Math.floor(Math.random()*emojis.length)], opacity: 1, popping: false });
         }
-        if (!window.smileInterval) {
-            window.smileInterval = setInterval(drawSmile, 50);
-        }
+        if (!window.smileInterval) window.smileInterval = setInterval(drawSmile, 50);
     }
     function drawSmile() {
-        if (window.currentView !== 'smile') return;
-        smileCtx.clearRect(0, 0, smileCanvas.width, smileCanvas.height);
+        if (views[currentViewIndex] !== 'smile') return;
+        smileCtx.clearRect(0,0,smileCanvas.width,smileCanvas.height);
         smileParticles.forEach(p => {
             if (!p.popping) { p.y -= p.speed; if(p.y<-20){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; } }
             smileCtx.font = `${p.size}px Arial`;
@@ -557,6 +556,34 @@
     }
     window.addEventListener('resize', startSmileAnimation);
 
+    // Овощи
+    const veggieCanvas = document.getElementById('veggieCanvas');
+    const veggieCtx = veggieCanvas.getContext('2d');
+    let veggieParticles = [];
+    const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+    function startVeggieAnimation() {
+        veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
+        veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
+        veggieParticles = [];
+        for (let i = 0; i < 40; i++) {
+            veggieParticles.push({ x: Math.random()*veggieCanvas.width, y: veggieCanvas.height+Math.random()*100, speed: 0.8+Math.random()*2, size: 16+Math.random()*14, emoji: veggieEmojis[Math.floor(Math.random()*veggieEmojis.length)], opacity: 1 });
+        }
+        if (!window.veggieInterval) window.veggieInterval = setInterval(drawVeggie, 50);
+    }
+    function drawVeggie() {
+        if (views[currentViewIndex] !== 'veggie') return;
+        veggieCtx.clearRect(0,0,veggieCanvas.width,veggieCanvas.height);
+        veggieParticles.forEach(p => {
+            p.y -= p.speed;
+            if (p.y < -20) { p.y = veggieCanvas.height + 20; p.x = Math.random() * veggieCanvas.width; }
+            veggieCtx.font = `${p.size}px Arial`;
+            veggieCtx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+            veggieCtx.fillText(p.emoji, p.x, p.y);
+        });
+    }
+    window.addEventListener('resize', startVeggieAnimation);
+
+    // Магазин и навигация
     document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return alert('Мало SRUM'); srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return alert('Мало SRUM'); srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return alert('Мало SRUM'); srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
@@ -589,6 +616,7 @@
         else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
     }
 
+    // Задания
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -707,6 +735,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
+    // Клуб
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
