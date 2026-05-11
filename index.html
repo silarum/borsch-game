@@ -71,27 +71,31 @@
         .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
         .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
 
+        /* Доска с овальными краями */
         .board {
             position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
-            width:82%;
+            width:80%;
             background:#DEB887;
-            clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
+            border-radius: 15px;
             border:3px solid #8B4513;
             display:flex; flex-direction:column;
-            padding:6px; gap:4px; z-index:10;
+            padding:8px; gap:6px; z-index:10;
         }
-        .row { display:flex; justify-content:space-around; }
-        .row:first-child { justify-content:center; gap:8px; }
-        .row:nth-child(2) { gap:2px; }
+        .row { display:flex; justify-content:center; gap:10px; }
+        .row:first-child { gap:12px; }
+        .row:nth-child(2) {
+            padding: 0 12%;
+            justify-content: space-between;
+        }
         .hole {
             background:radial-gradient(circle, #2F1B0E, #1A0F07);
             border-radius:50%; border:2px solid #3D2B1F;
             display:flex; justify-content:center; align-items:center;
             cursor:pointer; position:relative; transition:transform 0.1s;
-            width:44px; height:44px;
+            width:46px; height:46px;
         }
         .hole:active { transform:scale(0.85); }
-        .veg { font-size:1.6rem; pointer-events:none; animation:popIn 0.3s ease-out; }
+        .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
@@ -165,13 +169,22 @@
 
     <div class="board" id="board">
         <div class="row">
-            <div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div>
+            <div class="hole" data-hole="0"></div>
+            <div class="hole" data-hole="1"></div>
+            <div class="hole" data-hole="2"></div>
         </div>
         <div class="row">
-            <div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div>
+            <div class="hole" data-hole="3"></div>
+            <div class="hole" data-hole="4"></div>
+            <div class="hole" data-hole="5"></div>
+            <div class="hole" data-hole="6"></div>
         </div>
         <div class="row">
-            <div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div>
+            <div class="hole" data-hole="7"></div>
+            <div class="hole" data-hole="8"></div>
+            <div class="hole" data-hole="9"></div>
+            <div class="hole" data-hole="10"></div>
+            <div class="hole" data-hole="11"></div>
         </div>
     </div>
 
@@ -198,6 +211,7 @@
         <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
     </div>
 
+    <!-- Экраны разделов (без изменений) -->
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button class="shop-btn">Личный майнинг</button><button class="shop-btn">Командный 5×5</button></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
