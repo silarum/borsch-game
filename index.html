@@ -15,24 +15,21 @@
             position:relative; width:100%; max-width:420px; height:100vh;
             background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden;
         }
-        /* Переключатель фона – теперь внизу под горшком, скрывается на других экранах */
         #view-switch {
             position:absolute; left:5px;
-            bottom: calc(30% + 12px + 26px + 16px); /* ниже горшка */
+            bottom: calc(30% + 12px + 26px + 16px);
             background:rgba(0,0,0,0.8); color:white;
             border:none; border-radius:8px; padding:6px;
             font-size:0.7rem; cursor:pointer; z-index:45;
             display:flex; flex-direction:column; align-items:center; gap:4px;
         }
         #view-switch.hidden { display: none !important; }
-
         #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:block; }
         #matrixCanvas { width:100%; height:100%; display:block; }
         #smile-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
         #smileCanvas { width:100%; height:100%; display:block; }
         #veggie-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
         #veggieCanvas { width:100%; height:100%; display:block; }
-
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
@@ -45,14 +42,13 @@
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .rules-btn-bottom {
             position:absolute;
-            bottom: calc(30% + 1px); /* немного ниже */
+            bottom: calc(30% + 1px);
             right: 5%;
             background:rgba(0,0,0,0.7); color:white; border:none;
             padding:2px 6px; border-radius:6px; font-size:0.55rem;
             cursor:pointer; z-index:11; backdrop-filter:blur(5px);
         }
         .rules-btn-bottom.hidden { display: none !important; }
-
         .purple-bg { position:absolute; bottom:0; left:0; right:0; top:70%; background:purple; z-index:1; }
         .kitchen-area { position:absolute; bottom:22%; left:0; right:0; height:35%; z-index:2; }
         .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
@@ -77,8 +73,6 @@
         .start-btn, .timer-placeholder { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; font-size:1rem; cursor:pointer; box-shadow:0 0 20px rgba(255,69,0,0.7); animation:pulse 1.5s infinite; }
         .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
         .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
-
-        /* Доска – расширена, снизу отступ */
         .board {
             position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
             width:92%;
@@ -104,7 +98,6 @@
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
-
         .top-panel { position:absolute; top:5px; left:5px; right:5px; display:flex; justify-content:space-between; z-index:35; pointer-events:none; }
         .top-left-buttons { display:flex; gap:4px; flex-wrap:wrap; pointer-events:auto; }
         .top-left-buttons .item { background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; display:flex; align-items:center; gap:2px; cursor:pointer; backdrop-filter:blur(5px); }
@@ -143,11 +136,17 @@
         @keyframes rocketFly { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-90px) scale(0.8); opacity:0; } }
         .spark { position:absolute; z-index:30; pointer-events:none; font-size:1.5rem; animation:sparkBoom 0.8s ease-out forwards; }
         @keyframes sparkBoom { 0% { transform:translate(0,0) scale(1); opacity:1; } 100% { transform:translate(var(--sx), var(--sy)) scale(0.2); opacity:0; } }
-        /* Стили для арены */
-        .arena-btn { padding:16px 20px; border:none; border-radius:12px; font-weight:bold; font-size:1.2rem; background:#FF4500; color:white; margin:10px 0; cursor:pointer; }
-        .fight-btn { background:#ff0000; animation:pulse 0.8s infinite; }
         .bot-select { background:rgba(255,255,255,0.15); padding:16px; margin:8px; border-radius:12px; cursor:pointer; }
         .bot-select.selected { border:2px solid gold; }
+        .duel-scoreboard {
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 45;
+            background: rgba(0,0,0,0.8); padding: 8px 12px;
+            border-radius: 10px; color: white; font-weight: bold;
+            font-size: 0.75rem;
+        }
+        .duel-scoreboard.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -220,6 +219,13 @@
         <button class="nav-btn" data-screen="tasks">📋 Задания</button>
         <button class="nav-btn" data-screen="wallet">👛 Кошелёк</button>
         <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
+    </div>
+
+    <!-- Табло дуэли (появляется во время PvP) -->
+    <div class="duel-scoreboard hidden" id="duel-scoreboard">
+        <span>🥊 Ты: <span id="duelPlayerScore">0</span></span>
+        <span>⏳ <span id="duelTimer">60</span>с</span>
+        <span>🤖 <span id="duelBotName">Бот</span>: <span id="duelBotScore">0</span></span>
     </div>
 
     <!-- Экраны разделов -->
@@ -303,7 +309,7 @@
     const gameRecoveryTime = 600;
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
-    let streak = 0; // серия для множителя
+    let streak = 0;
 
     const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
@@ -340,6 +346,11 @@
     const holes = document.querySelectorAll('.hole');
     const viewSwitch = document.getElementById('view-switch');
     const rulesBtn = document.getElementById('rules-btn-bottom');
+    const duelScoreboard = document.getElementById('duel-scoreboard');
+    const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
+    const duelBotScoreEl = document.getElementById('duelBotScore');
+    const duelTimerEl = document.getElementById('duelTimer');
+    const duelBotNameEl = document.getElementById('duelBotName');
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -347,10 +358,10 @@
         investBalRight.textContent = `📈 Инвест: ${invest}`;
         document.getElementById('ton-balance') && (document.getElementById('ton-balance').textContent = ton.toFixed(2));
         document.getElementById('usdt-balance') && (document.getElementById('usdt-balance').textContent = usdt.toFixed(2));
-        if (games > 0 && !gameActive) {
+        if (games > 0 && !gameActive && !duelActive) {
             startBtnContainer.innerHTML = '<button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>';
             document.getElementById('start-btn').addEventListener('click', startGame);
-        } else if (gameActive) {
+        } else if (gameActive || duelActive) {
             startBtnContainer.innerHTML = '';
         } else {
             const now = Date.now(), last = window.lastGameTime || now;
@@ -437,7 +448,6 @@
         if (!gameActive) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) {
-            // промах мимо лунки или пустая лунка
             rum = Math.max(0, rum - 20);
             streak = 0;
             showPoopFountain();
@@ -452,7 +462,7 @@
             rum += Math.floor(gain);
             flyVegToPot(hole, hole.querySelector('.veg').textContent);
             showCoinFountain();
-            if (streak % 20 === 0) triggerRocket(); // ракета каждые 20 точных
+            if (streak % 20 === 0) triggerRocket();
         } else {
             rum = Math.max(0, rum - 20);
             streak = 0;
@@ -478,56 +488,203 @@
         });
     }
 
-    function flyVegToPot(hole, emoji) {
-        const holeRect = hole.getBoundingClientRect();
-        const potRect = pot.getBoundingClientRect();
-        const containerRect = document.getElementById('game-container').getBoundingClientRect();
-        const vegEl = document.createElement('div'); vegEl.className = 'flying-veg'; vegEl.textContent = emoji;
-        vegEl.style.left = (holeRect.left + holeRect.width/2 - containerRect.left) + 'px';
-        vegEl.style.top = (holeRect.top + holeRect.height/2 - containerRect.top) + 'px';
-        vegEl.style.setProperty('--dx', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
-        vegEl.style.setProperty('--dy', '-60px');
-        vegEl.style.setProperty('--ex', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) + 'px');
-        vegEl.style.setProperty('--ey', (potRect.top - containerRect.top + 5 - parseFloat(vegEl.style.top)) + 'px');
-        document.getElementById('game-container').appendChild(vegEl);
-        vegEl.addEventListener('animationend', () => vegEl.remove());
-    }
+    // ------------------ ДУЭЛЬ ------------------
+    let duelActive = false;
+    let duelPlayerScore = 0;
+    let duelBotScore = 0;
+    let duelTimerInterval;
+    let duelSpawnInterval;
+    let duelBotInterval;
+    let duelTimeLeft;
+    let arenaData = {
+        phase: 'select',
+        stake: 0,
+        bot: null
+    };
 
-    function startGame() {
-        if (games <= 0 || gameActive) return;
-        gameActive = true; gameTimeLeft = 60; streak = 0;
-        updateUI(); spawnAll();
-        let interval = 1800;
-        spawnInterval = setInterval(() => {
-            if (!gameActive) return;
-            spawnAll();
-            interval = Math.max(450, interval-80);
-            clearInterval(spawnInterval);
-            spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
-        }, interval);
-        gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
-    }
-    function endGame() {
+    const bots = [
+        { name: '🥉 Новичок', interval: 2200, desc: 'Медленно, но верно' },
+        { name: '🥈 Опытный', interval: 1400, desc: 'Средняя скорость' },
+        { name: '🥇 Легенда', interval: 800, desc: 'Режет как шеф' }
+    ];
+
+    function startDuel() {
+        if (duelActive) return;
+        duelActive = true;
         gameActive = false;
-        clearInterval(gameTimer); clearInterval(spawnInterval);
-        holes.forEach(h => h.innerHTML = '');
-        currentVeg = {};
-        games = Math.max(0, games - 1);
-        window.lastGameTime = Date.now();
-        updateUI();
-        if (games < maxGames) startRecovery();
-    }
-    function startRecovery() {
-        if (window.recoveryInterval) clearInterval(window.recoveryInterval);
-        window.recoveryInterval = setInterval(() => {
-            if (games >= maxGames) { clearInterval(window.recoveryInterval); return; }
-            if (Date.now() - (window.lastGameTime || 0) >= gameRecoveryTime * 1000) {
-                games = Math.min(maxGames, games + 1);
-                window.lastGameTime = Date.now();
-                updateUI();
-                if (games >= maxGames) clearInterval(window.recoveryInterval);
+        clearInterval(gameTimer);
+        clearInterval(spawnInterval);
+
+        duelPlayerScore = 0;
+        duelBotScore = 0;
+        duelTimeLeft = 60;
+        duelScoreboard.classList.remove('hidden');
+        viewSwitch.classList.add('hidden');
+        rulesBtn.classList.add('hidden');
+        document.querySelector('.bottom-panel').style.display = 'none';
+        document.querySelector('.top-panel').style.display = 'none';
+        startBtnContainer.innerHTML = '';
+
+        duelBotNameEl.textContent = arenaData.bot.name.split(' ')[1];
+        updateDuelScore();
+
+        spawnAll();
+        duelSpawnInterval = setInterval(() => {
+            if (!duelActive) return;
+            spawnAll();
+        }, 1800);
+
+        duelBotInterval = setInterval(() => {
+            if (!duelActive) return;
+            duelBotScore++;
+            updateDuelScore();
+        }, arenaData.bot.interval);
+
+        duelTimerInterval = setInterval(() => {
+            if (!duelActive) return;
+            duelTimeLeft--;
+            duelTimerEl.textContent = duelTimeLeft;
+            if (duelTimeLeft <= 0) {
+                endDuel();
             }
         }, 1000);
+
+        board.addEventListener('touchstart', duelTouchHandler, {passive: false});
+        board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    }
+
+    function duelTouchHandler(e) {
+        e.preventDefault();
+        if (!duelActive) return;
+        [...e.changedTouches].forEach(touch => {
+            const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
+            if (hole) {
+                const num = [...holes].indexOf(hole);
+                if (num === -1 || !currentVeg[num]) {
+                    duelPlayerScore = Math.max(0, duelPlayerScore - 1);
+                } else if (currentVeg[num].type === 'good') {
+                    duelPlayerScore++;
+                    flyVegToPot(hole, hole.querySelector('.veg').textContent);
+                } else {
+                    duelPlayerScore = Math.max(0, duelPlayerScore - 1);
+                }
+                delete currentVeg[num];
+                hole.innerHTML = '';
+                updateDuelScore();
+            } else {
+                duelPlayerScore = Math.max(0, duelPlayerScore - 1);
+                updateDuelScore();
+            }
+        });
+    }
+
+    function updateDuelScore() {
+        duelPlayerScoreEl.textContent = duelPlayerScore;
+        duelBotScoreEl.textContent = duelBotScore;
+    }
+
+    function endDuel() {
+        duelActive = false;
+        clearInterval(duelTimerInterval);
+        clearInterval(duelSpawnInterval);
+        clearInterval(duelBotInterval);
+        board.removeEventListener('touchstart', duelTouchHandler);
+        holes.forEach(h => h.innerHTML = '');
+        currentVeg = {};
+        duelScoreboard.classList.add('hidden');
+        viewSwitch.classList.remove('hidden');
+        rulesBtn.classList.remove('hidden');
+        document.querySelector('.bottom-panel').style.display = '';
+        document.querySelector('.top-panel').style.display = '';
+        updateUI();
+
+        if (duelPlayerScore > duelBotScore) {
+            rum += arenaData.stake * 2;
+        } else if (duelPlayerScore === duelBotScore) {
+            rum += arenaData.stake;
+        }
+        arenaData.phase = 'result';
+        renderArena();
+    }
+
+    function cancelDuel() {
+        if (duelActive) {
+            duelActive = false;
+            clearInterval(duelTimerInterval);
+            clearInterval(duelSpawnInterval);
+            clearInterval(duelBotInterval);
+            board.removeEventListener('touchstart', duelTouchHandler);
+            holes.forEach(h => h.innerHTML = '');
+            duelScoreboard.classList.add('hidden');
+            viewSwitch.classList.remove('hidden');
+            rulesBtn.classList.remove('hidden');
+            document.querySelector('.bottom-panel').style.display = '';
+            document.querySelector('.top-panel').style.display = '';
+            rum += arenaData.stake;
+            updateUI();
+            arenaData.phase = 'select';
+            renderArena();
+        }
+    }
+
+    const arenaContent = document.getElementById('arena-content');
+    function renderArena() {
+        if (!arenaContent) return;
+        let html = '<h2>🏟️ Крипто Беспредел</h2>';
+        if (arenaData.phase === 'select') {
+            html += `<p style="margin-bottom:12px;">Выбери противника и ставку:</p>`;
+            html += `<div style="display:flex; flex-direction:column; gap:10px; width:100%;">`;
+            bots.forEach((bot, idx) => {
+                html += `<div class="bot-select" data-bot-idx="${idx}" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>${bot.name} <span style="font-size:0.8rem; opacity:0.7;">(${bot.desc})</span></span>
+                    <span style="font-size:0.8rem;">⚡~${(60/bot.interval*1).toFixed(1)} очк/сек</span>
+                </div>`;
+            });
+            html += `</div>`;
+            html += `<input type="number" id="arena-stake" placeholder="Ставка RUM" min="10" max="${rum}" value="10" style="padding:10px; width:80%; margin:15px 0; border-radius:8px; border:none; background:rgba(255,255,255,0.15); color:white;">`;
+            html += `<button class="shop-btn" id="start-arena-btn" disabled>⚔️ В бой</button>`;
+        } else if (arenaData.phase === 'result') {
+            const win = duelPlayerScore > duelBotScore;
+            html += `<div style="text-align:center;">`;
+            html += win ? `<p style="font-size:1.5rem;">🎉 Победа!</p><p>Ты получаешь ${arenaData.stake * 2} RUM</p>` :
+                     (duelPlayerScore < duelBotScore ? `<p style="font-size:1.5rem;">💀 Поражение</p><p>Ставка потеряна</p>` : `<p style="font-size:1.5rem;">🤝 Ничья</p><p>Ставка возвращена</p>`);
+            html += `<button class="shop-btn" id="arena-ok-btn">Ок</button></div>`;
+        }
+        arenaContent.innerHTML = html;
+        bindArenaEvents();
+    }
+
+    function bindArenaEvents() {
+        if (arenaData.phase === 'select') {
+            document.querySelectorAll('.bot-select').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.bot-select').forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    arenaData.bot = bots[parseInt(this.dataset.botIdx)];
+                    document.getElementById('start-arena-btn').disabled = false;
+                });
+            });
+            const startBtn = document.getElementById('start-arena-btn');
+            if (startBtn) startBtn.addEventListener('click', () => {
+                const stake = parseInt(document.getElementById('arena-stake').value);
+                if (!arenaData.bot) return alert('Выбери бота');
+                if (isNaN(stake) || stake < 10) return alert('Минимум 10 RUM');
+                if (stake > rum) return alert('Недостаточно RUM');
+                arenaData.stake = stake;
+                rum -= stake;
+                updateUI();
+                arenaData.phase = 'duel';
+                startDuel();
+            });
+        } else if (arenaData.phase === 'result') {
+            document.getElementById('arena-ok-btn').addEventListener('click', () => {
+                arenaData.phase = 'select';
+                arenaData.bot = null;
+                arenaData.stake = 0;
+                updateUI();
+                renderArena();
+            });
+        }
     }
 
     // --- Фоны ---
@@ -620,130 +777,7 @@
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ===================== АРЕНА (PvP дуэль) =====================
-    const arenaContent = document.getElementById('arena-content');
-    const bots = [
-        { name: '🥉 Новичок', interval: 2000, desc: 'Медленно, но верно' },
-        { name: '🥈 Опытный', interval: 1200, desc: 'Средняя скорость' },
-        { name: '🥇 Легенда', interval: 700, desc: 'Режет как шеф' }
-    ];
-    let arena = {
-        phase: 'select', // 'select' | 'battle' | 'result'
-        stake: 0,
-        bot: null,
-        playerScore: 0,
-        botScore: 0,
-        timer: 60,
-        intervalId: null,
-        timerId: null
-    };
-
-    function renderArena() {
-        if (!arenaContent) return;
-        let html = '<h2>🏟️ Крипто Беспредел</h2>';
-        if (arena.phase === 'select') {
-            html += `<p style="margin-bottom:12px;">Выбери противника и ставку:</p>`;
-            html += `<div style="display:flex; flex-direction:column; gap:10px; width:100%;">`;
-            bots.forEach((bot, idx) => {
-                html += `<div class="bot-select" data-bot-idx="${idx}" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>${bot.name} <span style="font-size:0.8rem; opacity:0.7;">(${bot.desc})</span></span>
-                    <span style="font-size:0.8rem;">⚡${(60/bot.interval*1).toFixed(1)} очк/сек</span>
-                </div>`;
-            });
-            html += `</div>`;
-            html += `<input type="number" id="arena-stake" placeholder="Ставка RUM" min="10" max="${rum}" value="10" style="padding:10px; width:80%; margin:15px 0; border-radius:8px; border:none; background:rgba(255,255,255,0.15); color:white;">`;
-            html += `<button class="shop-btn" id="start-arena-btn" disabled>⚔️ В бой</button>`;
-        } else if (arena.phase === 'battle') {
-            html += `<div style="width:100%; text-align:center;">
-                <p style="font-size:1.2rem;">⚔️ ${arena.bot.name} ⚔️</p>
-                <p>Ставка: ${arena.stake} RUM</p>
-                <div style="display:flex; justify-content:space-around; margin:15px 0;">
-                    <div><strong>Ты</strong><br><span id="playerScoreDisplay" style="font-size:2rem;">${arena.playerScore}</span></div>
-                    <div><strong>Бот</strong><br><span id="botScoreDisplay" style="font-size:2rem;">${arena.botScore}</span></div>
-                </div>
-                <p>⏳ <span id="battleTimer">${arena.timer}</span> сек</p>
-                <button class="arena-btn fight-btn" id="fight-btn">🥊 БИТЬ</button>
-            </div>`;
-        } else if (arena.phase === 'result') {
-            const win = arena.playerScore > arena.botScore;
-            html += `<div style="text-align:center;">`;
-            html += win ? `<p style="font-size:1.5rem;">🎉 Победа!</p><p>Ты получаешь ${arena.stake * 2} RUM</p>` :
-                     (arena.playerScore < arena.botScore ? `<p style="font-size:1.5rem;">💀 Поражение</p><p>Ставка потеряна</p>` : `<p style="font-size:1.5rem;">🤝 Ничья</p><p>Ставка возвращена</p>`);
-            html += `<button class="shop-btn" id="arena-ok-btn">Ок</button></div>`;
-        }
-        arenaContent.innerHTML = html;
-        bindArenaEvents();
-    }
-
-    function bindArenaEvents() {
-        if (arena.phase === 'select') {
-            document.querySelectorAll('.bot-select').forEach(el => {
-                el.addEventListener('click', function() {
-                    document.querySelectorAll('.bot-select').forEach(e => e.classList.remove('selected'));
-                    this.classList.add('selected');
-                    arena.bot = bots[parseInt(this.dataset.botIdx)];
-                    document.getElementById('start-arena-btn').disabled = false;
-                });
-            });
-            const startBtn = document.getElementById('start-arena-btn');
-            if (startBtn) startBtn.addEventListener('click', () => {
-                const stake = parseInt(document.getElementById('arena-stake').value);
-                if (!arena.bot) return alert('Выбери бота');
-                if (isNaN(stake) || stake < 10) return alert('Минимум 10 RUM');
-                if (stake > rum) return alert('Недостаточно RUM');
-                arena.stake = stake;
-                rum -= stake;
-                arena.phase = 'battle';
-                arena.playerScore = 0;
-                arena.botScore = 0;
-                arena.timer = 60;
-                updateUI();
-                renderArena();
-                // запускаем бота и таймер
-                arena.intervalId = setInterval(() => {
-                    arena.botScore++;
-                    const bs = document.getElementById('botScoreDisplay');
-                    if (bs) bs.textContent = arena.botScore;
-                }, arena.bot.interval);
-                arena.timerId = setInterval(() => {
-                    arena.timer--;
-                    const bt = document.getElementById('battleTimer');
-                    if (bt) bt.textContent = arena.timer;
-                    if (arena.timer <= 0) {
-                        clearInterval(arena.timerId);
-                        clearInterval(arena.intervalId);
-                        arena.phase = 'result';
-                        resolveArenaBattle();
-                        renderArena();
-                    }
-                }, 1000);
-            });
-        } else if (arena.phase === 'battle') {
-            document.getElementById('fight-btn').addEventListener('click', () => {
-                arena.playerScore++;
-                document.getElementById('playerScoreDisplay').textContent = arena.playerScore;
-            });
-        } else if (arena.phase === 'result') {
-            document.getElementById('arena-ok-btn').addEventListener('click', () => {
-                arena.phase = 'select';
-                arena.bot = null;
-                arena.stake = 0;
-                updateUI();
-                renderArena();
-            });
-        }
-    }
-
-    function resolveArenaBattle() {
-        if (arena.playerScore > arena.botScore) {
-            rum += arena.stake * 2;
-        } else if (arena.playerScore === arena.botScore) {
-            rum += arena.stake;
-        }
-        updateUI();
-    }
-
-    // --- Навигация ---
+    // Навигация и скрытие кнопок переключения фона
     function hideViewSwitch() {
         viewSwitch.classList.add('hidden');
         rulesBtn.classList.add('hidden');
@@ -762,12 +796,7 @@
     document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
     document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', () => {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (arena.phase === 'battle') {
-            clearInterval(arena.timerId);
-            clearInterval(arena.intervalId);
-            rum += arena.stake; // возврат при выходе
-            arena.phase = 'select';
-        }
+        if (duelActive) cancelDuel();
         showViewSwitch();
     }));
 
@@ -787,13 +816,18 @@
             else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
             else if (screenId === 'arena') {
                 document.getElementById('arena-screen').classList.add('active');
-                if (arena.phase !== 'battle') renderArena();
+                if (arenaData.phase !== 'duel') renderArena();
             }
             else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
         } else {
             showViewSwitch();
         }
     }
+
+    // Задания, клуб, магазин остаются без изменений
+    // ... (весь остальной код заданий, клуба, магазина как в предыдущей версии)
+    // Для краткости здесь опущен, но в реальном файле он должен быть полностью идентичен последней рабочей версии.
+    // Вставляем его полностью:
 
     // Задания
     const tasksContent = document.getElementById('tasks-content');
@@ -914,7 +948,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // Клуб
+    // Клуб (полный код, как раньше)
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
