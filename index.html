@@ -15,7 +15,6 @@
             position:relative; width:100%; max-width:420px; height:100vh;
             background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden;
         }
-        /* Переключатель видов */
         #view-switch {
             position:absolute; left:5px; top:45%;
             transform:translateY(-50%);
@@ -24,7 +23,6 @@
             font-size:0.7rem; cursor:pointer; z-index:45;
             display:flex; flex-direction:column; align-items:center; gap:4px;
         }
-        /* Фоны */
         #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:block; }
         #matrixCanvas { width:100%; height:100%; display:block; }
         #smile-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
@@ -32,7 +30,6 @@
         #veggie-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
         #veggieCanvas { width:100%; height:100%; display:block; }
 
-        /* Интерфейс */
         .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
         .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
         .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
@@ -76,20 +73,21 @@
         .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
         .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
 
-        /* Доска со срезанными верхними углами */
+        /* ДОСКА – СТАЛА ШИРЕ */
         .board {
             position:absolute; bottom:8%; left:50%; transform:translateX(-50%);
-            width:80%;
+            width:90%;                    /* было 80% */
             background:#DEB887;
-            clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
+            clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
             border:3px solid #8B4513;
             display:flex; flex-direction:column;
-            padding:8px; gap:6px; z-index:10;
+            padding:10px; gap:8px;        /* увеличены отступы */
+            z-index:10;
         }
-        .row { display:flex; justify-content:center; gap:10px; }
-        .row:first-child { gap:12px; }
+        .row { display:flex; justify-content:center; gap:14px; }  /* увеличен зазор */
+        .row:first-child { gap:16px; }
         .row:nth-child(2) {
-            padding: 0 12%;
+            padding: 0 10%;
             justify-content: space-between;
         }
         .hole {
@@ -97,10 +95,10 @@
             border-radius:50%; border:2px solid #3D2B1F;
             display:flex; justify-content:center; align-items:center;
             cursor:pointer; position:relative; transition:transform 0.1s;
-            width:46px; height:46px;
+            width:50px; height:50px;      /* было 46px, теперь 50px */
         }
         .hole:active { transform:scale(0.85); }
-        .veg { font-size:1.8rem; pointer-events:none; animation:popIn 0.3s ease-out; }
+        .veg { font-size:2rem; pointer-events:none; animation:popIn 0.3s ease-out; }
         @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
         .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
         .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
@@ -218,7 +216,7 @@
     </div>
 
     <!-- Экраны разделов -->
-    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><h2>🏟️ Арена</h2><button class="shop-btn">Личный майнинг</button><button class="shop-btn">Командный 5×5</button></div>
+    <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><div id="arena-content"></div></div>
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
         <div style="display:flex; gap:8px; margin:10px 0;">
@@ -259,7 +257,27 @@
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button><h2>🏆 Топ игроков</h2><p>1. ...</p></div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button><h2>⛏️ Топ майнеров</h2><p>1. ...</p></div>
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button><h2>👥 Рефералы</h2><input readonly value="https://..."></div>
-    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила</h2><p>...</p></div>
+    <div class="screen" id="rules-screen">
+        <button class="back-btn">← Назад</button>
+        <h2>📜 Правила игры</h2>
+        <div style="text-align:left; margin-top:10px; line-height:1.5; width:100%;">
+            <p><strong>🍲 Тапалка</strong><br>
+            — Нажимай на полезные овощи (они улетят в кастрюлю и принесут 💰 RUM).<br>
+            — Избегай «плохих» ингредиентов (💩, 🪱) – потеряешь RUM.<br>
+            — За 20 точных попаданий подряд запускается 🚀 и даёт бонус.<br>
+            — У тебя 3 игры; каждая длится 60 секунд. Энергия восстанавливается раз в 10 минут.</p>
+            <p><strong>⚡ Бустеры</strong><br>
+            — Покупай в Магазине за SRUM: ×2, ×3, ×5 к награде на 24 часа.</p>
+            <p><strong>📋 Задания</strong><br>
+            — Выполняй официальные и частные задания, получай RUM или SRUM. Часть награды идёт в инвестиции.</p>
+            <p><strong>🏟️ Арена</strong><br>
+            — Ставка в RUM, случайный противник, сравнение мощи. Победитель удваивает ставку.</p>
+            <p><strong>🐺 Клуб</strong><br>
+            — Создай или вступи в клуб, назначай офицеров, приглашай бойцов.</p>
+            <p><strong>💱 Экономика</strong><br>
+            — RUM – игровая валюта, SRUM – токен. Обменивай на TON / USDT в Магазине.</p>
+        </div>
+    </div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button><h2>📖 О проекте</h2><p>...</p></div>
 </div>
 
@@ -583,15 +601,140 @@
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // Магазин и навигация
-    document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return alert('Мало SRUM'); srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
-    document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return alert('Мало SRUM'); srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
-    document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return alert('Мало SRUM'); srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
-    document.getElementById('buy-srum-ton').addEventListener('click', ()=>{ if(ton<1) return alert('Нужен 1 TON'); ton-=1; srum+=2; updateUI(); });
-    document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{ if(usdt<1) return alert('Нужен 1 USDT'); usdt-=1; srum+=1; updateUI(); });
-    document.getElementById('swap-srum-ton').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; ton+=0.5; updateUI(); });
-    document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; usdt+=1; updateUI(); });
+    // ===================== АРЕНА (PvP) =====================
+    const arenaContent = document.getElementById('arena-content');
+    let arenaState = {
+        active: false,
+        searchTimer: null,
+        battleTimer: null,
+        stake: 0,
+        timeLeft: 0,
+        opponentName: '',
+        playerPower: 0,
+        opponentPower: 0
+    };
 
+    function renderArena() {
+        if (!arenaContent) return;
+        let html = '<h2>🏟️ Крипто Беспредел</h2>';
+        if (arenaState.active) {
+            if (arenaState.timeLeft > 0 && !arenaState.opponentName) {
+                html += `<p>🔍 Поиск соперника... ${arenaState.timeLeft} сек</p>`;
+                html += `<p>Ставка: ${arenaState.stake} RUM</p>`;
+                html += `<button class="shop-btn" id="cancel-arena-btn">❌ Отменить поиск</button>`;
+            } else if (arenaState.timeLeft > 0 && arenaState.opponentName) {
+                html += `<p>⚔️ Битва против <b>${arenaState.opponentName}</b></p>`;
+                html += `<p>Ставка: ${arenaState.stake} RUM</p>`;
+                html += `<p>Твоя мощь: ${arenaState.playerPower} | Мощь врага: ${arenaState.opponentPower}</p>`;
+                html += `<p>⌛ Бой закончится через ${arenaState.timeLeft} сек...</p>`;
+            } else {
+                const win = arenaState.playerPower > arenaState.opponentPower;
+                if (win) {
+                    html += `<p>🎉 <b>ПОБЕДА!</b> Ты получаешь ${arenaState.stake * 2} RUM!</p>`;
+                } else if (arenaState.playerPower < arenaState.opponentPower) {
+                    html += `<p>💀 Поражение. Ты потерял ставку.</p>`;
+                } else {
+                    html += `<p>🤝 Ничья! Ставка возвращается.</p>`;
+                }
+                html += `<p>Твоя мощь: ${arenaState.playerPower} | Мощь врага: ${arenaState.opponentPower}</p>`;
+                html += `<button class="shop-btn" id="arena-ok-btn">Ок</button>`;
+            }
+        } else {
+            html += `<p>Выбери ставку в RUM и вступи в бой!</p>`;
+            html += `<input type="number" id="arena-stake" placeholder="Сумма RUM" min="10" max="${rum}" value="10" style="padding:10px; width:80%; margin:10px 0; border-radius:8px; border:none; background:rgba(255,255,255,0.15); color:white;">`;
+            html += `<button class="shop-btn" id="start-arena-btn">⚔️ Найти бой</button>`;
+            html += `<p style="font-size:0.7rem; opacity:0.7;">Исход зависит от случайной мощи и твоего бустера.</p>`;
+        }
+        arenaContent.innerHTML = html;
+        bindArenaEvents();
+    }
+
+    function bindArenaEvents() {
+        const startBtn = document.getElementById('start-arena-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                const stakeInput = document.getElementById('arena-stake');
+                const stake = parseInt(stakeInput.value);
+                if (isNaN(stake) || stake < 10) return alert('Минимальная ставка 10 RUM');
+                if (stake > rum) return alert('Недостаточно RUM');
+                arenaState.stake = stake;
+                arenaState.active = true;
+                arenaState.timeLeft = 5;
+                rum -= stake;
+                updateUI();
+                renderArena();
+                clearInterval(arenaState.searchTimer);
+                arenaState.searchTimer = setInterval(() => {
+                    arenaState.timeLeft--;
+                    renderArena();
+                    if (arenaState.timeLeft <= 0) {
+                        clearInterval(arenaState.searchTimer);
+                        arenaState.opponentName = pickOpponentName();
+                        arenaState.timeLeft = 5;
+                        generatePowers();
+                        renderArena();
+                        arenaState.battleTimer = setInterval(() => {
+                            arenaState.timeLeft--;
+                            renderArena();
+                            if (arenaState.timeLeft <= 0) {
+                                clearInterval(arenaState.battleTimer);
+                                resolveBattle();
+                                renderArena();
+                            }
+                        }, 1000);
+                    }
+                }, 1000);
+            });
+        }
+        const cancelBtn = document.getElementById('cancel-arena-btn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                clearInterval(arenaState.searchTimer);
+                rum += arenaState.stake;
+                arenaState.active = false;
+                arenaState.stake = 0;
+                arenaState.opponentName = '';
+                updateUI();
+                renderArena();
+            });
+        }
+        const okBtn = document.getElementById('arena-ok-btn');
+        if (okBtn) {
+            okBtn.addEventListener('click', () => {
+                arenaState.active = false;
+                arenaState.stake = 0;
+                arenaState.opponentName = '';
+                updateUI();
+                renderArena();
+            });
+        }
+    }
+
+    function pickOpponentName() {
+        const names = ['GigaChad', 'CryptoWhale', 'Борщехлёб', 'Майнер', 'ТокенКиллер', 'ЛамповыйПацан', 'SatoshiJr', 'TONLord'];
+        return names[Math.floor(Math.random() * names.length)];
+    }
+
+    function generatePowers() {
+        arenaState.playerPower = Math.floor(50 + Math.random() * 101);
+        if (activeBoost && activeBoost.endTime > Date.now()) {
+            arenaState.playerPower = Math.floor(arenaState.playerPower * (1 + (activeBoost.type - 1) * 0.2));
+        }
+        arenaState.opponentPower = Math.floor(50 + Math.random() * 121);
+    }
+
+    function resolveBattle() {
+        if (arenaState.playerPower > arenaState.opponentPower) {
+            rum += arenaState.stake * 2;
+        } else if (arenaState.playerPower < arenaState.opponentPower) {
+            // ставка уже списана
+        } else {
+            rum += arenaState.stake;
+        }
+        updateUI();
+    }
+
+    // Навигация
     document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
     document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
     document.getElementById('invest-nav-btn').addEventListener('click', ()=> switchScreen('invest'));
@@ -599,7 +742,12 @@
     document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
     document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
     document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
-    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', () => document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))));
+    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', () => {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        arenaState.active = false;
+        clearInterval(arenaState.searchTimer);
+        clearInterval(arenaState.battleTimer);
+    }));
 
     board.addEventListener('touchstart', handleTouchStart, {passive: false});
     board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
@@ -613,6 +761,7 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
         else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
+        else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
         else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
     }
 
@@ -814,6 +963,15 @@
     document.getElementById('club-my-btn').addEventListener('click', renderMyClub);
     document.getElementById('club-all-btn').addEventListener('click', renderAllClubs);
     document.getElementById('club-create-btn').addEventListener('click', showCreateClub);
+
+    // Магазин
+    document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return alert('Мало SRUM'); srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return alert('Мало SRUM'); srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return alert('Мало SRUM'); srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-srum-ton').addEventListener('click', ()=>{ if(ton<1) return alert('Нужен 1 TON'); ton-=1; srum+=2; updateUI(); });
+    document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{ if(usdt<1) return alert('Нужен 1 USDT'); usdt-=1; srum+=1; updateUI(); });
+    document.getElementById('swap-srum-ton').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; ton+=0.5; updateUI(); });
+    document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; usdt+=1; updateUI(); });
 })();
 </script>
 </body>
