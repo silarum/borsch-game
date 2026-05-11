@@ -15,10 +15,10 @@
             position:relative; width:100%; max-width:420px; height:100vh;
             background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden;
         }
-        /* Переключатель фона – теперь внизу под горшком */
+        /* Переключатель фона – теперь внизу под горшком, скрывается на других экранах */
         #view-switch {
             position:absolute; left:5px;
-            bottom: calc(30% + 12px + 26px + 12px); /* ниже горшка */
+            bottom: calc(30% + 12px + 26px + 16px); /* ниже горшка */
             background:rgba(0,0,0,0.8); color:white;
             border:none; border-radius:8px; padding:6px;
             font-size:0.7rem; cursor:pointer; z-index:45;
@@ -45,7 +45,7 @@
         .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
         .rules-btn-bottom {
             position:absolute;
-            bottom: calc(30% + 4px);
+            bottom: calc(30% + 1px); /* немного ниже */
             right: 5%;
             background:rgba(0,0,0,0.7); color:white; border:none;
             padding:2px 6px; border-radius:6px; font-size:0.55rem;
@@ -86,15 +86,12 @@
             clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
             border:3px solid #8B4513;
             display:flex; flex-direction:column;
-            padding:12px 10px 18px 10px; /* больше снизу */
+            padding:12px 10px 18px 10px;
             gap:8px; z-index:10;
         }
         .row { display:flex; justify-content:center; gap:14px; }
         .row:first-child { gap:16px; }
-        .row:nth-child(2) {
-            padding: 0 10%;
-            justify-content: space-between;
-        }
+        .row:nth-child(2) { padding: 0 10%; justify-content: space-between; }
         .hole {
             background:radial-gradient(circle, #2F1B0E, #1A0F07);
             border-radius:50%; border:2px solid #3D2B1F;
@@ -127,7 +124,7 @@
         .nav-btn:active { transform:scale(0.95); }
         .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); color:white; padding:20px; flex-direction:column; align-items:center; justify-content:flex-start; z-index:40; overflow-y:auto; }
         .screen.active { display:flex; }
-        .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; }
+        .back-btn { position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.3); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; z-index:50; }
         .flying-veg { position:absolute; z-index:20; pointer-events:none; animation:flyToPot 0.5s ease-in forwards; }
         @keyframes flyToPot { 0% { transform:translate(0,0) scale(1); opacity:1; } 50% { transform:translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform:translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
         .coin-fountain { position:absolute; pointer-events:none; z-index:25; animation:coinUp 0.8s ease-out forwards; font-size:1rem; font-weight:bold; }
@@ -146,6 +143,11 @@
         @keyframes rocketFly { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-90px) scale(0.8); opacity:0; } }
         .spark { position:absolute; z-index:30; pointer-events:none; font-size:1.5rem; animation:sparkBoom 0.8s ease-out forwards; }
         @keyframes sparkBoom { 0% { transform:translate(0,0) scale(1); opacity:1; } 100% { transform:translate(var(--sx), var(--sy)) scale(0.2); opacity:0; } }
+        /* Стили для арены */
+        .arena-btn { padding:16px 20px; border:none; border-radius:12px; font-weight:bold; font-size:1.2rem; background:#FF4500; color:white; margin:10px 0; cursor:pointer; }
+        .fight-btn { background:#ff0000; animation:pulse 0.8s infinite; }
+        .bot-select { background:rgba(255,255,255,0.15); padding:16px; margin:8px; border-radius:12px; cursor:pointer; }
+        .bot-select.selected { border:2px solid gold; }
     </style>
 </head>
 <body>
@@ -266,21 +268,22 @@
         <button class="back-btn">← Назад</button>
         <h2>📜 Правила игры</h2>
         <div style="text-align:left; margin-top:10px; line-height:1.5; width:100%;">
-            <p><strong>🍲 Тапалка</strong><br>
-            — Нажимай на полезные овощи (они улетят в кастрюлю и принесут 💰 RUM).<br>
-            — Избегай «плохих» ингредиентов (💩, 🪱) – потеряешь RUM.<br>
-            — За 20 точных попаданий подряд запускается 🚀 и даёт бонус.<br>
-            — У тебя 3 игры; каждая длится 60 секунд. Энергия восстанавливается раз в 10 минут.</p>
+            <p><strong>🍲 Основная готовка</strong><br>
+            Твоя задача — нажимать на <span style="color:#90EE90;">полезные овощи</span> (🥬🧅🥔🥕…), которые появляются в лунках на доске.<br>
+            Каждое точное попадание даёт <strong>10 RUM</strong>.<br>
+            — Если ты делаешь серию попаданий без ошибок, награда растёт:<br>
+            &nbsp;&nbsp;• 0-9 попаданий → 10 RUM за овощ<br>
+            &nbsp;&nbsp;• 10-19 попаданий → 20 RUM<br>
+            &nbsp;&nbsp;• 20-29 попаданий → 40 RUM<br>
+            &nbsp;&nbsp;• 30-39 → 80 RUM… и так далее (удвоение каждые 10).<br>
+            — <strong>Ошибка</strong>: если нажмёшь на <span style="color:#FF6B6B;">плохой ингредиент</span> (💩, 🪱, 🧀, 🥀, 🍄) или просто мажешь мимо лунки — <strong>теряешь 20 RUM</strong>, и вся накопленная серия сгорает (возвращаешься к 10 RUM).</p>
             <p><strong>⚡ Бустеры</strong><br>
-            — Покупай в Магазине за SRUM: ×2, ×3, ×5 к награде на 24 часа.</p>
-            <p><strong>📋 Задания</strong><br>
-            — Выполняй официальные и частные задания, получай RUM или SRUM. Часть награды идёт в инвестиции.</p>
-            <p><strong>🏟️ Арена</strong><br>
-            — Ставка в RUM, случайный противник, сравнение мощи. Победитель удваивает ставку.</p>
-            <p><strong>🐺 Клуб</strong><br>
-            — Создай или вступи в клуб, назначай офицеров, приглашай бойцов.</p>
-            <p><strong>💱 Экономика</strong><br>
-            — RUM – игровая валюта, SRUM – токен. Обменивай на TON / USDT в Магазине.</p>
+            Купи в Магазине за SRUM множитель ×2, ×3, ×5. Он умножает получившееся количество RUM (после учёта серии).</p>
+            <p><strong>🏟️ Арена «Крипто Беспредел»</strong><br>
+            — Дуэль с ботом. Выбираешь сложность (новичок/опытный/легенда), ставишь RUM.<br>
+            — За 60 секунд набирай больше очков, чем бот (жми 🥊 БИТЬ). Каждый твой удар даёт 1 очко.<br>
+            — Победитель забирает удвоенную ставку.</p>
+            <p><strong>🐺 Клуб, Задания, Кошелёк</strong> — управляй сообществом, выполняй квесты, обменивай SRUM на TON/USDT.</p>
         </div>
     </div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button><h2>📖 О проекте</h2><p>...</p></div>
@@ -300,7 +303,7 @@
     const gameRecoveryTime = 600;
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
-    let hitCombo = 0;
+    let streak = 0; // серия для множителя
 
     const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
@@ -333,7 +336,6 @@
     const rumBal = document.getElementById('rum-balance');
     const srumBal = document.getElementById('srum-balance');
     const investBalRight = document.getElementById('invest-balance-right');
-    const startBtn = document.getElementById('start-btn');
     const startBtnContainer = document.getElementById('start-btn-container');
     const holes = document.querySelectorAll('.hole');
     const viewSwitch = document.getElementById('view-switch');
@@ -435,26 +437,30 @@
         if (!gameActive) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) {
-            rum = Math.max(0, rum-5);
+            // промах мимо лунки или пустая лунка
+            rum = Math.max(0, rum - 20);
+            streak = 0;
             showPoopFountain();
-            hitCombo = 0;
             updateUI();
             return;
         }
         if (currentVeg[num].type === 'good') {
-            let gain = 10;
+            streak++;
+            let multiplier = Math.pow(2, Math.floor((streak-1) / 10));
+            let gain = 10 * multiplier;
             if (activeBoost && activeBoost.endTime > Date.now()) gain *= activeBoost.type;
-            rum += gain;
+            rum += Math.floor(gain);
             flyVegToPot(hole, hole.querySelector('.veg').textContent);
             showCoinFountain();
-            hitCombo++;
-            if (hitCombo === 20) { triggerRocket(); hitCombo = 0; }
+            if (streak % 20 === 0) triggerRocket(); // ракета каждые 20 точных
         } else {
-            rum = Math.max(0, rum-5);
+            rum = Math.max(0, rum - 20);
+            streak = 0;
             showPoopFountain();
-            hitCombo = 0;
         }
-        delete currentVeg[num]; hole.innerHTML = ''; updateUI();
+        delete currentVeg[num];
+        hole.innerHTML = '';
+        updateUI();
     }
 
     function handleTouchStart(e) {
@@ -462,7 +468,13 @@
         if (!gameActive) return;
         [...e.changedTouches].forEach(touch => {
             const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
-            if (hole) processHit(hole, touch); else { rum = Math.max(0, rum-5); showPoopFountain(); updateUI(); }
+            if (hole) processHit(hole, touch);
+            else {
+                rum = Math.max(0, rum - 20);
+                streak = 0;
+                showPoopFountain();
+                updateUI();
+            }
         });
     }
 
@@ -483,7 +495,7 @@
 
     function startGame() {
         if (games <= 0 || gameActive) return;
-        gameActive = true; gameTimeLeft = 60;
+        gameActive = true; gameTimeLeft = 60; streak = 0;
         updateUI(); spawnAll();
         let interval = 1800;
         spawnInterval = setInterval(() => {
@@ -608,140 +620,130 @@
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ===================== АРЕНА (PvP) =====================
+    // ===================== АРЕНА (PvP дуэль) =====================
     const arenaContent = document.getElementById('arena-content');
-    let arenaState = {
-        active: false,
-        searchTimer: null,
-        battleTimer: null,
+    const bots = [
+        { name: '🥉 Новичок', interval: 2000, desc: 'Медленно, но верно' },
+        { name: '🥈 Опытный', interval: 1200, desc: 'Средняя скорость' },
+        { name: '🥇 Легенда', interval: 700, desc: 'Режет как шеф' }
+    ];
+    let arena = {
+        phase: 'select', // 'select' | 'battle' | 'result'
         stake: 0,
-        timeLeft: 0,
-        opponentName: '',
-        playerPower: 0,
-        opponentPower: 0
+        bot: null,
+        playerScore: 0,
+        botScore: 0,
+        timer: 60,
+        intervalId: null,
+        timerId: null
     };
 
     function renderArena() {
         if (!arenaContent) return;
         let html = '<h2>🏟️ Крипто Беспредел</h2>';
-        if (arenaState.active) {
-            if (arenaState.timeLeft > 0 && !arenaState.opponentName) {
-                html += `<p>🔍 Поиск соперника... ${arenaState.timeLeft} сек</p>`;
-                html += `<p>Ставка: ${arenaState.stake} RUM</p>`;
-                html += `<button class="shop-btn" id="cancel-arena-btn">❌ Отменить поиск</button>`;
-            } else if (arenaState.timeLeft > 0 && arenaState.opponentName) {
-                html += `<p>⚔️ Битва против <b>${arenaState.opponentName}</b></p>`;
-                html += `<p>Ставка: ${arenaState.stake} RUM</p>`;
-                html += `<p>Твоя мощь: ${arenaState.playerPower} | Мощь врага: ${arenaState.opponentPower}</p>`;
-                html += `<p>⌛ Бой закончится через ${arenaState.timeLeft} сек...</p>`;
-            } else {
-                const win = arenaState.playerPower > arenaState.opponentPower;
-                if (win) {
-                    html += `<p>🎉 <b>ПОБЕДА!</b> Ты получаешь ${arenaState.stake * 2} RUM!</p>`;
-                } else if (arenaState.playerPower < arenaState.opponentPower) {
-                    html += `<p>💀 Поражение. Ты потерял ставку.</p>`;
-                } else {
-                    html += `<p>🤝 Ничья! Ставка возвращается.</p>`;
-                }
-                html += `<p>Твоя мощь: ${arenaState.playerPower} | Мощь врага: ${arenaState.opponentPower}</p>`;
-                html += `<button class="shop-btn" id="arena-ok-btn">Ок</button>`;
-            }
-        } else {
-            html += `<p>Выбери ставку в RUM и вступи в бой!</p>`;
-            html += `<input type="number" id="arena-stake" placeholder="Сумма RUM" min="10" max="${rum}" value="10" style="padding:10px; width:80%; margin:10px 0; border-radius:8px; border:none; background:rgba(255,255,255,0.15); color:white;">`;
-            html += `<button class="shop-btn" id="start-arena-btn">⚔️ Найти бой</button>`;
-            html += `<p style="font-size:0.7rem; opacity:0.7;">Исход зависит от случайной мощи и твоего бустера.</p>`;
+        if (arena.phase === 'select') {
+            html += `<p style="margin-bottom:12px;">Выбери противника и ставку:</p>`;
+            html += `<div style="display:flex; flex-direction:column; gap:10px; width:100%;">`;
+            bots.forEach((bot, idx) => {
+                html += `<div class="bot-select" data-bot-idx="${idx}" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>${bot.name} <span style="font-size:0.8rem; opacity:0.7;">(${bot.desc})</span></span>
+                    <span style="font-size:0.8rem;">⚡${(60/bot.interval*1).toFixed(1)} очк/сек</span>
+                </div>`;
+            });
+            html += `</div>`;
+            html += `<input type="number" id="arena-stake" placeholder="Ставка RUM" min="10" max="${rum}" value="10" style="padding:10px; width:80%; margin:15px 0; border-radius:8px; border:none; background:rgba(255,255,255,0.15); color:white;">`;
+            html += `<button class="shop-btn" id="start-arena-btn" disabled>⚔️ В бой</button>`;
+        } else if (arena.phase === 'battle') {
+            html += `<div style="width:100%; text-align:center;">
+                <p style="font-size:1.2rem;">⚔️ ${arena.bot.name} ⚔️</p>
+                <p>Ставка: ${arena.stake} RUM</p>
+                <div style="display:flex; justify-content:space-around; margin:15px 0;">
+                    <div><strong>Ты</strong><br><span id="playerScoreDisplay" style="font-size:2rem;">${arena.playerScore}</span></div>
+                    <div><strong>Бот</strong><br><span id="botScoreDisplay" style="font-size:2rem;">${arena.botScore}</span></div>
+                </div>
+                <p>⏳ <span id="battleTimer">${arena.timer}</span> сек</p>
+                <button class="arena-btn fight-btn" id="fight-btn">🥊 БИТЬ</button>
+            </div>`;
+        } else if (arena.phase === 'result') {
+            const win = arena.playerScore > arena.botScore;
+            html += `<div style="text-align:center;">`;
+            html += win ? `<p style="font-size:1.5rem;">🎉 Победа!</p><p>Ты получаешь ${arena.stake * 2} RUM</p>` :
+                     (arena.playerScore < arena.botScore ? `<p style="font-size:1.5rem;">💀 Поражение</p><p>Ставка потеряна</p>` : `<p style="font-size:1.5rem;">🤝 Ничья</p><p>Ставка возвращена</p>`);
+            html += `<button class="shop-btn" id="arena-ok-btn">Ок</button></div>`;
         }
         arenaContent.innerHTML = html;
         bindArenaEvents();
     }
 
     function bindArenaEvents() {
-        const startBtn = document.getElementById('start-arena-btn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                const stakeInput = document.getElementById('arena-stake');
-                const stake = parseInt(stakeInput.value);
-                if (isNaN(stake) || stake < 10) return alert('Минимальная ставка 10 RUM');
+        if (arena.phase === 'select') {
+            document.querySelectorAll('.bot-select').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.bot-select').forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    arena.bot = bots[parseInt(this.dataset.botIdx)];
+                    document.getElementById('start-arena-btn').disabled = false;
+                });
+            });
+            const startBtn = document.getElementById('start-arena-btn');
+            if (startBtn) startBtn.addEventListener('click', () => {
+                const stake = parseInt(document.getElementById('arena-stake').value);
+                if (!arena.bot) return alert('Выбери бота');
+                if (isNaN(stake) || stake < 10) return alert('Минимум 10 RUM');
                 if (stake > rum) return alert('Недостаточно RUM');
-                arenaState.stake = stake;
-                arenaState.active = true;
-                arenaState.timeLeft = 5;
+                arena.stake = stake;
                 rum -= stake;
+                arena.phase = 'battle';
+                arena.playerScore = 0;
+                arena.botScore = 0;
+                arena.timer = 60;
                 updateUI();
                 renderArena();
-                clearInterval(arenaState.searchTimer);
-                arenaState.searchTimer = setInterval(() => {
-                    arenaState.timeLeft--;
-                    renderArena();
-                    if (arenaState.timeLeft <= 0) {
-                        clearInterval(arenaState.searchTimer);
-                        arenaState.opponentName = pickOpponentName();
-                        arenaState.timeLeft = 5;
-                        generatePowers();
+                // запускаем бота и таймер
+                arena.intervalId = setInterval(() => {
+                    arena.botScore++;
+                    const bs = document.getElementById('botScoreDisplay');
+                    if (bs) bs.textContent = arena.botScore;
+                }, arena.bot.interval);
+                arena.timerId = setInterval(() => {
+                    arena.timer--;
+                    const bt = document.getElementById('battleTimer');
+                    if (bt) bt.textContent = arena.timer;
+                    if (arena.timer <= 0) {
+                        clearInterval(arena.timerId);
+                        clearInterval(arena.intervalId);
+                        arena.phase = 'result';
+                        resolveArenaBattle();
                         renderArena();
-                        arenaState.battleTimer = setInterval(() => {
-                            arenaState.timeLeft--;
-                            renderArena();
-                            if (arenaState.timeLeft <= 0) {
-                                clearInterval(arenaState.battleTimer);
-                                resolveBattle();
-                                renderArena();
-                            }
-                        }, 1000);
                     }
                 }, 1000);
             });
-        }
-        const cancelBtn = document.getElementById('cancel-arena-btn');
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', () => {
-                clearInterval(arenaState.searchTimer);
-                rum += arenaState.stake;
-                arenaState.active = false;
-                arenaState.stake = 0;
-                arenaState.opponentName = '';
-                updateUI();
-                renderArena();
+        } else if (arena.phase === 'battle') {
+            document.getElementById('fight-btn').addEventListener('click', () => {
+                arena.playerScore++;
+                document.getElementById('playerScoreDisplay').textContent = arena.playerScore;
             });
-        }
-        const okBtn = document.getElementById('arena-ok-btn');
-        if (okBtn) {
-            okBtn.addEventListener('click', () => {
-                arenaState.active = false;
-                arenaState.stake = 0;
-                arenaState.opponentName = '';
+        } else if (arena.phase === 'result') {
+            document.getElementById('arena-ok-btn').addEventListener('click', () => {
+                arena.phase = 'select';
+                arena.bot = null;
+                arena.stake = 0;
                 updateUI();
                 renderArena();
             });
         }
     }
 
-    function pickOpponentName() {
-        const names = ['GigaChad', 'CryptoWhale', 'Борщехлёб', 'Майнер', 'ТокенКиллер', 'ЛамповыйПацан', 'SatoshiJr', 'TONLord'];
-        return names[Math.floor(Math.random() * names.length)];
-    }
-
-    function generatePowers() {
-        arenaState.playerPower = Math.floor(50 + Math.random() * 101);
-        if (activeBoost && activeBoost.endTime > Date.now()) {
-            arenaState.playerPower = Math.floor(arenaState.playerPower * (1 + (activeBoost.type - 1) * 0.2));
-        }
-        arenaState.opponentPower = Math.floor(50 + Math.random() * 121);
-    }
-
-    function resolveBattle() {
-        if (arenaState.playerPower > arenaState.opponentPower) {
-            rum += arenaState.stake * 2;
-        } else if (arenaState.playerPower < arenaState.opponentPower) {
-            // ставка уже списана
-        } else {
-            rum += arenaState.stake;
+    function resolveArenaBattle() {
+        if (arena.playerScore > arena.botScore) {
+            rum += arena.stake * 2;
+        } else if (arena.playerScore === arena.botScore) {
+            rum += arena.stake;
         }
         updateUI();
     }
 
-    // Общие навигация и скрытие кнопок переключения фона
+    // --- Навигация ---
     function hideViewSwitch() {
         viewSwitch.classList.add('hidden');
         rulesBtn.classList.add('hidden');
@@ -760,9 +762,12 @@
     document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
     document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', () => {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        arenaState.active = false;
-        clearInterval(arenaState.searchTimer);
-        clearInterval(arenaState.battleTimer);
+        if (arena.phase === 'battle') {
+            clearInterval(arena.timerId);
+            clearInterval(arena.intervalId);
+            rum += arena.stake; // возврат при выходе
+            arena.phase = 'select';
+        }
         showViewSwitch();
     }));
 
@@ -780,7 +785,10 @@
             hideViewSwitch();
             if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
             else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
-            else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
+            else if (screenId === 'arena') {
+                document.getElementById('arena-screen').classList.add('active');
+                if (arena.phase !== 'battle') renderArena();
+            }
             else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
         } else {
             showViewSwitch();
@@ -934,52 +942,58 @@
                     saveAll(); renderMyClub();
                 });
             });
-            document.getElementById('invite-member-btn').addEventListener('click', () => { const name = prompt('Введите имя бойца:'); if (name) { if (!club.members) club.members = []; club.members.push(name); saveAll(); renderMyClub(); } });
+            document.getElementById('invite-member-btn').addEventListener('click', () => { const name = prompt('Имя бойца:'); if(name) { if(!club.members) club.members=[]; club.members.push(name); saveAll(); renderMyClub(); } });
             document.getElementById('manage-officers-btn').addEventListener('click', () => {
                 let list = '<div><p><b>Назначить офицера:</b></p>';
                 const fighters = club.members?.filter(m => m !== club.master && !club.officers?.includes(m)) || [];
-                if (fighters.length) fighters.forEach(f => list += `<button class="club-btn" data-name="${f}">${f} 👆</button> `);
+                if (fighters.length) fighters.forEach(f => list += `<button class="club-btn" data-name="${f}">${f} 👆</button>`);
                 else list += '<p>Нет бойцов.</p>';
                 list += '<p><b>Разжаловать:</b></p>';
-                if (club.officers?.length) club.officers.forEach(o => list += `<button class="club-btn" data-name="${o}">${o} 👇</button> `);
+                if (club.officers?.length) club.officers.forEach(o => list += `<button class="club-btn" data-name="${o}">${o} 👇</button>`);
                 else list += '<p>Нет офицеров.</p>';
                 list += '</div>';
                 clubContent.innerHTML = list;
-                document.querySelectorAll('.promote-btn').forEach(b => b.addEventListener('click', e => { if (!club.officers) club.officers = []; club.officers.push(e.target.dataset.name); saveAll(); renderMyClub(); }));
-                document.querySelectorAll('.demote-btn').forEach(b => b.addEventListener('click', e => { club.officers = club.officers.filter(o => o !== e.target.dataset.name); saveAll(); renderMyClub(); }));
+                document.querySelectorAll('[data-name]').forEach(b => b.addEventListener('click', e => {
+                    const name = e.target.dataset.name;
+                    if (!club.officers) club.officers = [];
+                    club.officers = club.officers.filter(o => o !== name);
+                    club.officers.push(name);
+                    saveAll(); renderMyClub();
+                }));
             });
-            document.getElementById('delete-club-btn').addEventListener('click', () => { if (confirm('Распустить клуб?')) { clubs = clubs.filter(c => c.id != myClubId); myClubId = null; saveAll(); renderMyClub(); } });
+            document.getElementById('delete-club-btn').addEventListener('click', ()=>{ if(confirm('Распустить клуб?')){ clubs = clubs.filter(c=>c.id!=myClubId); myClubId=null; saveAll(); renderMyClub(); } });
         } else {
-            if (document.getElementById('invite-member-btn')) document.getElementById('invite-member-btn').addEventListener('click', () => { const name = prompt('Введите имя бойца:'); if (name) { if (!club.members) club.members = []; club.members.push(name); saveAll(); renderMyClub(); } });
-            if (document.getElementById('leave-club-btn')) document.getElementById('leave-club-btn').addEventListener('click', () => {
-                if (confirm('Покинуть клуб?')) { club.members = club.members.filter(m => m !== 'Игрок'); if (club.officers?.includes('Игрок')) club.officers = club.officers.filter(o => o !== 'Игрок'); myClubId = null; saveAll(); renderMyClub(); }
+            if(document.getElementById('invite-member-btn')) document.getElementById('invite-member-btn').addEventListener('click', ()=>{ const name=prompt('Имя бойца:'); if(name){ if(!club.members) club.members=[]; club.members.push(name); saveAll(); renderMyClub(); } });
+            if(document.getElementById('leave-club-btn')) document.getElementById('leave-club-btn').addEventListener('click', ()=>{
+                if(confirm('Покинуть клуб?')){ club.members = club.members.filter(m=>m!=='Игрок'); if(club.officers?.includes('Игрок')) club.officers = club.officers.filter(o=>o!=='Игрок'); myClubId=null; saveAll(); renderMyClub(); }
             });
         }
     }
     function renderAllClubs() {
-        if (!clubs.length) { clubContent.innerHTML = '<p>Нет клубов.</p>'; return; }
-        let html = '';
-        clubs.forEach(c => {
+        if(!clubs.length){ clubContent.innerHTML='<p>Нет клубов.</p>'; return; }
+        let html='';
+        clubs.forEach(c=>{
             const isMember = myClubId == c.id;
             html += `<div class="task-item"><strong>${c.emoji||'🐺'} ${c.name}</strong> (${c.members?.length||0} уч.)<br>${c.desc||''}<br>${isMember ? '<span>✅ Вы в клубе</span>' : `<button class="club-btn" data-join="${c.id}">Вступить</button>`}</div>`;
         });
         clubContent.innerHTML = html;
-        document.querySelectorAll('[data-join]').forEach(b => b.addEventListener('click', e => {
-            const club = clubs.find(c => c.id == e.target.dataset.join);
-            if (!club || myClubId) return;
-            if (!club.members) club.members = []; club.members.push('Игрок'); myClubId = club.id; saveAll(); renderAllClubs();
+        document.querySelectorAll('[data-join]').forEach(b=>b.addEventListener('click',e=>{
+            const club = clubs.find(c=>c.id==e.target.dataset.join);
+            if(!club||myClubId) return;
+            if(!club.members) club.members=[];
+            club.members.push('Игрок'); myClubId=club.id; saveAll(); renderAllClubs();
         }));
     }
     function showCreateClub() {
         clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><input id="club-name" placeholder="Название"><input id="club-emoji" placeholder="Эмодзи"><input id="club-desc" placeholder="Описание"><p>Стоимость: 100 RUM</p><button id="club-create-submit" class="club-btn" style="background:#4CAF50;">Создать клуб</button></div>`;
-        document.getElementById('club-create-submit').addEventListener('click', () => {
-            const name = document.getElementById('club-name').value.trim();
-            const emoji = document.getElementById('club-emoji').value.trim() || '🐺';
-            const desc = document.getElementById('club-desc').value.trim();
-            if (!name || rum < 100) return alert('Недостаточно RUM или пустое название');
-            rum -= 100;
-            const newClub = { id: Date.now(), name, emoji, desc, master: 'Игрок', officers: [], members: ['Игрок'] };
-            clubs.push(newClub); myClubId = newClub.id; saveAll(); updateUI(); renderMyClub();
+        document.getElementById('club-create-submit').addEventListener('click',()=>{
+            const name=document.getElementById('club-name').value.trim();
+            const emoji=document.getElementById('club-emoji').value.trim()||'🐺';
+            const desc=document.getElementById('club-desc').value.trim();
+            if(!name||rum<100) return alert('Недостаточно RUM или пустое название');
+            rum-=100;
+            const newClub={ id:Date.now(), name, emoji, desc, master:'Игрок', officers:[], members:['Игрок'] };
+            clubs.push(newClub); myClubId=newClub.id; saveAll(); updateUI(); renderMyClub();
         });
     }
     document.getElementById('club-my-btn').addEventListener('click', renderMyClub);
