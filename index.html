@@ -5,89 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Крипто Борщ</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:#000; display:flex; justify-content:center; align-items:center; height:100vh; overflow:hidden; font-family:'Arial',sans-serif; touch-action:manipulation; user-select:none; -webkit-tap-highlight-color:transparent; }
-        #game-container { position:relative; width:100%; max-width:420px; height:100vh; background:linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%); overflow:hidden; }
-        #view-switch { position:absolute; left:5px; bottom: calc(30% + 12px + 26px + 19px); background:rgba(0,0,0,0.8); color:white; border:none; border-radius:8px; padding:6px; font-size:0.7rem; cursor:pointer; z-index:45; display:flex; flex-direction:column; align-items:center; gap:4px; }
-        #view-switch.hidden { display: none !important; }
-        #matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:block; }
-        #matrixCanvas { width:100%; height:100%; display:block; }
-        #smile-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
-        #smileCanvas { width:100%; height:100%; display:block; }
-        #veggie-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px); z-index:0; display:none; }
-        #veggieCanvas { width:100%; height:100%; display:block; }
-        .glass-wall { position:absolute; top:0; left:0; right:0; bottom:30%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.08)); border-bottom:2px solid rgba(255,255,255,0.5); pointer-events:none; z-index:3; }
-        .window-sill { position:absolute; bottom:30%; left:0; right:0; height:12px; background:#A0522D; border-top:2px solid #8B4513; z-index:5; }
-        .flower-pot { position:absolute; bottom:calc(30% + 12px); left:5%; width:24px; height:26px; background:#CD853F; border-radius:0 0 8px 8px; border:2px solid #8B4513; z-index:6; }
-        .flower-pot::after { content:'🌿'; position:absolute; top:-16px; left:2px; font-size:1rem; }
-        .boost-display { position:absolute; bottom:calc(30% + 12px + 26px + 4px); left:5%; display:flex; flex-direction:column; align-items:center; gap:2px; z-index:10; font-size:0.6rem; color:white; text-shadow:0 0 4px black; }
-        .boost-icon { background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:8px; }
-        .rules-btn-bottom { position:absolute; bottom:50px; right:5px; background:rgba(0,0,0,0.8); color:white; border:none; padding:3px 8px; border-radius:6px; font-size:0.6rem; cursor:pointer; z-index:12; backdrop-filter:blur(5px); }
-        .rules-btn-bottom.hidden { display: none !important; }
-        .purple-bg { position:absolute; bottom:0; left:0; right:0; top:70%; background:purple; z-index:1; }
-        .kitchen-area { position:absolute; bottom:22%; left:0; right:0; height:35%; z-index:2; }
-        .table { position:absolute; top:50%; left:5%; right:5%; height:50%; background:linear-gradient(180deg, #DEB887, #A0522D); border-top:6px solid #8B4513; }
-        .stove { position:absolute; top:20%; left:25%; right:25%; height:45%; background:linear-gradient(180deg, #F5F5F5, #D3D3D3); border-radius:15px 15px 5px 5px; border:3px solid #A9A9A9; }
-        .pot { position:absolute; top:5%; left:50%; transform:translateX(-50%); width:60%; height:55%; background:linear-gradient(180deg, #FFD700, #B8860B); border-radius:0 0 40px 40px; border:4px solid #8B6508; box-shadow:inset 0 4px 8px rgba(0,0,0,0.4), 0 8px 12px rgba(0,0,0,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:3; }
-        .pot::before { content:''; position:absolute; top:-15px; left:-5px; right:-5px; height:15px; background:linear-gradient(180deg, #FFD700, #DAA520); border-radius:5px 5px 0 0; border:3px solid #8B6508; border-bottom:none; }
-        .pot::after { content:''; position:absolute; top:-25px; left:50%; transform:translateX(-50%); width:20px; height:10px; background:#8B6508; border-radius:10px 10px 0 0; }
-        .steam { position:absolute; top:-25px; left:50%; transform:translateX(-50%); width:80%; height:18px; }
-        .steam-particle { position:absolute; width:12px; height:12px; background:rgba(255,255,255,0.8); border-radius:50%; animation:rise 2s infinite; }
-        .steam-particle:nth-child(1){ left:20%; animation-delay:0s; }
-        .steam-particle:nth-child(2){ left:50%; animation-delay:0.7s; }
-        .steam-particle:nth-child(3){ left:70%; animation-delay:1.4s; }
-        @keyframes rise { 0%{ transform:translateY(0) scale(1); opacity:0.8; } 100%{ transform:translateY(-20px) scale(1.8); opacity:0; } }
-        .start-btn-container { position:absolute; top:calc(10% + 56px); left:50%; transform:translateX(-50%); z-index:25; display:flex; align-items:center; justify-content:center; }
-        .start-btn, .timer-placeholder { background:linear-gradient(180deg, #FF6347, #DC143C); color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; font-size:1rem; cursor:pointer; box-shadow:0 0 20px rgba(255,69,0,0.7); animation:pulse 1.5s infinite; }
-        .start-btn:disabled, .timer-placeholder { background:#808080; animation:none; box-shadow:none; }
-        .timer-placeholder { animation:none; background:rgba(0,0,0,0.7); box-shadow:none; padding:8px 15px; font-size:0.9rem; }
-        .board { position:absolute; bottom:8%; left:50%; transform:translateX(-50%); width:92%; background:#DEB887; clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%); border:3px solid #8B4513; display:flex; flex-direction:column; padding:12px 10px 18px 10px; gap:8px; z-index:10; }
-        .row { display:flex; justify-content:center; gap:14px; }
-        .row:first-child { gap:16px; }
-        .row:nth-child(2) { padding: 0 10%; justify-content: space-between; }
-        .hole { background:radial-gradient(circle, #2F1B0E, #1A0F07); border-radius:50%; border:2px solid #3D2B1F; display:flex; justify-content:center; align-items:center; cursor:pointer; position:relative; transition:transform 0.1s; width:50px; height:50px; }
-        .hole:active { transform:scale(0.85); }
-        .veg { font-size:2rem; pointer-events:none; animation:popIn 0.3s ease-out; }
-        @keyframes popIn { 0%{ transform:scale(0); } 80%{ transform:scale(1.2); } 100%{ transform:scale(1); } }
-        .rotten { filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg); }
-        .rotten::after { content:'🪱'; position:absolute; top:-6px; right:-6px; font-size:0.6rem; }
-        .top-panel { position:absolute; top:5px; left:5px; right:5px; display:flex; justify-content:space-between; z-index:35; pointer-events:none; }
-        .top-left-buttons { display:flex; gap:4px; flex-wrap:wrap; pointer-events:auto; }
-        .top-left-buttons .item { background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; display:flex; align-items:center; gap:2px; cursor:pointer; backdrop-filter:blur(5px); }
-        .balances-right { display:flex; flex-direction:column; gap:4px; align-items:flex-end; pointer-events:auto; }
-        .balances-right div { background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:10px; font-size:0.55rem; font-weight:bold; backdrop-filter:blur(5px); }
-        #rum-balance { background:rgba(255,215,0,0.7); color:black; }
-        #srum-balance { background:rgba(192,192,192,0.7); color:black; }
-        #invest-balance-right { background:rgba(76,175,80,0.7); color:white; }
-        .bottom-panel { position:absolute; bottom:2px; left:2px; right:2px; display:flex; justify-content:space-around; z-index:30; }
-        .nav-btn { background:rgba(0,0,0,0.75); color:white; border:none; padding:10px 6px; border-radius:10px; font-size:0.75rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; flex:1; margin:2px; font-weight:bold; letter-spacing:0.5px; transition:all 0.2s; box-shadow:0 2px 5px rgba(0,0,0,0.5); }
-        .nav-btn:nth-child(1) { background:linear-gradient(180deg, #e74c3c, #c0392b); }
-        .nav-btn:nth-child(2) { background:linear-gradient(180deg, #8e44ad, #6c3483); }
-        .nav-btn:nth-child(3) { background:linear-gradient(180deg, #f39c12, #d68910); }
-        .nav-btn:nth-child(4) { background:linear-gradient(180deg, #27ae60, #1e8449); }
-        .nav-btn:nth-child(5) { background:linear-gradient(180deg, #2980b9, #2471a3); }
-        .nav-btn:active { transform:scale(0.95); }
-        .screen { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.92); color:white; padding:50px 20px 20px; flex-direction:column; align-items:center; justify-content:flex-start; z-index:40; overflow-y:auto; }
-        .screen.active { display:flex; }
-        .back-btn { position:absolute; top:15px; left:15px; background:rgba(0,0,0,0.8); color:white; border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:6px 12px; font-size:0.8rem; cursor:pointer; z-index:60; }
-        .duel-scoreboard { position:absolute; top:10px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.8); padding:6px 12px; border-radius:10px; color:white; font-weight:bold; font-size:0.7rem; z-index:45; }
-        .duel-scoreboard.hidden { display: none; }
-        .quick-duel-coin { position:absolute; top:90px; right:15px; width:56px; height:56px; background:radial-gradient(circle at 30% 30%, #FFD700, #B8860B); border-radius:50%; border:3px solid #FFA500; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer; box-shadow:0 0 20px gold, 0 0 40px orange; z-index:35; animation:pulse 1.5s infinite, float 3s ease-in-out infinite; }
-        @keyframes float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
-        .coin-particle { position:absolute; pointer-events:none; z-index:36; font-size:1rem; animation:sparkUp 0.6s ease-out forwards; }
-        @keyframes sparkUp { 0%{ transform:translateY(0) scale(1); opacity:1; } 100%{ transform:translateY(-40px) scale(0.2); opacity:0; } }
-        .quick-duel-modal { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:60; flex-direction:column; }
-        .quick-duel-box { background:#1a1a2e; border-radius:20px; padding:20px; width:85%; color:white; text-align:center; border:2px solid gold; }
-        .quick-duel-box input, .quick-duel-box select, .quick-duel-box button { width:100%; padding:12px; margin:8px 0; border-radius:10px; border:none; font-size:1rem; }
-        .quick-duel-box button { background:gold; color:black; font-weight:bold; }
-        .countdown-overlay { position:absolute; top:0; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; font-size:5rem; color:gold; text-shadow:0 0 20px black; z-index:50; background:rgba(0,0,0,0.5); }
-        .result-overlay { position:absolute; top:30%; left:10%; right:10%; background:rgba(0,0,0,0.9); color:white; border-radius:20px; padding:20px; text-align:center; z-index:55; }
-        .result-overlay button { margin:10px; padding:12px 20px; border-radius:12px; border:none; font-weight:bold; cursor:pointer; }
-        .arena-tabs { display:flex; gap:10px; margin:10px 0 20px; }
-        .arena-tabs button { padding:10px 15px; border:none; border-radius:12px; font-weight:bold; cursor:pointer; background:#333; color:#ccc; }
-        .arena-tabs button.active { background:linear-gradient(135deg, #FFD700, #FF8C00); color:black; }
-        .club-btn { padding:12px 18px; border:none; border-radius:8px; font-weight:bold; background:linear-gradient(180deg, #E040FB, #AA00FF); color:white; box-shadow:0 4px 10px rgba(224,64,251,0.5); margin:4px; cursor:pointer; }
-        .shop-btn { padding:14px 20px; border:none; border-radius:10px; font-weight:bold; font-size:1rem; background:linear-gradient(180deg, #00E5FF, #00B8D4); color:#000; box-shadow:0 4px 12px rgba(0,229,255,0.5); margin:6px 0; cursor:pointer; width:90%; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Arial',sans-serif;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
+        #game-container{position:relative;width:100%;max-width:420px;height:100vh;background:linear-gradient(180deg,#0a0a0a 0%,#1a1a2e 100%);overflow:hidden}
+        #view-switch{position:absolute;left:5px;bottom:calc(30% + 12px + 26px + 19px);background:rgba(0,0,0,0.8);color:white;border:none;border-radius:8px;padding:6px;font-size:0.7rem;cursor:pointer;z-index:45;display:flex;flex-direction:column;align-items:center;gap:4px}
+        #view-switch.hidden{display:none!important}
+        #matrix-bg{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:block}
+        #matrixCanvas{width:100%;height:100%;display:block}
+        #smile-view{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:none}
+        #smileCanvas{width:100%;height:100%;display:block}
+        #veggie-view{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:none}
+        #veggieCanvas{width:100%;height:100%;display:block}
+        .glass-wall{position:absolute;top:0;left:0;right:0;bottom:30%;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.08));border-bottom:2px solid rgba(255,255,255,0.5);pointer-events:none;z-index:3}
+        .window-sill{position:absolute;bottom:30%;left:0;right:0;height:12px;background:#A0522D;border-top:2px solid #8B4513;z-index:5}
+        .flower-pot{position:absolute;bottom:calc(30% + 12px);left:5%;width:24px;height:26px;background:#CD853F;border-radius:0 0 8px 8px;border:2px solid #8B4513;z-index:6}
+        .flower-pot::after{content:'🌿';position:absolute;top:-16px;left:2px;font-size:1rem}
+        .boost-display{position:absolute;bottom:calc(30% + 12px + 26px + 4px);left:5%;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:10;font-size:0.6rem;color:white;text-shadow:0 0 4px black}
+        .boost-icon{background:rgba(0,0,0,0.7);padding:2px 6px;border-radius:8px}
+        .rules-btn-bottom{position:absolute;bottom:52px;right:5px;background:rgba(0,0,0,0.85);color:white;border:none;padding:4px 10px;border-radius:6px;font-size:0.6rem;cursor:pointer;z-index:38}
+        .rules-btn-bottom.hidden{display:none!important}
+        .purple-bg{position:absolute;bottom:0;left:0;right:0;top:70%;background:purple;z-index:1}
+        .kitchen-area{position:absolute;bottom:22%;left:0;right:0;height:35%;z-index:2}
+        .table{position:absolute;top:50%;left:5%;right:5%;height:50%;background:linear-gradient(180deg,#DEB887,#A0522D);border-top:6px solid #8B4513}
+        .stove{position:absolute;top:20%;left:25%;right:25%;height:45%;background:linear-gradient(180deg,#F5F5F5,#D3D3D3);border-radius:15px 15px 5px 5px;border:3px solid #A9A9A9}
+        .pot{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:60%;height:55%;background:linear-gradient(180deg,#FFD700,#B8860B);border-radius:0 0 40px 40px;border:4px solid #8B6508;box-shadow:inset 0 4px 8px rgba(0,0,0,0.4),0 8px 12px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3}
+        .pot::before{content:'';position:absolute;top:-15px;left:-5px;right:-5px;height:15px;background:linear-gradient(180deg,#FFD700,#DAA520);border-radius:5px 5px 0 0;border:3px solid #8B6508;border-bottom:none}
+        .pot::after{content:'';position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:20px;height:10px;background:#8B6508;border-radius:10px 10px 0 0}
+        .steam{position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:80%;height:18px}
+        .steam-particle{position:absolute;width:12px;height:12px;background:rgba(255,255,255,0.8);border-radius:50%;animation:rise 2s infinite}
+        .steam-particle:nth-child(1){left:20%;animation-delay:0s}
+        .steam-particle:nth-child(2){left:50%;animation-delay:0.7s}
+        .steam-particle:nth-child(3){left:70%;animation-delay:1.4s}
+        @keyframes rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-20px) scale(1.8);opacity:0}}
+        .start-btn-container{position:absolute;top:calc(10% + 56px);left:50%;transform:translateX(-50%);z-index:25;display:flex;align-items:center;justify-content:center}
+        .start-btn,.timer-placeholder{background:linear-gradient(180deg,#FF6347,#DC143C);color:white;border:none;padding:12px 25px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 20px rgba(255,69,0,0.7);animation:pulse 1.5s infinite}
+        .start-btn:disabled,.timer-placeholder{background:#808080;animation:none;box-shadow:none}
+        .timer-placeholder{animation:none;background:rgba(0,0,0,0.7);box-shadow:none;padding:8px 15px;font-size:0.9rem}
+        .board{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:92%;background:#DEB887;clip-path:polygon(15% 0%,85% 0%,100% 100%,0% 100%);border:3px solid #8B4513;display:flex;flex-direction:column;padding:12px 10px 18px 10px;gap:8px;z-index:10}
+        .row{display:flex;justify-content:center;gap:14px}
+        .row:first-child{gap:16px}
+        .row:nth-child(2){padding:0 10%;justify-content:space-between}
+        .hole{background:radial-gradient(circle,#2F1B0E,#1A0F07);border-radius:50%;border:2px solid #3D2B1F;display:flex;justify-content:center;align-items:center;cursor:pointer;position:relative;transition:transform 0.1s;width:50px;height:50px}
+        .hole:active{transform:scale(0.85)}
+        .veg{font-size:2rem;pointer-events:none;animation:popIn 0.3s ease-out}
+        @keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.2)}100%{transform:scale(1)}}
+        .rotten{filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg)}.rotten::after{content:'🪱';position:absolute;top:-6px;right:-6px;font-size:0.6rem}
+        .top-panel{position:absolute;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;z-index:35;pointer-events:none}
+        .top-left-buttons,.balances-right{pointer-events:auto}
+        .top-left-buttons{display:flex;gap:4px;flex-wrap:wrap}.top-left-buttons .item{background:rgba(0,0,0,0.7);color:white;padding:2px 6px;border-radius:10px;font-size:0.55rem;display:flex;align-items:center;gap:2px;cursor:pointer;backdrop-filter:blur(5px)}
+        .balances-right{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+        .balances-right div{background:rgba(0,0,0,0.7);color:white;padding:2px 6px;border-radius:10px;font-size:0.55rem;font-weight:bold;backdrop-filter:blur(5px)}
+        #rum-balance{background:rgba(255,215,0,0.7);color:black}
+        #srum-balance{background:rgba(192,192,192,0.7);color:black}
+        #invest-balance-right{background:rgba(76,175,80,0.7);color:white}
+        .bottom-panel{position:absolute;bottom:2px;left:2px;right:2px;display:flex;justify-content:space-around;z-index:30}
+        .nav-btn{background:rgba(0,0,0,0.75);color:white;border:none;padding:10px 6px;border-radius:10px;font-size:0.75rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;margin:2px;font-weight:bold;letter-spacing:0.5px;transition:all 0.2s;box-shadow:0 2px 5px rgba(0,0,0,0.5)}
+        .nav-btn:nth-child(1){background:linear-gradient(180deg,#e74c3c,#c0392b)}.nav-btn:nth-child(2){background:linear-gradient(180deg,#8e44ad,#6c3483)}.nav-btn:nth-child(3){background:linear-gradient(180deg,#f39c12,#d68910)}.nav-btn:nth-child(4){background:linear-gradient(180deg,#27ae60,#1e8449)}.nav-btn:nth-child(5){background:linear-gradient(180deg,#2980b9,#2471a3)}
+        .nav-btn:active{transform:scale(0.95)}
+        .screen{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);color:white;padding:50px 20px 20px;flex-direction:column;align-items:center;justify-content:flex-start;z-index:40;overflow-y:auto}
+        .screen.active{display:flex}
+        .back-btn{position:absolute;top:15px;left:15px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;z-index:60}
+        .duel-scoreboard{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
+        .duel-scoreboard.hidden{display:none}
+        .quick-duel-coin{position:absolute;top:100px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:35;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        .coin-particle{position:absolute;pointer-events:none;z-index:36;font-size:1rem;animation:sparkUp 0.6s ease-out forwards}
+        @keyframes sparkUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-40px) scale(0.2);opacity:0}}
+        .quick-duel-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:60;flex-direction:column}
+        .quick-duel-box{background:#1a1a2e;border-radius:20px;padding:20px;width:85%;color:white;text-align:center;border:2px solid gold}
+        .quick-duel-box input,.quick-duel-box select,.quick-duel-box button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;font-size:1rem}
+        .quick-duel-box button{background:gold;color:black;font-weight:bold}
+        .countdown-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:5rem;color:gold;text-shadow:0 0 20px black;z-index:50;background:rgba(0,0,0,0.5)}
+        .result-overlay{position:absolute;top:30%;left:10%;right:10%;background:rgba(0,0,0,0.9);color:white;border-radius:20px;padding:20px;text-align:center;z-index:55}
+        .result-overlay button{margin:10px;padding:12px 20px;border-radius:12px;border:none;font-weight:bold;cursor:pointer}
+        .arena-tabs{display:flex;gap:10px;margin:10px 0 20px}
+        .arena-tabs button{padding:10px 15px;border:none;border-radius:12px;font-weight:bold;cursor:pointer;background:#333;color:#ccc}
+        .arena-tabs button.active{background:linear-gradient(135deg,#FFD700,#FF8C00);color:black}
+        .club-btn{padding:12px 18px;border:none;border-radius:8px;font-weight:bold;background:linear-gradient(180deg,#E040FB,#AA00FF);color:white;box-shadow:0 4px 10px rgba(224,64,251,0.5);margin:4px;cursor:pointer}
+        .shop-btn{padding:14px 20px;border:none;border-radius:10px;font-weight:bold;font-size:1rem;background:linear-gradient(180deg,#00E5FF,#00B8D4);color:#000;box-shadow:0 4px 12px rgba(0,229,255,0.5);margin:6px 0;cursor:pointer;width:90%}
+        .flying-veg,.coin-fountain,.poop-fountain,.rocket,.spark{position:absolute;z-index:20;pointer-events:none}
+        .flying-veg{animation:flyToPot 0.5s ease-in forwards}
+        @keyframes flyToPot{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:1}100%{transform:translate(var(--ex),var(--ey)) scale(0.5);opacity:0}}
+        .coin-fountain{animation:coinUp 0.8s ease-out forwards;font-size:1rem;font-weight:bold}
+        @keyframes coinUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(0.5);opacity:0}}
+        .poop-fountain{animation:poopDown 0.8s ease-out forwards;font-size:1rem}
+        @keyframes poopDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.5);opacity:0}}
+        .rocket{animation:rocketFly 0.6s ease-in forwards;font-size:2rem}
+        @keyframes rocketFly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(0.8);opacity:0}}
+        .spark{animation:sparkBoom 0.8s ease-out forwards;font-size:1.5rem}
+        @keyframes sparkBoom{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0.2);opacity:0}}
     </style>
 </head>
 <body>
@@ -111,15 +117,15 @@
     </div>
     <div class="top-panel">
         <div class="top-left-buttons">
-            <div class="item" id="top-tappers" style="background:#FFD700; color:black;">🏆 Топ игроков</div>
-            <div class="item" id="top-miners" style="background:#C0C0C0; color:black;">⛏️ Майнеры</div>
+            <div class="item" id="top-tappers" style="background:#FFD700;color:black">🏆 Топ игроков</div>
+            <div class="item" id="top-miners" style="background:#C0C0C0;color:black">⛏️ Майнеры</div>
             <div class="item" id="referral-icon">👥</div>
-            <div class="item" id="invest-nav-btn" style="background:#27ae60;">📈 Инвестиции</div>
+            <div class="item" id="invest-nav-btn" style="background:#27ae60">📈 Инвестиции</div>
             <div class="item" id="about-icon">📖 О проекте</div>
         </div>
         <div class="balances-right">
             <div id="rum-balance">💰 RUM: 0</div>
-            <div id="srum-balance">💎 SRUM: 10000.00</div>
+            <div id="srum-balance">💎 SRUM: 0.00</div>
             <div id="invest-balance-right">📈 Инвест: 0</div>
         </div>
     </div>
@@ -137,15 +143,15 @@
         <span>🤖 <span id="duelOpponent">—</span>: <span id="duelOpponentScore">0</span></span>
     </div>
     <div class="screen" id="arena-screen"><button class="back-btn">← Назад</button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ Майнинг</button><button data-tab="band">🐺 Банда</button><button data-tab="tournaments">🏆 Турниры</button></div><div id="arena-content"></div></div>
-    <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2><div style="display:flex; gap:8px; margin:10px 0;"><button id="club-my-btn" class="club-btn">Мой клуб</button><button id="club-all-btn" class="club-btn">Все клубы</button><button id="club-create-btn" class="club-btn">Создать</button></div><div id="club-content" style="width:100%; max-height:60%; overflow-y:auto;"></div></div>
-    <div class="screen" id="tasks-screen"><button class="back-btn">← Назад</button><h2>📋 Задания</h2><div style="display:flex; gap:8px; margin:15px 0;"><button id="tasks-available-btn" style="padding:8px 12px; background:#FFD700; border:none; border-radius:8px; color:black;">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px; background:#4CAF50; border:none; border-radius:8px;">Создать</button><button id="tasks-my-btn" style="padding:8px 12px; background:#2196F3; border:none; border-radius:8px;">Мои</button></div><div id="tasks-sub-tabs" style="display:flex; gap:8px; margin-bottom:10px;"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%; max-height:60%; overflow-y:auto;"></div></div>
+    <div class="screen" id="mining-club-screen"><button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2><div style="display:flex; gap:8px; margin:10px 0"><button id="club-my-btn" class="club-btn">Мой клуб</button><button id="club-all-btn" class="club-btn">Все клубы</button><button id="club-create-btn" class="club-btn">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
+    <div class="screen" id="tasks-screen"><button class="back-btn">← Назад</button><h2>📋 Задания</h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" style="padding:8px 12px;background:#FFD700;border:none;border-radius:8px;color:black">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px;background:#4CAF50;border:none;border-radius:8px">Создать</button><button id="tasks-my-btn" style="padding:8px 12px;background:#2196F3;border:none;border-radius:8px">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
     <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn">Инвестировать RUM</button></div>
     <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn">Привязать TON кошелёк</button></div>
     <div class="screen" id="shop-screen"><button class="back-btn">← Назад</button><h2>🛍️ Магазин</h2><button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button><button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button><button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button><button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button><button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button><button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button><button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button></div>
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button><h2>🏆 Топ игроков</h2><p>1. ...</p></div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button><h2>⛏️ Топ майнеров</h2><p>1. ...</p></div>
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button><h2>👥 Рефералы</h2><input readonly value="https://..."></div>
-    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила игры</h2><div style="text-align:left; margin-top:10px; line-height:1.5; width:100%;"><p><strong>🍲 Основная готовка</strong><br>Твоя задача — нажимать на <span style="color:#90EE90;">полезные овощи</span> (🥬🧅🥔🥕…), которые появляются в лунках на доске.<br>Каждое точное попадание даёт <strong>10 RUM</strong>.<br>— Если ты делаешь серию попаданий без ошибок, награда растёт:<br>&nbsp;&nbsp;• 0-9 попаданий → 10 RUM за овощ<br>&nbsp;&nbsp;• 10-19 попаданий → 20 RUM<br>&nbsp;&nbsp;• 20-29 попаданий → 40 RUM<br>&nbsp;&nbsp;• 30-39 → 80 RUM… и так далее (удвоение каждые 10).<br>— <strong>Ошибка</strong>: если нажмёшь на <span style="color:#FF6B6B;">плохой ингредиент</span> (💩, 🪱, 🧀, 🥀, 🍄) или просто мажешь мимо лунки — <strong>теряешь 20 RUM</strong>, и вся накопленная серия сгорает (возвращаешься к 10 RUM).</p><p><strong>🏟️ Быстрая дуэль (монетка)</strong><br>— Нажми на золотую монетку, выбери валюту и ставку, жди соперника и тапай 20 секунд!</p></div></div>
+    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила игры</h2><div style="text-align:left;margin-top:10px;line-height:1.5;width:100%"><p><strong>🍲 Основная готовка</strong><br>Твоя задача — нажимать на <span style="color:#90EE90">полезные овощи</span> (🥬🧅🥔🥕…), которые появляются в лунках на доске.<br>Каждое точное попадание даёт <strong>10 RUM</strong>.<br>— Если ты делаешь серию попаданий без ошибок, награда растёт:<br>&nbsp;&nbsp;• 0‑9 попаданий → 10 RUM за овощ<br>&nbsp;&nbsp;• 10‑19 попаданий → 20 RUM<br>&nbsp;&nbsp;• 20‑29 попаданий → 40 RUM<br>&nbsp;&nbsp;• 30‑39 → 80 RUM… и так далее (удвоение каждые 10).<br>— <strong>Ошибка</strong>: если нажмёшь на <span style="color:#FF6B6B">плохой ингредиент</span> (💩, 🪱, 🧀, 🥀, 🍄) или просто мажешь мимо лунки — <strong>теряешь 20 RUM</strong>, и вся накопленная серия сгорает (возвращаешься к 10 RUM).</p><p><strong>🏟️ Быстрая дуэль (монетка)</strong><br>— Нажми на золотую монетку, выбери валюту и ставку, жди соперника и тапай 20 секунд! При победе ты получишь 50‑87% от своей ставки.</p></div></div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button><h2>📖 О проекте</h2><p>...</p></div>
 </div>
 
@@ -155,8 +161,11 @@
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
     let rum = parseInt(localStorage.getItem('rum') || '0');
     let invest = parseInt(localStorage.getItem('invest') || '0');
-    // Устанавливаем 10000 SRUM по умолчанию
-    if (!localStorage.getItem('srum')) localStorage.setItem('srum', '10000');
+    // Гарантированный тестовый баланс 10000 SRUM (однократно)
+    if (!localStorage.getItem('srum_boosted')) {
+        let cur = parseFloat(localStorage.getItem('srum') || '0');
+        if (cur < 10000) { localStorage.setItem('srum', '10000'); localStorage.setItem('srum_boosted', '1'); }
+    }
     let srum = parseFloat(localStorage.getItem('srum') || '10000');
     let ton = parseFloat(localStorage.getItem('ton') || '0');
     let usdt = parseFloat(localStorage.getItem('usdt') || '0');
@@ -212,16 +221,14 @@
         if (games > 0 && !gameActive && !duelActive) {
             startBtnContainer.innerHTML = '<button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>';
             document.getElementById('start-btn').addEventListener('click', startGame);
-        } else if (gameActive || duelActive) {
-            startBtnContainer.innerHTML = '';
-        } else {
+        } else if (gameActive || duelActive) startBtnContainer.innerHTML = '';
+        else {
             const now = Date.now(), last = window.lastGameTime || now;
             const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
             const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
             startBtnContainer.innerHTML = `<div class="timer-placeholder">⏳ ${mins}:${secs.toString().padStart(2,'0')}</div>`;
         }
-        updateBoostDisplay();
-        saveAll();
+        updateBoostDisplay(); saveAll();
     }
     function updateBoostDisplay() {
         const display = document.getElementById('boost-display');
@@ -277,11 +284,8 @@
         if (!gameActive) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) {
-            rum = Math.max(0, rum - 20);
-            streak = 0;
-            showPoopFountain();
-            updateUI();
-            return;
+            rum = Math.max(0, rum - 20); streak = 0;
+            showPoopFountain(); updateUI(); return;
         }
         if (currentVeg[num].type === 'good') {
             streak++;
@@ -292,11 +296,7 @@
             flyVegToPot(hole, hole.querySelector('.veg').textContent);
             showCoinFountain();
             if (streak % 20 === 0) triggerRocket();
-        } else {
-            rum = Math.max(0, rum - 20);
-            streak = 0;
-            showPoopFountain();
-        }
+        } else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); }
         delete currentVeg[num];
         hole.innerHTML = '';
         updateUI();
@@ -308,12 +308,7 @@
         [...e.changedTouches].forEach(touch => {
             const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
             if (hole) processHit(hole, touch);
-            else {
-                rum = Math.max(0, rum - 20);
-                streak = 0;
-                showPoopFountain();
-                updateUI();
-            }
+            else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); }
         });
     }
 
@@ -337,15 +332,13 @@
         const containerRect = document.getElementById('game-container').getBoundingClientRect();
         const startX = potRect.left + potRect.width/2 - containerRect.left;
         const startY = potRect.top + potRect.height/2 - containerRect.top;
-        const rocket = document.createElement('div');
-        rocket.className = 'rocket'; rocket.textContent = '🚀';
+        const rocket = document.createElement('div'); rocket.className = 'rocket'; rocket.textContent = '🚀';
         rocket.style.left = startX + 'px'; rocket.style.top = startY + 'px';
         document.getElementById('game-container').appendChild(rocket);
         rocket.addEventListener('animationend', () => {
             rocket.remove();
             for (let i = 0; i < 12; i++) {
-                const spark = document.createElement('div');
-                spark.className = 'spark'; spark.textContent = '✨';
+                const spark = document.createElement('div'); spark.className = 'spark'; spark.textContent = '✨';
                 spark.style.left = startX + 'px'; spark.style.top = startY + 'px';
                 spark.style.setProperty('--sx', (Math.random() - 0.5) * 150 + 'px');
                 spark.style.setProperty('--sy', (Math.random() - 0.5) * 150 + 'px');
@@ -392,7 +385,7 @@
         }, 1000);
     }
 
-    // ========== ФОНЫ ==========
+    // ---------- ФОНЫ (матрица, смайлы, овощи) ----------
     const views = ['matrix', 'smile', 'veggie'];
     let currentViewIndex = 0;
     window.cycleView = function() {
@@ -482,7 +475,7 @@
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ========== БЫСТРАЯ ДУЭЛЬ (МОНЕТКА) ==========
+    // ---------- БЫСТРАЯ ДУЭЛЬ (монетка) ----------
     const botPool = [
         { name: 'ТокенМастер', speed: 1000 },
         { name: 'Борщехлёб', speed: 850 },
@@ -504,7 +497,6 @@
     const duelTimerEl = document.getElementById('duelTimer');
     const duelOpponentEl = document.getElementById('duelOpponent');
 
-    // Фонтанчик из монетки
     setInterval(() => {
         if (duelActive || gameActive) return;
         const coinEl = document.getElementById('quick-duel-coin');
@@ -573,7 +565,7 @@
             readyDiv.innerHTML = `<div style="text-align:center;">
                 <p>Противник: <b>${currentBot.name}</b></p>
                 <p>Ставка: ${duelStake} ${duelCurrency}</p>
-                <button id="duel-ready-btn" class="start-btn" style="font-size:1.5rem; padding:20px 40px;">🥘 Готов</button>
+                <button id="duel-ready-btn" class="start-btn" style="font-size:1.5rem;padding:20px 40px;">🥘 Готов</button>
             </div>`;
             document.getElementById('game-container').appendChild(readyDiv);
             document.getElementById('duel-ready-btn').addEventListener('click', () => {
@@ -651,8 +643,6 @@
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
         duelScoreboard.classList.add('hidden');
-        document.querySelector('.bottom-panel').style.display = '';
-        document.querySelector('.top-panel').style.display = '';
         updateUI();
 
         const win = duelPlayerScore > duelOpponentScore;
@@ -673,8 +663,16 @@
             }
         } else {
             rum += duelStake;
-            if (win) { rum += 50; showCoinFountain(15); resultDiv.innerHTML = `<h2>🎉 Победа!</h2><p>+50 RUM</p><button id="result-continue-btn">Продолжить</button>`; }
-            else { rum = Math.max(0, rum - 20); showPoopFountain(10); resultDiv.innerHTML = `<h2>💀 Поражение</h2><p>-20 RUM</p><button id="result-ok-btn">Ок</button>`; }
+            if (win) {
+                let rewardRUM = Math.floor(duelStake * (0.5 + Math.random() * 0.37));
+                rum += rewardRUM;
+                showCoinFountain(15);
+                resultDiv.innerHTML = `<h2>🎉 Победа!</h2><p>+${rewardRUM} RUM</p><button id="result-continue-btn">Продолжить</button>`;
+            } else {
+                rum = Math.max(0, rum - 20);
+                showPoopFountain(10);
+                resultDiv.innerHTML = `<h2>💀 Поражение</h2><p>-20 RUM</p><button id="result-ok-btn">Ок</button>`;
+            }
         }
         document.getElementById('game-container').appendChild(resultDiv);
         document.getElementById('result-continue-btn')?.addEventListener('click', ()=> resultDiv.remove());
@@ -682,12 +680,9 @@
         updateUI();
     }
 
-    // ========== АРЕНА (вкладки) ==========
+    // ---------- АРЕНА (вкладки) ----------
     let miningThreshold = 1;
     let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
-    let arenaStep = 'select';
-    let searchTimer = null;
-
     const arenaContent = document.getElementById('arena-content');
     const arenaTabs = document.getElementById('arena-tabs');
     let currentArenaTab = 'mining';
@@ -709,11 +704,7 @@
             html = `<h2>🏆 Турниры</h2><p>В разработке</p>`;
         }
         arenaContent.innerHTML = html;
-        bindArenaEvents();
-    }
-
-    function bindArenaEvents() {
-        if (currentArenaTab === 'mining' && document.getElementById('threshold-slider')) {
+        if (currentArenaTab === 'mining') {
             document.getElementById('threshold-slider').addEventListener('input', function() {
                 miningThreshold = parseFloat(this.value);
                 renderArena();
@@ -721,17 +712,14 @@
             document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
                 if (srum < miningThreshold) return alert('Недостаточно SRUM');
                 srum -= miningThreshold;
-                arenaStep = 'searching';
-                renderArena();
+                arenaContent.innerHTML = `<h2>🔍 Поиск соперника...</h2><p id="search-counter">5 сек</p>`;
                 let sec = 5;
-                arenaContent.innerHTML = `<h2>🔍 Поиск соперника...</h2><p id="search-counter">${sec} сек</p>`;
-                searchTimer = setInterval(() => {
+                let searchTimer = setInterval(() => {
                     sec--;
                     if (sec <= 0) {
                         clearInterval(searchTimer);
                         currentBot = botPool[Math.floor(Math.random() * botPool.length)];
-                        arenaStep = 'ready';
-                        arenaContent.innerHTML = `<h2>⚔️ Соперник найден!</h2><p>Противник: <b>${currentBot.name}</b></p><button class="start-btn" id="duel-ready-btn" style="font-size:1.5rem; padding:20px 40px;">🥘 Готов</button>`;
+                        arenaContent.innerHTML = `<h2>⚔️ Соперник найден!</h2><p>Противник: <b>${currentBot.name}</b></p><button class="start-btn" id="duel-ready-btn" style="font-size:1.5rem;padding:20px 40px;">🥘 Готов</button>`;
                         document.getElementById('duel-ready-btn').addEventListener('click', ()=>{
                             document.getElementById('duel-ready-btn').disabled = true;
                             document.getElementById('duel-ready-btn').textContent = '⏳ Ожидание...';
@@ -741,9 +729,7 @@
                                 startDuel();
                             }, 1000);
                         });
-                    } else {
-                        document.getElementById('search-counter').textContent = sec + ' сек';
-                    }
+                    } else document.getElementById('search-counter').textContent = sec + ' сек';
                 }, 1000);
             });
         }
@@ -758,11 +744,10 @@
         });
     });
 
-    // ========== НАВИГАЦИЯ ==========
+    // ---------- НАВИГАЦИЯ ----------
     function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); }
     function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); }
 
-    // Восстанавливаем работу всех кнопок
     document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
     document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
     document.getElementById('invest-nav-btn').addEventListener('click', ()=> switchScreen('invest'));
@@ -774,8 +759,6 @@
         ev.stopPropagation();
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         if (duelActive) { clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval); duelActive = false; }
-        if (searchTimer) { clearInterval(searchTimer); searchTimer = null; }
-        arenaStep = 'select';
         showViewSwitch();
     }));
 
@@ -798,7 +781,7 @@
         } else showViewSwitch();
     }
 
-    // ===================== ЗАДАНИЯ (сокращённо, но полностью рабочее) =====================
+    // ---------- ЗАДАНИЯ (полный код) ----------
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -842,12 +825,12 @@
         const max = (officialRumTasks.every(t => t.completionsDone >= t.maxCompletions) && officialSrumTasks.every(t => t.completionsDone >= t.maxCompletions)) ? 33 : 3;
         const currentCount = userTasks.length; const canCreate = currentCount < max;
         tasksContent.innerHTML = `
-            <div style="display:flex; flex-direction:column; gap:10px;"><p>Лимит созданных: ${currentCount}/${max}</p>
+            <div style="display:flex;flex-direction:column;gap:10px;"><p>Лимит созданных: ${currentCount}/${max}</p>
             <input id="task-desc" placeholder="Описание задания" ${canCreate ? '' : 'disabled'}>
             <input id="task-reward" type="number" placeholder="Награда" ${canCreate ? '' : 'disabled'}>
             <select id="task-currency" ${canCreate ? '' : 'disabled'}><option value="RUM">RUM</option><option value="SRUM">SRUM</option></select>
             <input id="task-link" type="url" placeholder="Ссылка на задание" ${canCreate ? '' : 'disabled'}>
-            <button id="publish-task-btn" style="padding:14px; background:#4CAF50; border:none; border-radius:10px; font-weight:bold; color:white; box-shadow:0 4px 12px rgba(76,175,80,0.5);" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
+            <button id="publish-task-btn" style="padding:14px;background:#4CAF50;border:none;border-radius:10px;font-weight:bold;color:white;box-shadow:0 4px 12px rgba(76,175,80,0.5)" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
         if (canCreate) {
             document.getElementById('publish-task-btn').addEventListener('click', () => {
                 const desc = document.getElementById('task-desc').value.trim();
@@ -878,8 +861,8 @@
         userTasks.forEach(t => {
             html += `<div class="task-item" id="my-task-${t.id}">
                 <div class="editable"><input id="desc-${t.id}" value="${t.desc}" /><input id="reward-${t.id}" type="number" value="${t.reward}" /><input id="link-${t.id}" value="${t.link || ''}" /></div>
-                <div style="display:flex; gap:8px; justify-content: space-between;"><span>${t.reward} ${t.currency}</span>
-                    <div><button class="edit-task-btn" data-task-id="${t.id}" style="padding:8px 14px; background:#2196F3; border:none; border-radius:6px; color:white; font-weight:bold;">✏️</button><button class="delete-task-btn" data-task-id="${t.id}" style="padding:8px 14px; background:#F44336; border:none; border-radius:6px; color:white; font-weight:bold;">🗑️</button></div></div></div>`;
+                <div style="display:flex;gap:8px;justify-content:space-between;"><span>${t.reward} ${t.currency}</span>
+                    <div><button class="edit-task-btn" data-task-id="${t.id}" style="padding:8px 14px;background:#2196F3;border:none;border-radius:6px;color:white;font-weight:bold;">✏️</button><button class="delete-task-btn" data-task-id="${t.id}" style="padding:8px 14px;background:#F44336;border:none;border-radius:6px;color:white;font-weight:bold;">🗑️</button></div></div></div>`;
         });
         tasksContent.innerHTML = html;
         document.querySelectorAll('.edit-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
@@ -917,7 +900,7 @@
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // ===================== КЛУБ =====================
+    // ---------- КЛУБ ----------
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
@@ -927,7 +910,7 @@
         const amIOfficer = club.officers?.includes('Игрок');
         let html = `<h3>${club.emoji||'🐺'} ${club.name}</h3><p>${club.desc||''}</p>`;
         html += `<p><b>Глава:</b> ${club.master||'—'}</p><p><b>Офицеры:</b> ${club.officers?.join(', ')||'нет'}</p><p><b>Бойцы:</b> ${club.members?.join(', ')||'нет'}</p>`;
-        html += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;">';
+        html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;">';
         if (amIMaster) {
             html += '<button class="club-btn" id="edit-club-btn">✏️</button><button class="club-btn" id="invite-member-btn">👥</button><button class="club-btn" id="manage-officers-btn">🛡️</button><button class="club-btn" id="delete-club-btn">🗑️</button>';
         } else if (amIOfficer) {
@@ -937,7 +920,7 @@
         clubContent.innerHTML = html;
         if (amIMaster) {
             document.getElementById('edit-club-btn').addEventListener('click', () => {
-                clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px;"><input id="edit-name" value="${club.name}"><input id="edit-emoji" value="${club.emoji}"><input id="edit-desc" value="${club.desc}"><button id="save-club-btn" style="background:#4CAF50; padding:10px;">Сохранить</button></div>`;
+                clubContent.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;"><input id="edit-name" value="${club.name}"><input id="edit-emoji" value="${club.emoji}"><input id="edit-desc" value="${club.desc}"><button id="save-club-btn" style="background:#4CAF50;padding:10px;">Сохранить</button></div>`;
                 document.getElementById('save-club-btn').addEventListener('click', () => {
                     club.name = document.getElementById('edit-name').value.trim() || club.name;
                     club.emoji = document.getElementById('edit-emoji').value.trim() || club.emoji;
@@ -986,7 +969,7 @@
         }));
     }
     function showCreateClub() {
-        clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><input id="club-name" placeholder="Название"><input id="club-emoji" placeholder="Эмодзи"><input id="club-desc" placeholder="Описание"><p>Стоимость: 100 RUM</p><button id="club-create-submit" class="club-btn" style="background:#4CAF50;">Создать клуб</button></div>`;
+        clubContent.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px;"><input id="club-name" placeholder="Название"><input id="club-emoji" placeholder="Эмодзи"><input id="club-desc" placeholder="Описание"><p>Стоимость: 100 RUM</p><button id="club-create-submit" class="club-btn" style="background:#4CAF50;">Создать клуб</button></div>`;
         document.getElementById('club-create-submit').addEventListener('click', ()=>{
             const name=document.getElementById('club-name').value.trim();
             const emoji=document.getElementById('club-emoji').value.trim()||'🐺';
@@ -1001,7 +984,7 @@
     document.getElementById('club-all-btn').addEventListener('click', renderAllClubs);
     document.getElementById('club-create-btn').addEventListener('click', showCreateClub);
 
-    // ===================== МАГАЗИН =====================
+    // ---------- МАГАЗИН ----------
     document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return alert('Мало SRUM'); srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return alert('Мало SRUM'); srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return alert('Мало SRUM'); srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
