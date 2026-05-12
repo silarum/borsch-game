@@ -8,9 +8,11 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Arial',sans-serif;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
         #game-container{position:relative;width:100%;max-width:420px;height:100vh;background:linear-gradient(180deg,#0a0a0a 0%,#1a1a2e 100%);overflow:hidden}
-        #view-switch{position:absolute;left:5px;bottom:calc(30% + 12px + 26px + 21px);background:rgba(0,0,0,0.8);color:white;border:none;border-radius:8px;padding:6px;font-size:0.7rem;cursor:pointer;z-index:45;display:flex;flex-direction:column;align-items:center;gap:4px}
+        /* Переключатель фона – поднят на 2мм (≈6px) */
+        #view-switch{position:absolute;left:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.8);color:white;border:none;border-radius:8px;padding:6px;font-size:0.7rem;cursor:pointer;z-index:45;display:flex;flex-direction:column;align-items:center;gap:4px}
         #view-switch.hidden{display:none!important}
-        #rules-btn-bottom{position:absolute;bottom:calc(30% + 12px + 26px + 21px);right:5px;background:rgba(0,0,0,0.85);color:white;border:none;padding:4px 10px;border-radius:6px;font-size:0.6rem;cursor:pointer;z-index:45}
+        /* Кнопка Правила – поднята на 2мм, теперь рядом с переключателем */
+        #rules-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.85);color:white;border:none;padding:4px 10px;border-radius:6px;font-size:0.6rem;cursor:pointer;z-index:45}
         #rules-btn-bottom.hidden{display:none!important}
         #matrix-bg{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:block}
         #matrixCanvas{width:100%;height:100%;display:block}
@@ -84,12 +86,23 @@
         .arena-tabs button.active{background:linear-gradient(135deg,#FFD700,#FF8C00);color:black}
         .club-btn{padding:12px 18px;border:none;border-radius:8px;font-weight:bold;background:linear-gradient(180deg,#E040FB,#AA00FF);color:white;box-shadow:0 4px 10px rgba(224,64,251,0.5);margin:4px;cursor:pointer}
         .shop-btn{padding:14px 20px;border:none;border-radius:10px;font-weight:bold;font-size:1rem;background:linear-gradient(180deg,#00E5FF,#00B8D4);color:#000;box-shadow:0 4px 12px rgba(0,229,255,0.5);margin:6px 0;cursor:pointer;width:90%}
+        .flying-veg,.coin-fountain,.poop-fountain,.rocket,.spark{position:absolute;z-index:20;pointer-events:none}
+        .flying-veg{animation:flyToPot 0.5s ease-in forwards}
+        @keyframes flyToPot{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:1}100%{transform:translate(var(--ex),var(--ey)) scale(0.5);opacity:0}}
+        .coin-fountain{animation:coinUp 0.8s ease-out forwards;font-size:1rem;font-weight:bold}
+        @keyframes coinUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(0.5);opacity:0}}
+        .poop-fountain{animation:poopDown 0.8s ease-out forwards;font-size:1rem}
+        @keyframes poopDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.5);opacity:0}}
+        .rocket{animation:rocketFly 0.6s ease-in forwards;font-size:2rem}
+        @keyframes rocketFly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(0.8);opacity:0}}
+        .spark{animation:sparkBoom 0.8s ease-out forwards;font-size:1.5rem}
+        @keyframes sparkBoom{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0.2);opacity:0}}
     </style>
 </head>
 <body>
 <div id="game-container">
     <button id="view-switch" onclick="cycleView()">🟢 Матрица</button>
-    <button class="rules-btn-bottom" id="rules-btn-bottom">📜 Правила</button>
+    <button id="rules-btn-bottom">📜 Правила</button>
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
     <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
     <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
@@ -142,7 +155,26 @@
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button><h2>🏆 Топ игроков</h2><p>1. ...</p></div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button><h2>⛏️ Топ майнеров</h2><p>1. ...</p></div>
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button><h2>👥 Рефералы</h2><input readonly value="https://..."></div>
-    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button><h2>📜 Правила игры</h2><div style="text-align:left;margin-top:10px;line-height:1.5;width:100%"><p><strong>🍲 Основная готовка</strong><br>Нажимай на <span style="color:#90EE90">полезные овощи</span> (🥬🧅🥔🥕…), они приносят RUM. Ошибка – штраф. Серии увеличивают награду.</p><p><strong>⛏️ Игровой майнинг (монетка)</strong><br>Выбирай порог и мощность, соревнуйся с другими майнерами за блок. Победитель получает 50–87% от порога в USDT или RUM.</p></div></div>
+    <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button>
+        <h2>📜 Правила игры</h2>
+        <div style="text-align:left;margin-top:10px;line-height:1.5;width:100%;max-height:70vh;overflow-y:auto;padding-right:5px;">
+            <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>
+            Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM.<br>
+            Серия точных попаданий удваивает награду каждые 10 попаданий.<br>
+            Ошибка (плохой овощ 💩🪱🧀🥀🍄 или мимо лунки) – штраф 20 RUM, серия сбрасывается.
+            </p>
+            <p><strong>⛏️ Криптобеспредел (игровой майнинг)</strong><br>
+            Выбери пул (SRUM или RUM), порог и этап. Это взнос за участие в поиске блока.<br>
+            Два майнера соревнуются: кто больше добудет очков за 20 секунд, тот получает блок.<br>
+            Победа: награда 50‑87% от порога в USDT (для SRUM) или в RUM (для RUM).<br>
+            Проигрыш: теряется мощность (штраф по этапу).<br>
+            Промах в дуэли снижает твой счёт на 2 очка (а не 20).<br>
+            Этапы: с 1 по 5, повышаются при победе, сбрасываются при поражении.<br>
+            Каждый этап меняет процент штрафа и награды.
+            </p>
+            <p><strong>🐺 Клуб, Задания, Магазин</strong> – улучшай майнинг, выполняй квесты, обменивай SRUM на TON/USDT.</p>
+        </div>
+    </div>
     <div class="screen" id="about-screen"><button class="back-btn">← Назад</button><h2>📖 О проекте</h2><p>...</p></div>
 </div>
 
@@ -455,7 +487,7 @@
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ---------- МАЙНИНГ (этапный) ----------
+    // ---------- МАЙНИНГ (этапный, с новыми правилами) ----------
     const botPool = [
         { name: 'ТокенМастер', speed: 1000 },
         { name: 'Борщехлёб', speed: 850 },
@@ -468,8 +500,8 @@
     let duelPlayerScore = 0, duelOpponentScore = 0;
     let duelTimerInterval, duelSpawnInterval, duelBotInterval;
     let duelTimeLeft;
-    let miningCurrency = 'SRUM';  // валюта пула
-    let miningThreshold = 1;      // порог
+    let miningCurrency = 'SRUM';
+    let miningThreshold = 1;
     let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
 
     const duelScoreboard = document.getElementById('duel-scoreboard');
@@ -503,6 +535,8 @@
     });
 
     function showMiningModal() {
+        const penalty = (miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1]).toFixed(2);
+        const reward = (miningThreshold * [0.07,0.15,0.3,0.6,0.75][miningStage-1]).toFixed(2);
         const modal = document.createElement('div');
         modal.className = 'quick-duel-modal';
         modal.innerHTML = `
@@ -514,6 +548,8 @@
                     <option value="RUM" ${miningCurrency==='RUM'?'selected':''}>RUM</option>
                 </select>
                 <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:90%;">
+                <p>Взнос: <strong id="mining-stake">${miningThreshold.toFixed(1)}</strong> ${miningCurrency}</p>
+                <p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p>
                 <button id="start-mining-search">🔍 Искать блок</button>
                 <button id="cancel-mining">✖ Отмена</button>
             </div>
@@ -530,6 +566,9 @@
             startSearch();
         });
         document.getElementById('cancel-mining').addEventListener('click', () => modal.remove());
+        document.getElementById('threshold-slider').addEventListener('input', function() {
+            document.getElementById('mining-stake').textContent = parseFloat(this.value).toFixed(1);
+        });
     }
 
     function startSearch() {
@@ -544,7 +583,7 @@
             readyDiv.className = 'countdown-overlay';
             readyDiv.innerHTML = `<div style="text-align:center;">
                 <p>Другой майнер: <b>${currentBot.name}</b></p>
-                <p>Ставка: ${miningThreshold.toFixed(1)} ${miningCurrency}</p>
+                <p>Взнос: ${miningThreshold.toFixed(1)} ${miningCurrency}</p>
                 <button id="mining-ready-btn" class="start-btn" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button>
             </div>`;
             document.getElementById('game-container').appendChild(readyDiv);
@@ -597,12 +636,20 @@
             if (hole) {
                 const num = [...holes].indexOf(hole);
                 if (num !== -1 && currentVeg[num]) {
-                    duelPlayerScore++;
-                    flyVegToPot(hole, hole.querySelector('.veg').textContent);
+                    const isGood = currentVeg[num].type === 'good';
+                    if (isGood) {
+                        duelPlayerScore++;
+                        flyVegToPot(hole, hole.querySelector('.veg').textContent);
+                    } else {
+                        duelPlayerScore = Math.max(0, duelPlayerScore - 2);
+                    }
                     delete currentVeg[num];
                     hole.innerHTML = '';
                     updateDuelScore();
                 }
+            } else {
+                duelPlayerScore = Math.max(0, duelPlayerScore - 2);
+                updateDuelScore();
             }
         });
     }
@@ -625,7 +672,7 @@
         let resultDiv = document.createElement('div');
         resultDiv.className = 'result-overlay';
         if (miningCurrency === 'SRUM') {
-            srum += miningThreshold; // возврат
+            srum += miningThreshold;
             if (win) {
                 let reward = miningThreshold * (0.5 + Math.random() * 0.37);
                 usdt += reward;
@@ -661,7 +708,7 @@
         document.getElementById('game-container').appendChild(resultDiv);
         document.getElementById('continue-mining')?.addEventListener('click', ()=>{
             resultDiv.remove();
-            startSearch(); // сразу искать новый блок с текущим этапом
+            startSearch();
         });
         document.getElementById('back-to-pool')?.addEventListener('click', ()=>{
             resultDiv.remove();
@@ -683,6 +730,7 @@
             <p>Порог: <b>${miningThreshold.toFixed(1)} SRUM</b> | Этап: <b>${miningStage}</b></p>
             <p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p>
             <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider-arena" style="width:90%;">
+            <p>Взнос: <strong id="arena-stake">${miningThreshold.toFixed(1)}</strong> SRUM</p>
             <button class="shop-btn" id="start-mining-btn" ${srum < miningThreshold ? 'disabled' : ''}>⛏️ Искать блок</button>`;
         } else if (currentArenaTab === 'band') html = `<h2>🐺 Банда (5×5)</h2><p>В разработке</p>`;
         else if (currentArenaTab === 'tournaments') html = `<h2>🏆 Турниры</h2><p>В разработке</p>`;
@@ -690,6 +738,7 @@
         if (currentArenaTab === 'mining') {
             document.getElementById('threshold-slider-arena').addEventListener('input', function() {
                 miningThreshold = parseFloat(this.value);
+                document.getElementById('arena-stake').textContent = miningThreshold.toFixed(1);
                 renderArena();
             });
             document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
@@ -764,7 +813,7 @@
         } else showViewSwitch();
     }
 
-    // --- ЗАДАНИЯ (сокращённый код, полностью рабочий) ---
+    // --- ЗАДАНИЯ (кратко, но полностью) ---
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
