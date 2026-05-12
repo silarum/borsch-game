@@ -156,6 +156,16 @@
             z-index:55;
         }
         .result-overlay button { margin:10px; padding:12px 20px; border-radius:12px; border:none; font-weight:bold; cursor:pointer; }
+        .flying-veg { position:absolute; z-index:20; pointer-events:none; animation:flyToPot 0.5s ease-in forwards; }
+        @keyframes flyToPot { 0% { transform:translate(0,0) scale(1); opacity:1; } 50% { transform:translate(var(--dx), var(--dy)) scale(1.3); opacity:1; } 100% { transform:translate(var(--ex), var(--ey)) scale(0.5); opacity:0; } }
+        .coin-fountain { position:absolute; pointer-events:none; z-index:25; animation:coinUp 0.8s ease-out forwards; font-size:1rem; font-weight:bold; }
+        @keyframes coinUp { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-80px) scale(0.5); opacity:0; } }
+        .poop-fountain { position:absolute; pointer-events:none; z-index:25; animation:poopDown 0.8s ease-out forwards; font-size:1rem; }
+        @keyframes poopDown { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(30px) scale(0.5); opacity:0; } }
+        .rocket { position:absolute; z-index:30; pointer-events:none; font-size:2rem; animation:rocketFly 0.6s ease-in forwards; }
+        @keyframes rocketFly { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(-90px) scale(0.8); opacity:0; } }
+        .spark { position:absolute; z-index:30; pointer-events:none; font-size:1.5rem; animation:sparkBoom 0.8s ease-out forwards; }
+        @keyframes sparkBoom { 0% { transform:translate(0,0) scale(1); opacity:1; } 100% { transform:translate(var(--sx), var(--sy)) scale(0.2); opacity:0; } }
     </style>
 </head>
 <body>
@@ -231,259 +241,890 @@
         <button class="back-btn">← Назад</button>
         <div id="arena-content"></div>
     </div>
-    <!-- остальные экраны без изменений -->
+    <div class="screen" id="mining-club-screen">
+        <button class="back-btn">← Назад</button><h2>🐺 Бойцовский клуб</h2>
+        <div style="display:flex; gap:8px; margin:10px 0;">
+            <button id="club-my-btn" class="club-btn">Мой клуб</button>
+            <button id="club-all-btn" class="club-btn">Все клубы</button>
+            <button id="club-create-btn" class="club-btn">Создать</button>
+        </div>
+        <div id="club-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
+    </div>
+    <div class="screen" id="tasks-screen">
+        <button class="back-btn">← Назад</button><h2>📋 Задания</h2>
+        <div style="display:flex; gap:8px; margin:15px 0;">
+            <button id="tasks-available-btn" style="padding:8px 12px; background:#FFD700; border:none; border-radius:8px; color:black;">Доступные</button>
+            <button id="tasks-create-btn" style="padding:8px 12px; background:#4CAF50; border:none; border-radius:8px;">Создать</button>
+            <button id="tasks-my-btn" style="padding:8px 12px; background:#2196F3; border:none; border-radius:8px;">Мои</button>
+        </div>
+        <div id="tasks-sub-tabs" style="display:flex; gap:8px; margin-bottom:10px;">
+            <button class="sub-tab active" data-tab="borsch">Крипто Борщ</button>
+            <button class="sub-tab" data-tab="private_rum">Частные (RUM)</button>
+            <button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button>
+            <button class="sub-tab" data-tab="srum">За СилаРум</button>
+        </div>
+        <div id="tasks-content" style="width:100%; max-height:60%; overflow-y:auto;"></div>
+    </div>
+    <div class="screen" id="invest-screen"><button class="back-btn">← Назад</button><h2>📈 Инвестиции</h2><p>Стартап «Борщ на блокчейне»</p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn">Инвестировать RUM</button></div>
+    <div class="screen" id="wallet-screen"><button class="back-btn">← Назад</button><h2>👛 Кошелёк</h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn">Привязать TON кошелёк</button></div>
+    <div class="screen" id="shop-screen">
+        <button class="back-btn">← Назад</button>
+        <h2>🛍️ Магазин</h2>
+        <button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button>
+        <button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button>
+        <button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button>
+        <button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button>
+        <button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button>
+        <button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button>
+        <button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button>
+    </div>
+    <div class="screen" id="top-tappers-screen"><button class="back-btn">← Назад</button><h2>🏆 Топ игроков</h2><p>1. ...</p></div>
+    <div class="screen" id="top-miners-screen"><button class="back-btn">← Назад</button><h2>⛏️ Топ майнеров</h2><p>1. ...</p></div>
+    <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button><h2>👥 Рефералы</h2><input readonly value="https://..."></div>
+    <div class="screen" id="rules-screen">
+        <button class="back-btn">← Назад</button>
+        <h2>📜 Правила игры</h2>
+        <div style="text-align:left; margin-top:10px; line-height:1.5; width:100%;">
+            <p><strong>🍲 Основная готовка</strong><br>
+            Твоя задача — нажимать на <span style="color:#90EE90;">полезные овощи</span> (🥬🧅🥔🥕…), которые появляются в лунках на доске.<br>
+            Каждое точное попадание даёт <strong>10 RUM</strong>.<br>
+            — Если ты делаешь серию попаданий без ошибок, награда растёт:<br>
+            &nbsp;&nbsp;• 0-9 попаданий → 10 RUM за овощ<br>
+            &nbsp;&nbsp;• 10-19 попаданий → 20 RUM<br>
+            &nbsp;&nbsp;• 20-29 попаданий → 40 RUM<br>
+            &nbsp;&nbsp;• 30-39 → 80 RUM… и так далее (удвоение каждые 10).<br>
+            — <strong>Ошибка</strong>: если нажмёшь на <span style="color:#FF6B6B;">плохой ингредиент</span> (💩, 🪱, 🧀, 🥀, 🍄) или просто мажешь мимо лунки — <strong>теряешь 20 RUM</strong>, и вся накопленная серия сгорает (возвращаешься к 10 RUM).</p>
+            <p><strong>🏟️ Арена «Крипто Беспредел»</strong><br>
+            — Главный экран с облаком показывает твой баланс USDT. Нажми на облако, чтобы войти в личный майнинг.<br>
+            — Выбери порог SRUM и этап, нажми «Майнить», жди соперника 5 секунд, затем жми «Готов» и круши овощи 20 секунд!</p>
+        </div>
+    </div>
+    <div class="screen" id="about-screen"><button class="back-btn">← Назад</button><h2>📖 О проекте</h2><p>...</p></div>
 </div>
 
 <script>
-// Весь исходный код игры до места арены (переменные, функции, тапалка, фоны, магазин и т.д.) сохранены полностью,
-// но здесь для экономии места опущены. В реальном файле они присутствуют.
+(function() {
+    const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+    const BAD = ['💩','🪱','🧀','🥀','🍄'];
+    let rum = parseInt(localStorage.getItem('rum') || '0');
+    let invest = parseInt(localStorage.getItem('invest') || '0');
+    let srum = parseFloat(localStorage.getItem('srum') || '0');
+    let ton = parseFloat(localStorage.getItem('ton') || '0');
+    let usdt = parseFloat(localStorage.getItem('usdt') || '0');
+    let games = parseInt(localStorage.getItem('games') || '3');
+    const maxGames = 3;
+    const gameRecoveryTime = 600;
+    let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
+    let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
+    let streak = 0;
 
-// ===================== АРЕНА (исправленная) =====================
-const botPool = [
-    { name: 'ТокенМастер', speed: 1000 },
-    { name: 'Борщехлёб', speed: 850 },
-    { name: 'CryptoWhale', speed: 700 },
-    { name: 'Майнер69', speed: 600 },
-    { name: 'Лампа', speed: 500 }
-];
-let currentBot = null;
-let duelActive = false;
-let duelPlayerScore = 0, duelOpponentScore = 0;
-let duelTimerInterval, duelSpawnInterval, duelBotInterval;
-let duelTimeLeft;
-let miningThreshold = 1;
-let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
-let arenaStep = 'cloud'; // cloud / select / searching / ready / waiting_ready / countdown
-let searchTimer = null;
+    const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
+        { id:1, desc:'Подписаться на канал', reward:50, link:'', maxCompletions:100, completionsDone:0, checking:false },
+        { id:2, desc:'Сделать репост', reward:100, link:'', maxCompletions:100, completionsDone:0, checking:false },
+        { id:3, desc:'Пригласить друга', reward:200, link:'', maxCompletions:100, completionsDone:0, checking:false },
+        { id:4, desc:'Сыграть 5 раундов', reward:300, link:'', maxCompletions:100, completionsDone:0, checking:false }
+    ];
+    const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
+        { id:101, desc:'Подпишись на Twitter', reward:0.1, link:'', maxCompletions:100, completionsDone:0, checking:false },
+        { id:102, desc:'Поставь лайк проекту', reward:0.15, link:'', maxCompletions:100, completionsDone:0, checking:false }
+    ];
+    let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks')) || [];
+    let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
+    let clubs = JSON.parse(localStorage.getItem('clubs')) || [];
+    let myClubId = localStorage.getItem('myClubId') || null;
 
-const duelScoreboard = document.getElementById('duel-scoreboard');
-const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
-const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
-const duelTimerEl = document.getElementById('duelTimer');
-const duelOpponentEl = document.getElementById('duelOpponent');
-const arenaContent = document.getElementById('arena-content');
-
-function renderArena() {
-    if (!arenaContent) return;
-    let html = '';
-    if (arenaStep === 'cloud') {
-        html = `<div class="arena-cloud" id="enter-mining-btn">
-            <h2>⚡ Крипто Беспредел</h2>
-            <div class="usd-amount">💰 ${usdt.toFixed(2)} USDT</div>
-        </div>
-        <button class="shop-btn" id="band-btn" style="background:#8e44ad;">🐺 Банда</button>
-        <button class="shop-btn" id="tournaments-btn" style="background:#f39c12;">🏆 Турниры</button>`;
-    } else if (arenaStep === 'select') {
-        const penalty = (miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1]).toFixed(2);
-        const reward = (miningThreshold * [0.07,0.15,0.3,0.6,0.75][miningStage-1]).toFixed(2);
-        html = `<h2>⛏️ Личный майнинг</h2>
-        <p>Порог: <b>${miningThreshold.toFixed(1)} SRUM</b> | Этап: <b>${miningStage}</b></p>
-        <p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p>
-        <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:90%;">
-        <button class="shop-btn" id="start-mining-btn" ${srum < miningThreshold ? 'disabled' : ''}>⛏️ Майнить</button>`;
-    } else if (arenaStep === 'searching') {
-        html = `<h2>🔍 Поиск соперника...</h2><p id="search-counter">5 сек</p>`;
-    } else if (arenaStep === 'ready') {
-        html = `<h2>⚔️ Соперник найден!</h2>
-        <p>Противник: <b>${currentBot ? currentBot.name : '???'}</b></p>
-        <p>Ставка: ${miningThreshold.toFixed(1)} SRUM</p>
-        <button class="start-btn" id="duel-ready-btn" style="font-size:1.5rem; padding:20px 40px; margin-top:20px;">🥘 Готов</button>`;
+    function saveAll() {
+        localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
+        localStorage.setItem('games', games); localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
+        localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
+        localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
+        localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
+        localStorage.setItem('userTasks', JSON.stringify(userTasks));
+        localStorage.setItem('clubs', JSON.stringify(clubs));
+        if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
     }
-    arenaContent.innerHTML = html;
-    bindArenaEvents();
-}
 
-function bindArenaEvents() {
-    if (arenaStep === 'cloud') {
-        document.getElementById('enter-mining-btn')?.addEventListener('click', ()=>{
-            arenaStep = 'select';
-            renderArena();
-        });
-        document.getElementById('band-btn')?.addEventListener('click', ()=> alert('Банды пока не активны.'));
-        document.getElementById('tournaments-btn')?.addEventListener('click', ()=>{
-            if (duelActive) return;
-            // тренировочная дуэль за RUM
-            currentBot = botPool[Math.floor(Math.random() * botPool.length)];
-            startDuel('rum');
-        });
-    } else if (arenaStep === 'select') {
-        document.getElementById('threshold-slider')?.addEventListener('input', function() {
-            miningThreshold = parseFloat(this.value);
-            renderArena();
-        });
-        document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
-            if (srum < miningThreshold) return alert('Недостаточно SRUM');
-            srum -= miningThreshold;
-            arenaStep = 'searching';
-            renderArena();
-            let sec = 5;
-            document.getElementById('search-counter').textContent = sec + ' сек';
-            searchTimer = setInterval(() => {
-                sec--;
-                if (sec <= 0) {
-                    clearInterval(searchTimer);
-                    currentBot = botPool[Math.floor(Math.random() * botPool.length)];
-                    arenaStep = 'ready';
-                    renderArena();
-                } else {
-                    document.getElementById('search-counter').textContent = sec + ' сек';
-                }
-            }, 1000);
-        });
-    } else if (arenaStep === 'ready') {
-        document.getElementById('duel-ready-btn')?.addEventListener('click', ()=>{
-            // Показать что бот тоже готов (через 1 сек)
-            const readyBtn = document.getElementById('duel-ready-btn');
-            readyBtn.disabled = true;
-            readyBtn.textContent = '⏳ Ожидание соперника...';
-            setTimeout(() => {
-                // Оба готовы - обратный отсчёт
-                document.querySelector('#arena-screen').classList.remove('active'); // убрать экран арены
-                showViewSwitch(); // показать кнопки фона
-                // Покажем оверлей с отсчётом
-                const overlay = document.createElement('div');
-                overlay.className = 'countdown-overlay';
-                overlay.textContent = '3';
-                document.getElementById('game-container').appendChild(overlay);
-                let count = 3;
-                let countInterval = setInterval(() => {
-                    count--;
-                    if (count > 0) overlay.textContent = count;
-                    else {
-                        clearInterval(countInterval);
-                        overlay.remove();
-                        arenaStep = 'cloud';
-                        startDuel('srum');
-                    }
-                }, 1000);
-            }, 1000);
-        });
-    }
-}
+    const pot = document.getElementById('pot');
+    const board = document.getElementById('board');
+    const rumBal = document.getElementById('rum-balance');
+    const srumBal = document.getElementById('srum-balance');
+    const investBalRight = document.getElementById('invest-balance-right');
+    const startBtnContainer = document.getElementById('start-btn-container');
+    const holes = document.querySelectorAll('.hole');
+    const viewSwitch = document.getElementById('view-switch');
+    const rulesBtn = document.getElementById('rules-btn-bottom');
 
-function startDuel(mode) {
-    if (duelActive) return;
-    duelActive = true;
-    gameActive = false;
-    clearInterval(gameTimer); clearInterval(spawnInterval);
-
-    duelPlayerScore = 0; duelOpponentScore = 0;
-    duelTimeLeft = 20;
-    duelOpponentEl.textContent = mode === 'srum' ? (currentBot ? currentBot.name : 'Бот') : 'Бот';
-    duelScoreboard.classList.remove('hidden');
-    // Показываем главный интерфейс (уже виден)
-    updateDuelScore();
-    spawnAll();
-
-    duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500);
-    let botSpeed = currentBot ? currentBot.speed : 800;
-    duelBotInterval = setInterval(() => {
-        if (!duelActive) return;
-        duelOpponentScore++;
-        updateDuelScore();
-    }, botSpeed);
-
-    duelTimerInterval = setInterval(() => {
-        if (!duelActive) return;
-        duelTimeLeft--;
-        duelTimerEl.textContent = duelTimeLeft;
-        if (duelTimeLeft <= 0) endDuel(mode);
-    }, 1000);
-
-    board.addEventListener('touchstart', duelTouchHandler, {passive: false});
-    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-}
-
-function duelTouchHandler(e) {
-    e.preventDefault();
-    if (!duelActive) return;
-    [...e.changedTouches].forEach(touch => {
-        const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
-        if (hole) {
-            const num = [...holes].indexOf(hole);
-            if (num !== -1 && currentVeg[num]) {
-                duelPlayerScore++;
-                flyVegToPot(hole, hole.querySelector('.veg').textContent);
-                delete currentVeg[num];
-                hole.innerHTML = '';
-                updateDuelScore();
-            }
-        }
-    });
-}
-
-function updateDuelScore() {
-    duelPlayerScoreEl.textContent = duelPlayerScore;
-    duelOpponentScoreEl.textContent = duelOpponentScore;
-}
-
-function endDuel(mode) {
-    duelActive = false;
-    clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
-    board.removeEventListener('touchstart', duelTouchHandler);
-    holes.forEach(h => h.innerHTML = '');
-    currentVeg = {};
-    duelScoreboard.classList.add('hidden');
-    document.querySelector('.bottom-panel').style.display = '';
-    document.querySelector('.top-panel').style.display = '';
-    updateUI();
-
-    const win = duelPlayerScore > duelOpponentScore;
-    let resultDiv = document.createElement('div');
-    resultDiv.className = 'result-overlay';
-    if (mode === 'srum') {
-        srum += miningThreshold; // возврат заморозки
-        if (win) {
-            let reward = miningThreshold * (0.5 + Math.random() * 0.37);
-            usdt += reward;
-            if (miningStage < 5) miningStage++;
-            localStorage.setItem('miningStage', miningStage);
-            showCoinFountain(30);
-            resultDiv.innerHTML = `<h2>🎉 Победа!</h2><p>+${reward.toFixed(2)} USDT</p><p>Этап ${miningStage}</p>
-                <button id="result-continue-btn">Продолжить</button>`;
+    function updateUI() {
+        rumBal.textContent = `💰 RUM: ${rum}`;
+        srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
+        investBalRight.textContent = `📈 Инвест: ${invest}`;
+        document.getElementById('ton-balance') && (document.getElementById('ton-balance').textContent = ton.toFixed(2));
+        document.getElementById('usdt-balance') && (document.getElementById('usdt-balance').textContent = usdt.toFixed(2));
+        if (games > 0 && !gameActive && !duelActive) {
+            startBtnContainer.innerHTML = '<button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>';
+            document.getElementById('start-btn').addEventListener('click', startGame);
+        } else if (gameActive || duelActive) {
+            startBtnContainer.innerHTML = '';
         } else {
-            let penalty = miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1];
-            srum = Math.max(0, srum - penalty);
-            miningStage = 1;
-            localStorage.setItem('miningStage', 1);
-            showPoopFountain(20);
-            resultDiv.innerHTML = `<h2>💀 Поражение</h2><p>Штраф ${penalty.toFixed(2)} SRUM</p><p>Майнинг окончен</p>
-                <button id="result-end-btn">Завершить</button>`;
+            const now = Date.now(), last = window.lastGameTime || now;
+            const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
+            const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
+            startBtnContainer.innerHTML = `<div class="timer-placeholder">⏳ ${mins}:${secs.toString().padStart(2,'0')}</div>`;
         }
-    } else { // rum
-        if (win) {
-            rum += 50;
-            showCoinFountain(15);
-            resultDiv.innerHTML = `<h2>🎉 Победа!</h2><p>+50 RUM</p><button id="result-continue-btn">Продолжить</button>`;
+        updateBoostDisplay();
+        saveAll();
+    }
+    function updateBoostDisplay() {
+        const display = document.getElementById('boost-display');
+        if (activeBoost && activeBoost.endTime > Date.now()) {
+            const remain = Math.max(0, Math.ceil((activeBoost.endTime - Date.now()) / 1000));
+            const h = Math.floor(remain/3600), m = Math.floor((remain%3600)/60), s = remain%60;
+            display.innerHTML = `<div class="boost-icon">🚀 x${activeBoost.type} ${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</div>`;
+        } else { display.innerHTML = ''; if (activeBoost && activeBoost.endTime <= Date.now()) activeBoost = null; }
+    }
+    setInterval(updateBoostDisplay, 1000); setInterval(updateUI, 1000);
+
+    function spawnAll() {
+        holes.forEach(h => h.innerHTML = '');
+        currentVeg = {};
+        for (let i=0; i<holes.length; i++) {
+            const isBad = Math.random() < 0.25;
+            const pool = isBad ? BAD : GOOD;
+            holes[i].innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
+            currentVeg[i] = { type: isBad ? 'bad' : 'good' };
+        }
+    }
+
+    function showCoinFountain(count = 10) {
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        const cx = potRect.left + potRect.width/2 - containerRect.left;
+        const cy = potRect.top - containerRect.top + 8;
+        for (let i=0; i<count; i++) {
+            const coin = document.createElement('div'); coin.className = 'coin-fountain'; coin.textContent = '💰';
+            coin.style.left = (cx + (Math.random()-0.5)*80) + 'px';
+            coin.style.top = cy + 'px';
+            coin.style.animationDuration = (0.7 + Math.random()*0.5) + 's';
+            document.getElementById('game-container').appendChild(coin);
+            coin.addEventListener('animationend', () => coin.remove());
+        }
+    }
+    function showPoopFountain(count = 5) {
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        const cx = potRect.left + potRect.width/2 - containerRect.left;
+        const cy = potRect.top - containerRect.top + 8;
+        for (let i=0; i<count; i++) {
+            const poop = document.createElement('div'); poop.className = 'poop-fountain'; poop.textContent = '💩';
+            poop.style.left = (cx + (Math.random()-0.5)*80) + 'px';
+            poop.style.top = cy + 'px';
+            poop.style.animationDuration = (0.6 + Math.random()*0.5) + 's';
+            document.getElementById('game-container').appendChild(poop);
+            poop.addEventListener('animationend', () => poop.remove());
+        }
+    }
+    function triggerRocket() {
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        const startX = potRect.left + potRect.width/2 - containerRect.left;
+        const startY = potRect.top + potRect.height/2 - containerRect.top;
+        const rocket = document.createElement('div');
+        rocket.className = 'rocket'; rocket.textContent = '🚀';
+        rocket.style.left = startX + 'px'; rocket.style.top = startY + 'px';
+        document.getElementById('game-container').appendChild(rocket);
+        rocket.addEventListener('animationend', () => {
+            rocket.remove();
+            for (let i = 0; i < 12; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark'; spark.textContent = '✨';
+                spark.style.left = startX + 'px'; spark.style.top = startY + 'px';
+                spark.style.setProperty('--sx', (Math.random() - 0.5) * 150 + 'px');
+                spark.style.setProperty('--sy', (Math.random() - 0.5) * 150 + 'px');
+                document.getElementById('game-container').appendChild(spark);
+                spark.addEventListener('animationend', () => spark.remove());
+            }
+        });
+    }
+
+    function processHit(hole, touch) {
+        if (!gameActive) return;
+        const num = [...holes].indexOf(hole);
+        if (num === -1 || !currentVeg[num]) {
+            rum = Math.max(0, rum - 20);
+            streak = 0;
+            showPoopFountain();
+            updateUI();
+            return;
+        }
+        if (currentVeg[num].type === 'good') {
+            streak++;
+            let multiplier = Math.pow(2, Math.floor((streak-1) / 10));
+            let gain = 10 * multiplier;
+            if (activeBoost && activeBoost.endTime > Date.now()) gain *= activeBoost.type;
+            rum += Math.floor(gain);
+            flyVegToPot(hole, hole.querySelector('.veg').textContent);
+            showCoinFountain();
+            if (streak % 20 === 0) triggerRocket();
         } else {
             rum = Math.max(0, rum - 20);
-            showPoopFountain(10);
-            resultDiv.innerHTML = `<h2>💀 Поражение</h2><p>-20 RUM</p><button id="result-end-btn">Завершить</button>`;
+            streak = 0;
+            showPoopFountain();
+        }
+        delete currentVeg[num];
+        hole.innerHTML = '';
+        updateUI();
+    }
+
+    function handleTouchStart(e) {
+        e.preventDefault();
+        if (!gameActive) return;
+        [...e.changedTouches].forEach(touch => {
+            const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
+            if (hole) processHit(hole, touch);
+            else {
+                rum = Math.max(0, rum - 20);
+                streak = 0;
+                showPoopFountain();
+                updateUI();
+            }
+        });
+    }
+
+    function flyVegToPot(hole, emoji) {
+        const holeRect = hole.getBoundingClientRect();
+        const potRect = pot.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        const vegEl = document.createElement('div'); vegEl.className = 'flying-veg'; vegEl.textContent = emoji;
+        vegEl.style.left = (holeRect.left + holeRect.width/2 - containerRect.left) + 'px';
+        vegEl.style.top = (holeRect.top + holeRect.height/2 - containerRect.top) + 'px';
+        vegEl.style.setProperty('--dx', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
+        vegEl.style.setProperty('--dy', '-60px');
+        vegEl.style.setProperty('--ex', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) + 'px');
+        vegEl.style.setProperty('--ey', (potRect.top - containerRect.top + 5 - parseFloat(vegEl.style.top)) + 'px');
+        document.getElementById('game-container').appendChild(vegEl);
+        vegEl.addEventListener('animationend', () => vegEl.remove());
+    }
+
+    function startGame() {
+        if (games <= 0 || gameActive) return;
+        gameActive = true; gameTimeLeft = 60; streak = 0;
+        updateUI(); spawnAll();
+        let interval = 1800;
+        spawnInterval = setInterval(() => {
+            if (!gameActive) return;
+            spawnAll();
+            interval = Math.max(450, interval-80);
+            clearInterval(spawnInterval);
+            spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
+        }, interval);
+        gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
+    }
+    function endGame() {
+        gameActive = false;
+        clearInterval(gameTimer); clearInterval(spawnInterval);
+        holes.forEach(h => h.innerHTML = '');
+        currentVeg = {};
+        games = Math.max(0, games - 1);
+        window.lastGameTime = Date.now();
+        updateUI();
+        if (games < maxGames) startRecovery();
+    }
+    function startRecovery() {
+        if (window.recoveryInterval) clearInterval(window.recoveryInterval);
+        window.recoveryInterval = setInterval(() => {
+            if (games >= maxGames) { clearInterval(window.recoveryInterval); return; }
+            if (Date.now() - (window.lastGameTime || 0) >= gameRecoveryTime * 1000) {
+                games = Math.min(maxGames, games + 1);
+                window.lastGameTime = Date.now();
+                updateUI();
+                if (games >= maxGames) clearInterval(window.recoveryInterval);
+            }
+        }, 1000);
+    }
+
+    // ========== ФОНЫ ==========
+    const views = ['matrix', 'smile', 'veggie'];
+    let currentViewIndex = 0;
+    window.cycleView = function() {
+        if (window.smileInterval) { clearInterval(window.smileInterval); window.smileInterval = null; }
+        if (window.veggieInterval) { clearInterval(window.veggieInterval); window.veggieInterval = null; }
+        currentViewIndex = (currentViewIndex + 1) % views.length;
+        const view = views[currentViewIndex];
+        document.getElementById('matrix-bg').style.display = view === 'matrix' ? 'block' : 'none';
+        document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
+        document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
+        const btn = document.getElementById('view-switch');
+        if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
+        else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
+        else if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
+    };
+
+    // Матрица
+    const matrixCanvas = document.getElementById('matrixCanvas');
+    const matrixCtx = matrixCanvas.getContext('2d');
+    let matrixParticles = [];
+    function startMatrix() {
+        matrixCanvas.width = matrixCanvas.parentElement.clientWidth;
+        matrixCanvas.height = matrixCanvas.parentElement.clientHeight;
+        matrixParticles = [];
+        for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
+    }
+    function drawMatrix() {
+        if (views[currentViewIndex] !== 'matrix') return;
+        matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
+        matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
+        matrixParticles.forEach(p => { matrixCtx.fillText(p.char,p.x,p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
+    }
+    startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
+
+    // Смайлы
+    const smileCanvas = document.getElementById('smileCanvas');
+    const smileCtx = smileCanvas.getContext('2d');
+    let smileParticles = [];
+    const emojis = ['😊','😂','😎','🥳','😍','🤩','😇'];
+    function startSmileAnimation() {
+        smileCanvas.width = smileCanvas.parentElement.clientWidth;
+        smileCanvas.height = smileCanvas.parentElement.clientHeight;
+        smileParticles = [];
+        for (let i = 0; i < 25; i++) {
+            smileParticles.push({ x: Math.random()*smileCanvas.width, y: smileCanvas.height+Math.random()*100, speed: 0.5+Math.random()*1.5, size: 16+Math.random()*14, emoji: emojis[Math.floor(Math.random()*emojis.length)], opacity: 1, popping: false });
+        }
+        if (!window.smileInterval) window.smileInterval = setInterval(drawSmile, 50);
+    }
+    function drawSmile() {
+        if (views[currentViewIndex] !== 'smile') return;
+        smileCtx.clearRect(0,0,smileCanvas.width,smileCanvas.height);
+        smileParticles.forEach(p => {
+            if (!p.popping) { p.y -= p.speed; if(p.y<-20){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; } }
+            smileCtx.font = `${p.size}px Arial`;
+            smileCtx.fillStyle = `rgba(255,215,0,${p.opacity})`;
+            smileCtx.fillText(p.emoji, p.x, p.y);
+            if (p.popping) { p.opacity -= 0.02; p.size += 1; if(p.opacity<=0){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; p.opacity=1; p.size=16+Math.random()*14; p.popping=false; } }
+        });
+        if (Math.random() < 0.02) { const r = smileParticles[Math.floor(Math.random()*smileParticles.length)]; if(r&&!r.popping) r.popping = true; }
+    }
+    window.addEventListener('resize', startSmileAnimation);
+
+    // Овощи
+    const veggieCanvas = document.getElementById('veggieCanvas');
+    const veggieCtx = veggieCanvas.getContext('2d');
+    let veggieParticles = [];
+    const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+    function startVeggieAnimation() {
+        veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
+        veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
+        veggieParticles = [];
+        for (let i = 0; i < 40; i++) {
+            veggieParticles.push({ x: Math.random()*veggieCanvas.width, y: veggieCanvas.height+Math.random()*100, speed: 0.8+Math.random()*2, size: 16+Math.random()*14, emoji: veggieEmojis[Math.floor(Math.random()*veggieEmojis.length)], opacity: 1 });
+        }
+        if (!window.veggieInterval) window.veggieInterval = setInterval(drawVeggie, 50);
+    }
+    function drawVeggie() {
+        if (views[currentViewIndex] !== 'veggie') return;
+        veggieCtx.clearRect(0,0,veggieCanvas.width,veggieCanvas.height);
+        veggieParticles.forEach(p => {
+            p.y -= p.speed;
+            if (p.y < -20) { p.y = veggieCanvas.height + 20; p.x = Math.random() * veggieCanvas.width; }
+            veggieCtx.font = `${p.size}px Arial`;
+            veggieCtx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+            veggieCtx.fillText(p.emoji, p.x, p.y);
+        });
+    }
+    window.addEventListener('resize', startVeggieAnimation);
+
+    // ===================== АРЕНА =====================
+    const botPool = [
+        { name: 'ТокенМастер', speed: 1000 },
+        { name: 'Борщехлёб', speed: 850 },
+        { name: 'CryptoWhale', speed: 700 },
+        { name: 'Майнер69', speed: 600 },
+        { name: 'Лампа', speed: 500 }
+    ];
+    let currentBot = null;
+    let duelActive = false;
+    let duelPlayerScore = 0, duelOpponentScore = 0;
+    let duelTimerInterval, duelSpawnInterval, duelBotInterval;
+    let duelTimeLeft;
+    let miningThreshold = 1;
+    let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
+    let arenaStep = 'cloud';
+    let searchTimer = null;
+
+    const duelScoreboard = document.getElementById('duel-scoreboard');
+    const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
+    const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
+    const duelTimerEl = document.getElementById('duelTimer');
+    const duelOpponentEl = document.getElementById('duelOpponent');
+    const arenaContent = document.getElementById('arena-content');
+
+    function renderArena() {
+        if (!arenaContent) return;
+        let html = '';
+        if (arenaStep === 'cloud') {
+            html = `<div class="arena-cloud" id="enter-mining-btn">
+                <h2>⚡ Крипто Беспредел</h2>
+                <div class="usd-amount">💰 ${usdt.toFixed(2)} USDT</div>
+            </div>
+            <button class="shop-btn" id="band-btn" style="background:#8e44ad;">🐺 Банда</button>
+            <button class="shop-btn" id="tournaments-btn" style="background:#f39c12;">🏆 Турниры</button>`;
+        } else if (arenaStep === 'select') {
+            const penalty = (miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1]).toFixed(2);
+            const reward = (miningThreshold * [0.07,0.15,0.3,0.6,0.75][miningStage-1]).toFixed(2);
+            html = `<h2>⛏️ Личный майнинг</h2>
+            <p>Порог: <b>${miningThreshold.toFixed(1)} SRUM</b> | Этап: <b>${miningStage}</b></p>
+            <p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p>
+            <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:90%;">
+            <button class="shop-btn" id="start-mining-btn" ${srum < miningThreshold ? 'disabled' : ''}>⛏️ Майнить</button>`;
+        } else if (arenaStep === 'searching') {
+            html = `<h2>🔍 Поиск соперника...</h2><p id="search-counter">5 сек</p>`;
+        } else if (arenaStep === 'ready') {
+            html = `<h2>⚔️ Соперник найден!</h2>
+            <p>Противник: <b>${currentBot ? currentBot.name : '???'}</b></p>
+            <p>Ставка: ${miningThreshold.toFixed(1)} SRUM</p>
+            <button class="start-btn" id="duel-ready-btn" style="font-size:1.5rem; padding:20px 40px; margin-top:20px;">🥘 Готов</button>`;
+        }
+        arenaContent.innerHTML = html;
+        bindArenaEvents();
+    }
+
+    function bindArenaEvents() {
+        if (arenaStep === 'cloud') {
+            document.getElementById('enter-mining-btn')?.addEventListener('click', ()=>{
+                arenaStep = 'select';
+                renderArena();
+            });
+            document.getElementById('band-btn')?.addEventListener('click', ()=> alert('Банды пока не активны.'));
+            document.getElementById('tournaments-btn')?.addEventListener('click', ()=>{
+                if (duelActive) return;
+                currentBot = botPool[Math.floor(Math.random() * botPool.length)];
+                startDuel('rum');
+            });
+        } else if (arenaStep === 'select') {
+            document.getElementById('threshold-slider')?.addEventListener('input', function() {
+                miningThreshold = parseFloat(this.value);
+                renderArena();
+            });
+            document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
+                if (srum < miningThreshold) return alert('Недостаточно SRUM');
+                srum -= miningThreshold;
+                arenaStep = 'searching';
+                renderArena();
+                let sec = 5;
+                document.getElementById('search-counter').textContent = sec + ' сек';
+                searchTimer = setInterval(() => {
+                    sec--;
+                    if (sec <= 0) {
+                        clearInterval(searchTimer);
+                        currentBot = botPool[Math.floor(Math.random() * botPool.length)];
+                        arenaStep = 'ready';
+                        renderArena();
+                    } else {
+                        document.getElementById('search-counter').textContent = sec + ' сек';
+                    }
+                }, 1000);
+            });
+        } else if (arenaStep === 'ready') {
+            document.getElementById('duel-ready-btn')?.addEventListener('click', ()=>{
+                const readyBtn = document.getElementById('duel-ready-btn');
+                readyBtn.disabled = true;
+                readyBtn.textContent = '⏳ Ожидание соперника...';
+                setTimeout(() => {
+                    document.querySelector('#arena-screen').classList.remove('active');
+                    showViewSwitch();
+                    const overlay = document.createElement('div');
+                    overlay.className = 'countdown-overlay';
+                    overlay.textContent = '3';
+                    document.getElementById('game-container').appendChild(overlay);
+                    let count = 3;
+                    let countInterval = setInterval(() => {
+                        count--;
+                        if (count > 0) overlay.textContent = count;
+                        else {
+                            clearInterval(countInterval);
+                            overlay.remove();
+                            arenaStep = 'cloud';
+                            startDuel('srum');
+                        }
+                    }, 1000);
+                }, 1000);
+            });
         }
     }
-    document.getElementById('game-container').appendChild(resultDiv);
 
-    document.getElementById('result-continue-btn')?.addEventListener('click', ()=>{
-        resultDiv.remove();
-        arenaStep = 'searching'; // сразу искать нового противника с текущим этапом
-        renderArena();
-        // автоматически запустить поиск? Или показать экран арены с поиском.
-        document.getElementById('arena-screen').classList.add('active');
-        hideViewSwitch();
-        // Для автоматического поиска можно вызвать логику поиска, но лучше оставить ручной запуск.
-    });
-    document.getElementById('result-end-btn')?.addEventListener('click', ()=>{
-        resultDiv.remove();
+    function startDuel(mode) {
+        if (duelActive) return;
+        duelActive = true;
+        gameActive = false;
+        clearInterval(gameTimer); clearInterval(spawnInterval);
+
+        duelPlayerScore = 0; duelOpponentScore = 0;
+        duelTimeLeft = 20;
+        duelOpponentEl.textContent = mode === 'srum' ? (currentBot ? currentBot.name : 'Бот') : 'Бот';
+        duelScoreboard.classList.remove('hidden');
+        updateDuelScore();
+        spawnAll();
+
+        duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500);
+        let botSpeed = currentBot ? currentBot.speed : 800;
+        duelBotInterval = setInterval(() => {
+            if (!duelActive) return;
+            duelOpponentScore++;
+            updateDuelScore();
+        }, botSpeed);
+
+        duelTimerInterval = setInterval(() => {
+            if (!duelActive) return;
+            duelTimeLeft--;
+            duelTimerEl.textContent = duelTimeLeft;
+            if (duelTimeLeft <= 0) endDuel(mode);
+        }, 1000);
+
+        board.addEventListener('touchstart', duelTouchHandler, {passive: false});
+        board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    }
+
+    function duelTouchHandler(e) {
+        e.preventDefault();
+        if (!duelActive) return;
+        [...e.changedTouches].forEach(touch => {
+            const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
+            if (hole) {
+                const num = [...holes].indexOf(hole);
+                if (num !== -1 && currentVeg[num]) {
+                    duelPlayerScore++;
+                    flyVegToPot(hole, hole.querySelector('.veg').textContent);
+                    delete currentVeg[num];
+                    hole.innerHTML = '';
+                    updateDuelScore();
+                }
+            }
+        });
+    }
+
+    function updateDuelScore() {
+        duelPlayerScoreEl.textContent = duelPlayerScore;
+        duelOpponentScoreEl.textContent = duelOpponentScore;
+    }
+
+    function endDuel(mode) {
+        duelActive = false;
+        clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
+        board.removeEventListener('touchstart', duelTouchHandler);
+        holes.forEach(h => h.innerHTML = '');
+        currentVeg = {};
+        duelScoreboard.classList.add('hidden');
+        document.querySelector('.bottom-panel').style.display = '';
+        document.querySelector('.top-panel').style.display = '';
+        updateUI();
+
+        const win = duelPlayerScore > duelOpponentScore;
+        let resultDiv = document.createElement('div');
+        resultDiv.className = 'result-overlay';
+        if (mode === 'srum') {
+            srum += miningThreshold;
+            if (win) {
+                let reward = miningThreshold * (0.5 + Math.random() * 0.37);
+                usdt += reward;
+                if (miningStage < 5) miningStage++;
+                localStorage.setItem('miningStage', miningStage);
+                showCoinFountain(30);
+                resultDiv.innerHTML = `<h2>🎉 Победа!</h2><p>+${reward.toFixed(2)} USDT</p><p>Этап ${miningStage}</p>
+                    <button id="result-continue-btn">Продолжить</button>`;
+            } else {
+                let penalty = miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1];
+                srum = Math.max(0, srum - penalty);
+                miningStage = 1;
+                localStorage.setItem('miningStage', 1);
+                showPoopFountain(20);
+                resultDiv.innerHTML = `<h2>💀 Поражение</h2><p>Штраф ${penalty.toFixed(2)} SRUM</p><p>Майнинг окончен</p>
+                    <button id="result-end-btn">Завершить</button>`;
+            }
+        } else {
+            if (win) {
+                rum += 50;
+                showCoinFountain(15);
+                resultDiv.innerHTML = `<h2>🎉 Победа!</h2><p>+50 RUM</p><button id="result-continue-btn">Продолжить</button>`;
+            } else {
+                rum = Math.max(0, rum - 20);
+                showPoopFountain(10);
+                resultDiv.innerHTML = `<h2>💀 Поражение</h2><p>-20 RUM</p><button id="result-end-btn">Завершить</button>`;
+            }
+        }
+        document.getElementById('game-container').appendChild(resultDiv);
+
+        document.getElementById('result-continue-btn')?.addEventListener('click', ()=>{
+            resultDiv.remove();
+            arenaStep = 'select';
+            renderArena();
+            document.getElementById('arena-screen').classList.add('active');
+            hideViewSwitch();
+        });
+        document.getElementById('result-end-btn')?.addEventListener('click', ()=>{
+            resultDiv.remove();
+            arenaStep = 'cloud';
+            renderArena();
+            document.getElementById('arena-screen').classList.add('active');
+            hideViewSwitch();
+        });
+        updateUI();
+    }
+
+    // ========== НАВИГАЦИЯ ==========
+    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); }
+    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); }
+
+    document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
+    document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
+    document.getElementById('invest-nav-btn').addEventListener('click', ()=> switchScreen('invest'));
+    document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
+    document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
+    document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
+    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (duelActive) {
+            clearInterval(duelTimerInterval);
+            clearInterval(duelSpawnInterval);
+            clearInterval(duelBotInterval);
+            duelActive = false;
+        }
+        if (searchTimer) { clearInterval(searchTimer); searchTimer = null; }
         arenaStep = 'cloud';
-        renderArena();
-        document.getElementById('arena-screen').classList.add('active');
-        hideViewSwitch();
-    });
+        showViewSwitch();
+    }));
+
+    board.addEventListener('touchstart', handleTouchStart, {passive: false});
+    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 
     updateUI();
-}
+    window.lastGameTime = Date.now();
+    if (games < maxGames) startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 
-// Остальная часть кода (навигация, задания, клуб, магазин, фоны) остается без изменений и должна быть вставлена полностью.
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (screenId) {
+            hideViewSwitch();
+            if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
+            else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
+            else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
+            else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
+        } else showViewSwitch();
+    }
+
+    // ===================== ЗАДАНИЯ =====================
+    const tasksContent = document.getElementById('tasks-content');
+    const subTabs = document.querySelectorAll('.sub-tab');
+    let currentTasksTab = 'borsch';
+    function findTaskById(id, type) {
+        if (type === 'borsch') return officialRumTasks.find(t => t.id === id);
+        if (type === 'srum') return officialSrumTasks.find(t => t.id === id);
+        if (type === 'private_rum' || type === 'private_srum') return globalUserTasks.find(t => t.id === id);
+        return null;
+    }
+    function renderAvailableTasks() {
+        subTabs.forEach(t => t.classList.remove('active'));
+        document.querySelector(`.sub-tab[data-tab="${currentTasksTab}"]`).classList.add('active');
+        let tasks = [];
+        if (currentTasksTab === 'borsch') tasks = officialRumTasks.filter(t => t.completionsDone < t.maxCompletions);
+        else if (currentTasksTab === 'srum') tasks = officialSrumTasks.filter(t => t.completionsDone < t.maxCompletions);
+        else if (currentTasksTab === 'private_rum') tasks = globalUserTasks.filter(t => !t.completed && t.author !== 'Ты' && t.currency === 'RUM');
+        else if (currentTasksTab === 'private_srum') tasks = globalUserTasks.filter(t => !t.completed && t.author !== 'Ты' && t.currency === 'SRUM');
+        let html = '';
+        if (tasks.length === 0) html = '<p>Нет доступных заданий.</p>';
+        tasks.forEach(task => {
+            const rew = task.currency==='SRUM' ? `${task.reward} SRUM` : `${task.reward} RUM`;
+            html += `<div class="task-item"><span>${task.desc} (${rew})</span><div style="display:flex; gap:8px;">${task.link?`<button class="open-link-btn" data-url="${task.link}">🔗 Выполнить</button>`:''} <button class="verify-btn" data-task-id="${task.id}" data-type="${currentTasksTab}">Я выполнил</button></div></div>`;
+        });
+        tasksContent.innerHTML = html;
+        document.querySelectorAll('.open-link-btn').forEach(b => b.addEventListener('click', e => { const u = e.target.dataset.url; if(u) window.open(u,'_blank'); }));
+        document.querySelectorAll('.verify-btn').forEach(b => b.addEventListener('click', e => {
+            const id = parseInt(e.target.dataset.taskId), type = e.target.dataset.type, task = findTaskById(id, type);
+            if (!task || task.checking) return;
+            task.checking = true; saveAll(); renderAvailableTasks();
+            e.target.textContent = '⏳'; e.target.disabled = true;
+            setTimeout(() => {
+                task.checking = false; task.completionsDone = (task.completionsDone||0)+1;
+                const reward = task.reward * 0.7;
+                if (task.currency==='SRUM') srum += reward; else rum += Math.floor(reward);
+                invest += Math.ceil(task.reward*0.3);
+                updateUI(); renderAvailableTasks();
+            }, 3000);
+        }));
+    }
+    function renderCreateTask() {
+        const max = (officialRumTasks.every(t => t.completionsDone >= t.maxCompletions) && officialSrumTasks.every(t => t.completionsDone >= t.maxCompletions)) ? 33 : 3;
+        const currentCount = userTasks.length; const canCreate = currentCount < max;
+        tasksContent.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:10px;"><p>Лимит созданных: ${currentCount}/${max}</p>
+            <input id="task-desc" placeholder="Описание задания" ${canCreate ? '' : 'disabled'}>
+            <input id="task-reward" type="number" placeholder="Награда" ${canCreate ? '' : 'disabled'}>
+            <select id="task-currency" ${canCreate ? '' : 'disabled'}><option value="RUM">RUM</option><option value="SRUM">SRUM</option></select>
+            <input id="task-link" type="url" placeholder="Ссылка на задание" ${canCreate ? '' : 'disabled'}>
+            <button id="publish-task-btn" style="padding:14px; background:#4CAF50; border:none; border-radius:10px; font-weight:bold; color:white; box-shadow:0 4px 12px rgba(76,175,80,0.5);" ${canCreate ? '' : 'disabled'}>Опубликовать</button></div>`;
+        if (canCreate) {
+            document.getElementById('publish-task-btn').addEventListener('click', () => {
+                const desc = document.getElementById('task-desc').value.trim();
+                const reward = parseFloat(document.getElementById('task-reward').value);
+                const currency = document.getElementById('task-currency').value;
+                const link = document.getElementById('task-link').value.trim();
+                if (desc && reward > 0) {
+                    if (currency === 'RUM' && rum >= reward) rum -= Math.ceil(reward);
+                    else if (currency === 'SRUM' && srum >= reward) srum -= reward;
+                    else { alert('Недостаточно средств'); return; }
+                    const newTask = { id: Date.now(), desc, reward, currency, link, author: 'Ты', completed: false, checking: false };
+                    userTasks.push(newTask); globalUserTasks.push(newTask);
+                    updateUI(); renderCreateTask(); alert('Задание опубликовано!');
+                } else alert('Неверные данные');
+            });
+        }
+    }
+    function renderMyTasks() {
+        let html = '<h3>Выполненные официальные</h3>';
+        officialRumTasks.concat(officialSrumTasks).forEach(t => {
+            if (t.completionsDone > 0) {
+                const type = officialRumTasks.includes(t) ? 'RUM' : 'SRUM';
+                html += `<div>✅ ${t.desc} — ${t.completionsDone} раз (${(t.completionsDone * t.reward).toFixed(type==='SRUM'?2:0)} ${type})</div>`;
+            }
+        });
+        html += '<h3>Созданные мной</h3>';
+        if (userTasks.length === 0) html += '<p>Нет созданных заданий</p>';
+        userTasks.forEach(t => {
+            html += `<div class="task-item" id="my-task-${t.id}">
+                <div class="editable"><input id="desc-${t.id}" value="${t.desc}" /><input id="reward-${t.id}" type="number" value="${t.reward}" /><input id="link-${t.id}" value="${t.link || ''}" /></div>
+                <div style="display:flex; gap:8px; justify-content: space-between;"><span>${t.reward} ${t.currency}</span>
+                    <div><button class="edit-task-btn" data-task-id="${t.id}" style="padding:8px 14px; background:#2196F3; border:none; border-radius:6px; color:white; font-weight:bold;">✏️</button><button class="delete-task-btn" data-task-id="${t.id}" style="padding:8px 14px; background:#F44336; border:none; border-radius:6px; color:white; font-weight:bold;">🗑️</button></div></div></div>`;
+        });
+        tasksContent.innerHTML = html;
+        document.querySelectorAll('.edit-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const taskId = parseInt(e.target.dataset.taskId);
+            const task = userTasks.find(t => t.id === taskId);
+            if (!task) return;
+            const newDesc = document.getElementById(`desc-${taskId}`).value.trim();
+            const newReward = parseFloat(document.getElementById(`reward-${taskId}`).value);
+            const newLink = document.getElementById(`link-${taskId}`).value.trim();
+            if (!newDesc || newReward <= 0) return alert('Неверное описание или награда');
+            const diff = newReward - task.reward;
+            if (diff > 0) {
+                if (task.currency === 'RUM' && rum >= diff) rum -= Math.ceil(diff);
+                else if (task.currency === 'SRUM' && srum >= diff) srum -= diff;
+                else return alert('Недостаточно средств');
+            } else if (diff < 0) {
+                if (task.currency === 'RUM') rum += Math.ceil(-diff);
+                else srum += -diff;
+            }
+            task.desc = newDesc; task.reward = newReward; task.link = newLink;
+            updateUI(); renderMyTasks(); alert('Задание обновлено!');
+        }));
+        document.querySelectorAll('.delete-task-btn').forEach(btn => btn.addEventListener('click', (e) => {
+            const taskId = parseInt(e.target.dataset.taskId);
+            const taskIndex = userTasks.findIndex(t => t.id === taskId);
+            if (taskIndex === -1) return;
+            const task = userTasks[taskIndex];
+            if (task.currency === 'RUM') rum += Math.ceil(task.reward);
+            else srum += task.reward;
+            userTasks.splice(taskIndex, 1);
+            const globalIndex = globalUserTasks.findIndex(t => t.id === taskId);
+            if (globalIndex !== -1) globalUserTasks.splice(globalIndex, 1);
+            updateUI(); renderMyTasks(); alert('Задание удалено, средства возвращены');
+        }));
+    }
+    subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
+
+    // ===================== КЛУБ =====================
+    const clubContent = document.getElementById('club-content');
+    function getMyClub() { return clubs.find(c => c.id == myClubId); }
+    function renderMyClub() {
+        const club = getMyClub();
+        if (!club) { clubContent.innerHTML = '<p>Вы не состоите в клубе.</p>'; return; }
+        const amIMaster = club.master === 'Игрок';
+        const amIOfficer = club.officers?.includes('Игрок');
+        let html = `<h3>${club.emoji||'🐺'} ${club.name}</h3><p>${club.desc||''}</p>`;
+        html += `<p><b>Глава:</b> ${club.master||'—'}</p><p><b>Офицеры:</b> ${club.officers?.join(', ')||'нет'}</p><p><b>Бойцы:</b> ${club.members?.join(', ')||'нет'}</p>`;
+        html += '<div style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;">';
+        if (amIMaster) {
+            html += '<button class="club-btn" id="edit-club-btn">✏️</button><button class="club-btn" id="invite-member-btn">👥</button><button class="club-btn" id="manage-officers-btn">🛡️</button><button class="club-btn" id="delete-club-btn">🗑️</button>';
+        } else if (amIOfficer) {
+            html += '<button class="club-btn" id="invite-member-btn">👥</button><button class="club-btn" id="leave-club-btn">🚪</button>';
+        } else { html += '<button class="club-btn" id="leave-club-btn">🚪</button>'; }
+        html += '</div>';
+        clubContent.innerHTML = html;
+        if (amIMaster) {
+            document.getElementById('edit-club-btn').addEventListener('click', () => {
+                clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:8px;"><input id="edit-name" value="${club.name}"><input id="edit-emoji" value="${club.emoji}"><input id="edit-desc" value="${club.desc}"><button id="save-club-btn" style="background:#4CAF50; padding:10px;">Сохранить</button></div>`;
+                document.getElementById('save-club-btn').addEventListener('click', () => {
+                    club.name = document.getElementById('edit-name').value.trim() || club.name;
+                    club.emoji = document.getElementById('edit-emoji').value.trim() || club.emoji;
+                    club.desc = document.getElementById('edit-desc').value.trim();
+                    saveAll(); renderMyClub();
+                });
+            });
+            document.getElementById('invite-member-btn').addEventListener('click', () => { const name = prompt('Имя бойца:'); if(name) { if(!club.members) club.members=[]; club.members.push(name); saveAll(); renderMyClub(); } });
+            document.getElementById('manage-officers-btn').addEventListener('click', () => {
+                let list = '<div><p><b>Назначить офицера:</b></p>';
+                const fighters = club.members?.filter(m => m !== club.master && !club.officers?.includes(m)) || [];
+                if (fighters.length) fighters.forEach(f => list += `<button class="club-btn" data-name="${f}">${f} 👆</button>`);
+                else list += '<p>Нет бойцов.</p>';
+                list += '<p><b>Разжаловать:</b></p>';
+                if (club.officers?.length) club.officers.forEach(o => list += `<button class="club-btn" data-name="${o}">${o} 👇</button>`);
+                else list += '<p>Нет офицеров.</p>';
+                list += '</div>';
+                clubContent.innerHTML = list;
+                document.querySelectorAll('[data-name]').forEach(b => b.addEventListener('click', e => {
+                    const nm = e.target.dataset.name;
+                    if (!club.officers) club.officers = [];
+                    club.officers = club.officers.filter(o => o !== nm);
+                    club.officers.push(nm);
+                    saveAll(); renderMyClub();
+                }));
+            });
+            document.getElementById('delete-club-btn').addEventListener('click', ()=>{ if(confirm('Распустить клуб?')){ clubs=clubs.filter(c=>c.id!=myClubId); myClubId=null; saveAll(); renderMyClub(); } });
+        } else {
+            if(document.getElementById('invite-member-btn')) document.getElementById('invite-member-btn').addEventListener('click', ()=>{ const name=prompt('Имя бойца:'); if(name){ if(!club.members) club.members=[]; club.members.push(name); saveAll(); renderMyClub(); } });
+            if(document.getElementById('leave-club-btn')) document.getElementById('leave-club-btn').addEventListener('click', ()=>{ if(confirm('Покинуть клуб?')){ club.members=club.members.filter(m=>m!=='Игрок'); if(club.officers?.includes('Игрок')) club.officers=club.officers.filter(o=>o!=='Игрок'); myClubId=null; saveAll(); renderMyClub(); } });
+        }
+    }
+    function renderAllClubs() {
+        if(!clubs.length){ clubContent.innerHTML='<p>Нет клубов.</p>'; return; }
+        let html='';
+        clubs.forEach(c=>{
+            const isMember = myClubId == c.id;
+            html += `<div class="task-item"><strong>${c.emoji||'🐺'} ${c.name}</strong> (${c.members?.length||0} уч.)<br>${c.desc||''}<br>${isMember ? '<span>✅ Вы в клубе</span>' : `<button class="club-btn" data-join="${c.id}">Вступить</button>`}</div>`;
+        });
+        clubContent.innerHTML = html;
+        document.querySelectorAll('[data-join]').forEach(b=>b.addEventListener('click', e=>{
+            const club = clubs.find(c=>c.id==e.target.dataset.join);
+            if(!club||myClubId) return;
+            if(!club.members) club.members=[];
+            club.members.push('Игрок'); myClubId=club.id; saveAll(); renderAllClubs();
+        }));
+    }
+    function showCreateClub() {
+        clubContent.innerHTML = `<div style="display:flex; flex-direction:column; gap:10px;"><input id="club-name" placeholder="Название"><input id="club-emoji" placeholder="Эмодзи"><input id="club-desc" placeholder="Описание"><p>Стоимость: 100 RUM</p><button id="club-create-submit" class="club-btn" style="background:#4CAF50;">Создать клуб</button></div>`;
+        document.getElementById('club-create-submit').addEventListener('click', ()=>{
+            const name=document.getElementById('club-name').value.trim();
+            const emoji=document.getElementById('club-emoji').value.trim()||'🐺';
+            const desc=document.getElementById('club-desc').value.trim();
+            if(!name||rum<100) return alert('Недостаточно RUM или пустое название');
+            rum-=100;
+            const newClub={ id:Date.now(), name, emoji, desc, master:'Игрок', officers:[], members:['Игрок'] };
+            clubs.push(newClub); myClubId=newClub.id; saveAll(); updateUI(); renderMyClub();
+        });
+    }
+    document.getElementById('club-my-btn').addEventListener('click', renderMyClub);
+    document.getElementById('club-all-btn').addEventListener('click', renderAllClubs);
+    document.getElementById('club-create-btn').addEventListener('click', showCreateClub);
+
+    // ===================== МАГАЗИН =====================
+    document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return alert('Мало SRUM'); srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return alert('Мало SRUM'); srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return alert('Мало SRUM'); srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
+    document.getElementById('buy-srum-ton').addEventListener('click', ()=>{ if(ton<1) return alert('Нужен 1 TON'); ton-=1; srum+=2; updateUI(); });
+    document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{ if(usdt<1) return alert('Нужен 1 USDT'); usdt-=1; srum+=1; updateUI(); });
+    document.getElementById('swap-srum-ton').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; ton+=0.5; updateUI(); });
+    document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; usdt+=1; updateUI(); });
+})();
 </script>
 </body>
 </html>
