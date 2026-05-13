@@ -14,11 +14,14 @@
         /* Яркая кнопка Правила */
         #rules-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
         #rules-btn-bottom.hidden{display:none!important}
-        /* Мигающий пальчик */
-        .hint-finger{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:blink 0.8s infinite;z-index:46;pointer-events:none}
+        /* Подсказка-пальчик снизу */
+        .hint-finger{
+            position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
+            font-size:1.2rem;animation:blink 0.8s infinite;
+            z-index:46;pointer-events:none;
+        }
         @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
         .hidden{display:none!important}
-        /* Фоны */
         #matrix-bg{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:block}
         #matrixCanvas{width:100%;height:100%;display:block}
         #smile-view{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:none}
@@ -29,14 +32,13 @@
         .window-sill{position:absolute;bottom:30%;left:0;right:0;height:12px;background:#A0522D;border-top:2px solid #8B4513;z-index:5}
         .flower-pot{position:absolute;bottom:calc(30% + 12px);left:5%;width:24px;height:26px;background:#CD853F;border-radius:0 0 8px 8px;border:2px solid #8B4513;z-index:6}
         .flower-pot::after{content:'🌿';position:absolute;top:-16px;left:2px;font-size:1rem}
-        /* Ракетка-бустер теперь под кастрюлей, выше доски */
+        /* Ракетка-бустер строго под кастрюлей */
         .boost-display{
-            position:absolute;bottom:18%;left:50%;transform:translateX(-50%);
+            position:absolute;bottom:20%;left:50%;transform:translateX(-50%);
             background:rgba(0,0,0,0.8);color:white;padding:4px 12px;border-radius:20px;
             font-size:0.7rem;font-weight:bold;z-index:12;white-space:nowrap;
             border:1px solid #FFD700;
         }
-        .boost-icon{display:inline-block}
         .purple-bg{position:absolute;bottom:0;left:0;right:0;top:70%;background:purple;z-index:1}
         .kitchen-area{position:absolute;bottom:22%;left:0;right:0;height:35%;z-index:2}
         .table{position:absolute;top:50%;left:5%;right:5%;height:50%;background:linear-gradient(180deg,#DEB887,#A0522D);border-top:6px solid #8B4513}
@@ -65,7 +67,9 @@
         .rotten{filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg)}.rotten::after{content:'🪱';position:absolute;top:-6px;right:-6px;font-size:0.6rem}
         .top-panel{position:absolute;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;z-index:35;pointer-events:none}
         .top-left-buttons,.balances-right{pointer-events:auto}
-        .top-left-buttons{display:flex;gap:4px;flex-wrap:wrap}.top-left-buttons .item{background:rgba(0,0,0,0.7);color:white;padding:2px 6px;border-radius:10px;font-size:0.55rem;display:flex;align-items:center;gap:2px;cursor:pointer;backdrop-filter:blur(5px)}
+        /* Верхние кнопки – максимально узкие */
+        .top-left-buttons{display:flex;gap:2px;flex-wrap:wrap}
+        .top-left-buttons .item{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:8px;font-size:0.5rem;display:flex;align-items:center;gap:1px;cursor:pointer;backdrop-filter:blur(5px)}
         .balances-right{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
         .balances-right div{background:rgba(0,0,0,0.7);color:white;padding:2px 6px;border-radius:10px;font-size:0.55rem;font-weight:bold;backdrop-filter:blur(5px)}
         #rum-balance{background:rgba(255,215,0,0.7);color:black}
@@ -81,7 +85,7 @@
         .back-btn{position:absolute;top:15px;left:15px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;z-index:60}
         .duel-scoreboard{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
         .duel-scoreboard.hidden{display:none}
-        .quick-duel-coin{position:absolute;top:110px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:35;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
+        .quick-duel-coin{position:absolute;top:120px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:35;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         .coin-particle{position:absolute;pointer-events:none;z-index:36;font-size:1rem;animation:sparkUp 0.6s ease-out forwards}
         @keyframes sparkUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-40px) scale(0.2);opacity:0}}
@@ -97,17 +101,6 @@
         .arena-tabs button.active{background:linear-gradient(135deg,#FFD700,#FF8C00);color:black}
         .club-btn{padding:12px 18px;border:none;border-radius:8px;font-weight:bold;background:linear-gradient(180deg,#E040FB,#AA00FF);color:white;box-shadow:0 4px 10px rgba(224,64,251,0.5);margin:4px;cursor:pointer}
         .shop-btn{padding:14px 20px;border:none;border-radius:10px;font-weight:bold;font-size:1rem;background:linear-gradient(180deg,#00E5FF,#00B8D4);color:#000;box-shadow:0 4px 12px rgba(0,229,255,0.5);margin:6px 0;cursor:pointer;width:90%}
-        .flying-veg,.coin-fountain,.poop-fountain,.rocket,.spark{position:absolute;z-index:20;pointer-events:none}
-        .flying-veg{animation:flyToPot 0.5s ease-in forwards}
-        @keyframes flyToPot{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:1}100%{transform:translate(var(--ex),var(--ey)) scale(0.5);opacity:0}}
-        .coin-fountain{animation:coinUp 0.8s ease-out forwards;font-size:1rem;font-weight:bold}
-        @keyframes coinUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(0.5);opacity:0}}
-        .poop-fountain{animation:poopDown 0.8s ease-out forwards;font-size:1rem}
-        @keyframes poopDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.5);opacity:0}}
-        .rocket{animation:rocketFly 0.6s ease-in forwards;font-size:2rem}
-        @keyframes rocketFly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(0.8);opacity:0}}
-        .spark{animation:sparkBoom 0.8s ease-out forwards;font-size:1.5rem}
-        @keyframes sparkBoom{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0.2);opacity:0}}
     </style>
 </head>
 <body>
@@ -174,7 +167,7 @@
     <div class="screen" id="referral-screen"><button class="back-btn">← Назад</button><h2>👥 Рефералы</h2><input readonly value="https://..."></div>
     <div class="screen" id="rules-screen"><button class="back-btn">← Назад</button>
         <h2>📜 Правила игры</h2>
-        <div style="text-align:left;line-height:1.5;width:100%;padding:10px;">
+        <div style="text-align:left;line-height:1.5;width:100%;max-height:70vh;overflow-y:auto;padding-right:5px;">
             <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>
             Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM.<br>
             Серия точных попаданий удваивает награду каждые 10 попаданий.<br>
@@ -505,7 +498,7 @@
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ---------- МАЙНИНГ (этапный, с новыми правилами) ----------
+    // ---------- МАЙНИНГ (этапный) ----------
     const botPool = [
         { name: 'ТокенМастер', speed: 1000 },
         { name: 'Борщехлёб', speed: 850 },
@@ -799,7 +792,6 @@
     function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); }
     function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); }
 
-    // Мигание подсказок
     setTimeout(() => {
         document.getElementById('view-finger')?.classList.add('hidden');
         document.getElementById('rules-finger')?.classList.add('hidden');
