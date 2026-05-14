@@ -8,18 +8,11 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Arial',sans-serif;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
         #game-container{position:relative;width:100%;max-width:420px;height:100vh;background:linear-gradient(180deg,#0a0a0a 0%,#1a1a2e 100%);overflow:hidden}
-        /* Яркий переключатель фона */
         #view-switch{position:absolute;left:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45;display:flex;flex-direction:column;align-items:center;gap:4px;transition:0.2s}
         #view-switch.hidden{display:none!important}
-        /* Яркая кнопка Правила */
         #rules-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
         #rules-btn-bottom.hidden{display:none!important}
-        /* Подсказка-пальчик снизу */
-        .hint-finger{
-            position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
-            font-size:1.2rem;animation:blink 0.8s infinite;
-            z-index:46;pointer-events:none;
-        }
+        .hint-finger{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:blink 0.8s infinite;z-index:46;pointer-events:none}
         @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
         .hidden{display:none!important}
         #matrix-bg{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:block}
@@ -32,13 +25,7 @@
         .window-sill{position:absolute;bottom:30%;left:0;right:0;height:12px;background:#A0522D;border-top:2px solid #8B4513;z-index:5}
         .flower-pot{position:absolute;bottom:calc(30% + 12px);left:5%;width:24px;height:26px;background:#CD853F;border-radius:0 0 8px 8px;border:2px solid #8B4513;z-index:6}
         .flower-pot::after{content:'🌿';position:absolute;top:-16px;left:2px;font-size:1rem}
-        /* Ракетка-бустер строго под кастрюлей */
-        .boost-display{
-            position:absolute;bottom:20%;left:50%;transform:translateX(-50%);
-            background:rgba(0,0,0,0.8);color:white;padding:4px 12px;border-radius:20px;
-            font-size:0.7rem;font-weight:bold;z-index:12;white-space:nowrap;
-            border:1px solid #FFD700;
-        }
+        .boost-display{position:absolute;bottom:20%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:white;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:bold;z-index:12;white-space:nowrap;border:1px solid #FFD700}
         .purple-bg{position:absolute;bottom:0;left:0;right:0;top:70%;background:purple;z-index:1}
         .kitchen-area{position:absolute;bottom:22%;left:0;right:0;height:35%;z-index:2}
         .table{position:absolute;top:50%;left:5%;right:5%;height:50%;background:linear-gradient(180deg,#DEB887,#A0522D);border-top:6px solid #8B4513}
@@ -67,7 +54,6 @@
         .rotten{filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg)}.rotten::after{content:'🪱';position:absolute;top:-6px;right:-6px;font-size:0.6rem}
         .top-panel{position:absolute;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;z-index:35;pointer-events:none}
         .top-left-buttons,.balances-right{pointer-events:auto}
-        /* Верхние кнопки – максимально узкие */
         .top-left-buttons{display:flex;gap:2px;flex-wrap:wrap}
         .top-left-buttons .item{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:8px;font-size:0.5rem;display:flex;align-items:center;gap:1px;cursor:pointer;backdrop-filter:blur(5px)}
         .balances-right{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
@@ -519,7 +505,7 @@
     const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
     const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
     const duelTimerEl = document.getElementById('duelTimer');
-    const duelOpponentEl = document.getElementById('duelOpponent');
+    // Удалена несуществующая ссылка на duelOpponent
 
     setInterval(() => {
         if (duelActive || gameActive) return;
@@ -621,9 +607,11 @@
         duelActive = true;
         gameActive = false;
         clearInterval(gameTimer); clearInterval(spawnInterval);
+        // Убираем основной обработчик
+        board.removeEventListener('touchstart', handleTouchStart);
+        board.removeEventListener('touchmove', preventDefaultMove);
         duelPlayerScore = 0; duelOpponentScore = 0;
         duelTimeLeft = 20;
-        duelOpponentEl.textContent = currentBot.name;
         duelScoreboard.classList.remove('hidden');
         updateDuelScore();
         spawnAll();
@@ -638,6 +626,8 @@
         board.addEventListener('touchstart', duelTouchHandler, {passive: false});
         board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
     }
+
+    function preventDefaultMove(e) { e.preventDefault(); }
 
     function duelTouchHandler(e) {
         e.preventDefault();
@@ -674,6 +664,10 @@
         duelActive = false;
         clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
         board.removeEventListener('touchstart', duelTouchHandler);
+        board.removeEventListener('touchmove', preventDefaultMove);
+        // Возвращаем основной обработчик
+        board.addEventListener('touchstart', handleTouchStart, {passive: false});
+        board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
         duelScoreboard.classList.add('hidden');
@@ -683,7 +677,7 @@
         let resultDiv = document.createElement('div');
         resultDiv.className = 'result-overlay';
         if (miningCurrency === 'SRUM') {
-            srum += miningThreshold;
+            srum += miningThreshold; // возврат взноса
             if (win) {
                 let reward = miningThreshold * (0.5 + Math.random() * 0.37);
                 usdt += reward;
