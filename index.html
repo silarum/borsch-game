@@ -12,6 +12,8 @@
         #view-switch.hidden{display:none!important}
         #rules-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
         #rules-btn-bottom.hidden{display:none!important}
+        #lang-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px + 35px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
+        #lang-btn-bottom.hidden{display:none!important}
         .hint-finger{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:blink 0.8s infinite;z-index:46;pointer-events:none}
         @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
         .hidden{display:none!important}
@@ -39,9 +41,10 @@
         .steam-particle:nth-child(2){left:50%;animation-delay:0.7s}
         .steam-particle:nth-child(3){left:70%;animation-delay:1.4s}
         @keyframes rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-20px) scale(1.8);opacity:0}}
-        .start-btn-container{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:25;text-align:center}
-        .start-btn{background:linear-gradient(180deg,#FF6347,#DC143C);color:white;border:none;padding:15px 30px;border-radius:30px;font-weight:bold;font-size:1.2rem;cursor:pointer;box-shadow:0 0 25px rgba(255,69,0,0.8);animation:pulse 1.5s infinite}
-        .start-btn:disabled{background:#808080;animation:none;box-shadow:none}
+        .start-btn-container{position:absolute;top:calc(50% - 30px);left:50%;transform:translate(-50%,-50%);z-index:25;display:flex;gap:10px}
+        .start-btn{background:linear-gradient(180deg,#FF6347,#DC143C);color:white;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;font-size:1.1rem;cursor:pointer;box-shadow:0 0 25px rgba(255,69,0,0.8);animation:pulse 1.5s infinite}
+        .pause-btn{background:linear-gradient(180deg,#FFA500,#FF8C00);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px orange}
+        .stop-btn{background:linear-gradient(180deg,#B22222,#8B0000);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px red}
         .energy-display{background:rgba(0,0,0,0.7);color:#FFD700;padding:4px 12px;border-radius:15px;font-size:0.8rem;font-weight:bold;margin-top:5px}
         .board{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:92%;background:#DEB887;clip-path:polygon(15% 0%,85% 0%,100% 100%,0% 100%);border:3px solid #8B4513;display:flex;flex-direction:column;padding:12px 10px 18px 10px;gap:8px;z-index:10}
         .row{display:flex;justify-content:center;gap:14px}
@@ -74,7 +77,7 @@
         .language-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:70;flex-direction:column}
         .language-box{background:#1a1a2e;border-radius:20px;padding:20px;width:80%;color:white;text-align:center;border:2px solid gold}
         .language-box button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;font-size:1rem;background:gold;color:black;font-weight:bold;cursor:pointer}
-        /* дополнительные стили для майнинга */
+        /* дополнительные стили */
         .quick-duel-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:60;flex-direction:column}
         .quick-duel-box{background:#1a1a2e;border-radius:20px;padding:20px;width:85%;color:white;text-align:center;border:2px solid gold}
         .countdown-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:3rem;color:gold;text-shadow:0 0 20px black;z-index:50;background:rgba(0,0,0,0.5);flex-direction:column}
@@ -98,6 +101,7 @@
 <div id="game-container">
     <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span><span class="hint-finger" id="view-finger">👆</span></button>
     <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span><span class="hint-finger" id="rules-finger">👆</span></button>
+    <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
     <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
     <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
@@ -108,6 +112,8 @@
     <div class="kitchen-area"><div class="table"></div><div class="stove"><div class="pot" id="pot"><div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div><div class="energy-display" id="energy-display"></div><div class="boost-display" id="boost-display"></div></div></div></div>
     <div class="start-btn-container" id="start-btn-container">
         <button class="start-btn" id="start-btn" data-lang="start_btn">🥘 НАЧАТЬ</button>
+        <button class="pause-btn hidden" id="pause-btn">⏸️ Пауза</button>
+        <button class="stop-btn hidden" id="stop-btn">⏹️ Стоп</button>
     </div>
     <div class="board" id="board">
         <div class="row"><div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div></div>
@@ -121,7 +127,6 @@
             <div class="item" id="referral-icon">👥 <span data-lang="referral">Рефералы</span></div>
             <div class="item" id="invest-nav-btn" style="background:#27ae60">📈 <span data-lang="invest">Инвест</span></div>
             <div class="item" id="about-icon">📖 <span data-lang="about">О проекте</span></div>
-            <div class="item" id="language-btn" style="background:#555">⚙️</div>
         </div>
         <div class="balances-right">
             <div id="rum-balance">💰 RUM: 0</div>
@@ -143,7 +148,7 @@
         <span>⏳ <span id="duelTimer">20</span>с</span>
         <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
     </div>
-    <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div></div>
+    <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
     <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" style="padding:8px 12px;background:#FFD700;border:none;border-radius:8px;color:black" data-lang="tasks_avail">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px;background:#4CAF50;border:none;border-radius:8px" data-lang="tasks_create">Создать</button><button id="tasks-my-btn" style="padding:8px 12px;background:#2196F3;border:none;border-radius:8px" data-lang="tasks_my">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
     <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Стартап «Борщ на блокчейне»</span></p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn" data-lang="invest_btn">Инвестировать RUM</button></div>
@@ -155,13 +160,21 @@
     <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
         <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
         <div class="rules-scroll">
-            <p><strong>🍲 <span data-lang="rules_basic">Основная готовка (RUM-майнинг)</span></strong><br>
-            <span data-lang="rules_basic_desc">Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM. Серия точных попаданий удваивает награду каждые 10 попаданий. Ошибка (плохой овощ 💩🪱🧀🥀🍄 или мимо лунки) – штраф 20 RUM, серия сбрасывается.</span>
+            <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>
+            Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM. Серия точных попаданий удваивает награду каждые 10 попаданий. Ошибка (плохой овощ 💩🪱🧀🥀🍄 или мимо лунки) – штраф 20 RUM, серия сбрасывается.
             </p>
-            <p><strong>⛏️ <span data-lang="rules_mining">Игровой майнинг (Криптобеспредел)</span></strong><br>
-            <span data-lang="rules_mining_desc">Выбери пул (SRUM или RUM), порог и этап. Это взнос за участие в поиске блока. Два майнера соревнуются: кто больше добудет очков за 20 секунд, тот получает блок. Победа: награда 50‑87% от порога в USDT (для SRUM) или в RUM (для RUM). Проигрыш: теряется мощность (штраф по этапу). Промах в дуэли снижает твой счёт на 2 очка. Этапы: с 1 по 5, повышаются при победе, сбрасываются при поражении. Каждый этап меняет процент штрафа и награды. После найденного блока победитель сразу получает награду и может продолжить майнинг.</span>
+            <p><strong>⛏️ Игровой майнинг (Криптобеспредел)</strong><br>
+            Выбери пул (SRUM или RUM), порог и этап. Два майнера соревнуются 20 секунд – кто больше наберет очков, тот получает блок.<br>
+            <b>Твой выигрыш = 70% от штрафа проигравшего.</b> Проект забирает 30%.<br>
+            Этапы и проценты:<br>
+            Этап 1: штраф 10% порога, выигрыш 7% (пример: 0.10 / 0.07 USDT)<br>
+            Этап 2: штраф 20%, выигрыш 15% (0.20 / 0.15 USDT)<br>
+            Этап 3: штраф 40%, выигрыш 30% (0.40 / 0.30 USDT)<br>
+            Этап 4: штраф 80%, выигрыш 60% (0.80 / 0.60 USDT)<br>
+            Этап 5: штраф 100%, выигрыш 75% (1.00 / 0.75 USDT)<br>
+            <i>Для азарта в интерфейсе суммы выигрыша показаны ×100.</i>
             </p>
-            <p><strong>🐺 <span data-lang="rules_club">Клуб, Задания, Магазин</span></strong> – <span data-lang="rules_club_desc">улучшай майнинг, выполняй квесты, обменивай SRUM на TON/USDT.</span></p>
+            <p><strong>🐺 Клуб, Задания, Магазин</strong> – улучшай майнинг, выполняй квесты, обменивай SRUM на TON/USDT.</p>
         </div>
     </div>
     <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📖 <span data-lang="about_title">О проекте</span></h2><p>...</p></div>
@@ -188,9 +201,6 @@ const translations = {
         invest_desc: 'Стартап «Борщ на блокчейне»', invest_btn: 'Инвестировать RUM', wallet_title: 'Кошелёк',
         wallet_connect: 'Привязать TON кошелёк', shop_title: 'Магазин', top_players_title: 'Топ игроков',
         top_miners_title: 'Топ майнеров', referral_title: 'Рефералы', rules_title: 'Правила игры',
-        rules_basic: 'Основная готовка (RUM-майнинг)', rules_basic_desc: 'Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM. Серия точных попаданий удваивает награду каждые 10 попаданий. Ошибка (плохой овощ 💩🪱🧀🥀🍄 или мимо лунки) – штраф 20 RUM, серия сбрасывается.',
-        rules_mining: 'Игровой майнинг (Криптобеспредел)', rules_mining_desc: 'Выбери пул (SRUM или RUM), порог и этап. Это взнос за участие в поиске блока. Два майнера соревнуются: кто больше добудет очков за 20 секунд, тот получает блок. Победа: награда 50‑87% от порога в USDT (для SRUM) или в RUM (для RUM). Проигрыш: теряется мощность (штраф по этапу). Промах в дуэли снижает твой счёт на 2 очка. Этапы: с 1 по 5, повышаются при победе, сбрасываются при поражении. Каждый этап меняет процент штрафа и награды. После найденного блока победитель сразу получает награду и может продолжить майнинг.',
-        rules_club: 'Клуб, Задания, Магазин', rules_club_desc: 'улучшай майнинг, выполняй квесты, обменивай SRUM на TON/USDT.',
         about_title: 'О проекте', lang_title: 'Выберите язык / Choose language / 选择语言', lang_cancel: 'Отмена / Cancel / 取消'
     },
     en: {
@@ -203,9 +213,6 @@ const translations = {
         invest_desc: 'Startup "Borsch on Blockchain"', invest_btn: 'Invest RUM', wallet_title: 'Wallet',
         wallet_connect: 'Link TON Wallet', shop_title: 'Shop', top_players_title: 'Top Players',
         top_miners_title: 'Top Miners', referral_title: 'Referrals', rules_title: 'Game Rules',
-        rules_basic: 'Basic Cooking (RUM-mining)', rules_basic_desc: 'Tap on good veggies 🥬🧅🥔🥕🫑🌿🫘🧄🍅, they give 10 RUM. A streak doubles the reward every 10 hits. Miss (bad veggie 💩🪱🧀🥀🍄 or empty hole) – 20 RUM penalty, streak resets.',
-        rules_mining: 'Game Mining (Kriptobespredel)', rules_mining_desc: 'Choose pool (SRUM or RUM), threshold and stage. Two miners compete: who gets more points in 20 seconds wins the block. Win: 50‑87% of threshold in USDT (for SRUM) or RUM (for RUM). Loss: lose power (penalty per stage). Miss reduces your score by 2. Stages 1‑5, increase on win, reset on loss.',
-        rules_club: 'Club, Tasks, Shop', rules_club_desc: 'upgrade mining, complete quests, exchange SRUM for TON/USDT.',
         about_title: 'About Project', lang_title: 'Choose language / Выберите язык / 选择语言', lang_cancel: 'Cancel / Отмена / 取消'
     },
     zh: {
@@ -218,9 +225,6 @@ const translations = {
         invest_desc: '“区块链上的罗宋汤”创业项目', invest_btn: '投资 RUM', wallet_title: '钱包',
         wallet_connect: '连接 TON 钱包', shop_title: '商店', top_players_title: '顶级玩家',
         top_miners_title: '顶级矿工', referral_title: '推荐', rules_title: '游戏规则',
-        rules_basic: '基础烹饪 (RUM挖矿)', rules_basic_desc: '点击好蔬菜 🥬🧅🥔🥕🫑🌿🫘🧄🍅，获得10 RUM。连续命中每10次奖励翻倍。失误（坏蔬菜 💩🪱🧀🥀🍄 或空孔）– 罚款20 RUM，连击重置。',
-        rules_mining: '游戏挖矿（Kriptobespredel）', rules_mining_desc: '选择池（SRUM或RUM）、门槛和阶段。两名矿工竞争：20秒内得分多者赢得区块。胜利：获得门槛50‑87%的USDT（SRUM池）或RUM（RUM池）。失败：失去力量（根据阶段罚款）。失误减少2分。阶段1‑5，胜利升级，失败重置。',
-        rules_club: '俱乐部、任务、商店', rules_club_desc: '升级挖矿，完成任务，用SRUM兑换TON/USDT。',
         about_title: '关于项目', lang_title: '选择语言 / Choose language / Выберите язык', lang_cancel: '取消 / Cancel / Отмена'
     }
 };
@@ -241,9 +245,6 @@ function setLanguage(lang) {
         startBtn.textContent = translations[lang].start_btn;
     }
 }
-document.getElementById('language-btn').addEventListener('click', ()=>{
-    document.getElementById('language-modal').classList.remove('hidden');
-});
 setLanguage(currentLang);
 
 // ----- Основной код игры -----
@@ -265,7 +266,8 @@ setLanguage(currentLang);
     let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
     let streak = 0;
-    let duelActive = false; // исправлено: объявлена глобально
+    let duelActive = false;
+    let gamePaused = false;
 
     const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
@@ -281,6 +283,7 @@ setLanguage(currentLang);
     let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
     let clubs = JSON.parse(localStorage.getItem('clubs')) || [];
     let myClubId = localStorage.getItem('myClubId') || null;
+    let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
 
     function saveAll() {
         localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
@@ -291,6 +294,7 @@ setLanguage(currentLang);
         localStorage.setItem('userTasks', JSON.stringify(userTasks));
         localStorage.setItem('clubs', JSON.stringify(clubs));
         if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
+        localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
     }
 
     const pot = document.getElementById('pot');
@@ -302,11 +306,16 @@ setLanguage(currentLang);
     const holes = document.querySelectorAll('.hole');
     const viewSwitch = document.getElementById('view-switch');
     const rulesBtn = document.getElementById('rules-btn-bottom');
+    const langBtn = document.getElementById('lang-btn-bottom');
     const boostDisplay = document.getElementById('boost-display');
     const energyDisplay = document.getElementById('energy-display');
     const startBtn = document.getElementById('start-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const stopBtn = document.getElementById('stop-btn');
 
     startBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', togglePause);
+    stopBtn.addEventListener('click', stopGame);
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -318,12 +327,23 @@ setLanguage(currentLang);
 
         if (games > 0 && !gameActive && !duelActive) {
             startBtn.style.display = 'inline-block';
+            pauseBtn.classList.add('hidden');
+            stopBtn.classList.add('hidden');
             energyDisplay.textContent = `⚡ ${games}/${maxGames} игр`;
-        } else if (gameActive || duelActive) {
+        } else if (gameActive) {
             startBtn.style.display = 'none';
+            pauseBtn.classList.remove('hidden');
+            stopBtn.classList.remove('hidden');
+            energyDisplay.textContent = '';
+        } else if (duelActive) {
+            startBtn.style.display = 'none';
+            pauseBtn.classList.add('hidden');
+            stopBtn.classList.add('hidden');
             energyDisplay.textContent = '';
         } else {
             startBtn.style.display = 'none';
+            pauseBtn.classList.add('hidden');
+            stopBtn.classList.add('hidden');
             const now = Date.now(), last = window.lastGameTime || now;
             const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
             const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
@@ -332,6 +352,7 @@ setLanguage(currentLang);
         updateBoostDisplay();
         saveAll();
     }
+
     function updateBoostDisplay() {
         if (activeBoost && activeBoost.endTime > Date.now()) {
             const remain = Math.max(0, Math.ceil((activeBoost.endTime - Date.now()) / 1000));
@@ -388,7 +409,7 @@ setLanguage(currentLang);
     }
 
     function processHit(hole, touch) {
-        if (!gameActive) return;
+        if (!gameActive || gamePaused) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); return; }
         if (currentVeg[num].type === 'good') {
@@ -406,12 +427,41 @@ setLanguage(currentLang);
 
     function handleTouchStart(e) {
         e.preventDefault();
-        if (!gameActive) return;
+        if (!gameActive || gamePaused) return;
         [...e.changedTouches].forEach(touch => {
             const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
             if (hole) processHit(hole, touch);
             else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); }
         });
+    }
+
+    function togglePause() {
+        if (gamePaused) {
+            gamePaused = false;
+            pauseBtn.textContent = '⏸️ Пауза';
+            gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
+            spawnInterval = setInterval(() => { if (gameActive && !gamePaused) spawnAll(); }, 1200);
+        } else {
+            gamePaused = true;
+            pauseBtn.textContent = '▶️ Продолжить';
+            clearInterval(gameTimer);
+            clearInterval(spawnInterval);
+        }
+    }
+
+    function stopGame() {
+        if (gameActive) {
+            gameActive = false;
+            gamePaused = false;
+            clearInterval(gameTimer);
+            clearInterval(spawnInterval);
+            holes.forEach(h => h.innerHTML = '');
+            currentVeg = {};
+            games = Math.max(0, games - 1);
+            window.lastGameTime = Date.now();
+            updateUI();
+            if (games < maxGames) startRecovery();
+        }
     }
 
     function flyVegToPot(hole, emoji) {
@@ -452,20 +502,22 @@ setLanguage(currentLang);
 
     function startGame() {
         if (games <= 0 || gameActive) return;
-        gameActive = true; gameTimeLeft = 60; streak = 0;
+        gameActive = true; gamePaused = false; gameTimeLeft = 60; streak = 0;
         updateUI(); spawnAll();
         let interval = 1800;
         spawnInterval = setInterval(() => {
-            if (!gameActive) return;
+            if (!gameActive || gamePaused) return;
             spawnAll();
             interval = Math.max(450, interval-80);
             clearInterval(spawnInterval);
-            spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
+            spawnInterval = setInterval(() => { if (gameActive && !gamePaused) spawnAll(); }, interval);
         }, interval);
         gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
     }
+
     function endGame() {
         gameActive = false;
+        gamePaused = false;
         clearInterval(gameTimer); clearInterval(spawnInterval);
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
@@ -474,6 +526,7 @@ setLanguage(currentLang);
         updateUI();
         if (games < maxGames) startRecovery();
     }
+
     function startRecovery() {
         if (window.recoveryInterval) clearInterval(window.recoveryInterval);
         window.recoveryInterval = setInterval(() => {
@@ -572,13 +625,48 @@ setLanguage(currentLang);
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ---------- МАЙНИНГ ----------
+    // ---------- МАЙНИНГ (этапный) ----------
     const botPool = [
         { name: 'ТокенМастер', speed: 1000 },
         { name: 'Борщехлёб', speed: 850 },
         { name: 'CryptoWhale', speed: 700 },
         { name: 'Майнер69', speed: 600 },
         { name: 'Лампа', speed: 500 }
+    ];
+    const cheerPhrases = [
+        "Не расстраивайся, майнер! Следующий блок будет твоим! 💪",
+        "Даже после промаха можно взять реванш. Вперёд!",
+        "Ошибка – это просто шаг к будущей победе!",
+        "Кто не рискует, тот не пьёт шампанское… или не добывает блок! 😉",
+        "Не сегодня, так завтра. Главное – не останавливаться!",
+        "Ты стал сильнее! Продолжай майнинг! 💎",
+        "Фартуна улыбнётся тебе, просто дай ей шанс.",
+        "Помни: даже лучшие майнеры иногда теряют блоки.",
+        "Не сдавайся! Твой звёздный час близок. 🚀",
+        "В следующий раз обязательно повезёт!",
+        "Это всего лишь одна попытка. Впереди ещё много!",
+        "Упорство и труд всё перетрут. И майнинг тоже.",
+        "Неудачи закаляют характер. Ты уже крут!",
+        "Каждая ошибка – это инвестиция в опыт.",
+        "Взбодрись! Следующий блок точно найдёшь!",
+        "Даже проигрыш приносит ценный опыт. Не унывай!",
+        "Ты на верном пути. Продолжай добывать!",
+        "Фортуна переменчива, но ты сильнее!",
+        "Майнеры не сдаются! Вперёд за новым блоком!",
+        "Не вешай нос, дружище! Всё только начинается!",
+        "Это всего лишь временная неудача. Ты справишься!",
+        "В мире крипты за падением всегда следует рост.",
+        "Просто не повезло. Попробуй ещё раз!",
+        "Удача любит настойчивых. Ты обязательно добьёшься своего!",
+        "Ты уже на полпути к победе!",
+        "Не опускай руки! Блок ждёт тебя.",
+        "Сегодня не твой день, но завтра будет лучше!",
+        "Даже маленький штраф – это урок. Продолжай!",
+        "Ошибки делают нас мудрее. Ты стал мудрее!",
+        "Следующая попытка будет удачной. Мы верим в тебя!",
+        "Никогда не сдавайся! Майнинг – это марафон.",
+        "Ты проиграл битву, но не войну. Продолжай!",
+        "Поверь в себя, и блок найдётся!"
     ];
     let currentBot = null;
     let duelPlayerScore = 0, duelOpponentScore = 0;
@@ -587,6 +675,10 @@ setLanguage(currentLang);
     let miningCurrency = 'SRUM';
     let miningThreshold = 1;
     let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
+    let pendingMining = null; // текущая активная сессия
+
+    function getPenaltyPercent() { return [0.1,0.2,0.4,0.8,1.0][miningStage-1]; }
+    function getRewardPercent() { return getPenaltyPercent() * 0.7; }
 
     const duelScoreboard = document.getElementById('duel-scoreboard');
     const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
@@ -614,12 +706,13 @@ setLanguage(currentLang);
 
     document.getElementById('quick-duel-coin').addEventListener('click', () => {
         if (duelActive || gameActive) return;
+        if (pendingMining) return alert('Сначала завершите текущий поиск или паузу.');
         showMiningModal();
     });
 
     function showMiningModal() {
-        const penalty = (miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1]).toFixed(2);
-        const reward = (miningThreshold * [0.07,0.15,0.3,0.6,0.75][miningStage-1]).toFixed(2);
+        const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
+        const reward = (miningThreshold * getRewardPercent()).toFixed(2);
         const modal = document.createElement('div');
         modal.className = 'quick-duel-modal';
         modal.innerHTML = `
@@ -642,6 +735,7 @@ setLanguage(currentLang);
             if (miningCurrency === 'RUM' && rum < miningThreshold) return alert('Недостаточно RUM');
             if (miningCurrency === 'SRUM') srum -= miningThreshold;
             else rum -= miningThreshold;
+            pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
             updateUI(); modal.remove();
             startSearch();
         });
@@ -739,34 +833,100 @@ setLanguage(currentLang);
         board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
         holes.forEach(h => h.innerHTML = ''); currentVeg = {};
         duelScoreboard.classList.add('hidden');
+        if (pendingMining) {
+            if (miningCurrency === 'SRUM') srum += pendingMining.threshold;
+            else rum += pendingMining.threshold;
+        }
+        pendingMining = null;
         updateUI();
+
         const win = duelPlayerScore > duelOpponentScore;
         let resultDiv = document.createElement('div'); resultDiv.className = 'result-overlay';
         if (miningCurrency === 'SRUM') {
-            srum += miningThreshold;
             if (win) {
-                let reward = miningThreshold * (0.5 + Math.random() * 0.37); usdt += reward;
-                if (miningStage < 5) miningStage++; localStorage.setItem('miningStage', miningStage);
+                let reward = miningThreshold * getRewardPercent();
+                usdt += reward;
+                if (miningStage < 5) miningStage++;
+                localStorage.setItem('miningStage', miningStage);
                 showCoinFountain(30);
-                resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${reward.toFixed(2)} USDT</p><p>Этап ${miningStage}</p><button id="continue-mining">Продолжить майнинг</button>`;
+                resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${reward.toFixed(2)} USDT</p><p>Этап ${miningStage}</p>
+                    <button id="continue-mining">Продолжить майнинг</button>
+                    <button id="pause-mining">⏸️ Пауза</button>`;
             } else {
-                let penalty = miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1]; srum = Math.max(0, srum - penalty);
-                miningStage = 1; localStorage.setItem('miningStage', 1);
+                let penalty = miningThreshold * getPenaltyPercent();
+                srum = Math.max(0, srum - penalty);
+                miningStage = 1;
+                localStorage.setItem('miningStage', 1);
                 showPoopFountain(20);
-                resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>Потеря мощности: ${penalty.toFixed(2)} SRUM</p><p>Этап сброшен до 1</p><button id="back-to-pool">Вернуться в пул</button>`;
+                let phrase = cheerPhrases[Math.floor(Math.random() * cheerPhrases.length)];
+                resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>${phrase}</p><p>Потеря мощности: ${penalty.toFixed(2)} SRUM</p><p>Этап сброшен до 1</p>
+                    <button id="continue-mining">Продолжить</button>
+                    <button id="pause-mining">⏸️ Пауза</button>`;
             }
         } else {
             rum += miningThreshold;
-            if (win) { let rewardRUM = Math.floor(miningThreshold * (0.5 + Math.random() * 0.37)); rum += rewardRUM; showCoinFountain(15); resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${rewardRUM} RUM</p><button id="continue-mining">Продолжить</button>`; }
-            else { rum = Math.max(0, rum - 20); showPoopFountain(10); resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>-20 RUM</p><button id="back-to-pool">Вернуться</button>`; }
+            if (win) { let rewardRUM = Math.floor(miningThreshold * getRewardPercent()); rum += rewardRUM; showCoinFountain(15); resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${rewardRUM} RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`; }
+            else { rum = Math.max(0, rum - 20); showPoopFountain(10); resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>-20 RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`; }
         }
         document.getElementById('game-container').appendChild(resultDiv);
-        document.getElementById('continue-mining')?.addEventListener('click', ()=>{ resultDiv.remove(); startSearch(); });
-        document.getElementById('back-to-pool')?.addEventListener('click', ()=>{ resultDiv.remove(); });
+        document.getElementById('continue-mining')?.addEventListener('click', ()=>{
+            resultDiv.remove();
+            if (miningCurrency === 'SRUM' && srum < miningThreshold) return alert('Недостаточно SRUM для продолжения');
+            if (miningCurrency === 'SRUM') srum -= miningThreshold;
+            else rum -= miningThreshold;
+            pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
+            startSearch();
+        });
+        document.getElementById('pause-mining')?.addEventListener('click', ()=>{
+            if (pausedSessions.length >= 7) return alert('Достигнут лимит замороженных сессий (7)');
+            pausedSessions.push({ currency: miningCurrency, threshold: miningThreshold, stage: miningStage });
+            if (miningCurrency === 'SRUM') srum += miningThreshold; // возврат взноса
+            else rum += miningThreshold;
+            updateUI();
+            resultDiv.remove();
+            renderPausedSessions();
+        });
         updateUI();
     }
 
-    // ---------- АРЕНА ----------
+    function renderPausedSessions() {
+        const container = document.getElementById('paused-sessions');
+        if (!container) return;
+        let html = '<h3>❄️ Замороженные сессии</h3>';
+        pausedSessions.forEach((s, i) => {
+            html += `<div style="background:#333;padding:5px;margin:5px;border-radius:8px;">
+                ${s.currency} порог ${s.threshold} этап ${s.stage}
+                <button data-idx="${i}" class="resume-session">▶️</button>
+                <button data-idx="${i}" class="cancel-session">🗑️</button>
+            </div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.resume-session').forEach(b => b.addEventListener('click', (e) => {
+            let idx = e.target.dataset.idx;
+            let session = pausedSessions[idx];
+            if (!session) return;
+            if (session.currency === 'SRUM' && srum < session.threshold) return alert('Недостаточно SRUM');
+            if (session.currency === 'RUM' && rum < session.threshold) return alert('Недостаточно RUM');
+            if (session.currency === 'SRUM') srum -= session.threshold;
+            else rum -= session.threshold;
+            miningCurrency = session.currency;
+            miningThreshold = session.threshold;
+            miningStage = session.stage;
+            pausedSessions.splice(idx, 1);
+            updateUI();
+            renderPausedSessions();
+            pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
+            startSearch();
+        }));
+        document.querySelectorAll('.cancel-session').forEach(b => b.addEventListener('click', (e) => {
+            let idx = e.target.dataset.idx;
+            pausedSessions.splice(idx, 1);
+            updateUI();
+            renderPausedSessions();
+        }));
+    }
+
+    // ---------- АРЕНА (вкладки) ----------
     const arenaContent = document.getElementById('arena-content');
     const arenaTabs = document.getElementById('arena-tabs');
     let currentArenaTab = 'mining';
@@ -774,8 +934,8 @@ setLanguage(currentLang);
         if (!arenaContent) return;
         let html = '';
         if (currentArenaTab === 'mining') {
-            const penalty = (miningThreshold * [0.1,0.2,0.4,0.8,1.0][miningStage-1]).toFixed(2);
-            const reward = (miningThreshold * [0.07,0.15,0.3,0.6,0.75][miningStage-1]).toFixed(2);
+            const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
+            const reward = (miningThreshold * getRewardPercent()).toFixed(2);
             html = `<h2>⛏️ Личный майнинг</h2><p>Порог: <b>${miningThreshold.toFixed(1)} SRUM</b> | Этап: <b>${miningStage}</b></p><p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p><input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider-arena" style="width:90%;"><p>Взнос: <strong id="arena-stake">${miningThreshold.toFixed(1)}</strong> SRUM</p><button class="shop-btn" id="start-mining-btn" ${srum < miningThreshold ? 'disabled' : ''}>⛏️ Искать блок</button>`;
         } else if (currentArenaTab === 'band') html = `<h2>🐺 Банда (5×5)</h2><p>В разработке</p>`;
         else if (currentArenaTab === 'tournaments') html = `<h2>🏆 Турниры</h2><p>В разработке</p>`;
@@ -789,6 +949,7 @@ setLanguage(currentLang);
             document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
                 if (srum < miningThreshold) return alert('Недостаточно SRUM');
                 srum -= miningThreshold; miningCurrency = 'SRUM';
+                pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
                 arenaContent.innerHTML = '<h2>🔍 Поиск блока...</h2><p id="search-counter">5 сек</p>';
                 let sec = 5;
                 let st = setInterval(() => {
@@ -810,6 +971,7 @@ setLanguage(currentLang);
                 }, 1000);
             });
         }
+        renderPausedSessions();
     }
     arenaTabs.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -819,8 +981,8 @@ setLanguage(currentLang);
     });
 
     // ---------- НАВИГАЦИЯ ----------
-    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); }
-    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); }
+    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
+    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
 
     setTimeout(() => {
         document.getElementById('view-finger')?.classList.add('hidden');
@@ -847,6 +1009,26 @@ setLanguage(currentLang);
     window.lastGameTime = Date.now();
     if (games < maxGames) startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    window.addEventListener('beforeunload', () => {
+        if (gameActive) {
+            localStorage.setItem('gamePausedState', JSON.stringify({timeLeft: gameTimeLeft, games: games, streak: streak, active: true}));
+        }
+    });
+    // восстановление при загрузке
+    (function restoreGame() {
+        let state = JSON.parse(localStorage.getItem('gamePausedState') || 'null');
+        if (state && state.active) {
+            games = state.games;
+            gameTimeLeft = state.timeLeft;
+            streak = state.streak || 0;
+            gameActive = true;
+            gamePaused = true; // ставим на паузу
+            pauseBtn.textContent = '▶️ Продолжить';
+            updateUI();
+            spawnAll();
+            localStorage.removeItem('gamePausedState');
+        }
+    })();
 
     function switchScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
