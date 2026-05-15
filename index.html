@@ -12,7 +12,7 @@
         #view-switch.hidden{display:none!important}
         #rules-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
         #rules-btn-bottom.hidden{display:none!important}
-        #lang-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px + 35px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
+        #lang-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px + 50px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
         #lang-btn-bottom.hidden{display:none!important}
         .hint-finger{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:blink 0.8s infinite;z-index:46;pointer-events:none}
         @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
@@ -41,7 +41,7 @@
         .steam-particle:nth-child(2){left:50%;animation-delay:0.7s}
         .steam-particle:nth-child(3){left:70%;animation-delay:1.4s}
         @keyframes rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-20px) scale(1.8);opacity:0}}
-        .start-btn-container{position:absolute;top:calc(50% - 30px);left:50%;transform:translate(-50%,-50%);z-index:25;display:flex;gap:10px}
+        .start-btn-container{position:absolute;top:calc(50% - 50px);left:50%;transform:translate(-50%,-50%);z-index:25;display:flex;gap:10px}
         .start-btn{background:linear-gradient(180deg,#FF6347,#DC143C);color:white;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;font-size:1.1rem;cursor:pointer;box-shadow:0 0 25px rgba(255,69,0,0.8);animation:pulse 1.5s infinite}
         .pause-btn{background:linear-gradient(180deg,#FFA500,#FF8C00);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px orange}
         .stop-btn{background:linear-gradient(180deg,#B22222,#8B0000);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px red}
@@ -72,7 +72,7 @@
         .rules-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;padding:0 5px;text-align:left;line-height:1.5}
         .back-btn{position:absolute;top:15px;left:15px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;z-index:60}
         .duel-scoreboard{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
-        .quick-duel-coin{position:absolute;top:120px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:50;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
+        .quick-duel-coin{position:absolute;top:135px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:50;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         .language-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:70;flex-direction:column}
         .language-box{background:#1a1a2e;border-radius:20px;padding:20px;width:80%;color:white;text-align:center;border:2px solid gold}
