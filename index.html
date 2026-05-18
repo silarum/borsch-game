@@ -14,13 +14,8 @@
         #rules-btn-bottom.hidden{display:none!important}
         #lang-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px + 50px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
         #lang-btn-bottom.hidden{display:none!important}
-        .user-profile{position:absolute;top:5px;left:5px;right:5px;display:flex;align-items:center;gap:8px;z-index:50;background:rgba(0,0,0,0.7);border-radius:10px;padding:4px 8px;pointer-events:auto}
-        .user-avatar{width:32px;height:32px;border-radius:50%;background:gold;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
-        .user-info{color:white;font-size:0.7rem;flex:1}
-        .user-menu-btn{background:none;border:none;color:white;font-size:1.2rem;cursor:pointer}
-        .menu-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:80;display:none;flex-direction:column;padding:20px}
-        .menu-overlay.active{display:flex}
-        .menu-overlay button{background:rgba(255,255,255,0.1);color:white;border:none;padding:12px;margin:4px 0;border-radius:8px;font-size:1rem;cursor:pointer}
+        .hint-finger{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:blink 0.8s infinite;z-index:46;pointer-events:none}
+        @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
         .hidden{display:none!important}
         #matrix-bg{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:block}
         #matrixCanvas{width:100%;height:100%;display:block}
@@ -48,7 +43,6 @@
         @keyframes rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-20px) scale(1.8);opacity:0}}
         .start-btn-container{position:absolute;top:calc(50% - 50px);left:50%;transform:translate(-50%,-50%);z-index:25;display:flex;gap:10px}
         .start-btn{background:linear-gradient(180deg,#FF6347,#DC143C);color:white;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;font-size:1.1rem;cursor:pointer;box-shadow:0 0 25px rgba(255,69,0,0.8);animation:pulse 1.5s infinite}
-        .start-btn:disabled{background:#808080;animation:none;box-shadow:none}
         .pause-btn{background:linear-gradient(180deg,#FFA500,#FF8C00);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px orange}
         .stop-btn{background:linear-gradient(180deg,#B22222,#8B0000);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px red}
         .energy-display{background:rgba(0,0,0,0.7);color:#FFD700;padding:4px 12px;border-radius:15px;font-size:0.8rem;font-weight:bold;margin-top:5px}
@@ -61,17 +55,29 @@
         .veg{font-size:2rem;pointer-events:none;animation:popIn 0.3s ease-out}
         @keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.2)}100%{transform:scale(1)}}
         .rotten{filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg)}.rotten::after{content:'🪱';position:absolute;top:-6px;right:-6px;font-size:0.6rem}
-        .screen{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);color:white;padding:40px 10px 20px;flex-direction:column;align-items:center;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .top-panel{position:absolute;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;z-index:35;pointer-events:none}
+        .top-left-buttons{display:flex;gap:2px;flex-wrap:wrap;pointer-events:auto}
+        .top-left-buttons .item{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:6px;font-size:0.5rem;display:flex;align-items:center;gap:1px;cursor:pointer;backdrop-filter:blur(5px);max-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .balances-right{display:flex;flex-direction:column;gap:2px;align-items:flex-end;pointer-events:auto}
+        .balances-right div{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:6px;font-size:0.5rem;font-weight:bold;backdrop-filter:blur(5px)}
+        #rum-balance{background:rgba(255,215,0,0.7);color:black}
+        #srum-balance{background:rgba(192,192,192,0.7);color:black}
+        #usdt-balance-top{background:rgba(76,175,80,0.7);color:white}
+        #ton-balance-top{background:rgba(33,150,243,0.7);color:white}
+        .bottom-panel{position:absolute;bottom:2px;left:2px;right:2px;display:flex;justify-content:space-around;z-index:30}
+        .nav-btn{color:white;border:none;padding:10px 6px;border-radius:12px;font-size:0.75rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;margin:2px;font-weight:bold;letter-spacing:0.5px;transition:all 0.3s;box-shadow:0 4px 8px rgba(0,0,0,0.5)}
+        .nav-btn:nth-child(1){background:linear-gradient(180deg,#e74c3c,#c0392b)}.nav-btn:nth-child(2){background:linear-gradient(180deg,#8e44ad,#6c3483)}.nav-btn:nth-child(3){background:linear-gradient(180deg,#f39c12,#d68910)}.nav-btn:nth-child(4){background:linear-gradient(180deg,#27ae60,#1e8449)}.nav-btn:nth-child(5){background:linear-gradient(180deg,#2980b9,#2471a3)}
+        .screen{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);color:white;padding:10px;flex-direction:column;align-items:center;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch}
         .screen.active{display:flex}
         .rules-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;padding:0 5px;text-align:left;line-height:1.5}
-        .back-btn{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:0.7rem;cursor:pointer;z-index:60}
-        .duel-scoreboard{position:absolute;top:40px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
+        .back-btn{position:absolute;top:15px;left:15px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;z-index:60}
+        .duel-scoreboard{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
         .quick-duel-coin{position:absolute;top:135px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:50;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
-        .quick-duel-coin.hidden{display:none}
         @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         .language-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:70;flex-direction:column}
         .language-box{background:#1a1a2e;border-radius:20px;padding:20px;width:80%;color:white;text-align:center;border:2px solid gold}
         .language-box button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;font-size:1rem;background:gold;color:black;font-weight:bold;cursor:pointer}
+        /* дополнительные стили */
         .quick-duel-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:60;flex-direction:column}
         .quick-duel-box{background:#1a1a2e;border-radius:20px;padding:20px;width:85%;color:white;text-align:center;border:2px solid gold}
         .countdown-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:3rem;color:gold;text-shadow:0 0 20px black;z-index:50;background:rgba(0,0,0,0.5);flex-direction:column}
@@ -93,30 +99,6 @@
 </head>
 <body>
 <div id="game-container">
-    <div class="user-profile" id="user-profile">
-        <div class="user-avatar" id="user-avatar">😎</div>
-        <div class="user-info">
-            <div id="user-nickname">Майнер</div>
-            <div id="user-status" data-lang="status_solo">Одиночка</div>
-        </div>
-        <button class="user-menu-btn" id="user-menu-btn">☰</button>
-    </div>
-    <div class="menu-overlay" id="menu-overlay">
-        <button id="menu-close">✖</button>
-        <button data-screen="arena">🏟️ Арена</button>
-        <button data-screen="mining-club">🐺 Клуб</button>
-        <button data-screen="tasks">📋 Задания</button>
-        <button data-screen="wallet">👛 Кошелёк</button>
-        <button data-screen="shop">🛍️ Магазин</button>
-        <button data-screen="invest">📈 Инвестиции</button>
-        <button data-screen="referral">👥 Рефералы</button>
-        <button data-screen="top-tappers">🏆 Топ игроков</button>
-        <button data-screen="top-miners">⛏️ Топ майнеров</button>
-        <button data-screen="rules">📜 Правила</button>
-        <button data-screen="about">📖 О проекте</button>
-        <button id="menu-language">🌐 Язык</button>
-    </div>
-
     <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span><span class="hint-finger" id="view-finger">👆</span></button>
     <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span><span class="hint-finger" id="rules-finger">👆</span></button>
     <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
@@ -138,52 +120,64 @@
         <div class="row"><div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div></div>
         <div class="row"><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div></div>
     </div>
+    <div class="top-panel">
+        <div class="top-left-buttons">
+            <div class="item" id="top-tappers" style="background:#FFD700;color:black">🏆 <span data-lang="top_players">Топ</span></div>
+            <div class="item" id="top-miners" style="background:#C0C0C0;color:black">⛏️ <span data-lang="top_miners">Майнеры</span></div>
+            <div class="item" id="referral-icon">👥 <span data-lang="referral">Рефералы</span></div>
+            <div class="item" id="invest-nav-btn" style="background:#27ae60">📈 <span data-lang="invest">Инвест</span></div>
+            <div class="item" id="about-icon">📖 <span data-lang="about">О проекте</span></div>
+        </div>
+        <div class="balances-right">
+            <div id="rum-balance">💰 RUM: 0</div>
+            <div id="srum-balance">💎 SRUM: 0.00</div>
+            <div id="usdt-balance-top">💵 USDT: 0.00</div>
+            <div id="ton-balance-top">⚡ TON: 0.00</div>
+        </div>
+    </div>
+    <div class="bottom-panel">
+        <button class="nav-btn" data-screen="arena"><span data-lang="arena_btn">🏟️ Арена</span></button>
+        <button class="nav-btn" data-screen="mining-club"><span data-lang="club_btn">🐺 Клуб</span></button>
+        <button class="nav-btn" data-screen="tasks"><span data-lang="tasks_btn">📋 Задания</span></button>
+        <button class="nav-btn" data-screen="wallet"><span data-lang="wallet_btn">👛 Кошелёк</span></button>
+        <button class="nav-btn" data-screen="shop"><span data-lang="shop_btn">🛍️ Магазин</span></button>
+    </div>
     <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
     <div class="duel-scoreboard hidden" id="duel-scoreboard">
         <span>⚡ <span data-lang="duel_you">Ты</span>: <span id="duelPlayerScore">0</span></span>
         <span>⏳ <span id="duelTimer">20</span>с</span>
         <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
     </div>
-
     <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
     <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" style="padding:8px 12px;background:#FFD700;border:none;border-radius:8px;color:black" data-lang="tasks_avail">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px;background:#4CAF50;border:none;border-radius:8px" data-lang="tasks_create">Создать</button><button id="tasks-my-btn" style="padding:8px 12px;background:#2196F3;border:none;border-radius:8px" data-lang="tasks_my">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
-    <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.</span></p><p>Скоро появятся первые проекты.</p></div>
+    <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Стартап «Борщ на блокчейне»</span></p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn" data-lang="invest_btn">Инвестировать RUM</button></div>
     <div class="screen" id="wallet-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn" data-lang="wallet_connect">Привязать TON кошелёк</button></div>
-    <div class="screen" id="shop-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🛍️ <span data-lang="shop_title">Магазин</span></h2>
-        <button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button>
-        <button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button>
-        <button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button>
-        <button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button>
-        <button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button>
-        <button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button>
-        <button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button>
-        <hr style="border-color:#555;width:100%;margin:10px 0">
-        <h3>💎 Статусы</h3>
-        <button class="shop-btn" id="buy-status-silver">🥈 Серебро — 100 SRUM (+1M RUM, вывод от 200 SRUM)</button>
-        <button class="shop-btn" id="buy-status-gold">🥇 Золото — 200 SRUM (+2M RUM, вывод от 100 SRUM)</button>
-        <button class="shop-btn" id="buy-status-platinum">💠 Платина — 300 SRUM (+3M RUM, вывод от 25 SRUM)</button>
-    </div>
+    <div class="screen" id="shop-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🛍️ <span data-lang="shop_title">Магазин</span></h2><button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button><button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button><button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button><button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button><button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button><button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button><button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button></div>
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🏆 <span data-lang="top_players_title">Топ игроков</span></h2><p>1. ...</p></div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>⛏️ <span data-lang="top_miners_title">Топ майнеров</span></h2><p>1. ...</p></div>
-    <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><input readonly value="https://t.me/crypto_borsch_bot?start=ref123" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><div id="referral-list" style="width:100%;"></div></div>
+    <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><input readonly value="https://..."></div>
     <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
         <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
         <div class="rules-scroll">
-            <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>Нажимай на полезные овощи, они приносят 10 RUM. Серия удваивает награду каждые 10 попаданий. Ошибка – штраф 20 RUM. Энергия: 3 игры, восстановление 10 мин.</p>
-            <p><strong>⛏️ Крипто беспредел (PvP-майнинг)</strong><br>Выбери пул (SRUM или RUM), порог и этап. Два майнера соревнуются 20 секунд. Победитель получает 70% штрафа проигравшего, проект забирает 30%. Этапы: 1-5, повышаются при победе, сбрасываются при поражении.</p>
-            <p><strong>🐺 Командный майнинг</strong><br>Главарь приглашает бойцов по никнейму, из рефералов или клуба. После готовности всех участников запускается майнинг от 1 до 5 SRUM.</p>
-            <p><strong>💎 Статусы</strong><br>Серебро, Золото, Платина дают бонусы RUM и снижают порог вывода SRUM. Можно купить в магазине или заработать, накопив достаточно RUM.</p>
-            <p><strong>👥 Рефералы</strong><br>Приглашай друзей и получай бонусы. Следи за статусом своих рефералов.</p>
+            <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>
+            Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM. Серия точных попаданий удваивает награду каждые 10 попаданий. Ошибка (плохой овощ 💩🪱🧀🥀🍄 или мимо лунки) – штраф 20 RUM, серия сбрасывается.
+            </p>
+            <p><strong>⛏️ Игровой майнинг (Криптобеспредел)</strong><br>
+            Выбери пул (SRUM или RUM), порог и этап. Два майнера соревнуются 20 секунд – кто больше наберет очков, тот получает блок.<br>
+            <b>Твой выигрыш = 70% от штрафа проигравшего.</b> Проект забирает 30%.<br>
+            Этапы и проценты:<br>
+            Этап 1: штраф 10% порога, выигрыш 7% (пример: 0.10 / 0.07 USDT)<br>
+            Этап 2: штраф 20%, выигрыш 15% (0.20 / 0.15 USDT)<br>
+            Этап 3: штраф 40%, выигрыш 30% (0.40 / 0.30 USDT)<br>
+            Этап 4: штраф 80%, выигрыш 60% (0.80 / 0.60 USDT)<br>
+            Этап 5: штраф 100%, выигрыш 75% (1.00 / 0.75 USDT)<br>
+            <i>Для азарта в интерфейсе суммы выигрыша показаны ×100.</i>
+            </p>
+            <p><strong>🐺 Клуб, Задания, Магазин</strong> – улучшай майнинг, выполняй квесты, обменивай SRUM на TON/USDT.</p>
         </div>
     </div>
-    <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
-        <h2>📖 <span data-lang="about_title">О проекте</span></h2>
-        <div class="rules-scroll">
-            <p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram, объединяющая тапалку, PvP-майнинг, клубы и инвестиции.</p>
-            <p>Возможности: играй, зарабатывай RUM и SRUM, участвуй в турнирах, создавай клубы, приглашай друзей, инвестируй в реальные проекты.</p>
-        </div>
-    </div>
+    <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📖 <span data-lang="about_title">О проекте</span></h2><p>...</p></div>
     <div id="language-modal" class="language-modal hidden">
         <div class="language-box">
             <h3 data-lang="lang_title">Выберите язык / Choose language / 选择语言</h3>
@@ -193,9 +187,9 @@
             <button onclick="document.getElementById('language-modal').classList.add('hidden')" data-lang="lang_cancel">Отмена / Cancel / 取消</button>
         </div>
     </div>
-</div>        
+</div>
+
 <script>
-// ================== ПЕРЕВОДЫ ==================
 const translations = {
     ru: {
         top_players: 'Топ', top_miners: 'Майнеры', referral: 'Рефералы', invest: 'Инвест', about: 'О проекте',
@@ -204,18 +198,10 @@ const translations = {
         arena_mining: 'Майнинг', arena_band: 'Банда', arena_tour: 'Турниры', club_title: 'Бойцовский клуб',
         club_my: 'Мой клуб', club_all: 'Все клубы', club_create: 'Создать', tasks_title: 'Задания',
         tasks_avail: 'Доступные', tasks_create: 'Создать', tasks_my: 'Мои', invest_title: 'Инвестиции',
-        invest_desc: 'Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.',
-        invest_btn: 'Инвестировать RUM', wallet_title: 'Кошелёк', wallet_connect: 'Привязать TON кошелёк',
-        shop_title: 'Магазин', top_players_title: 'Топ игроков', top_miners_title: 'Топ майнеров',
-        referral_title: 'Рефералы', rules_title: 'Правила игры', about_title: 'О проекте',
-        lang_title: 'Выберите язык / Choose language / 选择语言', lang_cancel: 'Отмена / Cancel / 取消',
-        status_solo: 'Одиночка', status_club: 'Глава клуба',
-        shop_status_silver: '🥈 Серебро — 100 SRUM (+1M RUM, вывод от 200 SRUM)',
-        shop_status_gold: '🥇 Золото — 200 SRUM (+2M RUM, вывод от 100 SRUM)',
-        shop_status_platinum: '💠 Платина — 300 SRUM (+3M RUM, вывод от 25 SRUM)',
-        invite_nickname: 'Пригласить по никнейму', invite_referral: 'Из рефералов', invite_club: 'Из клуба',
-        ready: 'Готов', not_ready: 'Не готов', invite_title: 'Приглашение в банду', accept: 'Принять', decline: 'Отклонить',
-        referral_active: 'Активен', referral_inactive: 'Неактивен', referral_long: 'Давно не заходил'
+        invest_desc: 'Стартап «Борщ на блокчейне»', invest_btn: 'Инвестировать RUM', wallet_title: 'Кошелёк',
+        wallet_connect: 'Привязать TON кошелёк', shop_title: 'Магазин', top_players_title: 'Топ игроков',
+        top_miners_title: 'Топ майнеров', referral_title: 'Рефералы', rules_title: 'Правила игры',
+        about_title: 'О проекте', lang_title: 'Выберите язык / Choose language / 选择语言', lang_cancel: 'Отмена / Cancel / 取消'
     },
     en: {
         top_players: 'Top', top_miners: 'Miners', referral: 'Referral', invest: 'Invest', about: 'About',
@@ -224,18 +210,10 @@ const translations = {
         arena_mining: 'Mining', arena_band: 'Band', arena_tour: 'Tournaments', club_title: 'Fight Club',
         club_my: 'My Club', club_all: 'All Clubs', club_create: 'Create', tasks_title: 'Tasks',
         tasks_avail: 'Available', tasks_create: 'Create', tasks_my: 'My', invest_title: 'Investments',
-        invest_desc: 'Invest RUM in real projects and become a co-owner of profits after business launch. Spending your time and attention, you invest in your financial future.',
-        invest_btn: 'Invest RUM', wallet_title: 'Wallet', wallet_connect: 'Link TON Wallet',
-        shop_title: 'Shop', top_players_title: 'Top Players', top_miners_title: 'Top Miners',
-        referral_title: 'Referrals', rules_title: 'Game Rules', about_title: 'About Project',
-        lang_title: 'Choose language / Выберите язык / 选择语言', lang_cancel: 'Cancel / Отмена / 取消',
-        status_solo: 'Lone Wolf', status_club: 'Club Leader',
-        shop_status_silver: '🥈 Silver — 100 SRUM (+1M RUM, withdrawal from 200 SRUM)',
-        shop_status_gold: '🥇 Gold — 200 SRUM (+2M RUM, withdrawal from 100 SRUM)',
-        shop_status_platinum: '💠 Platinum — 300 SRUM (+3M RUM, withdrawal from 25 SRUM)',
-        invite_nickname: 'Invite by nickname', invite_referral: 'From referrals', invite_club: 'From club',
-        ready: 'Ready', not_ready: 'Not ready', invite_title: 'Band invitation', accept: 'Accept', decline: 'Decline',
-        referral_active: 'Active', referral_inactive: 'Inactive', referral_long: 'Long time offline'
+        invest_desc: 'Startup "Borsch on Blockchain"', invest_btn: 'Invest RUM', wallet_title: 'Wallet',
+        wallet_connect: 'Link TON Wallet', shop_title: 'Shop', top_players_title: 'Top Players',
+        top_miners_title: 'Top Miners', referral_title: 'Referrals', rules_title: 'Game Rules',
+        about_title: 'About Project', lang_title: 'Choose language / Выберите язык / 选择语言', lang_cancel: 'Cancel / Отмена / 取消'
     },
     zh: {
         top_players: '排行', top_miners: '矿工', referral: '推荐', invest: '投资', about: '关于',
@@ -244,18 +222,10 @@ const translations = {
         arena_mining: '挖矿', arena_band: '帮派', arena_tour: '锦标赛', club_title: '战斗俱乐部',
         club_my: '我的俱乐部', club_all: '所有俱乐部', club_create: '创建', tasks_title: '任务',
         tasks_avail: '可用', tasks_create: '创建', tasks_my: '我的', invest_title: '投资',
-        invest_desc: '将RUM投资到真实项目中，成为业务启动后利润的共同拥有者。花费你的时间和注意力，为你的财务未来投资。',
-        invest_btn: '投资 RUM', wallet_title: '钱包', wallet_connect: '连接 TON 钱包',
-        shop_title: '商店', top_players_title: '顶级玩家', top_miners_title: '顶级矿工',
-        referral_title: '推荐', rules_title: '游戏规则', about_title: '关于项目',
-        lang_title: '选择语言 / Choose language / Выберите язык', lang_cancel: '取消 / Cancel / Отмена',
-        status_solo: '独狼', status_club: '俱乐部领袖',
-        shop_status_silver: '🥈 白银 — 100 SRUM (+100万 RUM, 200 SRUM起提现)',
-        shop_status_gold: '🥇 黄金 — 200 SRUM (+200万 RUM, 100 SRUM起提现)',
-        shop_status_platinum: '💠 铂金 — 300 SRUM (+300万 RUM, 25 SRUM起提现)',
-        invite_nickname: '通过昵称邀请', invite_referral: '从推荐中', invite_club: '从俱乐部',
-        ready: '准备', not_ready: '未准备', invite_title: '战队邀请', accept: '接受', decline: '拒绝',
-        referral_active: '活跃', referral_inactive: '不活跃', referral_long: '长时间离线'
+        invest_desc: '“区块链上的罗宋汤”创业项目', invest_btn: '投资 RUM', wallet_title: '钱包',
+        wallet_connect: '连接 TON 钱包', shop_title: '商店', top_players_title: '顶级玩家',
+        top_miners_title: '顶级矿工', referral_title: '推荐', rules_title: '游戏规则',
+        about_title: '关于项目', lang_title: '选择语言 / Choose language / Выберите язык', lang_cancel: '取消 / Cancel / Отмена'
     }
 };
 
@@ -277,7 +247,7 @@ function setLanguage(lang) {
 }
 setLanguage(currentLang);
 
-// ================== ИНИЦИАЛИЗАЦИЯ ИГРЫ ==================
+// ----- Основной код игры -----
 (function() {
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
@@ -298,16 +268,7 @@ setLanguage(currentLang);
     let streak = 0;
     let duelActive = false;
     let gamePaused = false;
-    let userStatus = localStorage.getItem('userStatus') || 'solo';
-    let userNickname = localStorage.getItem('nickname') || 'Майнер';
-    let myClubId = localStorage.getItem('myClubId') || null;
-    let clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
-    let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
-    let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
-    let miningCurrency = 'SRUM';
-    let miningThreshold = 1;
-    let pendingMining = null;
-    let currentBot = null;
+
     const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
         { id:2, desc:'Сделать репост', reward:100, maxCompletions:100, completionsDone:0, checking:false },
@@ -318,10 +279,24 @@ setLanguage(currentLang);
         { id:101, desc:'Подпишись на Twitter', reward:0.1, maxCompletions:100, completionsDone:0, checking:false },
         { id:102, desc:'Поставь лайк проекту', reward:0.15, maxCompletions:100, completionsDone:0, checking:false }
     ];
-    let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
-    let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+    let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks')) || [];
+    let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
+    let clubs = JSON.parse(localStorage.getItem('clubs')) || [];
+    let myClubId = localStorage.getItem('myClubId') || null;
+    let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
 
-    // DOM-элементы
+    function saveAll() {
+        localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
+        localStorage.setItem('games', games); localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
+        localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
+        localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
+        localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
+        localStorage.setItem('userTasks', JSON.stringify(userTasks));
+        localStorage.setItem('clubs', JSON.stringify(clubs));
+        if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
+        localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
+    }
+
     const pot = document.getElementById('pot');
     const board = document.getElementById('board');
     const rumBal = document.getElementById('rum-balance');
@@ -337,54 +312,10 @@ setLanguage(currentLang);
     const startBtn = document.getElementById('start-btn');
     const pauseBtn = document.getElementById('pause-btn');
     const stopBtn = document.getElementById('stop-btn');
-    const quickDuelCoin = document.getElementById('quick-duel-coin');
-    const duelScoreboard = document.getElementById('duel-scoreboard');
-    const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
-    const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
-    const duelTimerEl = document.getElementById('duelTimer');
 
-    // Профиль и меню
-    document.getElementById('user-menu-btn').addEventListener('click', () => {
-        document.getElementById('menu-overlay').classList.add('active');
-    });
-    document.getElementById('menu-close').addEventListener('click', () => {
-        document.getElementById('menu-overlay').classList.remove('active');
-    });
-    document.querySelectorAll('#menu-overlay button[data-screen]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.getElementById('menu-overlay').classList.remove('active');
-            switchScreen(e.currentTarget.dataset.screen);
-        });
-    });
-    document.getElementById('menu-language').addEventListener('click', () => {
-        document.getElementById('menu-overlay').classList.remove('active');
-        document.getElementById('language-modal').classList.remove('hidden');
-    });
-
-    function updateProfile() {
-        document.getElementById('user-nickname').textContent = userNickname;
-        const club = clubs.find(c => c.id == myClubId);
-        if (club && club.master === 'Игрок') {
-            document.getElementById('user-status').textContent = translations[currentLang].status_club;
-        } else {
-            document.getElementById('user-status').textContent = translations[currentLang].status_solo;
-        }
-    }
-
-    function saveAll() {
-        localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
-        localStorage.setItem('games', games); localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
-        localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
-        localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
-        localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
-        localStorage.setItem('userTasks', JSON.stringify(userTasks));
-        localStorage.setItem('clubs', JSON.stringify(clubs));
-        if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
-        localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
-        localStorage.setItem('miningStage', miningStage);
-        localStorage.setItem('nickname', userNickname);
-        localStorage.setItem('userStatus', userStatus);
-    }
+    startBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', togglePause);
+    stopBtn.addEventListener('click', stopGame);
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -419,7 +350,6 @@ setLanguage(currentLang);
             energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
         }
         updateBoostDisplay();
-        updateProfile();
         saveAll();
     }
 
@@ -584,6 +514,7 @@ setLanguage(currentLang);
         }, interval);
         gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
     }
+
     function endGame() {
         gameActive = false;
         gamePaused = false;
@@ -595,6 +526,7 @@ setLanguage(currentLang);
         updateUI();
         if (games < maxGames) startRecovery();
     }
+
     function startRecovery() {
         if (window.recoveryInterval) clearInterval(window.recoveryInterval);
         window.recoveryInterval = setInterval(() => {
@@ -608,7 +540,6 @@ setLanguage(currentLang);
         }, 1000);
     }
 
-    // Фоны
     const views = ['matrix', 'smile', 'veggie'];
     let currentViewIndex = 0;
     window.cycleView = function() {
@@ -694,7 +625,7 @@ setLanguage(currentLang);
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ================== МАЙНИНГ ==================
+    // ---------- МАЙНИНГ (этапный) ----------
     const botPool = [
         { name: 'ТокенМастер', speed: 1000 },
         { name: 'Борщехлёб', speed: 850 },
@@ -737,9 +668,47 @@ setLanguage(currentLang);
         "Ты проиграл битву, но не войну. Продолжай!",
         "Поверь в себя, и блок найдётся!"
     ];
+    let currentBot = null;
+    let duelPlayerScore = 0, duelOpponentScore = 0;
+    let duelTimerInterval, duelSpawnInterval, duelBotInterval;
+    let duelTimeLeft;
+    let miningCurrency = 'SRUM';
+    let miningThreshold = 1;
+    let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
+    let pendingMining = null; // текущая активная сессия
 
     function getPenaltyPercent() { return [0.1,0.2,0.4,0.8,1.0][miningStage-1]; }
     function getRewardPercent() { return getPenaltyPercent() * 0.7; }
+
+    const duelScoreboard = document.getElementById('duel-scoreboard');
+    const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
+    const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
+    const duelTimerEl = document.getElementById('duelTimer');
+
+    setInterval(() => {
+        if (duelActive || gameActive) return;
+        const coinEl = document.getElementById('quick-duel-coin');
+        if (!coinEl) return;
+        const rect = coinEl.getBoundingClientRect();
+        const containerRect = document.getElementById('game-container').getBoundingClientRect();
+        if (rect.width === 0) return;
+        const cx = rect.left + rect.width/2 - containerRect.left;
+        const cy = rect.top - containerRect.top;
+        const particle = document.createElement('div');
+        particle.className = 'coin-particle';
+        particle.textContent = '✨';
+        particle.style.left = cx + 'px';
+        particle.style.top = cy + 'px';
+        particle.style.animationDuration = (0.5 + Math.random()*0.3) + 's';
+        document.getElementById('game-container').appendChild(particle);
+        particle.addEventListener('animationend', () => particle.remove());
+    }, 800);
+
+    document.getElementById('quick-duel-coin').addEventListener('click', () => {
+        if (duelActive || gameActive) return;
+        if (pendingMining) return alert('Сначала завершите текущий поиск или паузу.');
+        showMiningModal();
+    });
 
     function showMiningModal() {
         const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
@@ -822,13 +791,13 @@ setLanguage(currentLang);
         duelScoreboard.classList.remove('hidden');
         updateDuelScore();
         spawnAll();
-        let duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500);
-        let duelBotInterval = setInterval(() => { if (duelActive) { duelOpponentScore++; updateDuelScore(); } }, currentBot.speed);
-        let duelTimerInterval = setInterval(() => {
+        duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500);
+        duelBotInterval = setInterval(() => { if (duelActive) { duelOpponentScore++; updateDuelScore(); } }, currentBot.speed);
+        duelTimerInterval = setInterval(() => {
             if (!duelActive) return;
             duelTimeLeft--;
             duelTimerEl.textContent = duelTimeLeft;
-            if (duelTimeLeft <= 0) endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval);
+            if (duelTimeLeft <= 0) endDuel();
         }, 1000);
         board.addEventListener('touchstart', duelTouchHandler, {passive: false});
         board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
@@ -855,7 +824,7 @@ setLanguage(currentLang);
 
     function updateDuelScore() { duelPlayerScoreEl.textContent = duelPlayerScore; duelOpponentScoreEl.textContent = duelOpponentScore; }
 
-    function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
+    function endDuel() {
         duelActive = false;
         clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
         board.removeEventListener('touchstart', duelTouchHandler);
@@ -911,7 +880,7 @@ setLanguage(currentLang);
         document.getElementById('pause-mining')?.addEventListener('click', ()=>{
             if (pausedSessions.length >= 7) return alert('Достигнут лимит замороженных сессий (7)');
             pausedSessions.push({ currency: miningCurrency, threshold: miningThreshold, stage: miningStage });
-            if (miningCurrency === 'SRUM') srum += miningThreshold;
+            if (miningCurrency === 'SRUM') srum += miningThreshold; // возврат взноса
             else rum += miningThreshold;
             updateUI();
             resultDiv.remove();
@@ -957,7 +926,7 @@ setLanguage(currentLang);
         }));
     }
 
-    // ================== АРЕНА ==================
+    // ---------- АРЕНА (вкладки) ----------
     const arenaContent = document.getElementById('arena-content');
     const arenaTabs = document.getElementById('arena-tabs');
     let currentArenaTab = 'mining';
@@ -1011,7 +980,68 @@ setLanguage(currentLang);
         });
     });
 
-    // ================== ЗАДАНИЯ ==================
+    // ---------- НАВИГАЦИЯ ----------
+    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
+    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
+
+    setTimeout(() => {
+        document.getElementById('view-finger')?.classList.add('hidden');
+        document.getElementById('rules-finger')?.classList.add('hidden');
+    }, 10000);
+
+    document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
+    document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
+    document.getElementById('invest-nav-btn').addEventListener('click', ()=> switchScreen('invest'));
+    document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
+    document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
+    document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
+    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (duelActive) { clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval); duelActive = false; }
+        showViewSwitch();
+    }));
+
+    board.addEventListener('touchstart', handleTouchStart, {passive: false});
+    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    updateUI();
+    window.lastGameTime = Date.now();
+    if (games < maxGames) startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    window.addEventListener('beforeunload', () => {
+        if (gameActive) {
+            localStorage.setItem('gamePausedState', JSON.stringify({timeLeft: gameTimeLeft, games: games, streak: streak, active: true}));
+        }
+    });
+    // восстановление при загрузке
+    (function restoreGame() {
+        let state = JSON.parse(localStorage.getItem('gamePausedState') || 'null');
+        if (state && state.active) {
+            games = state.games;
+            gameTimeLeft = state.timeLeft;
+            streak = state.streak || 0;
+            gameActive = true;
+            gamePaused = true; // ставим на паузу
+            pauseBtn.textContent = '▶️ Продолжить';
+            updateUI();
+            spawnAll();
+            localStorage.removeItem('gamePausedState');
+        }
+    })();
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (screenId) {
+            hideViewSwitch();
+            if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
+            else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
+            else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
+            else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
+        } else showViewSwitch();
+    }
+
+    // --- ЗАДАНИЯ ---
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -1053,7 +1083,7 @@ setLanguage(currentLang);
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // ================== КЛУБ ==================
+    // --- КЛУБ ---
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
@@ -1091,7 +1121,7 @@ setLanguage(currentLang);
     document.getElementById('club-all-btn').addEventListener('click', renderAllClubs);
     document.getElementById('club-create-btn').addEventListener('click', showCreateClub);
 
-    // ================== МАГАЗИН ==================
+    // --- МАГАЗИН ---
     document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return; srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return; srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return; srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
@@ -1099,77 +1129,6 @@ setLanguage(currentLang);
     document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{ if(usdt<1) return alert('Нужен 1 USDT'); usdt-=1; srum+=1; updateUI(); });
     document.getElementById('swap-srum-ton').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; ton+=0.5; updateUI(); });
     document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; usdt+=1; updateUI(); });
-    document.getElementById('buy-status-silver')?.addEventListener('click', ()=>{
-        if (srum < 100) return alert('Недостаточно SRUM');
-        srum -= 100; rum += 1000000; userStatus = 'silver';
-        updateUI(); alert('Статус Серебро активирован!');
-    });
-    document.getElementById('buy-status-gold')?.addEventListener('click', ()=>{
-        if (srum < 200) return alert('Недостаточно SRUM');
-        srum -= 200; rum += 2000000; userStatus = 'gold';
-        updateUI(); alert('Статус Золото активирован!');
-    });
-    document.getElementById('buy-status-platinum')?.addEventListener('click', ()=>{
-        if (srum < 300) return alert('Недостаточно SRUM');
-        srum -= 300; rum += 3000000; userStatus = 'platinum';
-        updateUI(); alert('Статус Платина активирован!');
-    });
-
-    // ================== НАВИГАЦИЯ ==================
-    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
-    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
-    function switchScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (screenId) {
-            hideViewSwitch();
-            quickDuelCoin.classList.add('hidden');
-            if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
-            else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
-            else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
-            else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
-        } else {
-            showViewSwitch();
-            quickDuelCoin.classList.remove('hidden');
-        }
-    }
-    document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
-    document.querySelectorAll('.nav-btn, .menu-overlay button[data-screen]').forEach(b => {
-        b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen));
-    });
-    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (duelActive) { }
-        showViewSwitch();
-        quickDuelCoin.classList.remove('hidden');
-    }));
-
-    startBtn.addEventListener('click', startGame);
-    pauseBtn.addEventListener('click', togglePause);
-    stopBtn.addEventListener('click', stopGame);
-    board.addEventListener('touchstart', handleTouchStart, {passive: false});
-    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    quickDuelCoin.addEventListener('click', () => {
-        if (duelActive || gameActive || pendingMining) return;
-        showMiningModal();
-    });
-
-    updateUI();
-    window.lastGameTime = Date.now();
-    if (games < maxGames) startRecovery();
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    window.addEventListener('beforeunload', () => {
-        if (gameActive) localStorage.setItem('gamePausedState', JSON.stringify({timeLeft: gameTimeLeft, games: games, streak: streak, active: true}));
-    });
-    (function restoreGame() {
-        let state = JSON.parse(localStorage.getItem('gamePausedState') || 'null');
-        if (state && state.active) {
-            games = state.games; gameTimeLeft = state.timeLeft; streak = state.streak || 0;
-            gameActive = true; gamePaused = true;
-            pauseBtn.textContent = '▶️ Продолжить'; updateUI(); spawnAll();
-            localStorage.removeItem('gamePausedState');
-        }
-    })();
 })();
 </script>
 </body>
