@@ -5,129 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Крипто Борщ – Игровой майнинг</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Arial',sans-serif;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
+        *{margin:0;padding:0;box-sizing:border-box} body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;font-family:'Arial',sans-serif;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent}
         #game-container{position:relative;width:100%;max-width:420px;height:100vh;background:linear-gradient(180deg,#0a0a0a 0%,#1a1a2e 100%);overflow:hidden}
-        #view-switch{position:absolute;left:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45;display:flex;flex-direction:column;align-items:center;gap:4px;transition:0.2s}
-        #view-switch.hidden{display:none!important}
-        #rules-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
-        #rules-btn-bottom.hidden{display:none!important}
-        #lang-btn-bottom{position:absolute;right:5px;bottom:calc(30% + 12px + 26px + 27px + 50px);background:rgba(0,0,0,0.9);color:white;border:2px solid gold;border-radius:10px;padding:8px;font-size:0.8rem;font-weight:bold;cursor:pointer;z-index:45}
-        #lang-btn-bottom.hidden{display:none!important}
-        .hint-finger{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:1.2rem;animation:blink 0.8s infinite;z-index:46;pointer-events:none}
-        @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
+        #view-switch, #rules-btn-bottom {
+            position:absolute; bottom:calc(30% + 12px + 26px + 10px);
+            background:rgba(0,0,0,0.9); color:white; border:2px solid gold;
+            border-radius:10px; padding:6px 10px; font-size:0.75rem; font-weight:bold;
+            cursor:pointer; z-index:45; display:flex; flex-direction:column; align-items:center; gap:2px; white-space:nowrap;
+        }
+        #view-switch { left:5px; }
+        #rules-btn-bottom { right:5px; }
+        #lang-btn-bottom {
+            position:absolute; right:5px; bottom:calc(30% + 12px + 26px + 10px + 40px);
+            background:rgba(0,0,0,0.9); color:white; border:2px solid gold;
+            border-radius:10px; padding:6px 10px; font-size:0.75rem; font-weight:bold;
+            cursor:pointer; z-index:45;
+        }
         .hidden{display:none!important}
-        #matrix-bg{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:block}
-        #matrixCanvas{width:100%;height:100%;display:block}
-        #smile-view{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:none}
-        #smileCanvas{width:100%;height:100%;display:block}
-        #veggie-view{position:absolute;top:0;left:0;right:0;bottom:calc(30% + 12px);z-index:0;display:none}
-        #veggieCanvas{width:100%;height:100%;display:block}
-        .glass-wall{position:absolute;top:0;left:0;right:0;bottom:30%;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.08));border-bottom:2px solid rgba(255,255,255,0.5);pointer-events:none;z-index:3}
-        .window-sill{position:absolute;bottom:30%;left:0;right:0;height:12px;background:#A0522D;border-top:2px solid #8B4513;z-index:5}
-        .flower-pot{position:absolute;bottom:calc(30% + 12px);left:5%;width:24px;height:26px;background:#CD853F;border-radius:0 0 8px 8px;border:2px solid #8B4513;z-index:6}
-        .flower-pot::after{content:'🌿';position:absolute;top:-16px;left:2px;font-size:1rem}
-        .boost-display{background:rgba(0,0,0,0.8);color:white;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:bold;white-space:nowrap;border:1px solid #FFD700;z-index:15}
-        .purple-bg{position:absolute;bottom:0;left:0;right:0;top:70%;background:purple;z-index:1}
-        .kitchen-area{position:absolute;bottom:22%;left:0;right:0;height:35%;z-index:2}
-        .table{position:absolute;top:50%;left:5%;right:5%;height:50%;background:linear-gradient(180deg,#DEB887,#A0522D);border-top:6px solid #8B4513}
-        .stove{position:absolute;top:20%;left:25%;right:25%;height:45%;background:linear-gradient(180deg,#F5F5F5,#D3D3D3);border-radius:15px 15px 5px 5px;border:3px solid #A9A9A9}
-        .pot{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:60%;height:55%;background:linear-gradient(180deg,#FFD700,#B8860B);border-radius:0 0 40px 40px;border:4px solid #8B6508;box-shadow:inset 0 4px 8px rgba(0,0,0,0.4),0 8px 12px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3}
-        .pot::before{content:'';position:absolute;top:-15px;left:-5px;right:-5px;height:15px;background:linear-gradient(180deg,#FFD700,#DAA520);border-radius:5px 5px 0 0;border:3px solid #8B6508;border-bottom:none}
-        .pot::after{content:'';position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:20px;height:10px;background:#8B6508;border-radius:10px 10px 0 0}
-        .steam{position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:80%;height:18px}
-        .steam-particle{position:absolute;width:12px;height:12px;background:rgba(255,255,255,0.8);border-radius:50%;animation:rise 2s infinite}
-        .steam-particle:nth-child(1){left:20%;animation-delay:0s}
-        .steam-particle:nth-child(2){left:50%;animation-delay:0.7s}
-        .steam-particle:nth-child(3){left:70%;animation-delay:1.4s}
-        @keyframes rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-20px) scale(1.8);opacity:0}}
+        .user-profile{position:absolute;top:5px;left:5px;display:flex;align-items:center;gap:8px;z-index:50;background:rgba(0,0,0,0.7);border-radius:10px;padding:4px 8px;pointer-events:auto;max-width:140px}
+        .user-avatar{width:36px;height:36px;border-radius:50%;background:gold;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer} .user-info{color:white;font-size:0.65rem;line-height:1.2} .user-menu-btn{background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;padding:0 4px}
+        .menu-dropdown{position:absolute;top:50px;left:5px;right:5px;background:rgba(0,0,0,0.95);border-radius:10px;padding:10px;z-index:90;display:none;flex-direction:column;gap:4px} .menu-dropdown.active{display:flex}
+        .menu-dropdown button{background:rgba(255,255,255,0.1);color:white;border:none;padding:10px;border-radius:8px;font-size:0.9rem;cursor:pointer;text-align:left}
+        .stats-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:80;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px} .stats-modal.active{display:flex}
+        .stats-box{background:#1a1a2e;border-radius:20px;padding:20px;width:85%;color:white;border:2px solid gold}
+        .admin-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px} .admin-modal.active{display:flex}
+        .admin-box{background:#1a1a2e;border-radius:20px;padding:20px;width:90%;color:white;border:2px solid red;max-height:80vh;overflow-y:auto}
+        .quick-duel-coin{position:absolute;top:191px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:50;animation:pulse 1.5s infinite,float 3s ease-in-out infinite} .quick-duel-coin.hidden{display:none}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
         .start-btn-container{position:absolute;top:calc(50% - 50px);left:50%;transform:translate(-50%,-50%);z-index:25;display:flex;gap:10px}
         .start-btn{background:linear-gradient(180deg,#FF6347,#DC143C);color:white;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;font-size:1.1rem;cursor:pointer;box-shadow:0 0 25px rgba(255,69,0,0.8);animation:pulse 1.5s infinite}
-        .pause-btn{background:linear-gradient(180deg,#FFA500,#FF8C00);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px orange}
-        .stop-btn{background:linear-gradient(180deg,#B22222,#8B0000);color:white;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;font-size:1rem;cursor:pointer;box-shadow:0 0 15px red}
-        .energy-display{background:rgba(0,0,0,0.7);color:#FFD700;padding:4px 12px;border-radius:15px;font-size:0.8rem;font-weight:bold;margin-top:5px}
         .board{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:92%;background:#DEB887;clip-path:polygon(15% 0%,85% 0%,100% 100%,0% 100%);border:3px solid #8B4513;display:flex;flex-direction:column;padding:12px 10px 18px 10px;gap:8px;z-index:10}
-        .row{display:flex;justify-content:center;gap:14px}
-        .row:first-child{gap:16px}
-        .row:nth-child(2){padding:0 10%;justify-content:space-between}
-        .hole{background:radial-gradient(circle,#2F1B0E,#1A0F07);border-radius:50%;border:2px solid #3D2B1F;display:flex;justify-content:center;align-items:center;cursor:pointer;position:relative;transition:transform 0.1s;width:50px;height:50px}
-        .hole:active{transform:scale(0.85)}
-        .veg{font-size:2rem;pointer-events:none;animation:popIn 0.3s ease-out}
-        @keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.2)}100%{transform:scale(1)}}
-        .rotten{filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg)}.rotten::after{content:'🪱';position:absolute;top:-6px;right:-6px;font-size:0.6rem}
-        .top-panel{position:absolute;top:5px;left:5px;right:5px;display:flex;justify-content:space-between;z-index:35;pointer-events:none}
-        .top-left-buttons{display:flex;gap:2px;flex-wrap:wrap;pointer-events:auto}
-        .top-left-buttons .item{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:6px;font-size:0.5rem;display:flex;align-items:center;gap:1px;cursor:pointer;backdrop-filter:blur(5px);max-width:80px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .balances-right{display:flex;flex-direction:column;gap:2px;align-items:flex-end;pointer-events:auto}
-        .balances-right div{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:6px;font-size:0.5rem;font-weight:bold;backdrop-filter:blur(5px)}
-        #rum-balance{background:rgba(255,215,0,0.7);color:black}
-        #srum-balance{background:rgba(192,192,192,0.7);color:black}
-        #usdt-balance-top{background:rgba(76,175,80,0.7);color:white}
-        #ton-balance-top{background:rgba(33,150,243,0.7);color:white}
+        .row{display:flex;justify-content:center;gap:14px} .row:first-child{gap:16px} .row:nth-child(2){padding:0 10%;justify-content:space-between}
+        .hole{background:radial-gradient(circle,#2F1B0E,#1A0F07);border-radius:50%;border:2px solid #3D2B1F;display:flex;justify-content:center;align-items:center;cursor:pointer;position:relative;transition:transform 0.1s;width:50px;height:50px} .hole:active{transform:scale(0.85)} .veg{font-size:2rem;pointer-events:none;animation:popIn 0.3s ease-out} @keyframes popIn{0%{transform:scale(0)}80%{transform:scale(1.2)}100%{transform:scale(1)}}
+        .rotten{filter:brightness(0.7) sepia(0.5) hue-rotate(-15deg)} .rotten::after{content:'🪱';position:absolute;top:-6px;right:-6px;font-size:0.6rem}
+        .screen{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);color:white;padding:40px 10px 20px;flex-direction:column;align-items:center;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch} .screen.active{display:flex} .back-btn{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:0.7rem;cursor:pointer;z-index:60}
+        .duel-scoreboard{position:absolute;top:40px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
         .bottom-panel{position:absolute;bottom:2px;left:2px;right:2px;display:flex;justify-content:space-around;z-index:30}
-        .nav-btn{color:white;border:none;padding:10px 6px;border-radius:12px;font-size:0.75rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;margin:2px;font-weight:bold;letter-spacing:0.5px;transition:all 0.3s;box-shadow:0 4px 8px rgba(0,0,0,0.5)}
-        .nav-btn:nth-child(1){background:linear-gradient(180deg,#e74c3c,#c0392b)}.nav-btn:nth-child(2){background:linear-gradient(180deg,#8e44ad,#6c3483)}.nav-btn:nth-child(3){background:linear-gradient(180deg,#f39c12,#d68910)}.nav-btn:nth-child(4){background:linear-gradient(180deg,#27ae60,#1e8449)}.nav-btn:nth-child(5){background:linear-gradient(180deg,#2980b9,#2471a3)}
-        .screen{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);color:white;padding:10px;flex-direction:column;align-items:center;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch}
-        .screen.active{display:flex}
-        .rules-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;padding:0 5px;text-align:left;line-height:1.5}
-        .back-btn{position:absolute;top:15px;left:15px;background:rgba(0,0,0,0.8);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;z-index:60}
-        .duel-scoreboard{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.8);padding:6px 12px;border-radius:10px;color:white;font-weight:bold;font-size:0.7rem;z-index:45}
-        .quick-duel-coin{position:absolute;top:135px;right:15px;width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#FFD700,#B8860B);border-radius:50%;border:3px solid #FFA500;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;box-shadow:0 0 20px gold,0 0 40px orange;z-index:50;animation:pulse 1.5s infinite,float 3s ease-in-out infinite}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-        .language-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:70;flex-direction:column}
-        .language-box{background:#1a1a2e;border-radius:20px;padding:20px;width:80%;color:white;text-align:center;border:2px solid gold}
-        .language-box button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;font-size:1rem;background:gold;color:black;font-weight:bold;cursor:pointer}
-        /* дополнительные стили */
-        .quick-duel-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:60;flex-direction:column}
-        .quick-duel-box{background:#1a1a2e;border-radius:20px;padding:20px;width:85%;color:white;text-align:center;border:2px solid gold}
+        .nav-btn{color:white;border:none;padding:10px 6px;border-radius:12px;font-size:0.75rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;margin:2px;font-weight:bold;letter-spacing:0.5px;transition:all 0.3s;box-shadow:0 4px 8px rgba(0,0,0,0.5)} .nav-btn:nth-child(1){background:linear-gradient(180deg,#e74c3c,#c0392b)} .nav-btn:nth-child(2){background:linear-gradient(180deg,#8e44ad,#6c3483)} .nav-btn:nth-child(3){background:linear-gradient(180deg,#f39c12,#d68910)} .nav-btn:nth-child(4){background:linear-gradient(180deg,#27ae60,#1e8449)} .nav-btn:nth-child(5){background:linear-gradient(180deg,#2980b9,#2471a3)}
+        .top-panel{position:absolute;top:5px;right:5px;display:flex;flex-direction:column;gap:2px;align-items:flex-end;z-index:35;pointer-events:auto} .balances-right{display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+        .balances-right div{background:rgba(0,0,0,0.7);color:white;padding:1px 4px;border-radius:6px;font-size:0.5rem;font-weight:bold;backdrop-filter:blur(5px)} #rum-balance{background:rgba(255,215,0,0.7);color:black} #srum-balance{background:rgba(192,192,192,0.7);color:black} #usdt-balance-top{background:rgba(76,175,80,0.7);color:white} #ton-balance-top{background:rgba(33,150,243,0.7);color:white}
+        .glass-wall{position:absolute;top:0;left:0;right:0;bottom:30%;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.08));border-bottom:2px solid rgba(255,255,255,0.5);pointer-events:none;z-index:3}
+        .window-sill{position:absolute;bottom:30%;left:0;right:0;height:12px;background:#A0522D;border-top:2px solid #8B4513;z-index:5}
+        .flower-pot{position:absolute;bottom:calc(30% + 12px);left:5%;width:24px;height:26px;background:#CD853F;border-radius:0 0 8px 8px;border:2px solid #8B4513;z-index:6} .flower-pot::after{content:'🌿';position:absolute;top:-16px;left:2px;font-size:1rem}
+        .purple-bg{position:absolute;bottom:0;left:0;right:0;top:70%;background:purple;z-index:1}
+        .kitchen-area{position:absolute;bottom:22%;left:0;right:0;height:35%;z-index:2} .table{position:absolute;top:50%;left:5%;right:5%;height:50%;background:linear-gradient(180deg,#DEB887,#A0522D);border-top:6px solid #8B4513} .stove{position:absolute;top:20%;left:25%;right:25%;height:45%;background:linear-gradient(180deg,#F5F5F5,#D3D3D3);border-radius:15px 15px 5px 5px;border:3px solid #A9A9A9}
+        .pot{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:60%;height:55%;background:linear-gradient(180deg,#FFD700,#B8860B);border-radius:0 0 40px 40px;border:4px solid #8B6508;box-shadow:inset 0 4px 8px rgba(0,0,0,0.4),0 8px 12px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3} .pot::before{content:'';position:absolute;top:-15px;left:-5px;right:-5px;height:15px;background:linear-gradient(180deg,#FFD700,#DAA520);border-radius:5px 5px 0 0;border:3px solid #8B6508;border-bottom:none} .pot::after{content:'';position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:20px;height:10px;background:#8B6508;border-radius:10px 10px 0 0}
+        .steam{position:absolute;top:-25px;left:50%;transform:translateX(-50%);width:80%;height:18px} .steam-particle{position:absolute;width:12px;height:12px;background:rgba(255,255,255,0.8);border-radius:50%;animation:rise 2s infinite} .steam-particle:nth-child(1){left:20%;animation-delay:0s} .steam-particle:nth-child(2){left:50%;animation-delay:0.7s} .steam-particle:nth-child(3){left:70%;animation-delay:1.4s} @keyframes rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-20px) scale(1.8);opacity:0}}
+        .energy-display{background:rgba(0,0,0,0.7);color:#FFD700;padding:4px 12px;border-radius:15px;font-size:0.8rem;font-weight:bold;margin-top:5px}
+        .boost-display{background:rgba(0,0,0,0.8);color:white;padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:bold;white-space:nowrap;border:1px solid #FFD700;z-index:15}
+        .language-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:70;flex-direction:column} .language-box{background:#1a1a2e;border-radius:20px;padding:20px;width:80%;color:white;text-align:center;border:2px solid gold} .language-box button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;font-size:1rem;background:gold;color:black;font-weight:bold;cursor:pointer}
+        .quick-duel-modal{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:60;flex-direction:column} .quick-duel-box{background:#1a1a2e;border-radius:20px;padding:20px;width:85%;color:white;text-align:center;border:2px solid gold}
         .countdown-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:3rem;color:gold;text-shadow:0 0 20px black;z-index:50;background:rgba(0,0,0,0.5);flex-direction:column}
-        .result-overlay{position:absolute;top:30%;left:10%;right:10%;background:rgba(0,0,0,0.9);color:white;border-radius:20px;padding:20px;text-align:center;z-index:55}
-        .result-overlay button{margin:10px;padding:12px 20px;border-radius:12px;border:none;font-weight:bold;cursor:pointer}
+        .result-overlay{position:absolute;top:30%;left:10%;right:10%;background:rgba(0,0,0,0.9);color:white;border-radius:20px;padding:20px;text-align:center;z-index:55} .result-overlay button{margin:10px;padding:12px 20px;border-radius:12px;border:none;font-weight:bold;cursor:pointer}
         .club-btn{padding:12px 18px;border:none;border-radius:8px;font-weight:bold;background:linear-gradient(180deg,#E040FB,#AA00FF);color:white;box-shadow:0 4px 10px rgba(224,64,251,0.5);margin:4px;cursor:pointer}
         .shop-btn{padding:14px 20px;border:none;border-radius:10px;font-weight:bold;font-size:1rem;background:linear-gradient(180deg,#00E5FF,#00B8D4);color:#000;box-shadow:0 4px 12px rgba(0,229,255,0.5);margin:6px 0;cursor:pointer;width:90%}
-        .flying-veg{position:absolute;z-index:20;pointer-events:none;animation:flyToPot 0.5s ease-in forwards}
-        @keyframes flyToPot{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:1}100%{transform:translate(var(--ex),var(--ey)) scale(0.5);opacity:0}}
-        .coin-fountain{position:absolute;pointer-events:none;z-index:25;animation:coinUp 0.8s ease-out forwards;font-size:1rem;font-weight:bold}
-        @keyframes coinUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(0.5);opacity:0}}
-        .poop-fountain{position:absolute;pointer-events:none;z-index:25;animation:poopDown 0.8s ease-out forwards;font-size:1rem}
-        @keyframes poopDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.5);opacity:0}}
-        .rocket{position:absolute;z-index:30;pointer-events:none;font-size:2rem;animation:rocketFly 0.6s ease-in forwards}
-        @keyframes rocketFly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(0.8);opacity:0}}
-        .spark{position:absolute;z-index:30;pointer-events:none;font-size:1.5rem;animation:sparkBoom 0.8s ease-out forwards}
-        @keyframes sparkBoom{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0.2);opacity:0}}
+        .flying-veg{position:absolute;z-index:20;pointer-events:none;animation:flyToPot 0.5s ease-in forwards} @keyframes flyToPot{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:1}100%{transform:translate(var(--ex),var(--ey)) scale(0.5);opacity:0}}
+        .coin-fountain{position:absolute;pointer-events:none;z-index:25;animation:coinUp 0.8s ease-out forwards;font-size:1rem;font-weight:bold} @keyframes coinUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-80px) scale(0.5);opacity:0}}
+        .poop-fountain{position:absolute;pointer-events:none;z-index:25;animation:poopDown 0.8s ease-out forwards;font-size:1rem} @keyframes poopDown{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(30px) scale(0.5);opacity:0}}
+        .rocket{position:absolute;z-index:30;pointer-events:none;font-size:2rem;animation:rocketFly 0.6s ease-in forwards} @keyframes rocketFly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(0.8);opacity:0}}
+        .spark{position:absolute;z-index:30;pointer-events:none;font-size:1.5rem;animation:sparkBoom 0.8s ease-out forwards} @keyframes sparkBoom{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0.2);opacity:0}}
+        .rules-scroll{max-height:70vh;overflow-y:auto;padding-right:5px;}
     </style>
 </head>
 <body>
 <div id="game-container">
-    <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span><span class="hint-finger" id="view-finger">👆</span></button>
-    <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span><span class="hint-finger" id="rules-finger">👆</span></button>
+    <div class="user-profile" id="user-profile">
+        <div class="user-avatar" id="user-avatar">😎</div>
+        <div class="user-info">
+            <div id="user-nickname">Майнер</div>
+            <div id="user-status" data-lang="status_solo">Одиночка</div>
+        </div>
+        <button class="user-menu-btn" id="user-menu-btn">☰</button>
+    </div>
+    <div class="menu-dropdown" id="menu-dropdown">
+        <button data-screen="about">📖 О проекте</button>
+        <button data-screen="top-tappers">🏆 Топ игроков</button>
+        <button data-screen="top-miners">⛏️ Топ майнеров</button>
+        <button data-screen="invest">📈 Инвестиции</button>
+        <button data-screen="referral">👥 Рефералы</button>
+        <button data-screen="roadmap">🗺️ Дорожная карта</button>
+    </div>
+    <div class="stats-modal" id="stats-modal">
+        <div class="stats-box">
+            <h3>📊 Статистика майнера</h3>
+            <p><b>Ник:</b> <span id="stats-nickname"></span></p>
+            <p><b>RUM:</b> <span id="stats-rum"></span></p>
+            <p><b>SRUM:</b> <span id="stats-srum"></span></p>
+            <p><b>USDT:</b> <span id="stats-usdt"></span></p>
+            <p><b>TON:</b> <span id="stats-ton"></span></p>
+            <p><b>Рейтинг (RUM):</b> <span id="stats-rank-rum">1</span></p>
+            <p><b>Рейтинг (SRUM):</b> <span id="stats-rank-srum">1</span></p>
+            <button onclick="document.getElementById('stats-modal').classList.remove('active')">Закрыть</button>
+        </div>
+    </div>
+    <div class="admin-modal" id="admin-modal">
+        <div class="admin-box" id="admin-content">
+            <h3>🔐 Вход в админ-панель</h3>
+            <input type="text" id="admin-login" placeholder="Логин" value="admin"><br>
+            <input type="password" id="admin-password" placeholder="Пароль" value="admin"><br>
+            <button onclick="adminLogin()">Войти</button>
+            <button onclick="document.getElementById('admin-modal').classList.remove('active')">Отмена</button>
+        </div>
+    </div>
+    <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span></button>
+    <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span></button>
     <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
     <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
     <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
     <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
-    <div class="glass-wall"></div>
-    <div class="window-sill"></div>
-    <div class="flower-pot"></div>
-    <div class="purple-bg"></div>
+    <div class="glass-wall"></div><div class="window-sill"></div><div class="flower-pot"></div><div class="purple-bg"></div>
     <div class="kitchen-area"><div class="table"></div><div class="stove"><div class="pot" id="pot"><div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div><div class="energy-display" id="energy-display"></div><div class="boost-display" id="boost-display"></div></div></div></div>
     <div class="start-btn-container" id="start-btn-container">
         <button class="start-btn" id="start-btn" data-lang="start_btn">🥘 НАЧАТЬ</button>
-        <button class="pause-btn hidden" id="pause-btn">⏸️ Пауза</button>
-        <button class="stop-btn hidden" id="stop-btn">⏹️ Стоп</button>
     </div>
     <div class="board" id="board">
         <div class="row"><div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div></div>
         <div class="row"><div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div></div>
         <div class="row"><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div></div>
     </div>
+    <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
+    <div class="duel-scoreboard hidden" id="duel-scoreboard">
+        <span>⚡ <span data-lang="duel_you">Ты</span>: <span id="duelPlayerScore">0</span></span>
+        <span>⏳ <span id="duelTimer">20</span>с</span>
+        <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
+    </div>
     <div class="top-panel">
-        <div class="top-left-buttons">
-            <div class="item" id="top-tappers" style="background:#FFD700;color:black">🏆 <span data-lang="top_players">Топ</span></div>
-            <div class="item" id="top-miners" style="background:#C0C0C0;color:black">⛏️ <span data-lang="top_miners">Майнеры</span></div>
-            <div class="item" id="referral-icon">👥 <span data-lang="referral">Рефералы</span></div>
-            <div class="item" id="invest-nav-btn" style="background:#27ae60">📈 <span data-lang="invest">Инвест</span></div>
-            <div class="item" id="about-icon">📖 <span data-lang="about">О проекте</span></div>
-        </div>
         <div class="balances-right">
             <div id="rum-balance">💰 RUM: 0</div>
             <div id="srum-balance">💎 SRUM: 0.00</div>
@@ -142,42 +144,45 @@
         <button class="nav-btn" data-screen="wallet"><span data-lang="wallet_btn">👛 Кошелёк</span></button>
         <button class="nav-btn" data-screen="shop"><span data-lang="shop_btn">🛍️ Магазин</span></button>
     </div>
-    <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
-    <div class="duel-scoreboard hidden" id="duel-scoreboard">
-        <span>⚡ <span data-lang="duel_you">Ты</span>: <span id="duelPlayerScore">0</span></span>
-        <span>⏳ <span id="duelTimer">20</span>с</span>
-        <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
-    </div>
     <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
     <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
     <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" style="padding:8px 12px;background:#FFD700;border:none;border-radius:8px;color:black" data-lang="tasks_avail">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px;background:#4CAF50;border:none;border-radius:8px" data-lang="tasks_create">Создать</button><button id="tasks-my-btn" style="padding:8px 12px;background:#2196F3;border:none;border-radius:8px" data-lang="tasks_my">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
-    <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Стартап «Борщ на блокчейне»</span></p><p>10 000 RUM / 2 350 RUM</p><button class="shop-btn" data-lang="invest_btn">Инвестировать RUM</button></div>
-    <div class="screen" id="wallet-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn" data-lang="wallet_connect">Привязать TON кошелёк</button></div>
-    <div class="screen" id="shop-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🛍️ <span data-lang="shop_title">Магазин</span></h2><button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button><button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button><button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button><button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button><button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button><button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button><button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button></div>
+    <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.</span></p><p>Скоро появятся первые проекты.</p></div>
+    <div class="screen" id="wallet-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn" id="connect-ton-btn"><span data-lang="wallet_connect">Привязать TON кошелёк</span></button></div>
+    <div class="screen" id="shop-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🛍️ <span data-lang="shop_title">Магазин</span></h2>
+        <button class="shop-btn" id="buy-boost-x2">⚡ Бустер ×2 (24ч) — 1 SRUM</button>
+        <button class="shop-btn" id="buy-boost-x3">⚡ Бустер ×3 (24ч) — 2 SRUM</button>
+        <button class="shop-btn" id="buy-boost-x5">⚡ Бустер ×5 (24ч) — 3 SRUM</button>
+        <button class="shop-btn" id="buy-srum-ton">💱 Купить SRUM за TON</button>
+        <button class="shop-btn" id="buy-srum-usdt">💱 Купить SRUM за USDT</button>
+        <button class="shop-btn" id="swap-srum-ton">💱 Обменять SRUM на TON</button>
+        <button class="shop-btn" id="swap-srum-usdt">💱 Обменять SRUM на USDT</button>
+        <hr style="border-color:#555;width:100%;margin:10px 0">
+        <h3>💎 Статусы</h3>
+        <button class="shop-btn" id="buy-status-silver">🥈 Серебро — 100 SRUM (+1M RUM, вывод от 200 SRUM)</button>
+        <button class="shop-btn" id="buy-status-gold">🥇 Золото — 200 SRUM (+2M RUM, вывод от 100 SRUM)</button>
+        <button class="shop-btn" id="buy-status-platinum">💠 Платина — 300 SRUM (+3M RUM, вывод от 25 SRUM)</button>
+    </div>
     <div class="screen" id="top-tappers-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🏆 <span data-lang="top_players_title">Топ игроков</span></h2><p>1. ...</p></div>
     <div class="screen" id="top-miners-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>⛏️ <span data-lang="top_miners_title">Топ майнеров</span></h2><p>1. ...</p></div>
-    <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><input readonly value="https://..."></div>
+    <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><div style="width:100%"><input readonly id="ref-link" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="copyRef()" class="shop-btn">📋 Копировать ссылку</button><input placeholder="Введите реферальный код" id="ref-code-input" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="applyRefCode()" class="shop-btn">🎁 Активировать код</button><div id="referral-list"></div></div></div>
     <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
         <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
         <div class="rules-scroll">
-            <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>
-            Нажимай на полезные овощи 🥬🧅🥔🥕🫑🌿🫘🧄🍅 , они приносят 10 RUM. Серия точных попаданий удваивает награду каждые 10 попаданий. Ошибка (плохой овощ 💩🪱🧀🥀🍄 или мимо лунки) – штраф 20 RUM, серия сбрасывается.
-            </p>
-            <p><strong>⛏️ Игровой майнинг (Криптобеспредел)</strong><br>
-            Выбери пул (SRUM или RUM), порог и этап. Два майнера соревнуются 20 секунд – кто больше наберет очков, тот получает блок.<br>
-            <b>Твой выигрыш = 70% от штрафа проигравшего.</b> Проект забирает 30%.<br>
-            Этапы и проценты:<br>
-            Этап 1: штраф 10% порога, выигрыш 7% (пример: 0.10 / 0.07 USDT)<br>
-            Этап 2: штраф 20%, выигрыш 15% (0.20 / 0.15 USDT)<br>
-            Этап 3: штраф 40%, выигрыш 30% (0.40 / 0.30 USDT)<br>
-            Этап 4: штраф 80%, выигрыш 60% (0.80 / 0.60 USDT)<br>
-            Этап 5: штраф 100%, выигрыш 75% (1.00 / 0.75 USDT)<br>
-            <i>Для азарта в интерфейсе суммы выигрыша показаны ×100.</i>
-            </p>
-            <p><strong>🐺 Клуб, Задания, Магазин</strong> – улучшай майнинг, выполняй квесты, обменивай SRUM на TON/USDT.</p>
+            <p><strong>🍲 Основная готовка (RUM-майнинг)</strong><br>Нажимай на полезные овощи, они приносят 10 RUM. Серия удваивает награду каждые 10 попаданий. Ошибка – штраф 20 RUM. Энергия: 3 игры, восстановление 10 мин.</p>
+            <p><strong>⛏️ Крипто беспредел (PvP-майнинг)</strong><br>Выбери пул (SRUM или RUM), порог и этап. Два майнера соревнуются 20 секунд. Победитель получает 70% штрафа проигравшего, проект забирает 30%. Этапы: 1-5, повышаются при победе, сбрасываются при поражении.</p>
+            <p><strong>🐺 Командный майнинг</strong><br>Главарь приглашает бойцов по никнейму, из рефералов или клуба. После готовности всех участников запускается майнинг от 1 до 5 SRUM.</p>
+            <p><strong>💎 Статусы</strong><br>Серебро, Золото, Платина дают бонусы RUM и снижают порог вывода SRUM. Можно купить в магазине или заработать, накопив достаточно RUM.</p>
+            <p><strong>👥 Рефералы</strong><br>Приглашай друзей и получай бонусы. Следи за статусом своих рефералов.</p>
         </div>
     </div>
-    <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📖 <span data-lang="about_title">О проекте</span></h2><p>...</p></div>
+    <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
+        <h2>📖 <span data-lang="about_title">О проекте</span></h2>
+        <div class="rules-scroll">
+            <p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram, объединяющая тапалку, PvP-майнинг, клубы и инвестиции.</p>
+            <p>Возможности: играй, зарабатывай RUM и SRUM, участвуй в турнирах, создавай клубы, приглашай друзей, инвестируй в реальные проекты.</p>
+        </div>
+    </div>
     <div id="language-modal" class="language-modal hidden">
         <div class="language-box">
             <h3 data-lang="lang_title">Выберите язык / Choose language / 选择语言</h3>
@@ -190,6 +195,7 @@
 </div>
 
 <script>
+// ================== ПЕРЕВОДЫ ==================
 const translations = {
     ru: {
         top_players: 'Топ', top_miners: 'Майнеры', referral: 'Рефералы', invest: 'Инвест', about: 'О проекте',
@@ -198,10 +204,18 @@ const translations = {
         arena_mining: 'Майнинг', arena_band: 'Банда', arena_tour: 'Турниры', club_title: 'Бойцовский клуб',
         club_my: 'Мой клуб', club_all: 'Все клубы', club_create: 'Создать', tasks_title: 'Задания',
         tasks_avail: 'Доступные', tasks_create: 'Создать', tasks_my: 'Мои', invest_title: 'Инвестиции',
-        invest_desc: 'Стартап «Борщ на блокчейне»', invest_btn: 'Инвестировать RUM', wallet_title: 'Кошелёк',
-        wallet_connect: 'Привязать TON кошелёк', shop_title: 'Магазин', top_players_title: 'Топ игроков',
-        top_miners_title: 'Топ майнеров', referral_title: 'Рефералы', rules_title: 'Правила игры',
-        about_title: 'О проекте', lang_title: 'Выберите язык / Choose language / 选择语言', lang_cancel: 'Отмена / Cancel / 取消'
+        invest_desc: 'Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.',
+        invest_btn: 'Инвестировать RUM', wallet_title: 'Кошелёк', wallet_connect: 'Привязать TON кошелёк',
+        shop_title: 'Магазин', top_players_title: 'Топ игроков', top_miners_title: 'Топ майнеров',
+        referral_title: 'Рефералы', rules_title: 'Правила игры', about_title: 'О проекте',
+        lang_title: 'Выберите язык / Choose language / 选择语言', lang_cancel: 'Отмена / Cancel / 取消',
+        status_solo: 'Одиночка', status_club: 'Глава клуба',
+        shop_status_silver: '🥈 Серебро — 100 SRUM (+1M RUM, вывод от 200 SRUM)',
+        shop_status_gold: '🥇 Золото — 200 SRUM (+2M RUM, вывод от 100 SRUM)',
+        shop_status_platinum: '💠 Платина — 300 SRUM (+3M RUM, вывод от 25 SRUM)',
+        invite_nickname: 'Пригласить по никнейму', invite_referral: 'Из рефералов', invite_club: 'Из клуба',
+        ready: 'Готов', not_ready: 'Не готов', invite_title: 'Приглашение в банду', accept: 'Принять', decline: 'Отклонить',
+        referral_active: 'Активен', referral_inactive: 'Неактивен', referral_long: 'Давно не заходил'
     },
     en: {
         top_players: 'Top', top_miners: 'Miners', referral: 'Referral', invest: 'Invest', about: 'About',
@@ -210,10 +224,18 @@ const translations = {
         arena_mining: 'Mining', arena_band: 'Band', arena_tour: 'Tournaments', club_title: 'Fight Club',
         club_my: 'My Club', club_all: 'All Clubs', club_create: 'Create', tasks_title: 'Tasks',
         tasks_avail: 'Available', tasks_create: 'Create', tasks_my: 'My', invest_title: 'Investments',
-        invest_desc: 'Startup "Borsch on Blockchain"', invest_btn: 'Invest RUM', wallet_title: 'Wallet',
-        wallet_connect: 'Link TON Wallet', shop_title: 'Shop', top_players_title: 'Top Players',
-        top_miners_title: 'Top Miners', referral_title: 'Referrals', rules_title: 'Game Rules',
-        about_title: 'About Project', lang_title: 'Choose language / Выберите язык / 选择语言', lang_cancel: 'Cancel / Отмена / 取消'
+        invest_desc: 'Invest RUM in real projects and become a co-owner of profits after business launch. Spending your time and attention, you invest in your financial future.',
+        invest_btn: 'Invest RUM', wallet_title: 'Wallet', wallet_connect: 'Link TON Wallet',
+        shop_title: 'Shop', top_players_title: 'Top Players', top_miners_title: 'Top Miners',
+        referral_title: 'Referrals', rules_title: 'Game Rules', about_title: 'About Project',
+        lang_title: 'Choose language / Выберите язык / 选择语言', lang_cancel: 'Cancel / Отмена / 取消',
+        status_solo: 'Lone Wolf', status_club: 'Club Leader',
+        shop_status_silver: '🥈 Silver — 100 SRUM (+1M RUM, withdrawal from 200 SRUM)',
+        shop_status_gold: '🥇 Gold — 200 SRUM (+2M RUM, withdrawal from 100 SRUM)',
+        shop_status_platinum: '💠 Platinum — 300 SRUM (+3M RUM, withdrawal from 25 SRUM)',
+        invite_nickname: 'Invite by nickname', invite_referral: 'From referrals', invite_club: 'From club',
+        ready: 'Ready', not_ready: 'Not ready', invite_title: 'Band invitation', accept: 'Accept', decline: 'Decline',
+        referral_active: 'Active', referral_inactive: 'Inactive', referral_long: 'Long time offline'
     },
     zh: {
         top_players: '排行', top_miners: '矿工', referral: '推荐', invest: '投资', about: '关于',
@@ -222,10 +244,18 @@ const translations = {
         arena_mining: '挖矿', arena_band: '帮派', arena_tour: '锦标赛', club_title: '战斗俱乐部',
         club_my: '我的俱乐部', club_all: '所有俱乐部', club_create: '创建', tasks_title: '任务',
         tasks_avail: '可用', tasks_create: '创建', tasks_my: '我的', invest_title: '投资',
-        invest_desc: '“区块链上的罗宋汤”创业项目', invest_btn: '投资 RUM', wallet_title: '钱包',
-        wallet_connect: '连接 TON 钱包', shop_title: '商店', top_players_title: '顶级玩家',
-        top_miners_title: '顶级矿工', referral_title: '推荐', rules_title: '游戏规则',
-        about_title: '关于项目', lang_title: '选择语言 / Choose language / Выберите язык', lang_cancel: '取消 / Cancel / Отмена'
+        invest_desc: '将RUM投资到真实项目中，成为业务启动后利润的共同拥有者。花费你的时间和注意力，为你的财务未来投资。',
+        invest_btn: '投资 RUM', wallet_title: '钱包', wallet_connect: '连接 TON 钱包',
+        shop_title: '商店', top_players_title: '顶级玩家', top_miners_title: '顶级矿工',
+        referral_title: '推荐', rules_title: '游戏规则', about_title: '关于项目',
+        lang_title: '选择语言 / Choose language / Выберите язык', lang_cancel: '取消 / Cancel / Отмена',
+        status_solo: '独狼', status_club: '俱乐部领袖',
+        shop_status_silver: '🥈 白银 — 100 SRUM (+100万 RUM, 200 SRUM起提现)',
+        shop_status_gold: '🥇 黄金 — 200 SRUM (+200万 RUM, 100 SRUM起提现)',
+        shop_status_platinum: '💠 铂金 — 300 SRUM (+300万 RUM, 25 SRUM起提现)',
+        invite_nickname: '通过昵称邀请', invite_referral: '从推荐中', invite_club: '从俱乐部',
+        ready: '准备', not_ready: '未准备', invite_title: '战队邀请', accept: '接受', decline: '拒绝',
+        referral_active: '活跃', referral_inactive: '不活跃', referral_long: '长时间离线'
     }
 };
 
@@ -240,14 +270,10 @@ function setLanguage(lang) {
         }
     });
     document.getElementById('language-modal').classList.add('hidden');
-    const startBtn = document.getElementById('start-btn');
-    if (startBtn && translations[lang].start_btn) {
-        startBtn.textContent = translations[lang].start_btn;
-    }
 }
 setLanguage(currentLang);
 
-// ----- Основной код игры -----
+// ================== ИНИЦИАЛИЗАЦИЯ ИГРЫ ==================
 (function() {
     const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
     const BAD = ['💩','🪱','🧀','🥀','🍄'];
@@ -267,7 +293,17 @@ setLanguage(currentLang);
     let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
     let streak = 0;
     let duelActive = false;
-    let gamePaused = false;
+    let userStatus = localStorage.getItem('userStatus') || 'solo';
+    let userNickname = localStorage.getItem('nickname') || 'Майнер';
+    let myClubId = localStorage.getItem('myClubId') || null;
+    let clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
+    let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
+    let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
+    let miningCurrency = 'SRUM';
+    let miningThreshold = 1;
+    let pendingMining = null;
+    let currentBot = null;
+    let bandData = null;
 
     const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
         { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
@@ -279,11 +315,9 @@ setLanguage(currentLang);
         { id:101, desc:'Подпишись на Twitter', reward:0.1, maxCompletions:100, completionsDone:0, checking:false },
         { id:102, desc:'Поставь лайк проекту', reward:0.15, maxCompletions:100, completionsDone:0, checking:false }
     ];
-    let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks')) || [];
-    let userTasks = JSON.parse(localStorage.getItem('userTasks')) || [];
-    let clubs = JSON.parse(localStorage.getItem('clubs')) || [];
-    let myClubId = localStorage.getItem('myClubId') || null;
-    let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
+    let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
+    let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+    let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
     function saveAll() {
         localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
@@ -295,6 +329,10 @@ setLanguage(currentLang);
         localStorage.setItem('clubs', JSON.stringify(clubs));
         if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
         localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
+        localStorage.setItem('miningStage', miningStage);
+        localStorage.setItem('nickname', userNickname);
+        localStorage.setItem('userStatus', userStatus);
+        localStorage.setItem('referrals', JSON.stringify(referrals));
     }
 
     const pot = document.getElementById('pot');
@@ -310,12 +348,74 @@ setLanguage(currentLang);
     const boostDisplay = document.getElementById('boost-display');
     const energyDisplay = document.getElementById('energy-display');
     const startBtn = document.getElementById('start-btn');
-    const pauseBtn = document.getElementById('pause-btn');
-    const stopBtn = document.getElementById('stop-btn');
+    const quickDuelCoin = document.getElementById('quick-duel-coin');
+    const duelScoreboard = document.getElementById('duel-scoreboard');
+    const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
+    const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
+    const duelTimerEl = document.getElementById('duelTimer');
 
-    startBtn.addEventListener('click', startGame);
-    pauseBtn.addEventListener('click', togglePause);
-    stopBtn.addEventListener('click', stopGame);
+    document.getElementById('user-avatar').addEventListener('click', () => {
+        document.getElementById('stats-nickname').textContent = userNickname;
+        document.getElementById('stats-rum').textContent = rum;
+        document.getElementById('stats-srum').textContent = srum;
+        document.getElementById('stats-usdt').textContent = usdt;
+        document.getElementById('stats-ton').textContent = ton;
+        document.getElementById('stats-rank-rum').textContent = '1';
+        document.getElementById('stats-rank-srum').textContent = '1';
+        document.getElementById('stats-modal').classList.add('active');
+    });
+    document.getElementById('user-menu-btn').addEventListener('click', () => {
+        document.getElementById('menu-dropdown').classList.toggle('active');
+    });
+    document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.getElementById('menu-dropdown').classList.remove('active');
+            switchScreen(e.currentTarget.dataset.screen);
+        });
+    });
+
+    window.adminLogin = function(){
+        let login = document.getElementById('admin-login').value;
+        let pass = document.getElementById('admin-password').value;
+        if(login==='admin' && pass==='admin'){
+            document.getElementById('admin-content').innerHTML = `
+                <h3>🔧 Админ-панель</h3>
+                <button onclick="showTournamentForm()">Создать турнир</button>
+                <button onclick="viewAllPlayers()">Все игроки</button>
+                <button onclick="createBots()">300 спартанцев</button>
+                <button onclick="document.getElementById('admin-modal').classList.remove('active')">Выход</button>
+            `;
+        } else alert('Неверный логин/пароль');
+    };
+    window.showTournamentForm = function(){ alert('Форма создания турнира'); };
+    window.viewAllPlayers = function(){ alert('Статистика игроков'); };
+    window.createBots = function(){ alert('Запуск ботов'); };
+
+    let pressTimer;
+    function startPressAdmin(e){
+        pressTimer = setTimeout(() => {
+            document.getElementById('admin-modal').classList.add('active');
+        }, 60000);
+    }
+    function cancelPressAdmin(){ clearTimeout(pressTimer); }
+    document.getElementById('user-avatar').addEventListener('touchstart', startPressAdmin);
+    document.getElementById('user-avatar').addEventListener('touchend', cancelPressAdmin);
+    document.getElementById('user-avatar').addEventListener('mousedown', startPressAdmin);
+    document.getElementById('user-avatar').addEventListener('mouseup', cancelPressAdmin);
+    document.querySelector('.nav-btn[data-screen="arena"]').addEventListener('touchstart', startPressAdmin);
+    document.querySelector('.nav-btn[data-screen="arena"]').addEventListener('touchend', cancelPressAdmin);
+    document.querySelector('.nav-btn[data-screen="shop"]').addEventListener('touchstart', startPressAdmin);
+    document.querySelector('.nav-btn[data-screen="shop"]').addEventListener('touchend', cancelPressAdmin);
+
+    function updateProfile() {
+        document.getElementById('user-nickname').textContent = userNickname;
+        const club = clubs.find(c => c.id == myClubId);
+        if (club && club.master === 'Игрок') {
+            document.getElementById('user-status').textContent = translations[currentLang].status_club;
+        } else {
+            document.getElementById('user-status').textContent = translations[currentLang].status_solo;
+        }
+    }
 
     function updateUI() {
         rumBal.textContent = `💰 RUM: ${rum}`;
@@ -327,29 +427,22 @@ setLanguage(currentLang);
 
         if (games > 0 && !gameActive && !duelActive) {
             startBtn.style.display = 'inline-block';
-            pauseBtn.classList.add('hidden');
-            stopBtn.classList.add('hidden');
             energyDisplay.textContent = `⚡ ${games}/${maxGames} игр`;
         } else if (gameActive) {
             startBtn.style.display = 'none';
-            pauseBtn.classList.remove('hidden');
-            stopBtn.classList.remove('hidden');
             energyDisplay.textContent = '';
         } else if (duelActive) {
             startBtn.style.display = 'none';
-            pauseBtn.classList.add('hidden');
-            stopBtn.classList.add('hidden');
             energyDisplay.textContent = '';
         } else {
             startBtn.style.display = 'none';
-            pauseBtn.classList.add('hidden');
-            stopBtn.classList.add('hidden');
             const now = Date.now(), last = window.lastGameTime || now;
             const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
             const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
             energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
         }
         updateBoostDisplay();
+        updateProfile();
         saveAll();
     }
 
@@ -409,7 +502,7 @@ setLanguage(currentLang);
     }
 
     function processHit(hole, touch) {
-        if (!gameActive || gamePaused) return;
+        if (!gameActive) return;
         const num = [...holes].indexOf(hole);
         if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); return; }
         if (currentVeg[num].type === 'good') {
@@ -427,41 +520,12 @@ setLanguage(currentLang);
 
     function handleTouchStart(e) {
         e.preventDefault();
-        if (!gameActive || gamePaused) return;
+        if (!gameActive) return;
         [...e.changedTouches].forEach(touch => {
             const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
             if (hole) processHit(hole, touch);
             else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); }
         });
-    }
-
-    function togglePause() {
-        if (gamePaused) {
-            gamePaused = false;
-            pauseBtn.textContent = '⏸️ Пауза';
-            gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
-            spawnInterval = setInterval(() => { if (gameActive && !gamePaused) spawnAll(); }, 1200);
-        } else {
-            gamePaused = true;
-            pauseBtn.textContent = '▶️ Продолжить';
-            clearInterval(gameTimer);
-            clearInterval(spawnInterval);
-        }
-    }
-
-    function stopGame() {
-        if (gameActive) {
-            gameActive = false;
-            gamePaused = false;
-            clearInterval(gameTimer);
-            clearInterval(spawnInterval);
-            holes.forEach(h => h.innerHTML = '');
-            currentVeg = {};
-            games = Math.max(0, games - 1);
-            window.lastGameTime = Date.now();
-            updateUI();
-            if (games < maxGames) startRecovery();
-        }
     }
 
     function flyVegToPot(hole, emoji) {
@@ -502,22 +566,20 @@ setLanguage(currentLang);
 
     function startGame() {
         if (games <= 0 || gameActive) return;
-        gameActive = true; gamePaused = false; gameTimeLeft = 60; streak = 0;
+        gameActive = true; gameTimeLeft = 60; streak = 0;
         updateUI(); spawnAll();
         let interval = 1800;
         spawnInterval = setInterval(() => {
-            if (!gameActive || gamePaused) return;
+            if (!gameActive) return;
             spawnAll();
             interval = Math.max(450, interval-80);
             clearInterval(spawnInterval);
-            spawnInterval = setInterval(() => { if (gameActive && !gamePaused) spawnAll(); }, interval);
+            spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
         }, interval);
         gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
     }
-
     function endGame() {
         gameActive = false;
-        gamePaused = false;
         clearInterval(gameTimer); clearInterval(spawnInterval);
         holes.forEach(h => h.innerHTML = '');
         currentVeg = {};
@@ -526,7 +588,6 @@ setLanguage(currentLang);
         updateUI();
         if (games < maxGames) startRecovery();
     }
-
     function startRecovery() {
         if (window.recoveryInterval) clearInterval(window.recoveryInterval);
         window.recoveryInterval = setInterval(() => {
@@ -540,6 +601,7 @@ setLanguage(currentLang);
         }, 1000);
     }
 
+    // Фоны
     const views = ['matrix', 'smile', 'veggie'];
     let currentViewIndex = 0;
     window.cycleView = function() {
@@ -625,7 +687,7 @@ setLanguage(currentLang);
     }
     window.addEventListener('resize', startVeggieAnimation);
 
-    // ---------- МАЙНИНГ (этапный) ----------
+    // ================== МАЙНИНГ ==================
     const botPool = [
         { name: 'ТокенМастер', speed: 1000 },
         { name: 'Борщехлёб', speed: 850 },
@@ -668,47 +730,9 @@ setLanguage(currentLang);
         "Ты проиграл битву, но не войну. Продолжай!",
         "Поверь в себя, и блок найдётся!"
     ];
-    let currentBot = null;
-    let duelPlayerScore = 0, duelOpponentScore = 0;
-    let duelTimerInterval, duelSpawnInterval, duelBotInterval;
-    let duelTimeLeft;
-    let miningCurrency = 'SRUM';
-    let miningThreshold = 1;
-    let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
-    let pendingMining = null; // текущая активная сессия
 
     function getPenaltyPercent() { return [0.1,0.2,0.4,0.8,1.0][miningStage-1]; }
     function getRewardPercent() { return getPenaltyPercent() * 0.7; }
-
-    const duelScoreboard = document.getElementById('duel-scoreboard');
-    const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
-    const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
-    const duelTimerEl = document.getElementById('duelTimer');
-
-    setInterval(() => {
-        if (duelActive || gameActive) return;
-        const coinEl = document.getElementById('quick-duel-coin');
-        if (!coinEl) return;
-        const rect = coinEl.getBoundingClientRect();
-        const containerRect = document.getElementById('game-container').getBoundingClientRect();
-        if (rect.width === 0) return;
-        const cx = rect.left + rect.width/2 - containerRect.left;
-        const cy = rect.top - containerRect.top;
-        const particle = document.createElement('div');
-        particle.className = 'coin-particle';
-        particle.textContent = '✨';
-        particle.style.left = cx + 'px';
-        particle.style.top = cy + 'px';
-        particle.style.animationDuration = (0.5 + Math.random()*0.3) + 's';
-        document.getElementById('game-container').appendChild(particle);
-        particle.addEventListener('animationend', () => particle.remove());
-    }, 800);
-
-    document.getElementById('quick-duel-coin').addEventListener('click', () => {
-        if (duelActive || gameActive) return;
-        if (pendingMining) return alert('Сначала завершите текущий поиск или паузу.');
-        showMiningModal();
-    });
 
     function showMiningModal() {
         const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
@@ -791,13 +815,13 @@ setLanguage(currentLang);
         duelScoreboard.classList.remove('hidden');
         updateDuelScore();
         spawnAll();
-        duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500);
-        duelBotInterval = setInterval(() => { if (duelActive) { duelOpponentScore++; updateDuelScore(); } }, currentBot.speed);
-        duelTimerInterval = setInterval(() => {
+        let duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500);
+        let duelBotInterval = setInterval(() => { if (duelActive) { duelOpponentScore++; updateDuelScore(); } }, currentBot.speed);
+        let duelTimerInterval = setInterval(() => {
             if (!duelActive) return;
             duelTimeLeft--;
             duelTimerEl.textContent = duelTimeLeft;
-            if (duelTimeLeft <= 0) endDuel();
+            if (duelTimeLeft <= 0) endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval);
         }, 1000);
         board.addEventListener('touchstart', duelTouchHandler, {passive: false});
         board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
@@ -824,7 +848,7 @@ setLanguage(currentLang);
 
     function updateDuelScore() { duelPlayerScoreEl.textContent = duelPlayerScore; duelOpponentScoreEl.textContent = duelOpponentScore; }
 
-    function endDuel() {
+    function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
         duelActive = false;
         clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
         board.removeEventListener('touchstart', duelTouchHandler);
@@ -880,7 +904,7 @@ setLanguage(currentLang);
         document.getElementById('pause-mining')?.addEventListener('click', ()=>{
             if (pausedSessions.length >= 7) return alert('Достигнут лимит замороженных сессий (7)');
             pausedSessions.push({ currency: miningCurrency, threshold: miningThreshold, stage: miningStage });
-            if (miningCurrency === 'SRUM') srum += miningThreshold; // возврат взноса
+            if (miningCurrency === 'SRUM') srum += miningThreshold;
             else rum += miningThreshold;
             updateUI();
             resultDiv.remove();
@@ -917,6 +941,7 @@ setLanguage(currentLang);
             renderPausedSessions();
             pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
             startSearch();
+            switchScreen(null);
         }));
         document.querySelectorAll('.cancel-session').forEach(b => b.addEventListener('click', (e) => {
             let idx = e.target.dataset.idx;
@@ -926,7 +951,7 @@ setLanguage(currentLang);
         }));
     }
 
-    // ---------- АРЕНА (вкладки) ----------
+    // ================== АРЕНА (вкладки) ==================
     const arenaContent = document.getElementById('arena-content');
     const arenaTabs = document.getElementById('arena-tabs');
     let currentArenaTab = 'mining';
@@ -937,10 +962,18 @@ setLanguage(currentLang);
             const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
             const reward = (miningThreshold * getRewardPercent()).toFixed(2);
             html = `<h2>⛏️ Личный майнинг</h2><p>Порог: <b>${miningThreshold.toFixed(1)} SRUM</b> | Этап: <b>${miningStage}</b></p><p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p><input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider-arena" style="width:90%;"><p>Взнос: <strong id="arena-stake">${miningThreshold.toFixed(1)}</strong> SRUM</p><button class="shop-btn" id="start-mining-btn" ${srum < miningThreshold ? 'disabled' : ''}>⛏️ Искать блок</button>`;
-        } else if (currentArenaTab === 'band') html = `<h2>🐺 Банда (5×5)</h2><p>В разработке</p>`;
-        else if (currentArenaTab === 'tournaments') html = `<h2>🏆 Турниры</h2><p>В разработке</p>`;
+        } else if (currentArenaTab === 'band') {
+            html = `<h2>🐺 Командный майнинг</h2>`;
+            if (!bandData) {
+                html += `<button class="shop-btn" id="create-band-btn">Создать банду</button>`;
+            } else {
+                html += `<h3>${bandData.name}</h3><p>Порог: ${bandData.threshold.toFixed(1)} SRUM</p><p>Бойцы:</p>`;
+                bandData.fighters.forEach(f => { html += `<div class="band-member">${f}</div>`; });
+                html += `<button class="shop-btn" id="start-band-match">⚔️ В бой</button><button class="shop-btn" id="disband-btn">Распустить</button>`;
+            }
+        } else if (currentArenaTab === 'tournaments') html = `<h2>🏆 Турниры</h2><p>В разработке</p>`;
         arenaContent.innerHTML = html;
-        if (currentArenaTab === 'mining') {
+        if (currentArenaTab === 'mining' && document.getElementById('threshold-slider-arena')) {
             document.getElementById('threshold-slider-arena').addEventListener('input', function() {
                 miningThreshold = parseFloat(this.value);
                 document.getElementById('arena-stake').textContent = miningThreshold.toFixed(1);
@@ -971,6 +1004,36 @@ setLanguage(currentLang);
                 }, 1000);
             });
         }
+        if (currentArenaTab === 'band') {
+            document.getElementById('create-band-btn')?.addEventListener('click', ()=>{
+                let name = prompt('Название банды');
+                if (!name) return;
+                bandData = { name, threshold: miningThreshold, fighters: ['Ты (босс)'], boss: 'Ты' };
+                for (let i=0; i<4; i++) bandData.fighters.push(`Боец_${i+1}`);
+                renderArena();
+            });
+            document.getElementById('disband-btn')?.addEventListener('click', ()=>{
+                bandData = null;
+                renderArena();
+            });
+            document.getElementById('start-band-match')?.addEventListener('click', ()=>{
+                if (!bandData || bandData.fighters.length < 5) return alert('Нужно 5 бойцов');
+                if (srum < bandData.threshold * 5) return alert('Недостаточно SRUM для взноса');
+                srum -= bandData.threshold * 5;
+                alert('Матч начался! (заглушка)');
+                // имитация победы
+                let win = Math.random() > 0.5;
+                if (win) {
+                    usdt += bandData.threshold * 4;
+                    alert(`Победа банды! +${(bandData.threshold*4).toFixed(2)} USDT`);
+                } else {
+                    alert('Поражение банды. Взнос потерян.');
+                }
+                bandData = null;
+                updateUI();
+                renderArena();
+            });
+        }
         renderPausedSessions();
     }
     arenaTabs.querySelectorAll('button').forEach(btn => {
@@ -980,68 +1043,7 @@ setLanguage(currentLang);
         });
     });
 
-    // ---------- НАВИГАЦИЯ ----------
-    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
-    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
-
-    setTimeout(() => {
-        document.getElementById('view-finger')?.classList.add('hidden');
-        document.getElementById('rules-finger')?.classList.add('hidden');
-    }, 10000);
-
-    document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
-    document.getElementById('about-icon').addEventListener('click', ()=> switchScreen('about'));
-    document.getElementById('invest-nav-btn').addEventListener('click', ()=> switchScreen('invest'));
-    document.getElementById('top-tappers').addEventListener('click', ()=> switchScreen('top-tappers'));
-    document.getElementById('top-miners').addEventListener('click', ()=> switchScreen('top-miners'));
-    document.getElementById('referral-icon').addEventListener('click', ()=> switchScreen('referral'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
-    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (duelActive) { clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval); duelActive = false; }
-        showViewSwitch();
-    }));
-
-    board.addEventListener('touchstart', handleTouchStart, {passive: false});
-    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    updateUI();
-    window.lastGameTime = Date.now();
-    if (games < maxGames) startRecovery();
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    window.addEventListener('beforeunload', () => {
-        if (gameActive) {
-            localStorage.setItem('gamePausedState', JSON.stringify({timeLeft: gameTimeLeft, games: games, streak: streak, active: true}));
-        }
-    });
-    // восстановление при загрузке
-    (function restoreGame() {
-        let state = JSON.parse(localStorage.getItem('gamePausedState') || 'null');
-        if (state && state.active) {
-            games = state.games;
-            gameTimeLeft = state.timeLeft;
-            streak = state.streak || 0;
-            gameActive = true;
-            gamePaused = true; // ставим на паузу
-            pauseBtn.textContent = '▶️ Продолжить';
-            updateUI();
-            spawnAll();
-            localStorage.removeItem('gamePausedState');
-        }
-    })();
-
-    function switchScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if (screenId) {
-            hideViewSwitch();
-            if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
-            else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
-            else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
-            else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
-        } else showViewSwitch();
-    }
-
-    // --- ЗАДАНИЯ ---
+    // ================== ЗАДАНИЯ ==================
     const tasksContent = document.getElementById('tasks-content');
     const subTabs = document.querySelectorAll('.sub-tab');
     let currentTasksTab = 'borsch';
@@ -1083,7 +1085,7 @@ setLanguage(currentLang);
     }
     subTabs.forEach(t => t.addEventListener('click', () => { currentTasksTab = t.dataset.tab; renderAvailableTasks(); }));
 
-    // --- КЛУБ ---
+    // ================== КЛУБ ==================
     const clubContent = document.getElementById('club-content');
     function getMyClub() { return clubs.find(c => c.id == myClubId); }
     function renderMyClub() {
@@ -1121,7 +1123,7 @@ setLanguage(currentLang);
     document.getElementById('club-all-btn').addEventListener('click', renderAllClubs);
     document.getElementById('club-create-btn').addEventListener('click', showCreateClub);
 
-    // --- МАГАЗИН ---
+    // ================== МАГАЗИН ==================
     document.getElementById('buy-boost-x2').addEventListener('click', ()=>{ if(srum<1) return; srum-=1; activeBoost={type:2, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x3').addEventListener('click', ()=>{ if(srum<2) return; srum-=2; activeBoost={type:3, endTime:Date.now()+86400000}; updateUI(); });
     document.getElementById('buy-boost-x5').addEventListener('click', ()=>{ if(srum<3) return; srum-=3; activeBoost={type:5, endTime:Date.now()+86400000}; updateUI(); });
@@ -1129,6 +1131,101 @@ setLanguage(currentLang);
     document.getElementById('buy-srum-usdt').addEventListener('click', ()=>{ if(usdt<1) return alert('Нужен 1 USDT'); usdt-=1; srum+=1; updateUI(); });
     document.getElementById('swap-srum-ton').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; ton+=0.5; updateUI(); });
     document.getElementById('swap-srum-usdt').addEventListener('click', ()=>{ if(srum<1) return alert('Минимум 1 SRUM'); srum-=1; usdt+=1; updateUI(); });
+    document.getElementById('buy-status-silver')?.addEventListener('click', ()=>{ if(srum<100) return; srum-=100; rum+=1000000; userStatus='silver'; updateUI(); alert('Статус Серебро активирован!'); });
+    document.getElementById('buy-status-gold')?.addEventListener('click', ()=>{ if(srum<200) return; srum-=200; rum+=2000000; userStatus='gold'; updateUI(); alert('Статус Золото активирован!'); });
+    document.getElementById('buy-status-platinum')?.addEventListener('click', ()=>{ if(srum<300) return; srum-=300; rum+=3000000; userStatus='platinum'; updateUI(); alert('Статус Платина активирован!'); });
+
+    // ================== РЕФЕРАЛЫ ==================
+    function generateRefCode() { return 'ref' + (localStorage.getItem('ref_seed') || Math.floor(Math.random()*1000000)); }
+    const myRefCode = generateRefCode();
+    document.getElementById('ref-link').value = `https://t.me/crypto_borsch_bot?start=${myRefCode}`;
+    window.copyRef = function() {
+        navigator.clipboard.writeText(document.getElementById('ref-link').value);
+        alert('Ссылка скопирована!');
+    };
+    window.applyRefCode = function() {
+        let code = document.getElementById('ref-code-input').value.trim();
+        if (!code) return;
+        if (code === myRefCode) return alert('Нельзя использовать свой код');
+        let refs = JSON.parse(localStorage.getItem('ref_used') || '[]');
+        if (refs.includes(code)) return alert('Код уже активирован');
+        refs.push(code);
+        localStorage.setItem('ref_used', JSON.stringify(refs));
+        // Начисляем бонус рефереру (упрощённо: ищем в localStorage)
+        let allRefs = JSON.parse(localStorage.getItem('referrals') || '[]');
+        let found = allRefs.find(r => r.code === code);
+        if (found) {
+            found.bonus = (found.bonus || 0) + 100;
+            localStorage.setItem('referrals', JSON.stringify(allRefs));
+            alert('Реферальный код активирован! Реферер получил 100 RUM.');
+        } else {
+            // Добавляем нового реферера?
+            allRefs.push({ code: code, bonus: 100 });
+            localStorage.setItem('referrals', JSON.stringify(allRefs));
+            alert('Код активирован!');
+        }
+        updateUI();
+    };
+    function renderReferralList() {
+        let html = '';
+        let refs = JSON.parse(localStorage.getItem('referrals') || '[]');
+        refs.forEach(r => {
+            html += `<div>Код: ${r.code} | Бонусов: ${r.bonus || 0} RUM</div>`;
+        });
+        document.getElementById('referral-list').innerHTML = html || 'Нет рефералов';
+    }
+    document.getElementById('referral-screen').addEventListener('click', renderReferralList);
+
+    // TON Connect заглушка
+    document.getElementById('connect-ton-btn')?.addEventListener('click', ()=>{
+        alert('Подключение TON кошелька будет доступно после интеграции TON Connect. Пока используется тестовый баланс.');
+    });
+
+    // ================== НАВИГАЦИЯ ==================
+    function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
+    function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (screenId) {
+            hideViewSwitch();
+            quickDuelCoin.classList.add('hidden');
+            document.getElementById('user-profile').classList.add('hidden');
+            if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
+            else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
+            else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
+            else if (screenId === 'referral') { document.getElementById('referral-screen').classList.add('active'); renderReferralList(); }
+            else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
+        } else {
+            showViewSwitch();
+            quickDuelCoin.classList.remove('hidden');
+            document.getElementById('user-profile').classList.remove('hidden');
+        }
+    }
+    document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
+    document.querySelectorAll('.nav-btn, .menu-dropdown button[data-screen]').forEach(b => {
+        b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen));
+    });
+    document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if (duelActive) { }
+        showViewSwitch();
+        quickDuelCoin.classList.remove('hidden');
+        document.getElementById('user-profile').classList.remove('hidden');
+    }));
+
+    startBtn.addEventListener('click', startGame);
+    board.addEventListener('touchstart', handleTouchStart, {passive: false});
+    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    quickDuelCoin.addEventListener('click', () => {
+        if (duelActive || gameActive || pendingMining) return;
+        showMiningModal();
+    });
+
+    updateUI();
+    window.lastGameTime = Date.now();
+    if (games < maxGames) startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 })();
 </script>
 </body>
