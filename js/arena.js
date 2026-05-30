@@ -1,5 +1,6 @@
-
 // ================== АРЕНА (МАЙНИНГ, БАНДА, ЗАМОРОЗКА СЕССИЙ) ==================
+
+// --- Пул ботов для PvP ---
 const botPool = [
     { name: 'ТокенМастер', speed: 1000 },
     { name: 'Борщехлёб', speed: 850 },
@@ -7,6 +8,8 @@ const botPool = [
     { name: 'Майнер69', speed: 600 },
     { name: 'Лампа', speed: 500 }
 ];
+
+// --- Ободряющие фразы при проигрыше ---
 const cheerPhrases = [
     "Не расстраивайся, майнер! Следующий блок будет твоим! 💪",
     "Даже после промаха можно взять реванш. Вперёд!",
@@ -43,15 +46,22 @@ const cheerPhrases = [
     "Поверь в себя, и блок найдётся!"
 ];
 
-function getPenaltyPercent() { return [0.1,0.2,0.4,0.8,1.0][miningStage-1]; }
-function getRewardPercent() { return getPenaltyPercent() * 0.7; }
+// --- Расчёт процентов для текущего этапа ---
+function getPenaltyPercent() {
+    return [0.1, 0.2, 0.4, 0.8, 1.0][miningStage - 1];
+}
 
-// Быстрая дуэль (монетка)
+function getRewardPercent() {
+    return getPenaltyPercent() * 0.7;
+}
+
+// --- Быстрая дуэль (монетка) ---
 quickDuelCoin.addEventListener('click', () => {
     if (duelActive || gameActive || pendingMining) return;
     showMiningModal();
 });
 
+// --- Модальное окно выбора порога и этапа (обычный майнинг) ---
 function showMiningModal() {
     const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
     const reward = (miningThreshold * getRewardPercent()).toFixed(2);
@@ -64,7 +74,7 @@ function showMiningModal() {
             <select id="mining-currency"><option value="SRUM" ${miningCurrency==='SRUM'?'selected':''}>SRUM (USDT)</option><option value="RUM" ${miningCurrency==='RUM'?'selected':''}>RUM</option></select>
             <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:90%;">
             <p>Взнос: <strong id="mining-stake">${miningThreshold.toFixed(1)}</strong> ${miningCurrency}</p>
-            <p>Штраф: ${penalty} SRUM | Награда: ${reward} USDT</p>
+            <p>Штраф при поражении: ${penalty} SRUM | Награда при победе: ${reward} USDT</p>
             <button id="start-mining-search">🔍 Искать блок</button>
             <button id="cancel-mining">✖ Отмена</button>
         </div>
@@ -79,7 +89,7 @@ function showMiningModal() {
         else rum -= miningThreshold;
         pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
         updateUI(); modal.remove();
-        startSearch();
+        startSearch('mining');
     });
     document.getElementById('cancel-mining').addEventListener('click', () => modal.remove());
     document.getElementById('threshold-slider').addEventListener('input', function() {
@@ -87,12 +97,71 @@ function showMiningModal() {
     });
 }
 
-function startSearch() {
+// --- Модальное окно турнира «Выжить в тюрьме» ---
+function showTournamentModal() {
+    const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
+    const reward = (miningThreshold * getRewardPercent()).toFixed(2);
+    const modal = document.createElement('div');
+    modal.className = 'quick-duel-modal';
+    modal.innerHTML = `
+        <div class="quick-duel-box">
+            <h2>🔒 Выжить в тюрьме</h2>
+            <p>Этап: <b>${getTournamentStageName(miningStage)}</b> | Порог: <b>${miningThreshold.toFixed(1)}</b> SRUM</p>
+            <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="tournament-threshold-slider" style="width:90%;">
+            <p>Взнос: <strong id="tournament-stake">${miningThreshold.toFixed(1)}</strong> SRUM</p>
+            <p>Штраф при поражении: ${penalty} SRUM | Награда при победе: ${reward} USDT</p>
+            <button id="start-tournament-search">🔍 Начать турнир</button>
+            <button id="cancel-tournament">✖ Отмена</button>
+        </div>
+    `;
+    document.getElementById('game-container').appendChild(modal);
+    document.getElementById('start-tournament-search').addEventListener('click', () => {
+        miningCurrency = 'SRUM'; // в турнире только SRUM
+        miningThreshold = parseFloat(document.getElementById('tournament-threshold-slider').value);
+        if (srum < miningThreshold) return alert('Недостаточно SRUM');
+        srum -= miningThreshold;
+        pendingMining = { currency: 'SRUM', threshold: miningThreshold, stage: miningStage };
+        updateUI(); modal.remove();
+        startSearch('tournament');
+    });
+    document.getElementById('cancel-tournament').addEventListener('click', () => modal.remove());
+    document.getElementById('tournament-threshold-slider').addEventListener('input', function() {
+        document.getElementById('tournament-stake').textContent = parseFloat(this.value).toFixed(1);
+    });
+}
+
+// --- Поиск блока (соперника) с автоподбором при отмене ---
+function startSearch(mode = 'mining') {
     const overlay = document.createElement('div');
     overlay.className = 'countdown-overlay';
     overlay.innerHTML = '<div style="font-size:1.8rem;">🔍 Поиск блока...</div>';
     document.getElementById('game-container').appendChild(overlay);
-    setTimeout(() => {
+
+    let searchTimerId;
+    let cancelled = false;
+
+    const cancelSearch = () => {
+        cancelled = true;
+        clearTimeout(searchTimerId);
+        overlay.remove();
+        // Возвращаем зарезервированную сумму, если игрок вышел
+        if (pendingMining) {
+            if (pendingMining.currency === 'SRUM') srum += pendingMining.threshold;
+            else rum += pendingMining.threshold;
+            pendingMining = null;
+            updateUI();
+        }
+    };
+
+    // Кнопка отмены поиска (если игрок передумал)
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '✖ Отмена';
+    cancelBtn.style.cssText = 'margin-top:20px; padding:10px 20px; font-size:1.2rem; background:#B22222; color:white; border:none; border-radius:10px; cursor:pointer;';
+    cancelBtn.addEventListener('click', cancelSearch);
+    overlay.appendChild(cancelBtn);
+
+    searchTimerId = setTimeout(() => {
+        if (cancelled) return;
         overlay.remove();
         currentBot = botPool[Math.floor(Math.random() * botPool.length)];
         const readyDiv = document.createElement('div');
@@ -101,12 +170,23 @@ function startSearch() {
             <p>Другой майнер: <b>${currentBot.name}</b></p>
             <p>Взнос: ${miningThreshold.toFixed(1)} ${miningCurrency}</p>
             <button id="mining-ready-btn" class="start-btn" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button>
+            <button id="cancel-ready-btn" style="margin-top:10px; padding:10px 20px; font-size:1rem; background:#B22222; color:white; border:none; border-radius:10px; cursor:pointer;">✖ Отмена</button>
         </div>`;
         document.getElementById('game-container').appendChild(readyDiv);
+
+        // Обработчик отмены готовности
+        document.getElementById('cancel-ready-btn').addEventListener('click', () => {
+            readyDiv.remove();
+            // Автоматически ищем нового бота для того, кто остался (наш игрок)
+            setTimeout(() => startSearch(mode), 500);
+        });
+
         document.getElementById('mining-ready-btn').addEventListener('click', () => {
             document.getElementById('mining-ready-btn').disabled = true;
             document.getElementById('mining-ready-btn').textContent = '⏳ Ожидание...';
+            // Ожидание соперника (бота) — имитация готовности
             setTimeout(() => {
+                if (cancelled) return;
                 readyDiv.innerHTML = `<div style="text-align:center;">
                     <p>Оба майнера готовы!</p>
                     <p id="countdown-number" style="font-size:4rem;">3</p>
@@ -122,6 +202,7 @@ function startSearch() {
     }, 2500);
 }
 
+// --- Запуск дуэли (20 секунд) ---
 function startDuel() {
     duelActive = true;
     gameActive = false;
@@ -145,6 +226,7 @@ function startDuel() {
     board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 }
 
+// --- Обработчик тапов во время дуэли ---
 function duelTouchHandler(e) {
     e.preventDefault();
     if (!duelActive) return;
@@ -162,8 +244,10 @@ function duelTouchHandler(e) {
     });
 }
 
+// --- Обновление табло дуэли ---
 function updateDuelScore() { duelPlayerScoreEl.textContent = duelPlayerScore; duelOpponentScoreEl.textContent = duelOpponentScore; }
 
+// --- Завершение дуэли и расчёт наград/штрафов ---
 function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     duelActive = false;
     clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
@@ -173,19 +257,15 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
     holes.forEach(h => h.innerHTML = ''); currentVeg = {};
     duelScoreboard.classList.add('hidden');
-    if (pendingMining) {
-        if (miningCurrency === 'SRUM') srum += pendingMining.threshold;
-        else rum += pendingMining.threshold;
-    }
-    pendingMining = null;
-    updateUI();
 
     const win = duelPlayerScore > duelOpponentScore;
     let resultDiv = document.createElement('div'); resultDiv.className = 'result-overlay';
+
     if (miningCurrency === 'SRUM') {
         if (win) {
             let reward = miningThreshold * getRewardPercent();
             usdt += reward;
+            srum += miningThreshold;
             if (miningStage < 5) miningStage++;
             localStorage.setItem('miningStage', miningStage);
             showCoinFountain(30);
@@ -194,7 +274,9 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
                 <button id="pause-mining">⏸️ Пауза</button>`;
         } else {
             let penalty = miningThreshold * getPenaltyPercent();
-            srum = Math.max(0, srum - penalty);
+            let reserved = miningThreshold;
+            let remaining = Math.max(0, reserved - penalty);
+            srum += remaining;
             miningStage = 1;
             localStorage.setItem('miningStage', 1);
             showPoopFountain(20);
@@ -205,30 +287,39 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
         }
     } else {
         rum += miningThreshold;
-        if (win) { let rewardRUM = Math.floor(miningThreshold * getRewardPercent()); rum += rewardRUM; showCoinFountain(15); resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${rewardRUM} RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`; }
-        else { rum = Math.max(0, rum - 20); showPoopFountain(10); resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>-20 RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`; }
+        if (win) {
+            let rewardRUM = Math.floor(miningThreshold * getRewardPercent());
+            rum += rewardRUM;
+            showCoinFountain(15);
+            resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${rewardRUM} RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
+        } else {
+            rum = Math.max(0, rum - 20);
+            showPoopFountain(10);
+            resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>-20 RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
+        }
     }
+    pendingMining = null;
+    updateUI();
     document.getElementById('game-container').appendChild(resultDiv);
+
     document.getElementById('continue-mining')?.addEventListener('click', ()=>{
         resultDiv.remove();
         if (miningCurrency === 'SRUM' && srum < miningThreshold) return alert('Недостаточно SRUM для продолжения');
         if (miningCurrency === 'SRUM') srum -= miningThreshold;
         else rum -= miningThreshold;
         pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
-        startSearch();
+        startSearch('mining');
     });
     document.getElementById('pause-mining')?.addEventListener('click', ()=>{
         if (pausedSessions.length >= 7) return alert('Достигнут лимит замороженных сессий (7)');
         pausedSessions.push({ currency: miningCurrency, threshold: miningThreshold, stage: miningStage });
-        if (miningCurrency === 'SRUM') srum += miningThreshold;
-        else rum += miningThreshold;
         updateUI();
         resultDiv.remove();
         renderPausedSessions();
     });
-    updateUI();
 }
 
+// --- Замороженные сессии (пауза) ---
 function renderPausedSessions() {
     const container = document.getElementById('paused-sessions');
     if (!container) return;
@@ -256,7 +347,7 @@ function renderPausedSessions() {
         updateUI();
         renderPausedSessions();
         pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
-        startSearch();
+        startSearch('mining');
         switchScreen(null);
     }));
     document.querySelectorAll('.cancel-session').forEach(b => b.addEventListener('click', (e) => {
@@ -267,7 +358,13 @@ function renderPausedSessions() {
     }));
 }
 
-// Арена (вкладки)
+// --- Названия этапов для турнира «Выжить в тюрьме» ---
+function getTournamentStageName(stage) {
+    const names = ['Новичок', 'Бывалый', 'Авторитет', 'Главарь', 'Смотрящий'];
+    return names[stage - 1] || 'Этап ' + stage;
+}
+
+// --- Арена (вкладки) ---
 const arenaContent = document.getElementById('arena-content');
 const arenaTabs = document.getElementById('arena-tabs');
 let currentArenaTab = 'mining';
@@ -287,7 +384,9 @@ function renderArena() {
             bandData.fighters.forEach(f => { html += `<div class="band-member">${f}</div>`; });
             html += `<button class="shop-btn" id="start-band-match">⚔️ В бой</button><button class="shop-btn" id="disband-btn">Распустить</button>`;
         }
-    } else if (currentArenaTab === 'tournaments') html = `<h2>🏆 Турниры</h2><p>В разработке</p>`;
+    } else if (currentArenaTab === 'tournaments') {
+        html = `<h2>🔒 Выжить в тюрьме</h2><p>Особый турнир с высокими ставками.</p><button class="shop-btn" id="start-tournament-btn">🔍 Начать турнир</button>`;
+    }
     arenaContent.innerHTML = html;
     if (currentArenaTab === 'mining' && document.getElementById('threshold-slider-arena')) {
         document.getElementById('threshold-slider-arena').addEventListener('input', function() {
@@ -347,6 +446,11 @@ function renderArena() {
             bandData = null;
             updateUI();
             renderArena();
+        });
+    }
+    if (currentArenaTab === 'tournaments') {
+        document.getElementById('start-tournament-btn')?.addEventListener('click', () => {
+            showTournamentModal();
         });
     }
     renderPausedSessions();
