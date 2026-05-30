@@ -52,27 +52,22 @@ function selectSpartanBot(playerStage) {
     if (!spartansEnabled) return null;
 
     let botIndex = -1;
-    let requiredState = ''; // для логирования
 
     if (playerStage === 5) {
         // Ищем бота, который должен выиграть на 5-м этапе (lastLostStage === 4)
         botIndex = spartanBots.findIndex(bot => bot.lastLostStage === 4);
-        requiredState = 'mustWin_on_5';
     } else {
         // Сначала ищем бота, готового проиграть (lastLostStage === null)
         botIndex = spartanBots.findIndex(bot => bot.lastLostStage === null);
-        requiredState = 'ready_to_lose';
         // Если нет – ищем того, кто должен выиграть именно на этом этапе
         if (botIndex === -1) {
             botIndex = spartanBots.findIndex(bot => bot.lastLostStage !== null && bot.lastLostStage + 1 === playerStage);
-            requiredState = 'mustWin_on_' + playerStage;
         }
     }
 
     if (botIndex === -1) {
         // Если совсем никого нет – берём первого попавшегося (на всякий случай)
         botIndex = 0;
-        requiredState = 'fallback';
     }
 
     const bot = spartanBots[botIndex];
@@ -86,7 +81,6 @@ function selectSpartanBot(playerStage) {
         speed = 1200 + Math.floor(Math.random() * 300); // медленный (должен проиграть)
     }
 
-    // Возвращаем данные бота, не изменяя его состояние здесь – состояние изменится после боя
     return {
         name: bot.name,
         speed: speed,
