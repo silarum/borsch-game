@@ -153,7 +153,7 @@ window.cycleView = function() {
     document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
     document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
     const btn = document.getElementById('view-switch');
-    if (view === 'veggie') { btn.innerHTML = '🥬 Овощи + Крипта'; startVeggieAnimation(); }
+    if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
     else if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
     else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
 };
