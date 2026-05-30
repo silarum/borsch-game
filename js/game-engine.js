@@ -184,7 +184,15 @@ function startSmileAnimation() {
     smileCanvas.height = smileCanvas.parentElement.clientHeight;
     smileParticles = [];
     for (let i = 0; i < 25; i++) {
-        smileParticles.push({ x: Math.random()*smileCanvas.width, y: smileCanvas.height+Math.random()*100, speed: 0.5+Math.random()*1.5, size: 16+Math.random()*14, emoji: emojis[Math.floor(Math.random()*emojis.length)], opacity: 1, popping: false });
+        smileParticles.push({
+            x: Math.random() * smileCanvas.width,
+            y: smileCanvas.height + Math.random() * 60,   // стартуют ближе к низу
+            speed: 0.5 + Math.random() * 1.5,
+            size: 16 + Math.random() * 14,
+            emoji: emojis[Math.floor(Math.random() * emojis.length)],
+            opacity: 1,
+            popping: false
+        });
     }
     if (!window.smileInterval) window.smileInterval = setInterval(drawSmile, 50);
 }
@@ -211,7 +219,14 @@ function startVeggieAnimation() {
     veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
     veggieParticles = [];
     for (let i = 0; i < 40; i++) {
-        veggieParticles.push({ x: Math.random()*veggieCanvas.width, y: veggieCanvas.height+Math.random()*100, speed: 0.8+Math.random()*2, size: 16+Math.random()*14, emoji: veggieEmojis[Math.floor(Math.random()*veggieEmojis.length)], opacity: 1 });
+        veggieParticles.push({
+            x: Math.random() * veggieCanvas.width,
+            y: veggieCanvas.height + Math.random() * 60,   // стартуют ближе к низу
+            speed: 0.8 + Math.random() * 2,
+            size: 16 + Math.random() * 14,
+            emoji: veggieEmojis[Math.floor(Math.random() * veggieEmojis.length)],
+            opacity: 1
+        });
     }
     if (!window.veggieInterval) window.veggieInterval = setInterval(drawVeggie, 50);
 }
