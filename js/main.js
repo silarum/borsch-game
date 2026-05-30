@@ -28,8 +28,10 @@ let miningThreshold = 1;
 let pendingMining = null;
 let currentBot = null;
 let bandData = null;
-// Армия ботов
+
+// Армия ботов (глобальная переменная)
 let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
+
 const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
     { id:2, desc:'Сделать репост', reward:100, maxCompletions:100, completionsDone:0, checking:false },
@@ -60,7 +62,6 @@ function saveAll() {
     localStorage.setItem('referrals', JSON.stringify(referrals));
 }
 
-// DOM-элементы, доступные глобально
 const pot = document.getElementById('pot');
 const board = document.getElementById('board');
 const rumBal = document.getElementById('rum-balance');
@@ -80,7 +81,6 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
-// Обновление интерфейса
 function updateUI() {
     rumBal.textContent = `💰 RUM: ${rum}`;
     srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
@@ -125,7 +125,6 @@ function updateBoostDisplay() {
 setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
-// Навигация
 function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
 function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
 function switchScreen(screenId) {
@@ -158,7 +157,6 @@ document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', 
     document.getElementById('user-profile').classList.remove('hidden');
 }));
 
-// Запуск
 updateUI();
 window.lastGameTime = Date.now();
 if (games < maxGames) startRecovery();
