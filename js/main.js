@@ -28,7 +28,8 @@ let miningThreshold = 1;
 let pendingMining = null;
 let currentBot = null;
 let bandData = null;
-
+// Армия ботов
+let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
     { id:2, desc:'Сделать репост', reward:100, maxCompletions:100, completionsDone:0, checking:false },
