@@ -39,6 +39,8 @@ window.adminLogin = function(){
             <button onclick="showTournamentForm()">Создать турнир</button>
             <button onclick="viewAllPlayers()">Все игроки</button>
             <button onclick="createBots()">300 спартанцев</button>
+            <button onclick="toggleSpartans()">${spartansEnabled ? '🛑 Выключить' : '🟢 Включить'} 300 спартанцев</button>
+            <button onclick="resetSpartans()">🔄 Сбросить состояния</button>
             <button onclick="document.getElementById('admin-modal').classList.remove('active')">Выход</button>
         `;
     } else alert('Неверный логин/пароль');
