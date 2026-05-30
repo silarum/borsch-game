@@ -162,3 +162,4 @@ updateUI();
 window.lastGameTime = Date.now();
 if (games < maxGames) startRecovery();
 document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+function preventDefaultMove(e) { e.preventDefault(); }
