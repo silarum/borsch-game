@@ -141,8 +141,8 @@ function startRecovery() {
     }, 1000);
 }
 
-// Фоны
-const views = ['matrix', 'smile', 'veggie'];
+// Фоны – теперь основной "Овощи + Крипта"
+const views = ['veggie', 'matrix', 'smile'];   // овощи по умолчанию
 let currentViewIndex = 0;
 window.cycleView = function() {
     if (window.smileInterval) { clearInterval(window.smileInterval); window.smileInterval = null; }
@@ -153,11 +153,12 @@ window.cycleView = function() {
     document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
     document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
     const btn = document.getElementById('view-switch');
-    if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
+    if (view === 'veggie') { btn.innerHTML = '🥬 Овощи + Крипта'; startVeggieAnimation(); }
+    else if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
     else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
-    else if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
 };
 
+// Матрица
 const matrixCanvas = document.getElementById('matrixCanvas');
 const matrixCtx = matrixCanvas.getContext('2d');
 let matrixParticles = [];
@@ -175,6 +176,7 @@ function drawMatrix() {
 }
 startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
 
+// Смайлы
 const smileCanvas = document.getElementById('smileCanvas');
 const smileCtx = smileCanvas.getContext('2d');
 let smileParticles = [];
@@ -186,7 +188,7 @@ function startSmileAnimation() {
     for (let i = 0; i < 25; i++) {
         smileParticles.push({
             x: Math.random() * smileCanvas.width,
-            y: smileCanvas.height + Math.random() * 60,   // стартуют ближе к низу
+            y: smileCanvas.height + Math.random() * 60,
             speed: 0.5 + Math.random() * 1.5,
             size: 16 + Math.random() * 14,
             emoji: emojis[Math.floor(Math.random() * emojis.length)],
@@ -210,10 +212,14 @@ function drawSmile() {
 }
 window.addEventListener('resize', startSmileAnimation);
 
+// Овощи + Крипта
 const veggieCanvas = document.getElementById('veggieCanvas');
 const veggieCtx = veggieCanvas.getContext('2d');
 let veggieParticles = [];
-const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+const veggieEmojis = [
+    '🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅',   // овощи
+    '🪙','💰','💎','₿','Ξ','Ł','⚡','📈'            // крипта
+];
 function startVeggieAnimation() {
     veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
     veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
@@ -221,7 +227,7 @@ function startVeggieAnimation() {
     for (let i = 0; i < 40; i++) {
         veggieParticles.push({
             x: Math.random() * veggieCanvas.width,
-            y: veggieCanvas.height + Math.random() * 60,   // стартуют ближе к низу
+            y: veggieCanvas.height + Math.random() * 60,
             speed: 0.8 + Math.random() * 2,
             size: 16 + Math.random() * 14,
             emoji: veggieEmojis[Math.floor(Math.random() * veggieEmojis.length)],
@@ -247,3 +253,7 @@ window.addEventListener('resize', startVeggieAnimation);
 startBtn.addEventListener('click', startGame);
 board.addEventListener('touchstart', handleTouchStart, {passive: false});
 board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+
+// Запуск фона по умолчанию – овощи
+startVeggieAnimation();
+document.getElementById('veggie-view').style.display = 'block';
