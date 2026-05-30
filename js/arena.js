@@ -1,7 +1,7 @@
 // ================== АРЕНА (МАЙНИНГ, БАНДА, ЗАМОРОЗКА СЕССИЙ) ==================
 
-// --- Пул ботов для PvP ---
-const botPool = [
+// --- Пул обычных ботов (если спартанцы выключены) ---
+const defaultBotPool = [
     { name: 'ТокенМастер', speed: 1000 },
     { name: 'Борщехлёб', speed: 850 },
     { name: 'CryptoWhale', speed: 700 },
@@ -144,7 +144,6 @@ function startSearch(mode = 'mining') {
         cancelled = true;
         clearTimeout(searchTimerId);
         overlay.remove();
-        // Возвращаем зарезервированную сумму, если игрок вышел
         if (pendingMining) {
             if (pendingMining.currency === 'SRUM') srum += pendingMining.threshold;
             else rum += pendingMining.threshold;
@@ -153,7 +152,6 @@ function startSearch(mode = 'mining') {
         }
     };
 
-    // Кнопка отмены поиска (если игрок передумал)
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = '✖ Отмена';
     cancelBtn.style.cssText = 'margin-top:20px; padding:10px 20px; font-size:1.2rem; background:#B22222; color:white; border:none; border-radius:10px; cursor:pointer;';
@@ -163,7 +161,20 @@ function startSearch(mode = 'mining') {
     searchTimerId = setTimeout(() => {
         if (cancelled) return;
         overlay.remove();
-        currentBot = botPool[Math.floor(Math.random() * botPool.length)];
+
+        // --- ВЫБОР БОТА ---
+        let selectedBot = null;
+        if (spartansEnabled) {
+            selectedBot = selectSpartanBot(miningStage);
+        }
+        if (selectedBot) {
+            currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin };
+        } else {
+            // обычный бот
+            let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
+            currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
+        }
+
         const readyDiv = document.createElement('div');
         readyDiv.className = 'countdown-overlay';
         readyDiv.innerHTML = `<div style="text-align:center;">
@@ -174,17 +185,14 @@ function startSearch(mode = 'mining') {
         </div>`;
         document.getElementById('game-container').appendChild(readyDiv);
 
-        // Обработчик отмены готовности
         document.getElementById('cancel-ready-btn').addEventListener('click', () => {
             readyDiv.remove();
-            // Автоматически ищем нового бота для того, кто остался (наш игрок)
             setTimeout(() => startSearch(mode), 500);
         });
 
         document.getElementById('mining-ready-btn').addEventListener('click', () => {
             document.getElementById('mining-ready-btn').disabled = true;
             document.getElementById('mining-ready-btn').textContent = '⏳ Ожидание...';
-            // Ожидание соперника (бота) — имитация готовности
             setTimeout(() => {
                 if (cancelled) return;
                 readyDiv.innerHTML = `<div style="text-align:center;">
@@ -260,10 +268,11 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
 
     const win = duelPlayerScore > duelOpponentScore;
     let resultDiv = document.createElement('div'); resultDiv.className = 'result-overlay';
+    let penalty = 0, reward = 0;
 
     if (miningCurrency === 'SRUM') {
         if (win) {
-            let reward = miningThreshold * getRewardPercent();
+            reward = miningThreshold * getRewardPercent();
             usdt += reward;
             srum += miningThreshold;
             if (miningStage < 5) miningStage++;
@@ -273,7 +282,7 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
                 <button id="continue-mining">Продолжить майнинг</button>
                 <button id="pause-mining">⏸️ Пауза</button>`;
         } else {
-            let penalty = miningThreshold * getPenaltyPercent();
+            penalty = miningThreshold * getPenaltyPercent();
             let reserved = miningThreshold;
             let remaining = Math.max(0, reserved - penalty);
             srum += remaining;
@@ -288,16 +297,24 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     } else {
         rum += miningThreshold;
         if (win) {
-            let rewardRUM = Math.floor(miningThreshold * getRewardPercent());
-            rum += rewardRUM;
+            reward = Math.floor(miningThreshold * getRewardPercent());
+            rum += reward;
             showCoinFountain(15);
-            resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${rewardRUM} RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
+            resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${reward} RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
         } else {
-            rum = Math.max(0, rum - 20);
+            penalty = 20;
+            rum = Math.max(0, rum - penalty);
             showPoopFountain(10);
             resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>-20 RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
         }
     }
+
+    // Обновляем состояние бота-спартанца
+    if (currentBot.botIndex >= 0) {
+        const botWon = !win; // бот выиграл, если игрок проиграл
+        updateSpartanBot(currentBot.botIndex, botWon, miningStage, penalty, reward);
+    }
+
     pendingMining = null;
     updateUI();
     document.getElementById('game-container').appendChild(resultDiv);
@@ -404,7 +421,14 @@ function renderArena() {
                 sec--;
                 if (sec <= 0) {
                     clearInterval(st);
-                    currentBot = botPool[Math.floor(Math.random() * botPool.length)];
+                    // Выбор бота для арены
+                    let sel = spartansEnabled ? selectSpartanBot(miningStage) : null;
+                    if (sel) {
+                        currentBot = { name: sel.name, speed: sel.speed, botIndex: sel.botIndex, shouldWin: sel.shouldWin };
+                    } else {
+                        let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
+                        currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
+                    }
                     arenaContent.innerHTML = `<h2>⚡ Блок найден</h2><p>Майнер: <b>${currentBot.name}</b></p><button class="start-btn" id="mining-ready-arena" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button>`;
                     document.getElementById('mining-ready-arena').addEventListener('click', ()=>{
                         document.getElementById('mining-ready-arena').disabled = true;
