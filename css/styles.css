@@ -47,3 +47,8 @@
 .rocket{position:absolute;z-index:30;pointer-events:none;font-size:2rem;animation:rocketFly 0.6s ease-in forwards} @keyframes rocketFly{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-90px) scale(0.8);opacity:0}}
 .spark{position:absolute;z-index:30;pointer-events:none;font-size:1.5rem;animation:sparkBoom 0.8s ease-out forwards} @keyframes sparkBoom{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0.2);opacity:0}}
 .rules-scroll{max-height:70vh;overflow-y:auto;padding-right:5px;}
+
+/* Фоны – теперь заканчиваются ниже, ближе к кастрюле */
+#matrix-bg { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px + 40px); z-index:0; display:block; }
+#smile-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px + 40px); z-index:0; display:none; }
+#veggie-view { position:absolute; top:0; left:0; right:0; bottom:calc(30% + 12px + 40px); z-index:0; display:none; }
