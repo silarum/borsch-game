@@ -18,7 +18,15 @@ const translations = {
         shop_status_platinum: '💠 Платина — 300 SRUM (+3M RUM, вывод от 25 SRUM)',
         invite_nickname: 'Пригласить по никнейму', invite_referral: 'Из рефералов', invite_club: 'Из клуба',
         ready: 'Готов', not_ready: 'Не готов', invite_title: 'Приглашение в банду', accept: 'Принять', decline: 'Отклонить',
-        referral_active: 'Активен', referral_inactive: 'Неактивен', referral_long: 'Давно не заходил'
+        referral_active: 'Активен', referral_inactive: 'Неактивен', referral_long: 'Давно не заходил',
+        rules_rum_title: 'RUM‑майнинг',
+        rules_rum_desc: 'Это твоя личная кухня! Нажимай на полезные овощи 🥬🧅🥔🥕 — они принесут тебе 🪙 RUM. Каждые 10 точных попаданий подряд удваивают награду: ×2, ×4, ×8… Ошибка (💩, 🪱 или промах) сбрасывает серию и отнимает 20 RUM. У тебя 3 попытки в час — используй их с умой!',
+        rules_pvp_title: 'Криптобеспредел (PvP‑майнинг)',
+        rules_pvp_desc: 'Здесь ты сражаешься с другими майнерами за реальные блоки 🎯. Ты ставишь 💎 SRUM (1 SRUM = 1 USDT) и выбираешь этап — от этого зависят риски и награды. За 20 секунд нужно набрать больше очков, чем соперник. Победил — получил USDT на кошелёк 💵, проиграл — штраф SRUM. Но самый крутой шанс — <strong>редкий блок до 10 000 USDT</strong>! Он выпадает случайно, как джекпот 🎰. Твоя мощь зависит от этапа и активных бустеров ⚡.',
+        rules_status_title: 'Статусы и вывод USDT',
+        rules_status_desc: 'Чем выше твой статус, тем больше можно выводить ежедневно:<br>🥈 Серебро — до 200 USDT/сутки<br>🥇 Золото — до 500 USDT/сутки<br>💠 Платина — до 1 000 USDT/сутки<br>Статус покупается в магазине за SRUM, но можно и заработать активной игрой. Вывод мгновенный, через TON‑кошелёк ⚡.',
+        rules_start_title: 'Как начать прямо сейчас',
+        rules_start_desc: '1. Жми 🥘 НАЧАТЬ — фарми RUM.<br>2. Нажми на золотую монету 💰 — войди в PvP‑майнинг за USDT.<br>3. Покупай бустеры и статусы в магазине 🛍️.<br>4. Приглашай друзей 👥 — получай бонусы.<br>5. Выводи реальные доллары на свой TON‑кошелёк 💵.'
     },
     en: {
         top_players: 'Top', top_miners: 'Miners', referral: 'Referral', invest: 'Invest', about: 'About',
@@ -38,7 +46,15 @@ const translations = {
         shop_status_platinum: '💠 Platinum — 300 SRUM (+3M RUM, withdrawal from 25 SRUM)',
         invite_nickname: 'Invite by nickname', invite_referral: 'From referrals', invite_club: 'From club',
         ready: 'Ready', not_ready: 'Not ready', invite_title: 'Band invitation', accept: 'Accept', decline: 'Decline',
-        referral_active: 'Active', referral_inactive: 'Inactive', referral_long: 'Long time offline'
+        referral_active: 'Active', referral_inactive: 'Inactive', referral_long: 'Long time offline',
+        rules_rum_title: 'RUM Mining',
+        rules_rum_desc: 'This is your personal kitchen! Tap healthy vegetables 🥬🧅🥔🥕 — they bring you 🪙 RUM. Every 10 consecutive hits double the reward: ×2, ×4, ×8… A mistake (💩, 🪱 or miss) resets the streak and takes 20 RUM. You have 3 attempts per hour — use them wisely!',
+        rules_pvp_title: 'Crypto Mayhem (PvP Mining)',
+        rules_pvp_desc: 'Here you fight other miners for real blocks 🎯. You stake 💎 SRUM (1 SRUM = 1 USDT) and choose a stage — risks and rewards depend on it. You have 20 seconds to score more points than your opponent. Win — get USDT to your wallet 💵, lose — a SRUM penalty. But the coolest chance — a <strong>rare block up to 10,000 USDT</strong>! It drops randomly like a jackpot 🎰. Your power depends on the stage and active boosters ⚡.',
+        rules_status_title: 'Statuses and USDT Withdrawal',
+        rules_status_desc: 'The higher your status, the more you can withdraw daily:<br>🥈 Silver — up to 200 USDT/day<br>🥇 Gold — up to 500 USDT/day<br>💠 Platinum — up to 1,000 USDT/day<br>Status is bought in the shop for SRUM, but can also be earned by active play. Withdrawal is instant, via TON wallet ⚡.',
+        rules_start_title: 'How to start right now',
+        rules_start_desc: '1. Press 🥘 START — farm RUM.<br>2. Tap the golden coin 💰 — enter PvP mining for USDT.<br>3. Buy boosters and statuses in the shop 🛍️.<br>4. Invite friends 👥 — get bonuses.<br>5. Withdraw real dollars to your TON wallet 💵.'
     },
     zh: {
         top_players: '排行', top_miners: '矿工', referral: '推荐', invest: '投资', about: '关于',
@@ -58,7 +74,15 @@ const translations = {
         shop_status_platinum: '💠 铂金 — 300 SRUM (+300万 RUM, 25 SRUM起提现)',
         invite_nickname: '通过昵称邀请', invite_referral: '从推荐中', invite_club: '从俱乐部',
         ready: '准备', not_ready: '未准备', invite_title: '战队邀请', accept: '接受', decline: '拒绝',
-        referral_active: '活跃', referral_inactive: '不活跃', referral_long: '长时间离线'
+        referral_active: '活跃', referral_inactive: '不活跃', referral_long: '长时间离线',
+        rules_rum_title: 'RUM 挖矿',
+        rules_rum_desc: '这是你的个人厨房！点击健康的蔬菜 🥬🧅🥔🥕 — 它们会带给你 🪙 RUM。连续击中 10 次奖励翻倍：×2, ×4, ×8… 错误（💩, 🪱 或未击中）会重置连击并扣除 20 RUM。每小时有 3 次机会 — 明智地使用它们！',
+        rules_pvp_title: '加密混乱 (PvP 挖矿)',
+        rules_pvp_desc: '在这里你与其他矿工争夺真正的区块 🎯。你质押 💎 SRUM (1 SRUM = 1 USDT) 并选择阶段 — 风险和奖励取决于此。你有 20 秒时间获得比对手更多的分数。获胜 — 将 USDT 存入钱包 💵，失败 — 扣除 SRUM 罚款。但最酷的机会 — <strong>稀有区块高达 10,000 USDT</strong>！它随机掉落如同大奖 🎰。你的力量取决于阶段和激活的加速器 ⚡。',
+        rules_status_title: '身份和 USDT 提现',
+        rules_status_desc: '身份越高，每日提现额度越大：<br>🥈 白银 — 最高 200 USDT/天<br>🥇 黄金 — 最高 500 USDT/天<br>💠 铂金 — 最高 1,000 USDT/天<br>身份可在商店用 SRUM 购买，也可通过活跃游戏赚取。提现即时，通过 TON 钱包 ⚡。',
+        rules_start_title: '立即开始',
+        rules_start_desc: '1. 按 🥘 开始 — 收获 RUM。<br>2. 点击金币 💰 — 进入 PvP 挖矿获取 USDT。<br>3. 在商店购买加速器和身份 🛍️。<br>4. 邀请朋友 👥 — 获得奖励。<br>5. 提取真实美元到你的 TON 钱包 💵。'
     }
 };
 
