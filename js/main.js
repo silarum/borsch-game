@@ -1,35 +1,33 @@
 // ================== ГЛОБАЛЬНЫЕ ДАННЫЕ И ИНИЦИАЛИЗАЦИЯ ==================
 const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 const BAD = ['💩','🪱','🧀','🥀','🍄'];
-let rum = parseInt(localStorage.getItem('rum') || '0');
-let invest = parseInt(localStorage.getItem('invest') || '0');
+let rum = 0;
+let invest = 0;
 if (!localStorage.getItem('srum_boosted')) {
-    let cur = parseFloat(localStorage.getItem('srum') || '0');
-    if (cur < 10000) { localStorage.setItem('srum', '10000'); localStorage.setItem('srum_boosted', '1'); }
+    localStorage.setItem('srum_boosted', '1');
 }
-let srum = parseFloat(localStorage.getItem('srum') || '10000');
-let ton = parseFloat(localStorage.getItem('ton') || '0');
-let usdt = parseFloat(localStorage.getItem('usdt') || '0');
+let srum = 10000;
+let ton = 0;
+let usdt = 0;
 let games = parseInt(localStorage.getItem('games') || '3');
 const maxGames = 3;
 const gameRecoveryTime = 600;
 let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
-let activeBoost = JSON.parse(localStorage.getItem('activeBoost') || 'null');
+let activeBoost = null;
 let streak = 0;
 let duelActive = false;
-let userStatus = localStorage.getItem('userStatus') || 'solo';
-let userNickname = localStorage.getItem('nickname') || 'Майнер';
+let userStatus = 'solo';
+let userNickname = 'Майнер';
 let myClubId = localStorage.getItem('myClubId') || null;
 let clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
 let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
-let miningStage = parseInt(localStorage.getItem('miningStage') || '1');
+let miningStage = 1;
 let miningCurrency = 'SRUM';
 let miningThreshold = 1;
 let pendingMining = null;
 let currentBot = null;
 let bandData = null;
 
-// Армия ботов (глобальная переменная)
 let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 
 const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
@@ -47,19 +45,17 @@ let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
 function saveAll() {
-    localStorage.setItem('rum', rum); localStorage.setItem('invest', invest); localStorage.setItem('srum', srum); localStorage.setItem('ton', ton); localStorage.setItem('usdt', usdt);
-    localStorage.setItem('games', games); localStorage.setItem('activeBoost', JSON.stringify(activeBoost));
+    localStorage.setItem('games', games);
+    localStorage.setItem('clubs', JSON.stringify(clubs));
+    if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
+    localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
+    localStorage.setItem('nickname', userNickname);
+    localStorage.setItem('userStatus', userStatus);
+    localStorage.setItem('referrals', JSON.stringify(referrals));
     localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
     localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
     localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
     localStorage.setItem('userTasks', JSON.stringify(userTasks));
-    localStorage.setItem('clubs', JSON.stringify(clubs));
-    if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
-    localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
-    localStorage.setItem('miningStage', miningStage);
-    localStorage.setItem('nickname', userNickname);
-    localStorage.setItem('userStatus', userStatus);
-    localStorage.setItem('referrals', JSON.stringify(referrals));
 }
 
 const pot = document.getElementById('pot');
@@ -80,6 +76,14 @@ const duelScoreboard = document.getElementById('duel-scoreboard');
 const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
+
+(async function init() {
+    await loadUserData();
+    updateUI();
+    window.lastGameTime = Date.now();
+    if (games < maxGames) startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+})();
 
 function updateUI() {
     rumBal.textContent = `💰 RUM: ${rum}`;
@@ -108,6 +112,7 @@ function updateUI() {
     updateBoostDisplay();
     updateProfile();
     saveAll();
+    saveUserData().catch(console.error);
 }
 
 function updateBoostDisplay() {
@@ -157,8 +162,4 @@ document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', 
     document.getElementById('user-profile').classList.remove('hidden');
 }));
 
-updateUI();
-window.lastGameTime = Date.now();
-if (games < maxGames) startRecovery();
-document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 function preventDefaultMove(e) { e.preventDefault(); }
