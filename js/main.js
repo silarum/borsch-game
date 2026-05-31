@@ -79,20 +79,15 @@ const duelTimerEl = document.getElementById('duelTimer');
 let userId = null;
 
 async function initApp() {
-    // Пытаемся получить данные из Telegram Mini App
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         const tgUser = Telegram.WebApp.initDataUnsafe.user;
         userId = tgUser.id;
         userNickname = tgUser.first_name || 'Майнер';
-        // Сразу запускаем игру
         startMainGame();
     } else {
-        // Запущены вне Telegram — показываем тестовый экран
-        document.getElementById('welcome-message').textContent = 'Запустите игру через Telegram Mini App для автоматической регистрации';
-        document.getElementById('welcome-buttons').style.display = 'flex';
-        document.getElementById('check-subscriptions').style.display = 'none';
+        document.getElementById('welcome-screen').style.display = 'flex';
         document.getElementById('skip-welcome').addEventListener('click', () => {
-            userId = 123456789; // тестовый ID
+            userId = 123456789;
             startMainGame();
         });
     }
@@ -101,6 +96,10 @@ async function initApp() {
 async function startMainGame() {
     document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('main-game').style.display = 'block';
+
+    // Запускаем фоновую анимацию сразу
+    document.getElementById('veggie-view').style.display = 'block';
+    startVeggieAnimation();
 
     const userData = await loadUserData(userId);
     if (userData) {
@@ -124,7 +123,6 @@ async function startMainGame() {
         });
     }
 
-    // Приветственный бонус
     try {
         const bonusGranted = await processWelcomeBonus(userId, userData || {});
         if (bonusGranted) {
@@ -139,22 +137,6 @@ async function startMainGame() {
     if (games < maxGames) startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 }
-
-// Обработчики экрана приветствия (для тестового режима)
-document.getElementById('check-subscriptions')?.addEventListener('click', async () => {
-    document.getElementById('welcome-message').textContent = 'Проверяем...';
-    const sub = await checkSubscription(123456789);
-    const grp = await checkGroup(123456789);
-    if (sub && grp) {
-        document.getElementById('welcome-message').textContent = '✅ Подписки подтверждены! Бонус будет начислен при входе в игру.';
-        setTimeout(() => {
-            userId = 123456789;
-            startMainGame();
-        }, 1500);
-    } else {
-        document.getElementById('welcome-message').textContent = '❌ Не все подписки активны. Проверьте и повторите.';
-    }
-});
 
 initApp();
 
