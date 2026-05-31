@@ -3,13 +3,12 @@ const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 const BAD = ['💩','🪱','🧀','🥀','🍄'];
 let rum = 0;
 let invest = 0;
-if (!localStorage.getItem('srum_boosted')) {
-    localStorage.setItem('srum_boosted', '1');
-}
-let srum = 10000;
+let srum = 0;                       // стартовый баланс 0
 let ton = 0;
 let usdt = 0;
-let games = parseInt(localStorage.getItem('games') || '3');
+// Энергия – если в localStorage ничего нет, даём 3 попытки
+let games = parseInt(localStorage.getItem('games'));
+if (isNaN(games) || games < 0) games = 3;
 const maxGames = 3;
 const gameRecoveryTime = 600;
 let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
@@ -77,29 +76,49 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
-let userId = 123456789; // временно, пока нет Telegram Web App
+// Определяем ID пользователя (Telegram или тестовый)
+let userId = 123456789;
+if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+    userId = Telegram.WebApp.initDataUnsafe.user.id;
+}
 
 (async function init() {
+    console.log('🚀 Инициализация игры, userId:', userId);
     // Загружаем данные из облака
     const userData = await loadUserData(userId);
     if (userData) {
         rum = userData.rum || 0;
-        srum = parseFloat(userData.srum) || 10000;
+        srum = parseFloat(userData.srum) || 0;
         ton = parseFloat(userData.ton) || 0;
         usdt = parseFloat(userData.usdt) || 0;
         userNickname = userData.nickname || 'Майнер';
         userStatus = userData.status || 'solo';
         miningStage = userData.mining_stage || 1;
         if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
+        console.log('✅ Данные загружены из облака');
     } else {
-        // Новый пользователь – создаём запись
-        await saveUserData(userId, { srum: 10000 });
+        // Новый пользователь – создаём запись с нулевым балансом
+        await saveUserData(userId, {
+            nickname: 'Майнер',
+            rum: 0,
+            srum: 0,
+            ton: 0,
+            usdt: 0,
+            status: 'solo',
+            mining_stage: 1
+        });
+        console.log('🆕 Создан новый профиль в облаке');
+        userData = { bonus_claimed: false, srum: 0 }; // для проверки бонуса
     }
 
     // Проверка приветственного бонуса
-    const bonusGranted = await processWelcomeBonus(userId, userData || {});
-    if (bonusGranted) {
-        alert('🎁 Поздравляем! Вы получили 1 SRUM за подписку на канал и группу!');
+    try {
+        const bonusGranted = await processWelcomeBonus(userId, userData);
+        if (bonusGranted) {
+            alert('🎁 Поздравляем! Вы получили 1 SRUM за подписку на канал и группу!');
+        }
+    } catch (e) {
+        console.warn('Бонус не проверен (возможно, нет интернета):', e);
     }
 
     updateUI();
