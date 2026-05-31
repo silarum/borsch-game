@@ -75,7 +75,7 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
-// ================== АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM ==================
+// ================== АВТОРИЗАЦИЯ И ПРИВЕТСТВЕННЫЙ БОНУС ==================
 let userId = null;
 
 async function initApp() {
@@ -85,19 +85,14 @@ async function initApp() {
         userNickname = tgUser.first_name || 'Майнер';
         startMainGame();
     } else {
-        document.getElementById('welcome-screen').style.display = 'flex';
-        document.getElementById('skip-welcome').addEventListener('click', () => {
-            userId = 123456789;
-            startMainGame();
-        });
+        // Тестовый режим – сразу запускаем с ID 123456789
+        userId = 123456789;
+        startMainGame();
     }
 }
 
 async function startMainGame() {
-    document.getElementById('welcome-screen').style.display = 'none';
     document.getElementById('main-game').style.display = 'block';
-
-    // Запускаем фоновую анимацию сразу
     document.getElementById('veggie-view').style.display = 'block';
     startVeggieAnimation();
 
@@ -123,19 +118,93 @@ async function startMainGame() {
         });
     }
 
-    try {
-        const bonusGranted = await processWelcomeBonus(userId, userData || {});
-        if (bonusGranted) {
-            alert('🎁 Поздравляем! Вы получили 1 SRUM за подписку на канал и группу!');
-        }
-    } catch (e) {
-        console.warn('Бонус не проверен:', e);
+    // Проверка приветственного бонуса (только если ещё не получен)
+    if (!userData || !userData.bonus_claimed) {
+        showBonusStep1();
+    } else {
+        updateUI();
+        window.lastGameTime = Date.now();
+        if (games < maxGames) startRecovery();
+        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
     }
+}
 
-    updateUI();
-    window.lastGameTime = Date.now();
-    if (games < maxGames) startRecovery();
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+function showBonusStep1() {
+    const modal = document.createElement('div');
+    modal.className = 'quick-duel-modal';
+    modal.innerHTML = `
+        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
+            <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #1a5276, #0e2f44);">
+                <h2>🎁 Приветственный бонус</h2>
+                <p style="font-size:1.2rem;">Подпишись на наш Telegram‑канал, чтобы получить <b>1 SRUM</b>!</p>
+                <a href="https://t.me/crypto_borsch_channel" target="_blank" style="display:block; background:#0088cc; color:white; padding:15px; border-radius:15px; text-decoration:none; font-size:1.2rem; margin:15px 0;">📢 Подписаться на канал</a>
+                <button id="check-channel-btn" class="btn-mining-big">✅ Я подписался</button>
+                <button id="skip-bonus-btn" style="background:none; color:#aaa; border:1px solid #aaa; border-radius:10px; padding:10px; margin-top:10px; width:100%;">Пропустить</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('game-container').appendChild(modal);
+
+    document.getElementById('check-channel-btn').addEventListener('click', async () => {
+        const sub = await checkSubscription(userId);
+        if (sub) {
+            modal.remove();
+            showBonusStep2();
+        } else {
+            alert('Вы ещё не подписались на канал. Пожалуйста, подпишитесь и нажмите кнопку снова.');
+        }
+    });
+
+    document.getElementById('skip-bonus-btn').addEventListener('click', () => {
+        modal.remove();
+        updateUI();
+        window.lastGameTime = Date.now();
+        if (games < maxGames) startRecovery();
+        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    });
+}
+
+function showBonusStep2() {
+    const modal = document.createElement('div');
+    modal.className = 'quick-duel-modal';
+    modal.innerHTML = `
+        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
+            <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #1e8449, #0b3d1f);">
+                <h2>🎁 Ещё один шаг!</h2>
+                <p style="font-size:1.2rem;">Вступите в нашу группу обсуждения, чтобы получить бонус!</p>
+                <a href="https://t.me/criptoniany" target="_blank" style="display:block; background:#0088cc; color:white; padding:15px; border-radius:15px; text-decoration:none; font-size:1.2rem; margin:15px 0;">💬 Вступить в группу</a>
+                <button id="check-group-btn" class="btn-mining-big">✅ Я вступил</button>
+                <button id="skip-bonus-btn2" style="background:none; color:#aaa; border:1px solid #aaa; border-radius:10px; padding:10px; margin-top:10px; width:100%;">Пропустить</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('game-container').appendChild(modal);
+
+    document.getElementById('check-group-btn').addEventListener('click', async () => {
+        const grp = await checkGroup(userId);
+        if (grp) {
+            modal.remove();
+            // Начисляем бонус
+            const newSrum = srum + 1;
+            await saveUserData(userId, { srum: newSrum, bonus_claimed: true });
+            srum = newSrum;
+            alert('🎁 Поздравляем! Вы получили 1 SRUM!');
+            updateUI();
+            window.lastGameTime = Date.now();
+            if (games < maxGames) startRecovery();
+            document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+        } else {
+            alert('Вы ещё не вступили в группу. Пожалуйста, вступите и нажмите кнопку снова.');
+        }
+    });
+
+    document.getElementById('skip-bonus-btn2').addEventListener('click', () => {
+        modal.remove();
+        updateUI();
+        window.lastGameTime = Date.now();
+        if (games < maxGames) startRecovery();
+        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    });
 }
 
 initApp();
