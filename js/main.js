@@ -3,10 +3,9 @@ const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 const BAD = ['💩','🪱','🧀','🥀','🍄'];
 let rum = 0;
 let invest = 0;
-let srum = 0;                       // стартовый баланс 0
+let srum = 0;
 let ton = 0;
 let usdt = 0;
-// Энергия – если в localStorage ничего нет, даём 3 попытки
 let games = parseInt(localStorage.getItem('games'));
 if (isNaN(games) || games < 0) games = 3;
 const maxGames = 3;
@@ -76,30 +75,46 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
-// Определяем ID пользователя (Telegram или тестовый)
-let userId = 123456789;
-if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-    userId = Telegram.WebApp.initDataUnsafe.user.id;
+// ================== АВТОРИЗАЦИЯ ЧЕРЕЗ TELEGRAM ==================
+let userId = null;
+
+async function initApp() {
+    // Пытаемся получить данные из Telegram Mini App
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+        const tgUser = Telegram.WebApp.initDataUnsafe.user;
+        userId = tgUser.id;
+        userNickname = tgUser.first_name || 'Майнер';
+        // Сразу запускаем игру
+        startMainGame();
+    } else {
+        // Запущены вне Telegram — показываем тестовый экран
+        document.getElementById('welcome-message').textContent = 'Запустите игру через Telegram Mini App для автоматической регистрации';
+        document.getElementById('welcome-buttons').style.display = 'flex';
+        document.getElementById('check-subscriptions').style.display = 'none';
+        document.getElementById('skip-welcome').addEventListener('click', () => {
+            userId = 123456789; // тестовый ID
+            startMainGame();
+        });
+    }
 }
 
-(async function init() {
-    console.log('🚀 Инициализация игры, userId:', userId);
-    // Загружаем данные из облака
+async function startMainGame() {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('main-game').style.display = 'block';
+
     const userData = await loadUserData(userId);
     if (userData) {
         rum = userData.rum || 0;
         srum = parseFloat(userData.srum) || 0;
         ton = parseFloat(userData.ton) || 0;
         usdt = parseFloat(userData.usdt) || 0;
-        userNickname = userData.nickname || 'Майнер';
+        userNickname = userData.nickname || userNickname;
         userStatus = userData.status || 'solo';
         miningStage = userData.mining_stage || 1;
         if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
-        console.log('✅ Данные загружены из облака');
     } else {
-        // Новый пользователь – создаём запись с нулевым балансом
         await saveUserData(userId, {
-            nickname: 'Майнер',
+            nickname: userNickname,
             rum: 0,
             srum: 0,
             ton: 0,
@@ -107,25 +122,41 @@ if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Tele
             status: 'solo',
             mining_stage: 1
         });
-        console.log('🆕 Создан новый профиль в облаке');
-        userData = { bonus_claimed: false, srum: 0 }; // для проверки бонуса
     }
 
-    // Проверка приветственного бонуса
+    // Приветственный бонус
     try {
-        const bonusGranted = await processWelcomeBonus(userId, userData);
+        const bonusGranted = await processWelcomeBonus(userId, userData || {});
         if (bonusGranted) {
             alert('🎁 Поздравляем! Вы получили 1 SRUM за подписку на канал и группу!');
         }
     } catch (e) {
-        console.warn('Бонус не проверен (возможно, нет интернета):', e);
+        console.warn('Бонус не проверен:', e);
     }
 
     updateUI();
     window.lastGameTime = Date.now();
     if (games < maxGames) startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-})();
+}
+
+// Обработчики экрана приветствия (для тестового режима)
+document.getElementById('check-subscriptions')?.addEventListener('click', async () => {
+    document.getElementById('welcome-message').textContent = 'Проверяем...';
+    const sub = await checkSubscription(123456789);
+    const grp = await checkGroup(123456789);
+    if (sub && grp) {
+        document.getElementById('welcome-message').textContent = '✅ Подписки подтверждены! Бонус будет начислен при входе в игру.';
+        setTimeout(() => {
+            userId = 123456789;
+            startMainGame();
+        }, 1500);
+    } else {
+        document.getElementById('welcome-message').textContent = '❌ Не все подписки активны. Проверьте и повторите.';
+    }
+});
+
+initApp();
 
 function updateUI() {
     rumBal.textContent = `💰 RUM: ${rum}`;
@@ -154,16 +185,18 @@ function updateUI() {
     updateBoostDisplay();
     updateProfile();
     saveAll();
-    saveUserData(userId, {
-        nickname: userNickname,
-        rum: rum,
-        srum: srum,
-        ton: ton,
-        usdt: usdt,
-        status: userStatus,
-        mining_stage: miningStage,
-        boost: activeBoost ? JSON.stringify(activeBoost) : null
-    }).catch(console.error);
+    if (userId) {
+        saveUserData(userId, {
+            nickname: userNickname,
+            rum: rum,
+            srum: srum,
+            ton: ton,
+            usdt: usdt,
+            status: userStatus,
+            mining_stage: miningStage,
+            boost: activeBoost ? JSON.stringify(activeBoost) : null
+        }).catch(console.error);
+    }
 }
 
 function updateBoostDisplay() {
