@@ -61,7 +61,7 @@ quickDuelCoin.addEventListener('click', () => {
     showMiningModal();
 });
 
-// --- Модальное окно выбора порога и этапа (обычный майнинг) – НОВЫЙ ДИЗАЙН ---
+// --- Модальное окно выбора порога и этапа (облачный дизайн) ---
 function showMiningModal() {
     const modal = document.createElement('div');
     modal.className = 'quick-duel-modal';
@@ -74,24 +74,38 @@ function showMiningModal() {
                 <h2>⛏️ Криптобеспредел</h2>
                 <div class="pool-amount">💎 ${poolAmount} USDT</div>
                 <div class="pool-players">🖥️ <span>${activePlayers}</span> майнеров в пуле</div>
-                <div class="pool-stage">Твой этап: <b>${miningStage}</b> | Порог: <b>${miningThreshold.toFixed(1)}</b> SRUM</div>
+                <div class="pool-stage">Твой этап: <b>${miningStage}</b></div>
                 <select id="mining-currency" style="width:100%;padding:12px;margin-top:15px;border-radius:10px;border:none;font-size:1rem;background:rgba(255,255,255,0.15);color:white;">
                     <option value="SRUM" ${miningCurrency==='SRUM'?'selected':''}>SRUM (USDT)</option>
                     <option value="RUM" ${miningCurrency==='RUM'?'selected':''}>RUM</option>
                 </select>
                 <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:100%;margin-top:10px;">
                 <p style="color:#ccc;margin-top:5px;">Взнос: <strong id="mining-stake">${miningThreshold.toFixed(1)}</strong> ${miningCurrency}</p>
-                <p style="color:#ff6666;">Штраф при поражении: ${(miningThreshold * getPenaltyPercent()).toFixed(2)} SRUM</p>
-                <p style="color:#66ff66;">Награда при победе: ${(miningThreshold * getRewardPercent()).toFixed(2)} USDT</p>
+                <p style="color:#ff6666;" id="penalty-text">Штраф при поражении: ${(miningThreshold * getPenaltyPercent()).toFixed(2)} SRUM</p>
+                <p style="color:#66ff66;" id="reward-text">Награда при победе: ${(miningThreshold * getRewardPercent()).toFixed(2)} USDT</p>
                 <button class="btn-mining-big" id="start-mining-search">🔍 ИСКАТЬ БЛОК</button>
                 <button id="cancel-mining" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">✖ Отмена</button>
             </div>
         </div>
     `;
     document.getElementById('game-container').appendChild(modal);
+
+    // Обработчик слайдера – обновляет взнос, штраф и награду
+    const slider = document.getElementById('threshold-slider');
+    const stakeDisplay = document.getElementById('mining-stake');
+    const penaltyDisplay = document.getElementById('penalty-text');
+    const rewardDisplay = document.getElementById('reward-text');
+    slider.addEventListener('input', function () {
+        const value = parseFloat(this.value);
+        stakeDisplay.textContent = value.toFixed(1);
+        penaltyDisplay.textContent = `Штраф при поражении: ${(value * getPenaltyPercent()).toFixed(2)} SRUM`;
+        rewardDisplay.textContent = `Награда при победе: ${(value * getRewardPercent()).toFixed(2)} USDT`;
+    });
+
+    // Старт майнинга
     document.getElementById('start-mining-search').addEventListener('click', () => {
         miningCurrency = document.getElementById('mining-currency').value;
-        miningThreshold = parseFloat(document.getElementById('threshold-slider').value);
+        miningThreshold = parseFloat(slider.value);
         if (miningCurrency === 'SRUM' && srum < miningThreshold) return alert('Недостаточно SRUM');
         if (miningCurrency === 'RUM' && rum < miningThreshold) return alert('Недостаточно RUM');
         if (miningCurrency === 'SRUM') srum -= miningThreshold;
@@ -100,10 +114,9 @@ function showMiningModal() {
         updateUI(); modal.remove();
         startSearch('mining');
     });
+
+    // Отмена
     document.getElementById('cancel-mining').addEventListener('click', () => modal.remove());
-    document.getElementById('threshold-slider').addEventListener('input', function() {
-        document.getElementById('mining-stake').textContent = parseFloat(this.value).toFixed(1);
-    });
 }
 
 // --- Модальное окно турнира «Выжить в тюрьме» ---
@@ -125,7 +138,7 @@ function showTournamentModal() {
     `;
     document.getElementById('game-container').appendChild(modal);
     document.getElementById('start-tournament-search').addEventListener('click', () => {
-        miningCurrency = 'SRUM'; // в турнире только SRUM
+        miningCurrency = 'SRUM';
         miningThreshold = parseFloat(document.getElementById('tournament-threshold-slider').value);
         if (srum < miningThreshold) return alert('Недостаточно SRUM');
         srum -= miningThreshold;
@@ -317,7 +330,6 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
         }
     }
 
-    // Обновляем состояние бота-спартанца
     if (currentBot.botIndex >= 0) {
         const botWon = !win;
         updateSpartanBot(currentBot.botIndex, botWon, miningStage, penalty, reward);
