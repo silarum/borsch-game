@@ -8,18 +8,7 @@
 </head>
 <body>
 <div id="game-container">
-    <!-- Экран приветствия (показывается вне Telegram) -->
-    <div id="welcome-screen" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;color:white;padding:20px;">
-        <h2>🥘 Добро пожаловать в Крипто Борщ!</h2>
-        <p id="welcome-message">Запустите игру через Telegram Mini App для автоматической регистрации</p>
-        <div id="welcome-buttons" style="display:flex;flex-direction:column;gap:10px;width:80%;margin-top:20px;">
-            <a href="https://t.me/crypto_borsch_channel" target="_blank" style="background:#0088cc;color:white;padding:12px;border-radius:10px;text-align:center;text-decoration:none;">📢 Подписаться на канал</a>
-            <a href="https://t.me/criptoniany" target="_blank" style="background:#0088cc;color:white;padding:12px;border-radius:10px;text-align:center;text-decoration:none;">💬 Вступить в группу</a>
-            <button id="skip-welcome" style="background:none;color:#aaa;border:1px solid #aaa;padding:10px;border-radius:10px;">Пропустить</button>
-        </div>
-    </div>
-
-    <!-- Основная игра -->
+    <!-- Основная игра (показывается после регистрации) -->
     <div id="main-game" style="display:none;">
         <div class="user-profile" id="user-profile">
             <div class="user-avatar" id="user-avatar">😎</div>
