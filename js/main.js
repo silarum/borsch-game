@@ -77,8 +77,31 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
+let userId = 123456789; // временно, пока нет Telegram Web App
+
 (async function init() {
-    await loadUserData();
+    // Загружаем данные из облака
+    const userData = await loadUserData(userId);
+    if (userData) {
+        rum = userData.rum || 0;
+        srum = parseFloat(userData.srum) || 10000;
+        ton = parseFloat(userData.ton) || 0;
+        usdt = parseFloat(userData.usdt) || 0;
+        userNickname = userData.nickname || 'Майнер';
+        userStatus = userData.status || 'solo';
+        miningStage = userData.mining_stage || 1;
+        if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
+    } else {
+        // Новый пользователь – создаём запись
+        await saveUserData(userId, { srum: 10000 });
+    }
+
+    // Проверка приветственного бонуса
+    const bonusGranted = await processWelcomeBonus(userId, userData || {});
+    if (bonusGranted) {
+        alert('🎁 Поздравляем! Вы получили 1 SRUM за подписку на канал и группу!');
+    }
+
     updateUI();
     window.lastGameTime = Date.now();
     if (games < maxGames) startRecovery();
@@ -112,7 +135,16 @@ function updateUI() {
     updateBoostDisplay();
     updateProfile();
     saveAll();
-    saveUserData().catch(console.error);
+    saveUserData(userId, {
+        nickname: userNickname,
+        rum: rum,
+        srum: srum,
+        ton: ton,
+        usdt: usdt,
+        status: userStatus,
+        mining_stage: miningStage,
+        boost: activeBoost ? JSON.stringify(activeBoost) : null
+    }).catch(console.error);
 }
 
 function updateBoostDisplay() {
