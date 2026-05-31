@@ -186,3 +186,67 @@
     color: #999;
     transform: none;
 }
+
+/* ========== КАРТОЧКИ ДЛЯ КОНТЕНТА (ПРАВИЛА, КЛУБ, ИНВЕСТИЦИИ И Т.Д.) ========== */
+.info-card {
+    background: linear-gradient(145deg, #1a1a2e, #252545);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: #ddd;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    width: 100%;
+    text-align: left;
+}
+
+.info-card strong {
+    color: #FFD700;
+}
+
+.info-card p {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* ========== ВКЛАДКИ АРЕНЫ И ЗАДАНИЙ ========== */
+.arena-tabs, #tasks-sub-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0 20px;
+    flex-wrap: wrap;
+}
+.arena-tabs button, #tasks-sub-tabs button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #ccc;
+    transition: 0.3s;
+}
+.arena-tabs button.active, #tasks-sub-tabs button.active {
+    background: linear-gradient(135deg, #FFD700, #FF8C00);
+    color: black;
+    box-shadow: 0 0 15px rgba(255,215,0,0.5);
+}
+
+.sub-tab {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    cursor: pointer;
+    background: #333;
+    color: #aaa;
+    transition: all 0.2s;
+    box-shadow: 0 0 5px rgba(255,255,255,0.2);
+}
+.sub-tab.active {
+    background: linear-gradient(135deg, #FFD700, #FF8C00);
+    color: black;
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 15px rgba(255,215,0,0.8);
+}
