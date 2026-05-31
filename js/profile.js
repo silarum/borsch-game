@@ -41,10 +41,58 @@ window.adminLogin = function(){
             <button onclick="createBots()">300 спартанцев</button>
             <button onclick="toggleSpartans()">${spartansEnabled ? '🛑 Выключить' : '🟢 Включить'} 300 спартанцев</button>
             <button onclick="resetSpartans()">🔄 Сбросить состояния</button>
+            <hr style="border-color:#555">
+            <h4>🛍️ Добавить товар в магазин</h4>
+            <input type="text" id="new-item-name" placeholder="Название">
+            <input type="text" id="new-item-icon" placeholder="Иконка (эмодзи)">
+            <input type="number" id="new-item-price" placeholder="Цена" step="0.01">
+            <select id="new-item-currency">
+                <option value="RUM">RUM</option>
+                <option value="SRUM">SRUM</option>
+                <option value="TON">TON</option>
+                <option value="USDT">USDT</option>
+            </select>
+            <input type="text" id="new-item-desc" placeholder="Описание">
+            <button onclick="addShopItem()">✅ Добавить товар</button>
+            <hr style="border-color:#555">
             <button onclick="document.getElementById('admin-modal').classList.remove('active')">Выход</button>
         `;
     } else alert('Неверный логин/пароль');
 };
+
+window.addShopItem = function() {
+    const name = document.getElementById('new-item-name').value.trim();
+    const icon = document.getElementById('new-item-icon').value.trim() || '🛒';
+    const price = parseFloat(document.getElementById('new-item-price').value);
+    const currency = document.getElementById('new-item-currency').value;
+    const desc = document.getElementById('new-item-desc').value.trim();
+
+    if (!name || isNaN(price) || price <= 0) {
+        alert('Заполните название и цену корректно');
+        return;
+    }
+
+    const newItem = {
+        id: Date.now(),
+        name,
+        icon,
+        price,
+        currency,
+        description: desc || ''
+    };
+
+    shopItems.push(newItem);
+    localStorage.setItem('shopItems', JSON.stringify(shopItems));
+    alert(`Товар "${name}" добавлен!`);
+    document.getElementById('new-item-name').value = '';
+    document.getElementById('new-item-icon').value = '';
+    document.getElementById('new-item-price').value = '';
+    document.getElementById('new-item-desc').value = '';
+    if (document.getElementById('shop-screen').classList.contains('active')) {
+        renderShop();
+    }
+};
+
 window.showTournamentForm = function(){ alert('Форма создания турнира'); };
 window.viewAllPlayers = function(){ alert('Статистика игроков'); };
 window.createBots = function(){ alert('Запуск ботов'); };
