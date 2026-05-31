@@ -9,6 +9,7 @@ function updateProfile() {
     }
 }
 
+// Открытие статистики (короткое нажатие на аватар)
 document.getElementById('user-avatar').addEventListener('click', () => {
     document.getElementById('stats-nickname').textContent = userNickname;
     document.getElementById('stats-rum').textContent = rum;
@@ -19,9 +20,14 @@ document.getElementById('user-avatar').addEventListener('click', () => {
     document.getElementById('stats-rank-srum').textContent = '1';
     document.getElementById('stats-modal').classList.add('active');
 });
-document.getElementById('user-menu-btn').addEventListener('click', () => {
+
+// Открытие/закрытие меню
+document.getElementById('user-menu-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
     document.getElementById('menu-dropdown').classList.toggle('active');
 });
+
+// Обработчики для пунктов меню (включая админку)
 document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.getElementById('menu-dropdown').classList.remove('active');
@@ -29,7 +35,13 @@ document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
     });
 });
 
-// Админ-панель
+// Кнопка "Админ-панель" в меню
+document.getElementById('admin-menu-btn').addEventListener('click', () => {
+    document.getElementById('menu-dropdown').classList.remove('active');
+    document.getElementById('admin-modal').classList.add('active');
+});
+
+// Админ-панель: вход
 window.adminLogin = function(){
     let login = document.getElementById('admin-login').value;
     let pass = document.getElementById('admin-password').value;
@@ -60,6 +72,7 @@ window.adminLogin = function(){
     } else alert('Неверный логин/пароль');
 };
 
+// Добавление товара в магазин из админки
 window.addShopItem = function() {
     const name = document.getElementById('new-item-name').value.trim();
     const icon = document.getElementById('new-item-icon').value.trim() || '🛒';
@@ -93,24 +106,32 @@ window.addShopItem = function() {
     }
 };
 
+// Заглушки для других кнопок админки
 window.showTournamentForm = function(){ alert('Форма создания турнира'); };
 window.viewAllPlayers = function(){ alert('Статистика игроков'); };
 window.createBots = function(){ alert('Запуск ботов'); };
 
+// Долгое нажатие (5 секунд) для открытия админки на аватаре и кнопках
 let pressTimer;
 function startPressAdmin(e){
+    e.preventDefault();
     pressTimer = setTimeout(() => {
         document.getElementById('admin-modal').classList.add('active');
-    }, 60000);
+    }, 5000); // 5 секунд
 }
 function cancelPressAdmin(){ clearTimeout(pressTimer); }
+
+// Вешаем обработчики на аватар
 document.getElementById('user-avatar').addEventListener('touchstart', startPressAdmin);
 document.getElementById('user-avatar').addEventListener('touchend', cancelPressAdmin);
 document.getElementById('user-avatar').addEventListener('mousedown', startPressAdmin);
 document.getElementById('user-avatar').addEventListener('mouseup', cancelPressAdmin);
-document.querySelector('.nav-btn[data-screen="arena"]').addEventListener('touchstart', startPressAdmin);
-document.querySelector('.nav-btn[data-screen="arena"]').addEventListener('touchend', cancelPressAdmin);
-document.querySelector('.nav-btn[data-screen="shop"]').addEventListener('touchstart', startPressAdmin);
-document.querySelector('.nav-btn[data-screen="shop"]').addEventListener('touchend', cancelPressAdmin);
-document.querySelector('.nav-btn[data-screen="wallet"]').addEventListener('touchstart', startPressAdmin);
-document.querySelector('.nav-btn[data-screen="wallet"]').addEventListener('touchend', cancelPressAdmin);
+
+// На кнопки навигации
+const navBtns = document.querySelectorAll('.nav-btn[data-screen="arena"], .nav-btn[data-screen="shop"], .nav-btn[data-screen="wallet"]');
+navBtns.forEach(btn => {
+    btn.addEventListener('touchstart', startPressAdmin);
+    btn.addEventListener('touchend', cancelPressAdmin);
+    btn.addEventListener('mousedown', startPressAdmin);
+    btn.addEventListener('mouseup', cancelPressAdmin);
+});
