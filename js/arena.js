@@ -61,22 +61,31 @@ quickDuelCoin.addEventListener('click', () => {
     showMiningModal();
 });
 
-// --- Модальное окно выбора порога и этапа (обычный майнинг) ---
+// --- Модальное окно выбора порога и этапа (обычный майнинг) – НОВЫЙ ДИЗАЙН ---
 function showMiningModal() {
-    const penalty = (miningThreshold * getPenaltyPercent()).toFixed(2);
-    const reward = (miningThreshold * getRewardPercent()).toFixed(2);
     const modal = document.createElement('div');
     modal.className = 'quick-duel-modal';
+    // Генерируем случайный пул для красоты
+    const poolAmount = (10000 + Math.random() * 190000).toFixed(0); // 10k - 200k
+    const activePlayers = Math.floor(10 + Math.random() * 290); // 10 - 300
     modal.innerHTML = `
-        <div class="quick-duel-box">
-            <h2>⛏️ Игровой майнинг</h2>
-            <p>Этап: <b>${miningStage}</b> | Порог: <b>${miningThreshold.toFixed(1)}</b> SRUM</p>
-            <select id="mining-currency"><option value="SRUM" ${miningCurrency==='SRUM'?'selected':''}>SRUM (USDT)</option><option value="RUM" ${miningCurrency==='RUM'?'selected':''}>RUM</option></select>
-            <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:90%;">
-            <p>Взнос: <strong id="mining-stake">${miningThreshold.toFixed(1)}</strong> ${miningCurrency}</p>
-            <p>Штраф при поражении: ${penalty} SRUM | Награда при победе: ${reward} USDT</p>
-            <button id="start-mining-search">🔍 Искать блок</button>
-            <button id="cancel-mining">✖ Отмена</button>
+        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
+            <div class="pool-cloud">
+                <h2>⛏️ Криптобеспредел</h2>
+                <div class="pool-amount">💎 ${poolAmount} USDT</div>
+                <div class="pool-players">🖥️ <span>${activePlayers}</span> майнеров в пуле</div>
+                <div class="pool-stage">Твой этап: <b>${miningStage}</b> | Порог: <b>${miningThreshold.toFixed(1)}</b> SRUM</div>
+                <select id="mining-currency" style="width:100%;padding:12px;margin-top:15px;border-radius:10px;border:none;font-size:1rem;background:rgba(255,255,255,0.15);color:white;">
+                    <option value="SRUM" ${miningCurrency==='SRUM'?'selected':''}>SRUM (USDT)</option>
+                    <option value="RUM" ${miningCurrency==='RUM'?'selected':''}>RUM</option>
+                </select>
+                <input type="range" min="0.1" max="5" step="0.1" value="${miningThreshold}" id="threshold-slider" style="width:100%;margin-top:10px;">
+                <p style="color:#ccc;margin-top:5px;">Взнос: <strong id="mining-stake">${miningThreshold.toFixed(1)}</strong> ${miningCurrency}</p>
+                <p style="color:#ff6666;">Штраф при поражении: ${(miningThreshold * getPenaltyPercent()).toFixed(2)} SRUM</p>
+                <p style="color:#66ff66;">Награда при победе: ${(miningThreshold * getRewardPercent()).toFixed(2)} USDT</p>
+                <button class="btn-mining-big" id="start-mining-search">🔍 ИСКАТЬ БЛОК</button>
+                <button id="cancel-mining" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">✖ Отмена</button>
+            </div>
         </div>
     `;
     document.getElementById('game-container').appendChild(modal);
@@ -170,7 +179,6 @@ function startSearch(mode = 'mining') {
         if (selectedBot) {
             currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin };
         } else {
-            // обычный бот
             let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
             currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
         }
@@ -311,7 +319,7 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
 
     // Обновляем состояние бота-спартанца
     if (currentBot.botIndex >= 0) {
-        const botWon = !win; // бот выиграл, если игрок проиграл
+        const botWon = !win;
         updateSpartanBot(currentBot.botIndex, botWon, miningStage, penalty, reward);
     }
 
@@ -421,7 +429,6 @@ function renderArena() {
                 sec--;
                 if (sec <= 0) {
                     clearInterval(st);
-                    // Выбор бота для арены
                     let sel = spartansEnabled ? selectSpartanBot(miningStage) : null;
                     if (sel) {
                         currentBot = { name: sel.name, speed: sel.speed, botIndex: sel.botIndex, shouldWin: sel.shouldWin };
