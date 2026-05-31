@@ -8,133 +8,150 @@
 </head>
 <body>
 <div id="game-container">
-    <div class="user-profile" id="user-profile">
-        <div class="user-avatar" id="user-avatar">😎</div>
-        <div class="user-info">
-            <div id="user-nickname">Майнер</div>
-            <div id="user-status" data-lang="status_solo">Одиночка</div>
-        </div>
-        <button class="user-menu-btn" id="user-menu-btn">☰</button>
-    </div>
-    <div class="menu-dropdown" id="menu-dropdown">
-        <button data-screen="about">📖 О проекте</button>
-        <button data-screen="top-tappers">🏆 Топ игроков</button>
-        <button data-screen="top-miners">⛏️ Топ майнеров</button>
-        <button data-screen="invest">📈 Инвестиции</button>
-        <button data-screen="referral">👥 Рефералы</button>
-        <button data-screen="roadmap">🗺️ Дорожная карта</button>
-    </div>
-    <div class="stats-modal" id="stats-modal">
-        <div class="stats-box">
-            <h3>📊 Статистика майнера</h3>
-            <p><b>Ник:</b> <span id="stats-nickname"></span></p>
-            <p><b>RUM:</b> <span id="stats-rum"></span></p>
-            <p><b>SRUM:</b> <span id="stats-srum"></span></p>
-            <p><b>USDT:</b> <span id="stats-usdt"></span></p>
-            <p><b>TON:</b> <span id="stats-ton"></span></p>
-            <p><b>Рейтинг (RUM):</b> <span id="stats-rank-rum">1</span></p>
-            <p><b>Рейтинг (SRUM):</b> <span id="stats-rank-srum">1</span></p>
-            <button onclick="document.getElementById('stats-modal').classList.remove('active')">Закрыть</button>
+    <!-- Экран приветствия (показывается до регистрации) -->
+    <div id="welcome-screen" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;padding:20px;">
+        <h2>🥘 Добро пожаловать в Крипто Борщ!</h2>
+        <p id="welcome-message">Проверяем подписки...</p>
+        <div id="welcome-buttons" style="display:none;flex-direction:column;gap:10px;width:80%;margin-top:20px;">
+            <a href="https://t.me/crypto_borsch_channel" target="_blank" style="background:#0088cc;color:white;padding:12px;border-radius:10px;text-align:center;text-decoration:none;">📢 Подписаться на канал</a>
+            <a href="https://t.me/criptoniany" target="_blank" style="background:#0088cc;color:white;padding:12px;border-radius:10px;text-align:center;text-decoration:none;">💬 Вступить в группу</a>
+            <button id="check-subscriptions" style="background:gold;color:black;padding:15px;border-radius:15px;font-weight:bold;font-size:1.2rem;">🎁 Проверить и получить бонус</button>
+            <button id="skip-welcome" style="background:none;color:#aaa;border:1px solid #aaa;padding:10px;border-radius:10px;">Пропустить</button>
         </div>
     </div>
-    <div class="admin-modal" id="admin-modal">
-        <div class="admin-box" id="admin-content">
-            <h3>🔐 Вход в админ-панель</h3>
-            <input type="text" id="admin-login" placeholder="Логин" value="admin"><br>
-            <input type="password" id="admin-password" placeholder="Пароль" value="admin"><br>
-            <button onclick="adminLogin()">Войти</button>
-            <button onclick="document.getElementById('admin-modal').classList.remove('active')">Отмена</button>
+
+    <!-- Остальная игра (скрыта до регистрации) -->
+    <div id="main-game" style="display:none;">
+        <div class="user-profile" id="user-profile">
+            <div class="user-avatar" id="user-avatar">😎</div>
+            <div class="user-info">
+                <div id="user-nickname">Майнер</div>
+                <div id="user-status" data-lang="status_solo">Одиночка</div>
+            </div>
+            <button class="user-menu-btn" id="user-menu-btn">☰</button>
         </div>
-    </div>
-    <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span></button>
-    <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span></button>
-    <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
-    <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
-    <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
-    <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
-    <div class="glass-wall"></div><div class="window-sill"></div><div class="flower-pot"></div><div class="purple-bg"></div>
-    <div class="kitchen-area"><div class="table"></div><div class="stove"><div class="pot" id="pot"><div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div><div class="energy-display" id="energy-display"></div><div class="boost-display" id="boost-display"></div></div></div></div>
-    <div class="start-btn-container" id="start-btn-container">
-        <button class="start-btn" id="start-btn" data-lang="start_btn">🥘 НАЧАТЬ</button>
-    </div>
-    <div class="board" id="board">
-        <div class="row"><div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div></div>
-        <div class="row"><div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div></div>
-        <div class="row"><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div></div>
-    </div>
-    <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
-    <div class="duel-scoreboard hidden" id="duel-scoreboard">
-        <span>⚡ <span data-lang="duel_you">Ты</span>: <span id="duelPlayerScore">0</span></span>
-        <span>⏳ <span id="duelTimer">20</span>с</span>
-        <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
-    </div>
-    <div class="top-panel">
-        <div class="balances-right">
-            <div id="rum-balance">💰 RUM: 0</div>
-            <div id="srum-balance">💎 SRUM: 0.00</div>
-            <div id="usdt-balance-top">💵 USDT: 0.00</div>
-            <div id="ton-balance-top">⚡ TON: 0.00</div>
+        <div class="menu-dropdown" id="menu-dropdown">
+            <button data-screen="about">📖 О проекте</button>
+            <button data-screen="top-tappers">🏆 Топ игроков</button>
+            <button data-screen="top-miners">⛏️ Топ майнеров</button>
+            <button data-screen="invest">📈 Инвестиции</button>
+            <button data-screen="referral">👥 Рефералы</button>
+            <button data-screen="roadmap">🗺️ Дорожная карта</button>
         </div>
-    </div>
-    <div class="bottom-panel">
-        <button class="nav-btn" data-screen="arena"><span data-lang="arena_btn">🏟️ Арена</span></button>
-        <button class="nav-btn" data-screen="mining-club"><span data-lang="club_btn">🐺 Клуб</span></button>
-        <button class="nav-btn" data-screen="tasks"><span data-lang="tasks_btn">📋 Задания</span></button>
-        <button class="nav-btn" data-screen="wallet"><span data-lang="wallet_btn">👛 Кошелёк</span></button>
-        <button class="nav-btn" data-screen="shop"><span data-lang="shop_btn">🛍️ Магазин</span></button>
-    </div>
-    <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
-    <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
-    <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" style="padding:8px 12px;background:#FFD700;border:none;border-radius:8px;color:black" data-lang="tasks_avail">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px;background:#4CAF50;border:none;border-radius:8px" data-lang="tasks_create">Создать</button><button id="tasks-my-btn" style="padding:8px 12px;background:#2196F3;border:none;border-radius:8px" data-lang="tasks_my">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
-    <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.</span></p><p>Скоро появятся первые проекты.</p></div>
-    <div class="screen" id="wallet-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn" id="connect-ton-btn"><span data-lang="wallet_connect">Привязать TON кошелёк</span></button></div>
-    <div class="screen" id="shop-screen">
-        <button class="back-btn">← <span data-lang="back">Назад</span></button>
-        <h2>🛍️ <span data-lang="shop_title">Магазин</span></h2>
-        <div class="shop-grid" id="shop-grid"></div>
-    </div>
-    <div class="screen" id="top-tappers-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🏆 <span data-lang="top_players_title">Топ игроков</span></h2><p>1. ...</p></div>
-    <div class="screen" id="top-miners-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>⛏️ <span data-lang="top_miners_title">Топ майнеров</span></h2><p>1. ...</p></div>
-    <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><div style="width:100%"><input readonly id="ref-link" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="copyRef()" class="shop-btn">📋 Копировать ссылку</button><input placeholder="Введите реферальный код" id="ref-code-input" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="applyRefCode()" class="shop-btn">🎁 Активировать код</button><div id="referral-list"></div></div></div>
-    <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
-        <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
-        <div class="rules-scroll">
-            <p><strong>🍲 <span data-lang="rules_rum_title">RUM‑майнинг</span></strong><br>
-            <span data-lang="rules_rum_desc">Это твоя личная кухня! Нажимай на полезные овощи 🥬🧅🥔🥕 — они принесут тебе 🪙 RUM. Каждые 10 точных попаданий подряд удваивают награду: ×2, ×4, ×8… Ошибка (💩, 🪱 или промах) сбрасывает серию и отнимает 20 RUM. У тебя 3 попытки в час — используй их с умой!</span></p>
-            <p><strong>⛏️ <span data-lang="rules_pvp_title">Криптобеспредел (PvP‑майнинг)</span></strong><br>
-            <span data-lang="rules_pvp_desc">Здесь ты сражаешься с другими майнерами за реальные блоки 🎯. Ты ставишь 💎 SRUM (1 SRUM = 1 USDT) и выбираешь этап — от этого зависят риски и награды. За 20 секунд нужно набрать больше очков, чем соперник. Победил — получил USDT на кошелёк 💵, проиграл — штраф SRUM. Но самый крутой шанс — <strong>редкий блок до 10 000 USDT</strong>! Он выпадает случайно, как джекпот 🎰. Твоя мощь зависит от этапа и активных бустеров ⚡.</span></p>
-            <p><strong>💎 <span data-lang="rules_status_title">Статусы и вывод USDT</span></strong><br>
-            <span data-lang="rules_status_desc">Чем выше твой статус, тем больше можно выводить ежедневно:
-            <br>🥈 Серебро — до 200 USDT/сутки
-            <br>🥇 Золото — до 500 USDT/сутки
-            <br>💠 Платина — до 1 000 USDT/сутки
-            <br>Статус покупается в магазине за SRUM, но можно и заработать активной игрой. Вывод мгновенный, через TON‑кошелёк ⚡.</span></p>
-            <p><strong>🚀 <span data-lang="rules_start_title">Как начать прямо сейчас</span></strong><br>
-            <span data-lang="rules_start_desc">1. Жми 🥘 НАЧАТЬ — фарми RUM.<br>
-            2. Нажми на золотую монету 💰 — войди в PvP‑майнинг за USDT.<br>
-            3. Покупай бустеры и статусы в магазине 🛍️.<br>
-            4. Приглашай друзей 👥 — получай бонусы.<br>
-            5. Выводи реальные доллары на свой TON‑кошелёк 💵.</span></p>
+        <div class="stats-modal" id="stats-modal">
+            <div class="stats-box">
+                <h3>📊 Статистика майнера</h3>
+                <p><b>Ник:</b> <span id="stats-nickname"></span></p>
+                <p><b>RUM:</b> <span id="stats-rum"></span></p>
+                <p><b>SRUM:</b> <span id="stats-srum"></span></p>
+                <p><b>USDT:</b> <span id="stats-usdt"></span></p>
+                <p><b>TON:</b> <span id="stats-ton"></span></p>
+                <p><b>Рейтинг (RUM):</b> <span id="stats-rank-rum">1</span></p>
+                <p><b>Рейтинг (SRUM):</b> <span id="stats-rank-srum">1</span></p>
+                <button onclick="document.getElementById('stats-modal').classList.remove('active')">Закрыть</button>
+            </div>
         </div>
-    </div>
-    <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
-        <h2>📖 <span data-lang="about_title">О проекте</span></h2>
-        <div class="rules-scroll">
-            <p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram, объединяющая тапалку, PvP-майнинг, клубы и инвестиции.</p>
-            <p>Возможности: играй, зарабатывай RUM и SRUM, участвуй в турнирах, создавай клубы, приглашай друзей, инвестируй в реальные проекты.</p>
+        <div class="admin-modal" id="admin-modal">
+            <div class="admin-box" id="admin-content">
+                <h3>🔐 Вход в админ-панель</h3>
+                <input type="text" id="admin-login" placeholder="Логин" value="admin"><br>
+                <input type="password" id="admin-password" placeholder="Пароль" value="admin"><br>
+                <button onclick="adminLogin()">Войти</button>
+                <button onclick="document.getElementById('admin-modal').classList.remove('active')">Отмена</button>
+            </div>
         </div>
-    </div>
-    <div id="language-modal" class="language-modal hidden">
-        <div class="language-box">
-            <h3 data-lang="lang_title">Выберите язык / Choose language / 选择语言</h3>
-            <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
-            <button onclick="setLanguage('en')">🇬🇧 English</button>
-            <button onclick="setLanguage('zh')">🇨🇳 中文</button>
-            <button onclick="document.getElementById('language-modal').classList.add('hidden')" data-lang="lang_cancel">Отмена / Cancel / 取消</button>
+        <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span></button>
+        <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span></button>
+        <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
+        <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
+        <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
+        <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
+        <div class="glass-wall"></div><div class="window-sill"></div><div class="flower-pot"></div><div class="purple-bg"></div>
+        <div class="kitchen-area"><div class="table"></div><div class="stove"><div class="pot" id="pot"><div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div><div class="energy-display" id="energy-display"></div><div class="boost-display" id="boost-display"></div></div></div></div>
+        <div class="start-btn-container" id="start-btn-container">
+            <button class="start-btn" id="start-btn" data-lang="start_btn">🥘 НАЧАТЬ</button>
+        </div>
+        <div class="board" id="board">
+            <div class="row"><div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div></div>
+            <div class="row"><div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div></div>
+            <div class="row"><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div></div>
+        </div>
+        <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
+        <div class="duel-scoreboard hidden" id="duel-scoreboard">
+            <span>⚡ <span data-lang="duel_you">Ты</span>: <span id="duelPlayerScore">0</span></span>
+            <span>⏳ <span id="duelTimer">20</span>с</span>
+            <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
+        </div>
+        <div class="top-panel">
+            <div class="balances-right">
+                <div id="rum-balance">💰 RUM: 0</div>
+                <div id="srum-balance">💎 SRUM: 0.00</div>
+                <div id="usdt-balance-top">💵 USDT: 0.00</div>
+                <div id="ton-balance-top">⚡ TON: 0.00</div>
+            </div>
+        </div>
+        <div class="bottom-panel">
+            <button class="nav-btn" data-screen="arena"><span data-lang="arena_btn">🏟️ Арена</span></button>
+            <button class="nav-btn" data-screen="mining-club"><span data-lang="club_btn">🐺 Клуб</span></button>
+            <button class="nav-btn" data-screen="tasks"><span data-lang="tasks_btn">📋 Задания</span></button>
+            <button class="nav-btn" data-screen="wallet"><span data-lang="wallet_btn">👛 Кошелёк</span></button>
+            <button class="nav-btn" data-screen="shop"><span data-lang="shop_btn">🛍️ Магазин</span></button>
+        </div>
+        <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
+        <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
+        <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" style="padding:8px 12px;background:#FFD700;border:none;border-radius:8px;color:black" data-lang="tasks_avail">Доступные</button><button id="tasks-create-btn" style="padding:8px 12px;background:#4CAF50;border:none;border-radius:8px" data-lang="tasks_create">Создать</button><button id="tasks-my-btn" style="padding:8px 12px;background:#2196F3;border:none;border-radius:8px" data-lang="tasks_my">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
+        <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><p><span data-lang="invest_desc">Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.</span></p><p>Скоро появятся первые проекты.</p></div>
+        <div class="screen" id="wallet-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2><p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p><button class="shop-btn" id="connect-ton-btn"><span data-lang="wallet_connect">Привязать TON кошелёк</span></button></div>
+        <div class="screen" id="shop-screen">
+            <button class="back-btn">← <span data-lang="back">Назад</span></button>
+            <h2>🛍️ <span data-lang="shop_title">Магазин</span></h2>
+            <div class="shop-grid" id="shop-grid"></div>
+        </div>
+        <div class="screen" id="top-tappers-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🏆 <span data-lang="top_players_title">Топ игроков</span></h2><p>1. ...</p></div>
+        <div class="screen" id="top-miners-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>⛏️ <span data-lang="top_miners_title">Топ майнеров</span></h2><p>1. ...</p></div>
+        <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><div style="width:100%"><input readonly id="ref-link" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="copyRef()" class="shop-btn">📋 Копировать ссылку</button><input placeholder="Введите реферальный код" id="ref-code-input" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="applyRefCode()" class="shop-btn">🎁 Активировать код</button><div id="referral-list"></div></div></div>
+        <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
+            <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
+            <div class="rules-scroll">
+                <p><strong>🍲 <span data-lang="rules_rum_title">RUM‑майнинг</span></strong><br>
+                <span data-lang="rules_rum_desc">Это твоя личная кухня! Нажимай на полезные овощи 🥬🧅🥔🥕 — они принесут тебе 🪙 RUM. Каждые 10 точных попаданий подряд удваивают награду: ×2, ×4, ×8… Ошибка (💩, 🪱 или промах) сбрасывает серию и отнимает 20 RUM. У тебя 3 попытки в час — используй их с умой!</span></p>
+                <p><strong>⛏️ <span data-lang="rules_pvp_title">Криптобеспредел (PvP‑майнинг)</span></strong><br>
+                <span data-lang="rules_pvp_desc">Здесь ты сражаешься с другими майнерами за реальные блоки 🎯. Ты ставишь 💎 SRUM (1 SRUM = 1 USDT) и выбираешь этап — от этого зависят риски и награды. За 20 секунд нужно набрать больше очков, чем соперник. Победил — получил USDT на кошелёк 💵, проиграл — штраф SRUM. Но самый крутой шанс — <strong>редкий блок до 10 000 USDT</strong>! Он выпадает случайно, как джекпот 🎰. Твоя мощь зависит от этапа и активных бустеров ⚡.</span></p>
+                <p><strong>💎 <span data-lang="rules_status_title">Статусы и вывод USDT</span></strong><br>
+                <span data-lang="rules_status_desc">Чем выше твой статус, тем больше можно выводить ежедневно:
+                <br>🥈 Серебро — до 200 USDT/сутки
+                <br>🥇 Золото — до 500 USDT/сутки
+                <br>💠 Платина — до 1 000 USDT/сутки
+                <br>Статус покупается в магазине за SRUM, но можно и заработать активной игрой. Вывод мгновенный, через TON‑кошелёк ⚡.</span></p>
+                <p><strong>🚀 <span data-lang="rules_start_title">Как начать прямо сейчас</span></strong><br>
+                <span data-lang="rules_start_desc">1. Жми 🥘 НАЧАТЬ — фарми RUM.<br>
+                2. Нажми на золотую монету 💰 — войди в PvP‑майнинг за USDT.<br>
+                3. Покупай бустеры и статусы в магазине 🛍️.<br>
+                4. Приглашай друзей 👥 — получай бонусы.<br>
+                5. Выводи реальные доллары на свой TON‑кошелёк 💵.</span></p>
+            </div>
+        </div>
+        <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
+            <h2>📖 <span data-lang="about_title">О проекте</span></h2>
+            <div class="rules-scroll">
+                <p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram, объединяющая тапалку, PvP-майнинг, клубы и инвестиции.</p>
+                <p>Возможности: играй, зарабатывай RUM и SRUM, участвуй в турнирах, создавай клубы, приглашай друзей, инвестируй в реальные проекты.</p>
+            </div>
+        </div>
+        <div id="language-modal" class="language-modal hidden">
+            <div class="language-box">
+                <h3 data-lang="lang_title">Выберите язык / Choose language / 选择语言</h3>
+                <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
+                <button onclick="setLanguage('en')">🇬🇧 English</button>
+                <button onclick="setLanguage('zh')">🇨🇳 中文</button>
+                <button onclick="document.getElementById('language-modal').classList.add('hidden')" data-lang="lang_cancel">Отмена / Cancel / 取消</button>
+            </div>
         </div>
     </div>
 </div>
 <script src="js/lang.js"></script>
+<script src="js/api.js"></script>
+<script src="js/bonus.js"></script>
 <script src="js/main.js"></script>
 <script src="js/game-engine.js"></script>
 <script src="js/market.js"></script>
