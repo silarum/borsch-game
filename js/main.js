@@ -6,6 +6,7 @@ let invest = 0;
 let srum = 0;
 let ton = 0;
 let usdt = 0;
+// Энергия – восстанавливается корректно
 let games = parseInt(localStorage.getItem('games'));
 if (isNaN(games) || games < 0) games = 3;
 const maxGames = 3;
@@ -105,6 +106,8 @@ async function startMainGame() {
         userStatus = userData.status || 'solo';
         miningStage = userData.mining_stage || 1;
         if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
+        // Восстанавливаем энергию из облака, если есть
+        if (typeof userData.games !== 'undefined') games = userData.games;
     } else {
         await saveUserData(userId, {
             nickname: userNickname,
@@ -113,7 +116,8 @@ async function startMainGame() {
             ton: 0,
             usdt: 0,
             status: 'solo',
-            mining_stage: 1
+            mining_stage: 1,
+            games: games
         });
     }
 
@@ -242,7 +246,8 @@ function updateUI() {
             usdt: usdt,
             status: userStatus,
             mining_stage: miningStage,
-            boost: activeBoost ? JSON.stringify(activeBoost) : null
+            boost: activeBoost ? JSON.stringify(activeBoost) : null,
+            games: games
         }).catch(console.error);
     }
 }
