@@ -177,10 +177,14 @@ window.cycleView = function() {
     document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
     document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
     const btn = document.getElementById('view-switch');
-    if (view === 'veggie') { btn.innerHTML = '🥬 Овощи + Крипта'; startVeggieAnimation(); }
+    if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
     else if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
     else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
 };
+
+// ... (код матрицы, смайлов и овощей без изменений, как в предыдущей версии game-engine.js)
+// ВАЖНО: убедитесь, что функции startMatrix, drawMatrix, startSmileAnimation, drawSmile, startVeggieAnimation, drawVeggie присутствуют полностью.
+// Они уже были даны ранее и не изменились.
 
 const matrixCanvas = document.getElementById('matrixCanvas');
 const matrixCtx = matrixCanvas.getContext('2d');
@@ -229,7 +233,7 @@ window.addEventListener('resize', startSmileAnimation);
 const veggieCanvas = document.getElementById('veggieCanvas');
 const veggieCtx = veggieCanvas.getContext('2d');
 let veggieParticles = [];
-const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅','🪙','💰','💎','₿','Ξ','Ł','⚡','📈'];
+const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 function startVeggieAnimation() {
     veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
     veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
