@@ -34,15 +34,13 @@
                 <p><b>SRUM:</b> <span id="stats-srum"></span></p>
                 <p><b>USDT:</b> <span id="stats-usdt"></span></p>
                 <p><b>TON:</b> <span id="stats-ton"></span></p>
-                <p><b>Рейтинг (RUM):</b> <span id="stats-rank-rum">1</span></p>
-                <p><b>Рейтинг (SRUM):</b> <span id="stats-rank-srum">1</span></p>
                 <button onclick="document.getElementById('stats-modal').classList.remove('active')">Закрыть</button>
             </div>
         </div>
         <div class="admin-modal" id="admin-modal">
             <div class="admin-box" id="admin-content"></div>
         </div>
-        <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span></button>
+        <button id="view-switch" onclick="cycleView()"><span>🥬 Овощи + Крипта</span></button>
         <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span></button>
         <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
         <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
@@ -99,9 +97,9 @@
         <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
             <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
             <div class="rules-scroll">
-                <div class="info-card"><p><strong>🍲 <span data-lang="rules_rum_title">RUM‑майнинг</span></strong><br><span data-lang="rules_rum_desc">Это твоя личная кухня! Нажимай на полезные овощи 🥬🧅🥔🥕 — они принесут тебе 🪙 RUM. Каждые 10 точных попаданий подряд удваивают награду: ×2, ×4, ×8… Ошибка (💩, 🪱 или промах) сбрасывает серию и отнимает 20 RUM. У тебя 3 попытки в час — используй их с умой!</span></p></div>
-                <div class="info-card"><p><strong>⛏️ <span data-lang="rules_pvp_title">Криптобеспредел (PvP‑майнинг)</span></strong><br><span data-lang="rules_pvp_desc">Здесь ты сражаешься с другими майнерами за реальные блоки 🎯. Ты ставишь 💎 SRUM (1 SRUM = 1 USDT) и выбираешь этап — от этого зависят риски и награды. За 20 секунд нужно набрать больше очков, чем соперник. Победил — получил USDT на кошелёк 💵, проиграл — штраф SRUM. Но самый крутой шанс — редкий блок до 10 000 USDT! Он выпадает случайно, как джекпот 🎰.</span></p></div>
-                <div class="info-card"><p><strong>💎 <span data-lang="rules_status_title">Статусы и вывод USDT</span></strong><br><span data-lang="rules_status_desc">🥈 Серебро — до 200 USDT/сутки<br>🥇 Золото — до 500 USDT/сутки<br>💠 Платина — до 1 000 USDT/сутки<br>Вывод через TON‑кошелёк ⚡.</span></p></div>
+                <div class="info-card"><p><strong>🍲 <span data-lang="rules_rum_title">RUM‑майнинг</span></strong><br><span data-lang="rules_rum_desc">Это твоя личная кухня! Нажимай на полезные овощи 🥬🧅🥔🥕 — они принесут тебе 🪙 RUM. Каждые 10 точных попаданий подряд удваивают награду. Ошибка сбрасывает серию и отнимает 20 RUM. 3 попытки в час.</span></p></div>
+                <div class="info-card"><p><strong>⛏️ <span data-lang="rules_pvp_title">Криптобеспредел (PvP‑майнинг)</span></strong><br><span data-lang="rules_pvp_desc">Ставка SRUM, дуэль 20 секунд. Победитель получает USDT, проигравший теряет мощность.</span></p></div>
+                <div class="info-card"><p><strong>💎 <span data-lang="rules_status_title">Статусы и вывод USDT</span></strong><br><span data-lang="rules_status_desc">🥈 Серебро — до 200 USDT/сутки<br>🥇 Золото — до 500 USDT/сутки<br>💠 Платина — до 1 000 USDT/сутки</span></p></div>
             </div>
         </div>
         <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
@@ -123,6 +121,7 @@
 <script src="js/api.js"></script>
 <script src="js/bonus.js"></script>
 <script src="js/wallet.js"></script>
+<script src="js/contract.js"></script>
 <script src="js/main.js"></script>
 <script src="js/game-engine.js"></script>
 <script src="js/market.js"></script>
