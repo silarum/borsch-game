@@ -81,11 +81,16 @@
         <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
         <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" class="sub-tab active">Доступные</button><button id="tasks-create-btn" class="sub-tab">Создать</button><button id="tasks-my-btn" class="sub-tab">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
         <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><div class="info-card"><p><span data-lang="invest_desc">Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.</span></p><p>Скоро появятся первые проекты.</p></div></div>
-        <div class="screen" id="wallet-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2><div class="info-card" id="wallet-card">
-            <p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p>
-            <div id="ton-connect-container" style="display:flex;justify-content:center;margin:15px 0;"></div>
-            <p style="font-size:0.8rem;color:#aaa;" id="wallet-address"></p>
-        </div></div>
+        <div class="screen" id="wallet-screen">
+            <button class="back-btn">← <span data-lang="back">Назад</span></button>
+            <h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2>
+            <div class="info-card" id="wallet-card">
+                <p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p>
+                <div id="ton-connect-container" style="display:flex;justify-content:center;margin:15px 0;"></div>
+                <p style="font-size:0.8rem;color:#aaa;" id="wallet-address"></p>
+                <button class="shop-btn" onclick="requestWithdrawal()" style="margin-top:15px;">💸 Запросить вывод</button>
+            </div>
+        </div>
         <div class="screen" id="shop-screen">
             <button class="back-btn">← <span data-lang="back">Назад</span></button>
             <h2>🛍️ <span data-lang="shop_title">Магазин</span></h2>
