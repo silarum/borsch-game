@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Крипто Борщ – Игровой майнинг</title>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- TON Connect -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
@@ -26,7 +25,6 @@
             <button data-screen="invest">📈 Инвестиции</button>
             <button data-screen="referral">👥 Рефералы</button>
             <button data-screen="roadmap">🗺️ Дорожная карта</button>
-            <button id="admin-menu-btn" style="background:rgba(255,0,0,0.3);">🔧 Админ-панель</button>
         </div>
         <div class="stats-modal" id="stats-modal">
             <div class="stats-box">
@@ -42,13 +40,7 @@
             </div>
         </div>
         <div class="admin-modal" id="admin-modal">
-            <div class="admin-box" id="admin-content">
-                <h3>🔐 Вход в админ-панель</h3>
-                <input type="text" id="admin-login" placeholder="Логин" value="admin"><br>
-                <input type="password" id="admin-password" placeholder="Пароль" value="admin"><br>
-                <button onclick="adminLogin()">Войти</button>
-                <button onclick="document.getElementById('admin-modal').classList.remove('active')">Отмена</button>
-            </div>
+            <div class="admin-box" id="admin-content"></div>
         </div>
         <button id="view-switch" onclick="cycleView()"><span>🟢 Матрица</span></button>
         <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span></button>
@@ -87,7 +79,6 @@
             <button class="nav-btn" data-screen="wallet"><span data-lang="wallet_btn">👛 Кошелёк</span></button>
             <button class="nav-btn" data-screen="shop"><span data-lang="shop_btn">🛍️ Магазин</span></button>
         </div>
-        <!-- Экраны разделов -->
         <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
         <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
         <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" class="sub-tab active">Доступные</button><button id="tasks-create-btn" class="sub-tab">Создать</button><button id="tasks-my-btn" class="sub-tab">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
