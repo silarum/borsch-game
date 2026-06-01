@@ -1,14 +1,10 @@
-// ================== ПОКУПКА ТОВАРОВ ЗА TON/USDT (СМАРТ-КОНТРАКТ) ==================
+// ================== ПОКУПКА SRUM ЧЕРЕЗ СЕРВЕР ==================
 const ADMIN_WALLET = 'EQAXN7Ibjs-_PjDtfW7uPhifRDU0aqkyyJhqVeZDoaI_4ZCB';
+const EDGE_FUNCTION_URL = 'https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/buy-srum';
 
-async function purchaseWithCrypto(amount, currency) {
+async function buySRUMWithTON(amountInTon) {
     if (!tonConnectUI || !currentWalletAddress) {
         alert('Сначала подключите кошелёк TON');
-        return;
-    }
-
-    if (currency !== 'TON' && currency !== 'USDT') {
-        alert('Эта валюта не поддерживается');
         return;
     }
 
@@ -17,12 +13,11 @@ async function purchaseWithCrypto(amount, currency) {
         messages: [
             {
                 address: ADMIN_WALLET,
-                amount: (amount * 1e9).toString(),
+                amount: (amountInTon * 1e9).toString(),
                 payload: btoa(JSON.stringify({
-                    type: 'Purchase',
+                    type: 'BuySRUM',
                     buyer: currentWalletAddress,
-                    amount: amount,
-                    currency: currency
+                    amount: amountInTon
                 }))
             }
         ]
@@ -31,10 +26,29 @@ async function purchaseWithCrypto(amount, currency) {
     try {
         const result = await tonConnectUI.sendTransaction(transaction);
         console.log('Транзакция отправлена:', result);
-        return true;
+
+        // Отправляем запрос на сервер для начисления SRUM
+        const response = await fetch(EDGE_FUNCTION_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId,
+                amount: amountInTon,
+                tx_hash: result.boc // или другой идентификатор транзакции
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            window.srum = data.new_balance;
+            updateUI();
+            alert(`🎉 Вы купили ${amountInTon * 2} SRUM!`);
+        } else {
+            const err = await response.json();
+            alert('Ошибка начисления: ' + (err.error || 'попробуйте позже'));
+        }
     } catch (e) {
         console.error('Ошибка транзакции:', e);
-        alert('Не удалось выполнить оплату. Попробуйте позже.');
-        return false;
+        alert('Не удалось выполнить покупку. Попробуйте позже.');
     }
 }
