@@ -1,4 +1,4 @@
-// ================== ПРОФИЛЬ И АДМИНКА ==================
+// ================== ПРОФИЛЬ И АДМИНКА (SUPABASE) ==================
 function updateProfile() {
     document.getElementById('user-nickname').textContent = userNickname;
     const club = clubs.find(c => c.id == myClubId);
@@ -9,7 +9,7 @@ function updateProfile() {
     }
 }
 
-// Статистика
+// Статистика (короткое нажатие на аватар)
 document.getElementById('user-avatar').addEventListener('click', () => {
     document.getElementById('stats-nickname').textContent = userNickname;
     document.getElementById('stats-rum').textContent = rum;
@@ -26,7 +26,6 @@ document.getElementById('user-menu-btn').addEventListener('click', (e) => {
     document.getElementById('menu-dropdown').classList.toggle('active');
 });
 
-// Пункты меню
 document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.getElementById('menu-dropdown').classList.remove('active');
@@ -34,39 +33,87 @@ document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
     });
 });
 
-// ================== АДМИН-ПАНЕЛЬ (доступ только по долгому нажатию) ==================
+// ================== АДМИН-ПАНЕЛЬ ==================
 window.adminLogin = function(){
     let login = document.getElementById('admin-login').value;
     let pass = document.getElementById('admin-password').value;
     if(login==='admin' && pass==='admin'){
-        document.getElementById('admin-content').innerHTML = `
-            <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #2e004f, #6a0dad); margin:0; width:100%;">
-                <h2>🔧 Админ-панель</h2>
-                <button class="btn-mining-big" onclick="showTournamentForm()">Создать турнир</button>
-                <button class="btn-mining-big" onclick="viewAllPlayers()">Все игроки</button>
-                <button class="btn-mining-big" onclick="createBots()">300 спартанцев</button>
-                <button class="btn-mining-big" onclick="toggleSpartans()">${spartansEnabled ? '🛑 Выключить' : '🟢 Включить'} 300 спартанцев</button>
-                <button class="btn-mining-big" onclick="resetSpartans()">🔄 Сбросить состояния</button>
-                <hr style="border-color:#555">
-                <h4>🛍️ Добавить товар в магазин</h4>
-                <input type="text" id="new-item-name" placeholder="Название" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
-                <input type="text" id="new-item-icon" placeholder="Иконка (эмодзи)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
-                <input type="number" id="new-item-price" placeholder="Цена" step="0.01" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
-                <select id="new-item-currency" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
-                    <option value="RUM">RUM</option>
-                    <option value="SRUM">SRUM</option>
-                    <option value="TON">TON</option>
-                    <option value="USDT">USDT</option>
-                </select>
-                <input type="text" id="new-item-desc" placeholder="Описание" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
-                <button class="btn-mining-big" onclick="addShopItem()">✅ Добавить товар</button>
-                <hr style="border-color:#555">
-                <button class="btn-mining-big" onclick="document.getElementById('admin-modal').classList.remove('active')">Выход</button>
-            </div>
-        `;
+        renderAdminPanel();
     } else alert('Неверный логин/пароль');
 };
 
+function renderAdminPanel() {
+    document.getElementById('admin-content').innerHTML = `
+        <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #2e004f, #6a0dad); margin:0; width:100%;">
+            <h2>🔧 Админ-панель</h2>
+            <button class="btn-mining-big" onclick="createTournament()">Создать турнир</button>
+            <button class="btn-mining-big" onclick="viewAllPlayers()">Все игроки</button>
+            <button class="btn-mining-big" onclick="createSpartanBots()">300 спартанцев</button>
+            <button class="btn-mining-big" onclick="toggleSpartans()">${spartansEnabled ? '🛑 Выключить' : '🟢 Включить'} 300 спартанцев</button>
+            <button class="btn-mining-big" onclick="resetSpartans()">🔄 Сбросить состояния</button>
+            <hr style="border-color:#555">
+            <h4>🛍️ Добавить товар в магазин</h4>
+            <input type="text" id="new-item-name" placeholder="Название" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
+            <input type="text" id="new-item-icon" placeholder="Иконка (эмодзи)" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
+            <input type="number" id="new-item-price" placeholder="Цена" step="0.01" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
+            <select id="new-item-currency" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
+                <option value="RUM">RUM</option>
+                <option value="SRUM">SRUM</option>
+                <option value="TON">TON</option>
+                <option value="USDT">USDT</option>
+            </select>
+            <input type="text" id="new-item-desc" placeholder="Описание" style="width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:rgba(255,255,255,0.15);color:white;">
+            <button class="btn-mining-big" onclick="addShopItem()">✅ Добавить товар</button>
+            <hr style="border-color:#555">
+            <button class="btn-mining-big" onclick="document.getElementById('admin-modal').classList.remove('active')">Выход</button>
+        </div>
+    `;
+}
+
+// ================== ФУНКЦИИ АДМИНКИ (Supabase) ==================
+window.createTournament = async function() {
+    const name = prompt('Название турнира:');
+    if (!name) return;
+    const prize = prompt('Призовой фонд (USDT):', '1000');
+    if (!prize || isNaN(prize)) return alert('Неверная сумма');
+    // Сохраняем в таблицу tournaments
+    await supabaseRequest('POST', 'tournaments', {
+        name,
+        prize: parseFloat(prize),
+        status: 'active',
+        created_by: userId,
+        created_at: new Date().toISOString()
+    });
+    alert(`Турнир "${name}" создан!`);
+};
+
+window.viewAllPlayers = async function() {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/users?select=*`, {
+        headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+    });
+    if (response.ok) {
+        const users = await response.json();
+        let list = '';
+        users.forEach(u => {
+            list += `${u.nickname || 'Без имени'} – RUM: ${u.rum}, SRUM: ${u.srum}\n`;
+        });
+        alert('Все игроки:\n' + (list || 'Нет данных'));
+    } else {
+        alert('Ошибка загрузки игроков');
+    }
+};
+
+window.createSpartanBots = function() {
+    // Используем существующую функцию из bots.js
+    spartanBots = generateSpartans();
+    localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
+    alert('300 спартанцев созданы!');
+};
+
+// Добавление товара (уже работает с localStorage, позже перенесём в Supabase)
 window.addShopItem = function() {
     const name = document.getElementById('new-item-name').value.trim();
     const icon = document.getElementById('new-item-icon').value.trim() || '🛒';
@@ -100,11 +147,7 @@ window.addShopItem = function() {
     }
 };
 
-window.showTournamentForm = function(){ alert('Форма создания турнира'); };
-window.viewAllPlayers = function(){ alert('Статистика игроков'); };
-window.createBots = function(){ alert('Запуск ботов'); };
-
-// Долгое нажатие (5 секунд) для открытия админки
+// ================== ДОЛГОЕ НАЖАТИЕ ==================
 let pressTimer;
 function startPressAdmin(e){
     e.preventDefault();
