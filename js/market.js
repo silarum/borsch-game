@@ -6,18 +6,12 @@ const defaultShopItems = [
     { id: 4, name: 'Статус Серебро', icon: '🥈', price: 100, currency: 'SRUM', description: '+1M RUM, вывод от 200 SRUM' },
     { id: 5, name: 'Статус Золото', icon: '🥇', price: 200, currency: 'SRUM', description: '+2M RUM, вывод от 100 SRUM' },
     { id: 6, name: 'Статус Платина', icon: '💠', price: 300, currency: 'SRUM', description: '+3M RUM, вывод от 25 SRUM' },
-    { id: 7, name: 'Купить SRUM за TON', icon: '💱', price: 1, currency: 'TON', description: 'Получите 2 SRUM за 1 TON' },
-    { id: 8, name: 'Купить SRUM за USDT', icon: '💱', price: 1, currency: 'USDT', description: 'Получите 1 SRUM за 1 USDT' },
-    { id: 9, name: 'Обменять SRUM на TON', icon: '💱', price: 1, currency: 'SRUM', description: 'Получите 0.5 TON за 1 SRUM' },
-    { id: 10, name: 'Обменять SRUM на USDT', icon: '💱', price: 1, currency: 'SRUM', description: 'Получите 1 USDT за 1 SRUM' }
+    { id: 7, name: 'Купить SRUM за TON', icon: '💎', price: 1, currency: 'TON', description: '2 SRUM за 1 TON' }
 ];
 
 let shopItems = JSON.parse(localStorage.getItem('shopItems')) || defaultShopItems;
-if (!localStorage.getItem('shopItems')) {
-    localStorage.setItem('shopItems', JSON.stringify(defaultShopItems));
-}
+if (!localStorage.getItem('shopItems')) localStorage.setItem('shopItems', JSON.stringify(defaultShopItems));
 
-// Рендер сетки товаров
 function renderShop() {
     const grid = document.getElementById('shop-grid');
     if (!grid) return;
@@ -34,9 +28,8 @@ function renderShop() {
         grid.appendChild(card);
     });
 
-    // Обработчики кнопок
     document.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const id = parseInt(e.target.dataset.id);
             const item = shopItems.find(i => i.id === id);
             if (!item) return;
@@ -45,52 +38,43 @@ function renderShop() {
     });
 }
 
-// Логика покупки
-function purchaseItem(item) {
-    let balance = 0;
-    switch (item.currency) {
-        case 'RUM': balance = window.rum; break;
-        case 'SRUM': balance = window.srum; break;
-        case 'TON': balance = window.ton; break;
-        case 'USDT': balance = window.usdt; break;
+async function purchaseItem(item) {
+    // Товары за TON/USDT – через смарт-контракт
+    if (item.currency === 'TON' || item.currency === 'USDT') {
+        const success = await purchaseWithCrypto(item.price, item.currency);
+        if (success) {
+            applyItemEffect(item);
+        }
+        return;
     }
+
+    // Товары за SRUM или RUM – внутренний баланс
+    let balance = item.currency === 'SRUM' ? window.srum : window.rum;
     if (balance < item.price) {
         alert(`Недостаточно ${item.currency}`);
         return;
     }
 
-    switch (item.currency) {
-        case 'RUM': window.rum -= item.price; break;
-        case 'SRUM': window.srum -= item.price; break;
-        case 'TON': window.ton -= item.price; break;
-        case 'USDT': window.usdt -= item.price; break;
-    }
+    if (item.currency === 'SRUM') window.srum -= item.price;
+    else window.rum -= item.price;
 
-    if (item.id === 1) { window.activeBoost = { type: 2, endTime: Date.now() + 86400000 }; }
-    else if (item.id === 2) { window.activeBoost = { type: 3, endTime: Date.now() + 86400000 }; }
-    else if (item.id === 3) { window.activeBoost = { type: 5, endTime: Date.now() + 86400000 }; }
+    applyItemEffect(item);
+}
+
+function applyItemEffect(item) {
+    if (item.id === 1) window.activeBoost = { type: 2, endTime: Date.now() + 86400000 };
+    else if (item.id === 2) window.activeBoost = { type: 3, endTime: Date.now() + 86400000 };
+    else if (item.id === 3) window.activeBoost = { type: 5, endTime: Date.now() + 86400000 };
     else if (item.id === 4) { window.rum += 1000000; window.userStatus = 'silver'; alert('Статус Серебро активирован!'); }
     else if (item.id === 5) { window.rum += 2000000; window.userStatus = 'gold'; alert('Статус Золото активирован!'); }
     else if (item.id === 6) { window.rum += 3000000; window.userStatus = 'platinum'; alert('Статус Платина активирован!'); }
-    else if (item.id === 7) { window.srum += 2; }
-    else if (item.id === 8) { window.srum += 1; }
-    else if (item.id === 9) { window.ton += 0.5; }
-    else if (item.id === 10) { window.usdt += 1; }
-    else {
-        alert(`Вы приобрели "${item.name}"!`);
-    }
-
+    else if (item.id === 7) { window.srum += item.price * 2; alert(`Куплено ${item.price * 2} SRUM!`); }
+    else { alert(`Вы приобрели "${item.name}"!`); }
     updateUI();
 }
 
-// Инициализация магазина при открытии экрана
 const shopScreenObserver = new MutationObserver(() => {
-    if (document.getElementById('shop-screen').classList.contains('active')) {
-        renderShop();
-    }
+    if (document.getElementById('shop-screen').classList.contains('active')) renderShop();
 });
 shopScreenObserver.observe(document.getElementById('shop-screen'), { attributes: true });
-
-if (document.getElementById('shop-screen').classList.contains('active')) {
-    renderShop();
-}
+if (document.getElementById('shop-screen').classList.contains('active')) renderShop();
