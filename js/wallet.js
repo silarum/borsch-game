@@ -1,4 +1,4 @@
-// ================== TON CONNECT (без внешнего манифеста) ==================
+// ================== TON CONNECT ==================
 let tonConnectUI = null;
 let currentWalletAddress = null;
 
@@ -9,7 +9,7 @@ function initTonConnect() {
     }
 
     tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        // не указываем manifestUrl – работает без него
+        manifestUrl: 'https://silarum.github.io/borsch-game/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-container'
     });
 
