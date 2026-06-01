@@ -88,7 +88,7 @@ window.loadWithdrawalRequests = async function() {
         let html = '';
         requests.forEach(r => {
             html += `<div style="background:rgba(255,255,255,0.1);padding:8px;margin:5px 0;border-radius:8px;">
-                <b>${r.nickname || 'Игрок'}</b>: ${r.amount} SRUM → ${r.usdt_amount} USDT (${r.wallet_address})
+                <b>${r.nickname || 'Игрок'}</b>: ${r.amount} SRUM → ${r.usdt_amount} USDT (${r.wallet_address.slice(0,6)}...)
                 <button onclick="approveWithdrawal(${r.id})">✅</button>
                 <button onclick="rejectWithdrawal(${r.id})">❌</button>
             </div>`;
@@ -100,37 +100,43 @@ window.loadWithdrawalRequests = async function() {
 };
 
 window.approveWithdrawal = async function(id) {
-    await supabaseRequest('PATCH', `withdrawal_requests?id=eq.${id}`, { status: 'approved' });
-    loadWithdrawalRequests();
+    if (!confirm('Подтвердить вывод? SRUM будут списаны с баланса игрока.')) return;
+    try {
+        const res = await fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/process-withdrawal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ request_id: id, action: 'approve' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert('✅ Вывод подтверждён! Баланс игрока обновлён.');
+            loadWithdrawalRequests();
+        } else {
+            alert('Ошибка: ' + (data.error || 'неизвестная ошибка'));
+        }
+    } catch (e) {
+        alert('Ошибка соединения с сервером');
+    }
 };
 
 window.rejectWithdrawal = async function(id) {
-    await supabaseRequest('PATCH', `withdrawal_requests?id=eq.${id}`, { status: 'rejected' });
-    loadWithdrawalRequests();
-};
-
-// ================== СОЗДАНИЕ ТОВАРА ==================
-window.addShopItem = function() {
-    const name = document.getElementById('new-item-name').value.trim();
-    const icon = document.getElementById('new-item-icon').value.trim() || '🛒';
-    const price = parseFloat(document.getElementById('new-item-price').value);
-    const currency = document.getElementById('new-item-currency').value;
-    const desc = document.getElementById('new-item-desc').value.trim();
-
-    if (!name || isNaN(price) || price <= 0) {
-        alert('Заполните название и цену корректно');
-        return;
+    if (!confirm('Отклонить заявку? SRUM не будут списаны.')) return;
+    try {
+        const res = await fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/process-withdrawal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ request_id: id, action: 'reject' })
+        });
+        if (res.ok) {
+            alert('Заявка отклонена.');
+            loadWithdrawalRequests();
+        } else {
+            const data = await res.json();
+            alert('Ошибка: ' + (data.error || 'неизвестная ошибка'));
+        }
+    } catch (e) {
+        alert('Ошибка соединения с сервером');
     }
-
-    const newItem = { id: Date.now(), name, icon, price, currency, description: desc || '' };
-    shopItems.push(newItem);
-    localStorage.setItem('shopItems', JSON.stringify(shopItems));
-    alert(`Товар "${name}" добавлен!`);
-    document.getElementById('new-item-name').value = '';
-    document.getElementById('new-item-icon').value = '';
-    document.getElementById('new-item-price').value = '';
-    document.getElementById('new-item-desc').value = '';
-    if (document.getElementById('shop-screen').classList.contains('active')) renderShop();
 };
 
 // ================== ТУРНИРЫ И ИГРОКИ ==================
@@ -158,6 +164,40 @@ window.createSpartanBots = function() {
     spartanBots = generateSpartans();
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
     alert('300 спартанцев созданы!');
+};
+
+// Добавление товара (уже работает с localStorage, позже перенесём в Supabase)
+window.addShopItem = function() {
+    const name = document.getElementById('new-item-name').value.trim();
+    const icon = document.getElementById('new-item-icon').value.trim() || '🛒';
+    const price = parseFloat(document.getElementById('new-item-price').value);
+    const currency = document.getElementById('new-item-currency').value;
+    const desc = document.getElementById('new-item-desc').value.trim();
+
+    if (!name || isNaN(price) || price <= 0) {
+        alert('Заполните название и цену корректно');
+        return;
+    }
+
+    const newItem = {
+        id: Date.now(),
+        name,
+        icon,
+        price,
+        currency,
+        description: desc || ''
+    };
+
+    shopItems.push(newItem);
+    localStorage.setItem('shopItems', JSON.stringify(shopItems));
+    alert(`Товар "${name}" добавлен!`);
+    document.getElementById('new-item-name').value = '';
+    document.getElementById('new-item-icon').value = '';
+    document.getElementById('new-item-price').value = '';
+    document.getElementById('new-item-desc').value = '';
+    if (document.getElementById('shop-screen').classList.contains('active')) {
+        renderShop();
+    }
 };
 
 // ================== ДОЛГОЕ НАЖАТИЕ ==================
