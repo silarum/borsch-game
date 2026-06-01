@@ -64,189 +64,34 @@
     box-shadow: 0 0 40px rgba(180, 0, 255, 0.6), inset 0 0 20px rgba(255, 215, 0, 0.3);
     animation: cloudPulse 4s ease-in-out infinite;
 }
-@keyframes cloudPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-}
-.pool-cloud h2 {
-    font-size: 1.8rem;
-    margin-bottom: 8px;
-    text-shadow: 0 0 10px gold;
-}
-.pool-amount {
-    font-size: 2.8rem;
-    font-weight: 900;
-    color: #FFD700;
-    text-shadow: 0 0 15px orange;
-    margin: 10px 0;
-}
-.pool-players {
-    font-size: 0.9rem;
-    color: #ccc;
-}
-.pool-players span {
-    color: #0f0;
-    font-weight: bold;
-}
-.btn-mining-big {
-    display: block;
-    width: 100%;
-    padding: 18px;
-    margin-top: 20px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #000;
-    background: linear-gradient(180deg, #FFD700, #FFA500);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    box-shadow: 0 0 30px gold, 0 8px 0 #b8860b;
-    transition: 0.2s;
-}
-.btn-mining-big:active {
-    transform: translateY(4px);
-    box-shadow: 0 0 20px gold, 0 4px 0 #b8860b;
-}
-.btn-mining-big:disabled {
-    background: #555;
-    box-shadow: none;
-    transform: none;
-}
-.pool-stage {
-    font-size: 1.2rem;
-    margin-top: 15px;
-    color: #FFD700;
-}
+@keyframes cloudPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
+.pool-cloud h2 { font-size:1.8rem; margin-bottom:8px; text-shadow:0 0 10px gold; }
+.pool-amount { font-size:2.8rem; font-weight:900; color:#FFD700; text-shadow:0 0 15px orange; margin:10px 0; }
+.pool-players { font-size:0.9rem; color:#ccc; }
+.pool-players span { color:#0f0; font-weight:bold; }
+.btn-mining-big { display:block; width:100%; padding:18px; margin-top:20px; font-size:1.5rem; font-weight:bold; text-transform:uppercase; letter-spacing:2px; color:#000; background:linear-gradient(180deg,#FFD700,#FFA500); border:none; border-radius:20px; cursor:pointer; box-shadow:0 0 30px gold, 0 8px 0 #b8860b; transition:0.2s; }
+.btn-mining-big:active { transform:translateY(4px); box-shadow:0 0 20px gold, 0 4px 0 #b8860b; }
+.btn-mining-big:disabled { background:#555; box-shadow:none; transform:none; }
+.pool-stage { font-size:1.2rem; margin-top:15px; color:#FFD700; }
 
 /* ========== МАГАЗИН ========== */
-.shop-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    width: 100%;
-    padding: 10px 0;
-}
-.shop-card {
-    background: linear-gradient(145deg, #1e1e2f, #2a2a40);
-    border-radius: 20px;
-    padding: 15px 10px;
-    text-align: center;
-    color: white;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,215,0,0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-.shop-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(255,215,0,0.3), 0 0 0 2px gold;
-}
-.shop-card .icon {
-    font-size: 3rem;
-    filter: drop-shadow(0 0 8px gold);
-}
-.shop-card .name {
-    font-weight: bold;
-    font-size: 1rem;
-    color: #FFD700;
-}
-.shop-card .price {
-    font-size: 1.2rem;
-    font-weight: 900;
-    margin: 5px 0;
-}
-.shop-card .currency {
-    font-size: 0.8rem;
-    color: #aaa;
-}
-.shop-card button {
-    background: linear-gradient(180deg, #FFD700, #FFA500);
-    border: none;
-    border-radius: 15px;
-    padding: 12px;
-    width: 100%;
-    font-weight: bold;
-    font-size: 1rem;
-    color: #000;
-    cursor: pointer;
-    box-shadow: 0 4px 0 #b8860b, 0 0 15px gold;
-    transition: 0.1s;
-}
-.shop-card button:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #b8860b, 0 0 10px gold;
-}
-.shop-card button:disabled {
-    background: #555;
-    box-shadow: none;
-    color: #999;
-    transform: none;
-}
+.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; width:100%; padding:10px 0; }
+.shop-card { background:linear-gradient(145deg,#1e1e2f,#2a2a40); border-radius:20px; padding:15px 10px; text-align:center; color:white; box-shadow:0 8px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,215,0,0.3); transition:transform 0.2s, box-shadow 0.2s; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.shop-card:hover { transform:translateY(-5px); box-shadow:0 12px 30px rgba(255,215,0,0.3), 0 0 0 2px gold; }
+.shop-card .icon { font-size:3rem; filter:drop-shadow(0 0 8px gold); }
+.shop-card .name { font-weight:bold; font-size:1rem; color:#FFD700; }
+.shop-card .price { font-size:1.2rem; font-weight:900; margin:5px 0; }
+.shop-card .currency { font-size:0.8rem; color:#aaa; }
+.shop-card button { background:linear-gradient(180deg,#FFD700,#FFA500); border:none; border-radius:15px; padding:12px; width:100%; font-weight:bold; font-size:1rem; color:#000; cursor:pointer; box-shadow:0 4px 0 #b8860b, 0 0 15px gold; transition:0.1s; }
+.shop-card button:active { transform:translateY(3px); box-shadow:0 1px 0 #b8860b, 0 0 10px gold; }
+.shop-card button:disabled { background:#555; box-shadow:none; color:#999; transform:none; }
 
-/* ========== КАРТОЧКИ ДЛЯ КОНТЕНТА (ПРАВИЛА, КЛУБ, ИНВЕСТИЦИИ И Т.Д.) ========== */
-.info-card {
-    background: linear-gradient(145deg, #1a1a2e, #252545);
-    border: 1px solid rgba(255,215,0,0.3);
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 15px;
-    color: #ddd;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    width: 100%;
-    text-align: left;
-}
+/* ========== КАРТОЧКИ ДЛЯ КОНТЕНТА ========== */
+.info-card { background:linear-gradient(145deg,#1a1a2e,#252545); border:1px solid rgba(255,215,0,0.3); border-radius:15px; padding:15px; margin-bottom:15px; color:#ddd; box-shadow:0 4px 15px rgba(0,0,0,0.4); width:100%; text-align:left; }
+.info-card strong { color:#FFD700; }
 
-.info-card strong {
-    color: #FFD700;
-}
-
-.info-card p {
-    margin-bottom: 8px;
-    line-height: 1.5;
-}
-
-/* ========== ВКЛАДКИ АРЕНЫ И ЗАДАНИЙ ========== */
-.arena-tabs, #tasks-sub-tabs {
-    display: flex;
-    gap: 10px;
-    margin: 10px 0 20px;
-    flex-wrap: wrap;
-}
-.arena-tabs button, #tasks-sub-tabs button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    background: rgba(255,255,255,0.1);
-    color: #ccc;
-    transition: 0.3s;
-}
-.arena-tabs button.active, #tasks-sub-tabs button.active {
-    background: linear-gradient(135deg, #FFD700, #FF8C00);
-    color: black;
-    box-shadow: 0 0 15px rgba(255,215,0,0.5);
-}
-
-.sub-tab {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 0.75rem;
-    cursor: pointer;
-    background: #333;
-    color: #aaa;
-    transition: all 0.2s;
-    box-shadow: 0 0 5px rgba(255,255,255,0.2);
-}
-.sub-tab.active {
-    background: linear-gradient(135deg, #FFD700, #FF8C00);
-    color: black;
-    animation: pulse 1.5s infinite;
-    box-shadow: 0 0 15px rgba(255,215,0,0.8);
-}
+/* ========== КЛУБЫ – ОБЛАКО ========== */
+.club-cloud { background:radial-gradient(circle at 20% 20%,#2e004f,#6a0dad); border:2px solid gold; border-radius:30px; padding:20px; margin:10px 0; color:white; box-shadow:0 0 20px rgba(180,0,255,0.4); width:100%; }
+.club-cloud h3 { font-size:1.5rem; color:#FFD700; margin-bottom:10px; }
+.club-cloud p { margin:5px 0; }
+.club-cloud button { margin:5px; padding:10px 15px; border:none; border-radius:12px; font-weight:bold; background:linear-gradient(180deg,#FFD700,#FFA500); color:#000; cursor:pointer; }
