@@ -294,8 +294,8 @@ function duelTouchHandler(e) {
 // --- Обновление табло дуэли ---
 function updateDuelScore() { duelPlayerScoreEl.textContent = duelPlayerScore; duelOpponentScoreEl.textContent = duelOpponentScore; }
 
-// --- Завершение дуэли и расчёт наград/штрафов ---
-function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
+// --- Завершение дуэли и расчёт наград/штрафов (ЗАЩИЩЁННЫЙ) ---
+async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     duelActive = false;
     clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
     board.removeEventListener('touchstart', duelTouchHandler);
@@ -307,51 +307,51 @@ function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
 
     const win = duelPlayerScore > duelOpponentScore;
     let resultDiv = document.createElement('div'); resultDiv.className = 'result-overlay';
-    let penalty = 0, reward = 0;
 
-    if (miningCurrency === 'SRUM') {
-        if (win) {
-            reward = miningThreshold * getRewardPercent();
-            usdt += reward;
-            srum += miningThreshold;
-            if (miningStage < 5) miningStage++;
-            localStorage.setItem('miningStage', miningStage);
-            showCoinFountain(30);
-            resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${reward.toFixed(2)} USDT</p><p>Этап ${miningStage}</p>
-                <button id="continue-mining">Продолжить майнинг</button>
-                <button id="pause-mining">⏸️ Пауза</button>`;
-        } else {
-            penalty = miningThreshold * getPenaltyPercent();
-            let reserved = miningThreshold;
-            let remaining = Math.max(0, reserved - penalty);
-            srum += remaining;
-            miningStage = 1;
-            localStorage.setItem('miningStage', 1);
-            showPoopFountain(20);
-            let phrase = cheerPhrases[Math.floor(Math.random() * cheerPhrases.length)];
-            resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>${phrase}</p><p>Потеря мощности: ${penalty.toFixed(2)} SRUM</p><p>Этап сброшен до 1</p>
-                <button id="continue-mining">Продолжить</button>
-                <button id="pause-mining">⏸️ Пауза</button>`;
-        }
-    } else {
-        rum += miningThreshold;
-        if (win) {
-            reward = Math.floor(miningThreshold * getRewardPercent());
-            rum += reward;
-            showCoinFountain(15);
-            resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${reward} RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
-        } else {
-            penalty = 20;
-            rum = Math.max(0, rum - penalty);
-            showPoopFountain(10);
-            resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>-20 RUM</p><button id="continue-mining">Продолжить</button><button id="pause-mining">⏸️ Пауза</button>`;
-        }
-    }
+    try {
+        const res = await fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/update-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId,
+                type: 'pvp_result',
+                data: {
+                    win: win,
+                    threshold: miningThreshold,
+                    stage: miningStage,
+                    currency: miningCurrency
+                }
+            })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (miningCurrency === 'SRUM') {
+                srum = data.srum;
+                usdt = data.usdt;
+                miningStage = data.mining_stage;
+                localStorage.setItem('miningStage', miningStage);
+            } else {
+                rum = data.rum;
+            }
 
-    // Обновляем состояние бота-спартанца
-    if (currentBot.botIndex >= 0) {
-        const botWon = !win;
-        updateSpartanBot(currentBot.botIndex, botWon, miningStage, penalty, reward);
+            if (win) {
+                showCoinFountain(30);
+                resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2><p>+${(miningThreshold * getRewardPercent()).toFixed(2)} USDT</p><p>Этап ${miningStage}</p>
+                    <button id="continue-mining">Продолжить майнинг</button>
+                    <button id="pause-mining">⏸️ Пауза</button>`;
+            } else {
+                showPoopFountain(20);
+                let phrase = cheerPhrases[Math.floor(Math.random() * cheerPhrases.length)];
+                resultDiv.innerHTML = `<h2>💨 Блок упущен</h2><p>${phrase}</p><p>Потеря мощности: ${(miningThreshold * getPenaltyPercent()).toFixed(2)} SRUM</p><p>Этап сброшен до 1</p>
+                    <button id="continue-mining">Продолжить</button>
+                    <button id="pause-mining">⏸️ Пауза</button>`;
+            }
+        } else {
+            throw new Error('Server returned ' + res.status);
+        }
+    } catch (e) {
+        console.error('Ошибка синхронизации PvP:', e);
+        resultDiv.innerHTML = `<h2>⚠️ Ошибка соединения</h2><p>Результат будет обработан позже</p><button id="continue-mining">Продолжить</button>`;
     }
 
     pendingMining = null;
