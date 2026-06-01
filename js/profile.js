@@ -76,7 +76,6 @@ window.createTournament = async function() {
     if (!name) return;
     const prize = prompt('Призовой фонд (USDT):', '1000');
     if (!prize || isNaN(prize)) return alert('Неверная сумма');
-    // Сохраняем в таблицу tournaments
     await supabaseRequest('POST', 'tournaments', {
         name,
         prize: parseFloat(prize),
@@ -107,13 +106,11 @@ window.viewAllPlayers = async function() {
 };
 
 window.createSpartanBots = function() {
-    // Используем существующую функцию из bots.js
     spartanBots = generateSpartans();
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
     alert('300 спартанцев созданы!');
 };
 
-// Добавление товара (уже работает с localStorage, позже перенесём в Supabase)
 window.addShopItem = function() {
     const name = document.getElementById('new-item-name').value.trim();
     const icon = document.getElementById('new-item-icon').value.trim() || '🛒';
@@ -166,7 +163,6 @@ function startPressAdmin(e){
 }
 function cancelPressAdmin(){ clearTimeout(pressTimer); }
 
-// Элементы для долгого нажатия
 document.getElementById('user-avatar').addEventListener('touchstart', startPressAdmin);
 document.getElementById('user-avatar').addEventListener('touchend', cancelPressAdmin);
 document.getElementById('user-avatar').addEventListener('mousedown', startPressAdmin);
