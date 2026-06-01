@@ -85,7 +85,6 @@ async function initApp() {
         userNickname = tgUser.first_name || 'Майнер';
         startMainGame();
     } else {
-        // Тестовый режим – сразу запускаем с ID 123456789
         userId = 123456789;
         startMainGame();
     }
@@ -118,7 +117,6 @@ async function startMainGame() {
         });
     }
 
-    // Проверка приветственного бонуса (только если ещё не получен)
     if (!userData || !userData.bonus_claimed) {
         showBonusStep1();
     } else {
@@ -184,7 +182,6 @@ function showBonusStep2() {
         const grp = await checkGroup(userId);
         if (grp) {
             modal.remove();
-            // Начисляем бонус
             const newSrum = srum + 1;
             await saveUserData(userId, { srum: newSrum, bonus_claimed: true });
             srum = newSrum;
