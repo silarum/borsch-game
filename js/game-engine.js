@@ -104,6 +104,7 @@ function triggerRocket() {
 
 function startGame() {
     if (games <= 0 || gameActive) return;
+    window._rumBeforeGame = rum;
     gameActive = true; gameTimeLeft = 60; streak = 0;
     updateUI(); spawnAll();
     let interval = 1800;
@@ -116,16 +117,41 @@ function startGame() {
     }, interval);
     gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
 }
-function endGame() {
+
+async function endGame() {
     gameActive = false;
     clearInterval(gameTimer); clearInterval(spawnInterval);
     holes.forEach(h => h.innerHTML = '');
     currentVeg = {};
     games = Math.max(0, games - 1);
     window.lastGameTime = Date.now();
+
+    try {
+        const res = await fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/update-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId,
+                type: 'rum_mining',
+                data: {
+                    rum_earned: rum - (window._rumBeforeGame || 0),
+                    games_used: games,
+                    streak: streak
+                }
+            })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            rum = data.rum;
+        }
+    } catch (e) {
+        console.error('Ошибка синхронизации RUM:', e);
+    }
+
     updateUI();
     if (games < maxGames) startRecovery();
 }
+
 function startRecovery() {
     if (window.recoveryInterval) clearInterval(window.recoveryInterval);
     window.recoveryInterval = setInterval(() => {
@@ -156,7 +182,6 @@ window.cycleView = function() {
     else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
 };
 
-// Матрица
 const matrixCanvas = document.getElementById('matrixCanvas');
 const matrixCtx = matrixCanvas.getContext('2d');
 let matrixParticles = [];
@@ -174,7 +199,6 @@ function drawMatrix() {
 }
 startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
 
-// Смайлы
 const smileCanvas = document.getElementById('smileCanvas');
 const smileCtx = smileCanvas.getContext('2d');
 let smileParticles = [];
@@ -202,7 +226,6 @@ function drawSmile() {
 }
 window.addEventListener('resize', startSmileAnimation);
 
-// Овощи + Крипта (основной)
 const veggieCanvas = document.getElementById('veggieCanvas');
 const veggieCtx = veggieCanvas.getContext('2d');
 let veggieParticles = [];
