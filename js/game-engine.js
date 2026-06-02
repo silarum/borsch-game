@@ -1,140 +1,261 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Крипто Борщ – Игровой майнинг</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-</head>
-<body>
-<div id="game-container">
-    <div id="main-game" style="display:none;">
-        <div class="user-profile" id="user-profile">
-            <div class="user-avatar" id="user-avatar">😎</div>
-            <div class="user-info">
-                <div id="user-nickname">Майнер</div>
-                <div id="user-status" data-lang="status_solo">Одиночка</div>
-            </div>
-            <button class="user-menu-btn" id="user-menu-btn">☰</button>
-        </div>
-        <div class="menu-dropdown" id="menu-dropdown">
-            <button data-screen="about">📖 О проекте</button>
-            <button data-screen="top-tappers">🏆 Топ игроков</button>
-            <button data-screen="top-miners">⛏️ Топ майнеров</button>
-            <button data-screen="invest">📈 Инвестиции</button>
-            <button data-screen="referral">👥 Рефералы</button>
-            <button data-screen="roadmap">🗺️ Дорожная карта</button>
-        </div>
-        <div class="stats-modal" id="stats-modal">
-            <div class="stats-box">
-                <h3>📊 Статистика майнера</h3>
-                <p><b>Ник:</b> <span id="stats-nickname"></span></p>
-                <p><b>RUM:</b> <span id="stats-rum"></span></p>
-                <p><b>SRUM:</b> <span id="stats-srum"></span></p>
-                <p><b>USDT:</b> <span id="stats-usdt"></span></p>
-                <p><b>TON:</b> <span id="stats-ton"></span></p>
-                <button onclick="document.getElementById('stats-modal').classList.remove('active')">Закрыть</button>
-            </div>
-        </div>
-        <div class="admin-modal" id="admin-modal">
-            <div class="admin-box" id="admin-content"></div>
-        </div>
-        <button id="view-switch" onclick="cycleView()"><span>🥬 Овощи</span></button>
-        <button id="rules-btn-bottom"><span data-lang="rules_btn">📜 Правила</span></button>
-        <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
-        <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
-        <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
-        <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
-        <div class="glass-wall"></div><div class="window-sill"></div><div class="flower-pot"></div><div class="purple-bg"></div>
-        <div class="kitchen-area"><div class="table"></div><div class="stove"><div class="pot" id="pot"><div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div><div class="energy-display" id="energy-display"></div><div class="boost-display" id="boost-display"></div></div></div></div>
-        <div class="start-btn-container" id="start-btn-container">
-            <button class="start-btn" id="start-btn" data-lang="start_btn">🥘 НАЧАТЬ</button>
-        </div>
-        <div class="board" id="board">
-            <div class="row"><div class="hole" data-hole="0"></div><div class="hole" data-hole="1"></div><div class="hole" data-hole="2"></div></div>
-            <div class="row"><div class="hole" data-hole="3"></div><div class="hole" data-hole="4"></div><div class="hole" data-hole="5"></div><div class="hole" data-hole="6"></div></div>
-            <div class="row"><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div></div>
-        </div>
-        <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
-        <div class="duel-scoreboard hidden" id="duel-scoreboard">
-            <span>⚡ <span data-lang="duel_you">Ты</span>: <span id="duelPlayerScore">0</span></span>
-            <span>⏳ <span id="duelTimer">20</span>с</span>
-            <span>🖥️ <span data-lang="duel_miner">Майнер</span>: <span id="duelOpponentScore">0</span></span>
-        </div>
-        <div class="top-panel">
-            <div class="balances-right">
-                <div id="rum-balance">💰 RUM: 0</div>
-                <div id="srum-balance">💎 SRUM: 0.00</div>
-                <div id="usdt-balance-top">💵 USDT: 0.00</div>
-                <div id="ton-balance-top">⚡ TON: 0.00</div>
-            </div>
-        </div>
-        <div class="bottom-panel">
-            <button class="nav-btn" data-screen="arena"><span data-lang="arena_btn">🏟️ Арена</span></button>
-            <button class="nav-btn" data-screen="mining-club"><span data-lang="club_btn">🐺 Клуб</span></button>
-            <button class="nav-btn" data-screen="tasks"><span data-lang="tasks_btn">📋 Задания</span></button>
-            <button class="nav-btn" data-screen="wallet"><span data-lang="wallet_btn">👛 Кошелёк</span></button>
-            <button class="nav-btn" data-screen="shop"><span data-lang="shop_btn">🛍️ Магазин</span></button>
-        </div>
-        <div class="screen" id="arena-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><div class="arena-tabs" id="arena-tabs"><button data-tab="mining" class="active">⛏️ <span data-lang="arena_mining">Майнинг</span></button><button data-tab="band">🐺 <span data-lang="arena_band">Банда</span></button><button data-tab="tournaments">🏆 <span data-lang="arena_tour">Турниры</span></button></div><div id="arena-content"></div><div id="paused-sessions" style="margin-top:10px;"></div></div>
-        <div class="screen" id="mining-club-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🐺 <span data-lang="club_title">Бойцовский клуб</span></h2><div style="display:flex;gap:8px;margin:10px 0"><button id="club-my-btn" class="club-btn" data-lang="club_my">Мой клуб</button><button id="club-all-btn" class="club-btn" data-lang="club_all">Все клубы</button><button id="club-create-btn" class="club-btn" data-lang="club_create">Создать</button></div><div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
-        <div class="screen" id="tasks-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📋 <span data-lang="tasks_title">Задания</span></h2><div style="display:flex;gap:8px;margin:15px 0"><button id="tasks-available-btn" class="sub-tab active">Доступные</button><button id="tasks-create-btn" class="sub-tab">Создать</button><button id="tasks-my-btn" class="sub-tab">Мои</button></div><div id="tasks-sub-tabs" style="display:flex;gap:8px;margin-bottom:10px"><button class="sub-tab active" data-tab="borsch">Крипто Борщ</button><button class="sub-tab" data-tab="private_rum">Частные (RUM)</button><button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button><button class="sub-tab" data-tab="srum">За СилаРум</button></div><div id="tasks-content" style="width:100%;max-height:60%;overflow-y:auto"></div></div>
-        <div class="screen" id="invest-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>📈 <span data-lang="invest_title">Инвестиции</span></h2><div class="info-card"><p><span data-lang="invest_desc">Вкладывай RUM в реальные проекты и становись совладельцем прибыли после запуска бизнеса. Тратя время и внимание, ты инвестируешь в своё финансовое будущее.</span></p><p>Скоро появятся первые проекты.</p></div></div>
-        <div class="screen" id="wallet-screen">
-            <button class="back-btn">← <span data-lang="back">Назад</span></button>
-            <h2>👛 <span data-lang="wallet_title">Кошелёк</span></h2>
-            <div class="info-card" id="wallet-card">
-                <p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p>
-                <div id="ton-connect-container" style="display:flex;justify-content:center;margin:15px 0;"></div>
-                <p style="font-size:0.8rem;color:#aaa;" id="wallet-address"></p>
-                <button class="shop-btn" onclick="requestWithdrawal()" style="margin-top:15px;">💸 Запросить вывод</button>
-            </div>
-        </div>
-        <div class="screen" id="shop-screen">
-            <button class="back-btn">← <span data-lang="back">Назад</span></button>
-            <h2>🛍️ <span data-lang="shop_title">Магазин</span></h2>
-            <div class="shop-grid" id="shop-grid"></div>
-        </div>
-        <div class="screen" id="top-tappers-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>🏆 <span data-lang="top_players_title">Топ игроков</span></h2><div class="info-card"><p>1. ...</p></div></div>
-        <div class="screen" id="top-miners-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>⛏️ <span data-lang="top_miners_title">Топ майнеров</span></h2><div class="info-card"><p>1. ...</p></div></div>
-        <div class="screen" id="referral-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button><h2>👥 <span data-lang="referral_title">Рефералы</span></h2><div class="info-card" style="width:100%"><input readonly id="ref-link" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="copyRef()" class="shop-btn">📋 Копировать ссылку</button><input placeholder="Введите реферальный код" id="ref-code-input" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;"><button onclick="applyRefCode()" class="shop-btn">🎁 Активировать код</button><div id="referral-list"></div></div></div>
-        <div class="screen" id="rules-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
-            <h2>📜 <span data-lang="rules_title">Правила игры</span></h2>
-            <div class="rules-scroll">
-                <div class="info-card"><p><strong>🍲 <span data-lang="rules_rum_title">RUM‑майнинг</span></strong><br><span data-lang="rules_rum_desc">Это твоя личная кухня! Нажимай на полезные овощи 🥬🧅🥔🥕 — они принесут тебе 🪙 RUM. Каждые 10 точных попаданий подряд удваивают награду. Ошибка сбрасывает серию и отнимает 20 RUM. 3 попытки в час.</span></p></div>
-                <div class="info-card"><p><strong>⛏️ <span data-lang="rules_pvp_title">Криптобеспредел (PvP‑майнинг)</span></strong><br><span data-lang="rules_pvp_desc">Ставка SRUM, дуэль 20 секунд. Победитель получает USDT, проигравший теряет мощность.</span></p></div>
-                <div class="info-card"><p><strong>💎 <span data-lang="rules_status_title">Статусы и вывод USDT</span></strong><br><span data-lang="rules_status_desc">🥈 Серебро — до 200 USDT/сутки<br>🥇 Золото — до 500 USDT/сутки<br>💠 Платина — до 1 000 USDT/сутки</span></p></div>
-            </div>
-        </div>
-        <div class="screen" id="about-screen"><button class="back-btn">← <span data-lang="back">Назад</span></button>
-            <h2>📖 <span data-lang="about_title">О проекте</span></h2>
-            <div class="rules-scroll"><div class="info-card"><p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram.</p></div></div>
-        </div>
-        <div id="language-modal" class="language-modal hidden">
-            <div class="language-box">
-                <h3 data-lang="lang_title">Выберите язык</h3>
-                <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
-                <button onclick="setLanguage('en')">🇬🇧 English</button>
-                <button onclick="setLanguage('zh')">🇨🇳 中文</button>
-                <button onclick="document.getElementById('language-modal').classList.add('hidden')" data-lang="lang_cancel">Отмена</button>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="js/lang.js"></script>
-<script src="js/api.js"></script>
-<script src="js/bonus.js"></script>
-<script src="js/wallet.js"></script>
-<script src="js/contract.js"></script>
-<script src="js/main.js"></script>
-<script src="js/game-engine.js"></script>
-<script src="js/market.js"></script>
-<script src="js/tasks.js"></script>
-<script src="js/club.js"></script>
-<script src="js/bots.js"></script>
-<script src="js/arena.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/referrals.js"></script>
-</body>
-</html>
+// ================== ТАПАЛКА И ФОНЫ ==================
+function showCoinFountain(count = 10) {
+    const potRect = pot.getBoundingClientRect();
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const cx = potRect.left + potRect.width/2 - containerRect.left;
+    const cy = potRect.top - containerRect.top + 8;
+    for (let i=0; i<count; i++) {
+        const coin = document.createElement('div'); coin.className = 'coin-fountain'; coin.textContent = '💰';
+        coin.style.left = (cx + (Math.random()-0.5)*80) + 'px';
+        coin.style.top = cy + 'px';
+        coin.style.animationDuration = (0.7 + Math.random()*0.5) + 's';
+        document.getElementById('game-container').appendChild(coin);
+        coin.addEventListener('animationend', () => coin.remove());
+    }
+}
+function showPoopFountain(count = 5) {
+    const potRect = pot.getBoundingClientRect();
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const cx = potRect.left + potRect.width/2 - containerRect.left;
+    const cy = potRect.top - containerRect.top + 8;
+    for (let i=0; i<count; i++) {
+        const poop = document.createElement('div'); poop.className = 'poop-fountain'; poop.textContent = '💩';
+        poop.style.left = (cx + (Math.random()-0.5)*80) + 'px';
+        poop.style.top = cy + 'px';
+        poop.style.animationDuration = (0.6 + Math.random()*0.5) + 's';
+        document.getElementById('game-container').appendChild(poop);
+        poop.addEventListener('animationend', () => poop.remove());
+    }
+}
+
+function spawnAll() {
+    holes.forEach(h => h.innerHTML = '');
+    currentVeg = {};
+    for (let i=0; i<holes.length; i++) {
+        const isBad = Math.random() < 0.25;
+        const pool = isBad ? BAD : GOOD;
+        holes[i].innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
+        currentVeg[i] = { type: isBad ? 'bad' : 'good' };
+    }
+}
+
+function processHit(hole, touch) {
+    if (!gameActive) return;
+    const num = [...holes].indexOf(hole);
+    if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); return; }
+    if (currentVeg[num].type === 'good') {
+        streak++;
+        let multiplier = Math.pow(2, Math.floor((streak-1) / 10));
+        let gain = 10 * multiplier;
+        if (activeBoost && activeBoost.endTime > Date.now()) gain *= activeBoost.type;
+        rum += Math.floor(gain);
+        flyVegToPot(hole, hole.querySelector('.veg').textContent);
+        showCoinFountain();
+        if (streak % 20 === 0) triggerRocket();
+    } else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); }
+    delete currentVeg[num]; hole.innerHTML = ''; updateUI();
+}
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    if (!gameActive) return;
+    [...e.changedTouches].forEach(touch => {
+        const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
+        if (hole) processHit(hole, touch);
+        else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); }
+    });
+}
+
+function flyVegToPot(hole, emoji) {
+    const holeRect = hole.getBoundingClientRect();
+    const potRect = pot.getBoundingClientRect();
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const vegEl = document.createElement('div'); vegEl.className = 'flying-veg'; vegEl.textContent = emoji;
+    vegEl.style.left = (holeRect.left + holeRect.width/2 - containerRect.left) + 'px';
+    vegEl.style.top = (holeRect.top + holeRect.height/2 - containerRect.top) + 'px';
+    vegEl.style.setProperty('--dx', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
+    vegEl.style.setProperty('--dy', '-60px');
+    vegEl.style.setProperty('--ex', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) + 'px');
+    vegEl.style.setProperty('--ey', (potRect.top - containerRect.top + 5 - parseFloat(vegEl.style.top)) + 'px');
+    document.getElementById('game-container').appendChild(vegEl);
+    vegEl.addEventListener('animationend', () => vegEl.remove());
+}
+
+function triggerRocket() {
+    const potRect = pot.getBoundingClientRect();
+    const containerRect = document.getElementById('game-container').getBoundingClientRect();
+    const startX = potRect.left + potRect.width/2 - containerRect.left;
+    const startY = potRect.top + potRect.height/2 - containerRect.top;
+    const rocket = document.createElement('div'); rocket.className = 'rocket'; rocket.textContent = '🚀';
+    rocket.style.left = startX + 'px'; rocket.style.top = startY + 'px';
+    document.getElementById('game-container').appendChild(rocket);
+    rocket.addEventListener('animationend', () => {
+        rocket.remove();
+        for (let i = 0; i < 12; i++) {
+            const spark = document.createElement('div'); spark.className = 'spark'; spark.textContent = '✨';
+            spark.style.left = startX + 'px'; spark.style.top = startY + 'px';
+            spark.style.setProperty('--sx', (Math.random() - 0.5) * 150 + 'px');
+            spark.style.setProperty('--sy', (Math.random() - 0.5) * 150 + 'px');
+            document.getElementById('game-container').appendChild(spark);
+            spark.addEventListener('animationend', () => spark.remove());
+        }
+    });
+}
+
+function startGame() {
+    if (games <= 0 || gameActive) return;
+    window._rumBeforeGame = rum;
+    gameActive = true; gameTimeLeft = 60; streak = 0;
+    updateUI(); spawnAll();
+    let interval = 1800;
+    spawnInterval = setInterval(() => {
+        if (!gameActive) return;
+        spawnAll();
+        interval = Math.max(450, interval-80);
+        clearInterval(spawnInterval);
+        spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
+    }, interval);
+    gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
+}
+
+async function endGame() {
+    gameActive = false;
+    clearInterval(gameTimer); clearInterval(spawnInterval);
+    holes.forEach(h => h.innerHTML = '');
+    currentVeg = {};
+    games = Math.max(0, games - 1);
+    window.lastGameTime = Date.now();
+
+    try {
+        const res = await fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/update-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userId,
+                type: 'rum_mining',
+                data: {
+                    rum_earned: rum - (window._rumBeforeGame || 0),
+                    games_used: games,
+                    streak: streak
+                }
+            })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            rum = data.rum;
+        }
+    } catch (e) {
+        console.error('Ошибка синхронизации RUM:', e);
+    }
+
+    updateUI();
+    if (games < maxGames) startRecovery();
+}
+
+function startRecovery() {
+    if (window.recoveryInterval) clearInterval(window.recoveryInterval);
+    window.recoveryInterval = setInterval(() => {
+        if (games >= maxGames) { clearInterval(window.recoveryInterval); return; }
+        if (Date.now() - (window.lastGameTime || 0) >= gameRecoveryTime * 1000) {
+            games = Math.min(maxGames, games + 1);
+            window.lastGameTime = Date.now();
+            updateUI();
+            if (games >= maxGames) clearInterval(window.recoveryInterval);
+        }
+    }, 1000);
+}
+
+// Фоны
+const views = ['veggie', 'smile', 'matrix'];
+let currentViewIndex = 0;
+window.cycleView = function() {
+    if (window.smileInterval) { clearInterval(window.smileInterval); window.smileInterval = null; }
+    if (window.veggieInterval) { clearInterval(window.veggieInterval); window.veggieInterval = null; }
+    currentViewIndex = (currentViewIndex + 1) % views.length;
+    const view = views[currentViewIndex];
+    document.getElementById('matrix-bg').style.display = view === 'matrix' ? 'block' : 'none';
+    document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
+    document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
+    const btn = document.getElementById('view-switch');
+    if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
+    else if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
+    else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
+};
+
+// ... (код матрицы, смайлов и овощей без изменений, как в предыдущей версии game-engine.js)
+// ВАЖНО: убедитесь, что функции startMatrix, drawMatrix, startSmileAnimation, drawSmile, startVeggieAnimation, drawVeggie присутствуют полностью.
+// Они уже были даны ранее и не изменились.
+
+const matrixCanvas = document.getElementById('matrixCanvas');
+const matrixCtx = matrixCanvas.getContext('2d');
+let matrixParticles = [];
+function startMatrix() {
+    matrixCanvas.width = matrixCanvas.parentElement.clientWidth;
+    matrixCanvas.height = matrixCanvas.parentElement.clientHeight;
+    matrixParticles = [];
+    for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
+}
+function drawMatrix() {
+    if (views[currentViewIndex] !== 'matrix') return;
+    matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
+    matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
+    matrixParticles.forEach(p => { matrixCtx.fillText(p.char,p.x,p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
+}
+startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
+
+const smileCanvas = document.getElementById('smileCanvas');
+const smileCtx = smileCanvas.getContext('2d');
+let smileParticles = [];
+const emojis = ['😊','😂','😎','🥳','😍','🤩','😇'];
+function startSmileAnimation() {
+    smileCanvas.width = smileCanvas.parentElement.clientWidth;
+    smileCanvas.height = smileCanvas.parentElement.clientHeight;
+    smileParticles = [];
+    for (let i = 0; i < 25; i++) {
+        smileParticles.push({ x: Math.random()*smileCanvas.width, y: smileCanvas.height+Math.random()*60, speed: 0.5+Math.random()*1.5, size: 16+Math.random()*14, emoji: emojis[Math.floor(Math.random()*emojis.length)], opacity: 1, popping: false });
+    }
+    if (!window.smileInterval) window.smileInterval = setInterval(drawSmile, 50);
+}
+function drawSmile() {
+    if (views[currentViewIndex] !== 'smile') return;
+    smileCtx.clearRect(0,0,smileCanvas.width,smileCanvas.height);
+    smileParticles.forEach(p => {
+        if (!p.popping) { p.y -= p.speed; if(p.y<-20){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; } }
+        smileCtx.font = `${p.size}px Arial`;
+        smileCtx.fillStyle = `rgba(255,215,0,${p.opacity})`;
+        smileCtx.fillText(p.emoji, p.x, p.y);
+        if (p.popping) { p.opacity -= 0.02; p.size += 1; if(p.opacity<=0){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; p.opacity=1; p.size=16+Math.random()*14; p.popping=false; } }
+    });
+    if (Math.random() < 0.02) { const r = smileParticles[Math.floor(Math.random()*smileParticles.length)]; if(r&&!r.popping) r.popping = true; }
+}
+window.addEventListener('resize', startSmileAnimation);
+
+const veggieCanvas = document.getElementById('veggieCanvas');
+const veggieCtx = veggieCanvas.getContext('2d');
+let veggieParticles = [];
+const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+function startVeggieAnimation() {
+    veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
+    veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
+    veggieParticles = [];
+    for (let i = 0; i < 40; i++) {
+        veggieParticles.push({ x: Math.random()*veggieCanvas.width, y: veggieCanvas.height+Math.random()*60, speed: 0.8+Math.random()*2, size: 16+Math.random()*14, emoji: veggieEmojis[Math.floor(Math.random()*veggieEmojis.length)], opacity: 1 });
+    }
+    if (!window.veggieInterval) window.veggieInterval = setInterval(drawVeggie, 50);
+}
+function drawVeggie() {
+    if (views[currentViewIndex] !== 'veggie') return;
+    veggieCtx.clearRect(0,0,veggieCanvas.width,veggieCanvas.height);
+    veggieParticles.forEach(p => {
+        p.y -= p.speed;
+        if (p.y < -20) { p.y = veggieCanvas.height + 20; p.x = Math.random() * veggieCanvas.width; }
+        veggieCtx.font = `${p.size}px Arial`;
+        veggieCtx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+        veggieCtx.fillText(p.emoji, p.x, p.y);
+    });
+}
+window.addEventListener('resize', startVeggieAnimation);
+
+startBtn.addEventListener('click', startGame);
+board.addEventListener('touchstart', handleTouchStart, {passive: false});
+board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
