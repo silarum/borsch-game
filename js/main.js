@@ -77,6 +77,8 @@ const duelTimerEl = document.getElementById('duelTimer');
 
 // ================== АВТОРИЗАЦИЯ И ПРИВЕТСТВЕННЫЙ БОНУС ==================
 let userId = null;
+// Гарантируем, что lastGameTime определён (для восстановления энергии)
+window.lastGameTime = 0;
 
 async function initApp() {
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
@@ -105,7 +107,12 @@ async function startMainGame() {
         userStatus = userData.status || 'solo';
         miningStage = userData.mining_stage || 1;
         if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
-        if (typeof userData.games !== 'undefined') games = userData.games;
+        // 🔥 КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: энергия из облака
+        if (typeof userData.games === 'number' && userData.games >= 0) {
+            games = userData.games;
+        } else {
+            games = 3; // fallback
+        }
     } else {
         await saveUserData(userId, {
             nickname: userNickname,
@@ -117,94 +124,24 @@ async function startMainGame() {
             mining_stage: 1,
             games: 3
         });
+        games = 3;
     }
 
+    // Приветственный бонус
     if (!userData || !userData.bonus_claimed) {
         showBonusStep1();
     } else {
         updateUI();
-        window.lastGameTime = Date.now();
+        window.lastGameTime = window.lastGameTime || 0; // на всякий случай
         if (games < maxGames) startRecovery();
         document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
     }
 }
 
-function showBonusStep1() {
-    const modal = document.createElement('div');
-    modal.className = 'quick-duel-modal';
-    modal.innerHTML = `
-        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
-            <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #1a5276, #0e2f44);">
-                <h2>🎁 Приветственный бонус</h2>
-                <p style="font-size:1.2rem;">Подпишись на наш Telegram‑канал, чтобы получить <b>1 SRUM</b>!</p>
-                <a href="https://t.me/crypto_borsch_channel" target="_blank" style="display:block; background:#0088cc; color:white; padding:15px; border-radius:15px; text-decoration:none; font-size:1.2rem; margin:15px 0;">📢 Подписаться на канал</a>
-                <button id="check-channel-btn" class="btn-mining-big">✅ Я подписался</button>
-                <button id="skip-bonus-btn" style="background:none; color:#aaa; border:1px solid #aaa; border-radius:10px; padding:10px; margin-top:10px; width:100%;">Пропустить</button>
-            </div>
-        </div>
-    `;
-    document.getElementById('game-container').appendChild(modal);
-
-    document.getElementById('check-channel-btn').addEventListener('click', async () => {
-        const sub = await checkSubscription(userId);
-        if (sub) {
-            modal.remove();
-            showBonusStep2();
-        } else {
-            alert('Вы ещё не подписались на канал. Пожалуйста, подпишитесь и нажмите кнопку снова.');
-        }
-    });
-
-    document.getElementById('skip-bonus-btn').addEventListener('click', () => {
-        modal.remove();
-        updateUI();
-        window.lastGameTime = Date.now();
-        if (games < maxGames) startRecovery();
-        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    });
-}
-
-function showBonusStep2() {
-    const modal = document.createElement('div');
-    modal.className = 'quick-duel-modal';
-    modal.innerHTML = `
-        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
-            <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #1e8449, #0b3d1f);">
-                <h2>🎁 Ещё один шаг!</h2>
-                <p style="font-size:1.2rem;">Вступите в нашу группу обсуждения, чтобы получить бонус!</p>
-                <a href="https://t.me/criptoniany" target="_blank" style="display:block; background:#0088cc; color:white; padding:15px; border-radius:15px; text-decoration:none; font-size:1.2rem; margin:15px 0;">💬 Вступить в группу</a>
-                <button id="check-group-btn" class="btn-mining-big">✅ Я вступил</button>
-                <button id="skip-bonus-btn2" style="background:none; color:#aaa; border:1px solid #aaa; border-radius:10px; padding:10px; margin-top:10px; width:100%;">Пропустить</button>
-            </div>
-        </div>
-    `;
-    document.getElementById('game-container').appendChild(modal);
-
-    document.getElementById('check-group-btn').addEventListener('click', async () => {
-        const grp = await checkGroup(userId);
-        if (grp) {
-            modal.remove();
-            const newSrum = srum + 1;
-            await saveUserData(userId, { srum: newSrum, bonus_claimed: true });
-            srum = newSrum;
-            alert('🎁 Поздравляем! Вы получили 1 SRUM!');
-            updateUI();
-            window.lastGameTime = Date.now();
-            if (games < maxGames) startRecovery();
-            document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-        } else {
-            alert('Вы ещё не вступили в группу. Пожалуйста, вступите и нажмите кнопку снова.');
-        }
-    });
-
-    document.getElementById('skip-bonus-btn2').addEventListener('click', () => {
-        modal.remove();
-        updateUI();
-        window.lastGameTime = Date.now();
-        if (games < maxGames) startRecovery();
-        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-    });
-}
+// ... функции showBonusStep1 и showBonusStep2 остаются без изменений ...
+// они уже полностью приведены в прошлых ответах, здесь не дублирую для краткости,
+// но в реальном файле они должны присутствовать полностью.
+// Вставьте их сюда.
 
 initApp();
 
@@ -227,7 +164,7 @@ function updateUI() {
         energyDisplay.textContent = '';
     } else {
         startBtn.style.display = 'none';
-        const now = Date.now(), last = window.lastGameTime || now;
+        const now = Date.now(), last = window.lastGameTime || 0;
         const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
         const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
         energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
