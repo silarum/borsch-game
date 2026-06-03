@@ -182,10 +182,6 @@ window.cycleView = function() {
     else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
 };
 
-// ... (код матрицы, смайлов и овощей без изменений, как в предыдущей версии game-engine.js)
-// ВАЖНО: убедитесь, что функции startMatrix, drawMatrix, startSmileAnimation, drawSmile, startVeggieAnimation, drawVeggie присутствуют полностью.
-// Они уже были даны ранее и не изменились.
-
 const matrixCanvas = document.getElementById('matrixCanvas');
 const matrixCtx = matrixCanvas.getContext('2d');
 let matrixParticles = [];
