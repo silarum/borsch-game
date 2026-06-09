@@ -6,7 +6,8 @@ const defaultShopItems = [
     { id: 4, name: 'Статус Серебро', icon: '🥈', price: 100, currency: 'SRUM', description: '+1M RUM, вывод от 200 SRUM' },
     { id: 5, name: 'Статус Золото', icon: '🥇', price: 200, currency: 'SRUM', description: '+2M RUM, вывод от 100 SRUM' },
     { id: 6, name: 'Статус Платина', icon: '💠', price: 300, currency: 'SRUM', description: '+3M RUM, вывод от 25 SRUM' },
-    { id: 7, name: 'Купить SRUM за TON', icon: '💎', price: 1, currency: 'TON', description: '2 SRUM за 1 TON' }
+    { id: 7, name: 'Купить SRUM за TON', icon: '💎', price: 1, currency: 'TON', description: '2 SRUM за 1 TON' },
+    { id: 8, name: 'Обмен RUM → SRUM (раз в сутки)', icon: '🔄', price: 10000, currency: 'RUM', description: '10 000 RUM = 1 SRUM (раз в 24 часа)' }
 ];
 
 let shopItems = JSON.parse(localStorage.getItem('shopItems')) || defaultShopItems;
@@ -39,12 +40,35 @@ function renderShop() {
 }
 
 async function purchaseItem(item) {
-    // Товары за TON/USDT – через смарт-контракт
-    if (item.currency === 'TON' || item.currency === 'USDT') {
-        const success = await purchaseWithCrypto(item.price, item.currency);
-        if (success) {
-            applyItemEffect(item);
+    // Товары за TON – через смарт-контракт
+    if (item.currency === 'TON') {
+        const success = await buySRUMWithTON(item.price);
+        if (success) applyItemEffect(item);
+        return;
+    }
+
+    // Ежедневный обмен RUM → SRUM
+    if (item.id === 8) {
+        const now = Date.now();
+        const lastExchange = parseInt(localStorage.getItem('lastRumExchange') || '0');
+        if (now - lastExchange < 86400000) {
+            const remaining = Math.ceil((86400000 - (now - lastExchange)) / 3600000);
+            alert(`Обмен доступен раз в 24 часа. Осталось примерно ${remaining} ч.`);
+            return;
         }
+        if (rum < 10000) {
+            alert('Недостаточно RUM (нужно 10 000)');
+            return;
+        }
+        rum -= 10000;
+        srum += 1;
+        localStorage.setItem('lastRumExchange', now.toString());
+        // Сохраняем в облаке
+        if (userId) {
+            saveUserData(userId, { rum, srum, last_rum_exchange: new Date(now).toISOString() }).catch(console.error);
+        }
+        alert('✅ Обменяно! 10 000 RUM → 1 SRUM');
+        updateUI();
         return;
     }
 
@@ -68,7 +92,7 @@ function applyItemEffect(item) {
     else if (item.id === 4) { window.rum += 1000000; window.userStatus = 'silver'; alert('Статус Серебро активирован!'); }
     else if (item.id === 5) { window.rum += 2000000; window.userStatus = 'gold'; alert('Статус Золото активирован!'); }
     else if (item.id === 6) { window.rum += 3000000; window.userStatus = 'platinum'; alert('Статус Платина активирован!'); }
-    else if (item.id === 7) { window.srum += item.price * 2; alert(`Куплено ${item.price * 2} SRUM!`); }
+    else if (item.id === 7) { /* handled by contract */ }
     else { alert(`Вы приобрели "${item.name}"!`); }
     updateUI();
 }
