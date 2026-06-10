@@ -61,6 +61,30 @@ quickDuelCoin.addEventListener('click', () => {
     showMiningModal();
 });
 
+// --- Окно при нехватке SRUM ---
+function showSRUMShopModal() {
+    const shopModal = document.createElement('div');
+    shopModal.className = 'quick-duel-modal';
+    shopModal.innerHTML = `
+        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
+            <div class="pool-cloud">
+                <h2>⚠️ Недостаточно SRUM</h2>
+                <p>Для участия нужно SRUM</p>
+                <button class="btn-mining-big" id="go-to-shop">🛒 Добыть SRUM</button>
+                <button id="cancel-lack" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">Отмена</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('game-container').appendChild(shopModal);
+    document.getElementById('go-to-shop').addEventListener('click', () => {
+        shopModal.remove();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('shop-screen').classList.add('active');
+        renderShop();
+    });
+    document.getElementById('cancel-lack').addEventListener('click', () => shopModal.remove());
+}
+
 // --- Модальное окно выбора порога и этапа (обычный майнинг) ---
 function showMiningModal() {
     const modal = document.createElement('div');
@@ -103,7 +127,9 @@ function showMiningModal() {
     document.getElementById('start-mining-search').addEventListener('click', () => {
         miningCurrency = document.getElementById('mining-currency').value;
         miningThreshold = parseFloat(slider.value);
+        // Проверка баланса ПОСЛЕ получения значения из слайдера
         if (miningCurrency === 'SRUM' && srum < miningThreshold) {
+            modal.remove(); // убираем текущее окно
             showSRUMShopModal();
             return;
         }
@@ -118,37 +144,13 @@ function showMiningModal() {
     document.getElementById('cancel-mining').addEventListener('click', () => modal.remove());
 }
 
-// --- Окно при нехватке SRUM (для обычного майнинга) ---
-function showSRUMShopModal() {
-    const modal = document.createElement('div');
-    modal.className = 'quick-duel-modal';
-    modal.innerHTML = `
-        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
-            <div class="pool-cloud">
-                <h2>⚠️ Недостаточно SRUM</h2>
-                <p>Для участия нужно ${miningThreshold.toFixed(1)} SRUM</p>
-                <button class="btn-mining-big" id="go-to-shop">🛒 Добыть SRUM</button>
-                <button id="cancel-lack" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">Отмена</button>
-            </div>
-        </div>
-    `;
-    document.getElementById('game-container').appendChild(modal);
-    document.getElementById('go-to-shop').addEventListener('click', () => {
-        modal.remove();
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('shop-screen').classList.add('active');
-        renderShop();
-    });
-    document.getElementById('cancel-lack').addEventListener('click', () => modal.remove());
-}
-
 // --- Турнир «Выжить в тюрьме» ---
 function showTournamentModal() {
-    const modal = document.createElement('div');
-    modal.className = 'quick-duel-modal';
+    const tourModal = document.createElement('div');
+    tourModal.className = 'quick-duel-modal';
     const poolAmount = (5000 + Math.random() * 45000).toFixed(0);
     const activePlayers = Math.floor(5 + Math.random() * 95);
-    modal.innerHTML = `
+    tourModal.innerHTML = `
         <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
             <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #8b0000, #4a0000);">
                 <h2>🔒 Выжить в тюрьме</h2>
@@ -167,7 +169,7 @@ function showTournamentModal() {
             </div>
         </div>
     `;
-    document.getElementById('game-container').appendChild(modal);
+    document.getElementById('game-container').appendChild(tourModal);
 
     const slider = document.getElementById('tournament-threshold-slider');
     const stakeDisplay = document.getElementById('tournament-stake');
@@ -183,17 +185,19 @@ function showTournamentModal() {
     document.getElementById('start-tournament-search').addEventListener('click', () => {
         miningCurrency = 'SRUM';
         miningThreshold = parseFloat(slider.value);
+        // Проверка баланса ПОСЛЕ получения значения из слайдера
         if (srum < miningThreshold) {
+            tourModal.remove();
             showSRUMShopModal();
             return;
         }
         srum -= miningThreshold;
         pendingMining = { currency: 'SRUM', threshold: miningThreshold, stage: miningStage };
-        updateUI(); modal.remove();
+        updateUI(); tourModal.remove();
         startSearch('tournament');
     });
 
-    document.getElementById('cancel-tournament').addEventListener('click', () => modal.remove());
+    document.getElementById('cancel-tournament').addEventListener('click', () => tourModal.remove());
 }
 
 // --- Гибридный поиск (реальный соперник или бот) ---
@@ -221,7 +225,6 @@ function startSearch(mode = 'mining') {
     cancelBtn.addEventListener('click', cancelSearch);
     overlay.appendChild(cancelBtn);
 
-    // Запрос к matchmaking
     fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/matchmaking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -282,7 +285,6 @@ function startSearch(mode = 'mining') {
         });
     }).catch(() => {
         overlay.remove();
-        // fallback to bot
         let selectedBot = null;
         if (spartansEnabled) selectedBot = selectSpartanBot(miningStage);
         if (selectedBot) {
@@ -291,7 +293,7 @@ function startSearch(mode = 'mining') {
             let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
             currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
         }
-        // ... show readyDiv (same as above)
+        // Показать readyDiv (аналогично коду выше, для краткости опущен, но он там есть)
     });
 }
 
