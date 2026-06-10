@@ -6,7 +6,7 @@ let invest = 0;
 let srum = 0;
 let ton = 0;
 let usdt = 0;
-let games = 3;                // <-- сразу 3 игры, без localStorage
+let games = 3;                // <-- сразу 3 игры
 const maxGames = 3;
 const gameRecoveryTime = 600;
 let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
@@ -27,7 +27,7 @@ let bandData = null;
 
 let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 
-// Остальные массивы оставлены для совместимости, но не мешают
+// Остальные массивы для совместимости
 const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [];
 const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [];
 let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
@@ -119,7 +119,7 @@ function updateBoostDisplay() {
 setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
-// Навигация (без изменений)
+// Навигация
 function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
 function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
 function switchScreen(screenId) {
