@@ -1,4 +1,4 @@
-// ================== ГЛОБАЛЬНЫЕ ДАННЫЕ И ИНИЦИАЛИЗАЦИЯ (ЛОКАЛЬНАЯ ВЕРСИЯ) ==================
+// ================== ГЛОБАЛЬНЫЕ ДАННЫЕ И ИНИЦИАЛИЗАЦИЯ ==================
 const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 const BAD = ['💩','🪱','🧀','🥀','🍄'];
 let rum = 0;
@@ -6,7 +6,7 @@ let invest = 0;
 let srum = 0;
 let ton = 0;
 let usdt = 0;
-let games = 3;                // <-- сразу 3 игры
+let games = 3;
 const maxGames = 3;
 const gameRecoveryTime = 600;
 let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
@@ -27,9 +27,16 @@ let bandData = null;
 
 let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 
-// Остальные массивы для совместимости
-const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [];
-const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [];
+const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
+    { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
+    { id:2, desc:'Сделать репост', reward:100, maxCompletions:100, completionsDone:0, checking:false },
+    { id:3, desc:'Пригласить друга', reward:200, maxCompletions:100, completionsDone:0, checking:false },
+    { id:4, desc:'Сыграть 5 раундов', reward:300, maxCompletions:100, completionsDone:0, checking:false }
+];
+const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
+    { id:101, desc:'Подпишись на Twitter', reward:0.1, maxCompletions:100, completionsDone:0, checking:false },
+    { id:102, desc:'Поставь лайк проекту', reward:0.15, maxCompletions:100, completionsDone:0, checking:false }
+];
 let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
 let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
@@ -42,6 +49,10 @@ function saveAll() {
     localStorage.setItem('nickname', userNickname);
     localStorage.setItem('userStatus', userStatus);
     localStorage.setItem('referrals', JSON.stringify(referrals));
+    localStorage.setItem('officialRumTasks', JSON.stringify(officialRumTasks));
+    localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
+    localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
+    localStorage.setItem('userTasks', JSON.stringify(userTasks));
 }
 
 const pot = document.getElementById('pot');
@@ -63,16 +74,48 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
-// ================== ИНИЦИАЛИЗАЦИЯ БЕЗ ЗАДЕРЖЕК ==================
+// ================== ГИБРИДНАЯ ИНИЦИАЛИЗАЦИЯ (БЫСТРЫЙ СТАРТ + ОБЛАКО) ==================
+let userId = 123456789;
 window.lastGameTime = 0;
 
-(function initApp() {
+(async function initApp() {
+    // 1. Мгновенно показываем игру
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     startVeggieAnimation();
     updateUI();
     if (games < maxGames) startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+
+    // 2. Определяем Telegram ID (без блокировки)
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+        userId = Telegram.WebApp.initDataUnsafe.user.id;
+        userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
+    }
+
+    // 3. Тихая загрузка из облака (если доступен api.js)
+    if (typeof loadUserData !== 'function') return;
+    try {
+        const userData = await loadUserData(userId);
+        if (userData) {
+            rum = userData.rum || 0;
+            srum = parseFloat(userData.srum) || 0;
+            ton = parseFloat(userData.ton) || 0;
+            usdt = parseFloat(userData.usdt) || 0;
+            userNickname = userData.nickname || userNickname;
+            userStatus = userData.status || 'solo';
+            miningStage = userData.mining_stage || 1;
+            if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
+            if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
+            // Приветственный бонус
+            if (!userData.bonus_claimed && typeof showBonusStep1 === 'function') {
+                showBonusStep1();
+            }
+        }
+        updateUI();
+    } catch (e) {
+        console.log('Облачная загрузка отложена, работаем локально');
+    }
 })();
 
 function updateUI() {
@@ -102,6 +145,21 @@ function updateUI() {
     updateBoostDisplay();
     updateProfile();
     saveAll();
+    // Сохраняем в облако тихо
+    if (typeof saveUserData === 'function' && userId) {
+        saveUserData(userId, {
+            nickname: userNickname,
+            rum: rum,
+            srum: srum,
+            ton: ton,
+            usdt: usdt,
+            status: userStatus,
+            mining_stage: miningStage,
+            boost: activeBoost ? JSON.stringify(activeBoost) : null,
+            games: games,
+            last_rum_exchange: localStorage.getItem('lastRumExchange') || null
+        }).catch(() => {});
+    }
 }
 
 function updateBoostDisplay() {
@@ -119,7 +177,6 @@ function updateBoostDisplay() {
 setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
-// Навигация
 function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
 function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
 function switchScreen(screenId) {
