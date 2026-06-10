@@ -172,6 +172,7 @@ function updateBoostDisplay() {
 setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
+// ================== НАВИГАЦИЯ ==================
 function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
 function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
 function switchScreen(screenId) {
@@ -180,6 +181,7 @@ function switchScreen(screenId) {
         hideViewSwitch();
         quickDuelCoin.classList.add('hidden');
         document.getElementById('user-profile').classList.add('hidden');
+        startBtn.style.display = 'none'; // СКРЫВАЕМ КНОПКУ НАЧАТЬ
         if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
         else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
         else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
@@ -190,6 +192,7 @@ function switchScreen(screenId) {
         showViewSwitch();
         quickDuelCoin.classList.remove('hidden');
         document.getElementById('user-profile').classList.remove('hidden');
+        updateUI(); // ВОЗВРАЩАЕМ КНОПКУ НАЧАТЬ, если должна быть видна
     }
 }
 document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
@@ -203,6 +206,7 @@ document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', 
     showViewSwitch();
     quickDuelCoin.classList.remove('hidden');
     document.getElementById('user-profile').classList.remove('hidden');
+    updateUI(); // Показываем кнопку Начать снова
 }));
 
 function preventDefaultMove(e) { e.preventDefault(); }
