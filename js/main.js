@@ -1,4 +1,4 @@
-// ================== ГЛОБАЛЬНЫЕ ДАННЫЕ И ИНИЦИАЛИЗАЦИЯ ==================
+// ================== ГЛОБАЛЬНЫЕ ДАННЫЕ И ИНИЦИАЛИЗАЦИЯ (ГИБРИД) ==================
 const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 const BAD = ['💩','🪱','🧀','🥀','🍄'];
 let rum = 0;
@@ -74,12 +74,11 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
-// ================== ГИБРИДНАЯ ИНИЦИАЛИЗАЦИЯ (БЫСТРЫЙ СТАРТ + ОБЛАКО) ==================
+// ================== ГИБРИДНАЯ ИНИЦИАЛИЗАЦИЯ ==================
 let userId = 123456789;
 window.lastGameTime = 0;
 
 (async function initApp() {
-    // 1. Мгновенно показываем игру
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     startVeggieAnimation();
@@ -87,13 +86,11 @@ window.lastGameTime = 0;
     if (games < maxGames) startRecovery();
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 
-    // 2. Определяем Telegram ID (без блокировки)
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
     }
 
-    // 3. Тихая загрузка из облака (если доступен api.js)
     if (typeof loadUserData !== 'function') return;
     try {
         const userData = await loadUserData(userId);
@@ -107,7 +104,6 @@ window.lastGameTime = 0;
             miningStage = userData.mining_stage || 1;
             if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
             if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
-            // Приветственный бонус
             if (!userData.bonus_claimed && typeof showBonusStep1 === 'function') {
                 showBonusStep1();
             }
@@ -145,7 +141,6 @@ function updateUI() {
     updateBoostDisplay();
     updateProfile();
     saveAll();
-    // Сохраняем в облако тихо
     if (typeof saveUserData === 'function' && userId) {
         saveUserData(userId, {
             nickname: userNickname,
