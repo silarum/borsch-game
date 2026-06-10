@@ -61,13 +61,12 @@ quickDuelCoin.addEventListener('click', () => {
     showMiningModal();
 });
 
-// --- Модальное окно выбора порога и этапа (обычный майнинг) – НОВЫЙ ДИЗАЙН ---
+// --- Модальное окно выбора порога и этапа (обычный майнинг) ---
 function showMiningModal() {
     const modal = document.createElement('div');
     modal.className = 'quick-duel-modal';
-    // Генерируем случайный пул для красоты
-    const poolAmount = (10000 + Math.random() * 190000).toFixed(0); // 10k - 200k
-    const activePlayers = Math.floor(10 + Math.random() * 290); // 10 - 300
+    const poolAmount = (10000 + Math.random() * 190000).toFixed(0);
+    const activePlayers = Math.floor(10 + Math.random() * 290);
     modal.innerHTML = `
         <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
             <div class="pool-cloud">
@@ -90,7 +89,6 @@ function showMiningModal() {
     `;
     document.getElementById('game-container').appendChild(modal);
 
-    // Обработчик слайдера – обновляет взнос, штраф и награду
     const slider = document.getElementById('threshold-slider');
     const stakeDisplay = document.getElementById('mining-stake');
     const penaltyDisplay = document.getElementById('penalty-text');
@@ -102,11 +100,13 @@ function showMiningModal() {
         rewardDisplay.textContent = `Награда при победе: ${(value * getRewardPercent()).toFixed(2)} USDT`;
     });
 
-    // Старт майнинга
     document.getElementById('start-mining-search').addEventListener('click', () => {
         miningCurrency = document.getElementById('mining-currency').value;
         miningThreshold = parseFloat(slider.value);
-        if (miningCurrency === 'SRUM' && srum < miningThreshold) return alert('Недостаточно SRUM');
+        if (miningCurrency === 'SRUM' && srum < miningThreshold) {
+            showSRUMShopModal();
+            return;
+        }
         if (miningCurrency === 'RUM' && rum < miningThreshold) return alert('Недостаточно RUM');
         if (miningCurrency === 'SRUM') srum -= miningThreshold;
         else rum -= miningThreshold;
@@ -115,16 +115,39 @@ function showMiningModal() {
         startSearch('mining');
     });
 
-    // Отмена
     document.getElementById('cancel-mining').addEventListener('click', () => modal.remove());
 }
 
-// --- Модальное окно турнира «Выжить в тюрьме» – КРАСИВЫЙ ДИЗАЙН ---
+// --- Окно при нехватке SRUM (для обычного майнинга) ---
+function showSRUMShopModal() {
+    const modal = document.createElement('div');
+    modal.className = 'quick-duel-modal';
+    modal.innerHTML = `
+        <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
+            <div class="pool-cloud">
+                <h2>⚠️ Недостаточно SRUM</h2>
+                <p>Для участия нужно ${miningThreshold.toFixed(1)} SRUM</p>
+                <button class="btn-mining-big" id="go-to-shop">🛒 Добыть SRUM</button>
+                <button id="cancel-lack" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">Отмена</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('game-container').appendChild(modal);
+    document.getElementById('go-to-shop').addEventListener('click', () => {
+        modal.remove();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('shop-screen').classList.add('active');
+        renderShop();
+    });
+    document.getElementById('cancel-lack').addEventListener('click', () => modal.remove());
+}
+
+// --- Турнир «Выжить в тюрьме» ---
 function showTournamentModal() {
     const modal = document.createElement('div');
     modal.className = 'quick-duel-modal';
-    const poolAmount = (5000 + Math.random() * 45000).toFixed(0); // 5k - 50k
-    const activePlayers = Math.floor(5 + Math.random() * 95); // 5 - 100
+    const poolAmount = (5000 + Math.random() * 45000).toFixed(0);
+    const activePlayers = Math.floor(5 + Math.random() * 95);
     modal.innerHTML = `
         <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
             <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #8b0000, #4a0000);">
@@ -160,7 +183,10 @@ function showTournamentModal() {
     document.getElementById('start-tournament-search').addEventListener('click', () => {
         miningCurrency = 'SRUM';
         miningThreshold = parseFloat(slider.value);
-        if (srum < miningThreshold) return alert('Недостаточно SRUM');
+        if (srum < miningThreshold) {
+            showSRUMShopModal();
+            return;
+        }
         srum -= miningThreshold;
         pendingMining = { currency: 'SRUM', threshold: miningThreshold, stage: miningStage };
         updateUI(); modal.remove();
@@ -170,19 +196,16 @@ function showTournamentModal() {
     document.getElementById('cancel-tournament').addEventListener('click', () => modal.remove());
 }
 
-// --- Поиск блока (соперника) с автоподбором при отмене ---
+// --- Гибридный поиск (реальный соперник или бот) ---
 function startSearch(mode = 'mining') {
     const overlay = document.createElement('div');
     overlay.className = 'countdown-overlay';
     overlay.innerHTML = '<div style="font-size:1.8rem;">🔍 Поиск блока...</div>';
     document.getElementById('game-container').appendChild(overlay);
 
-    let searchTimerId;
     let cancelled = false;
-
     const cancelSearch = () => {
         cancelled = true;
-        clearTimeout(searchTimerId);
         overlay.remove();
         if (pendingMining) {
             if (pendingMining.currency === 'SRUM') srum += pendingMining.threshold;
@@ -198,20 +221,31 @@ function startSearch(mode = 'mining') {
     cancelBtn.addEventListener('click', cancelSearch);
     overlay.appendChild(cancelBtn);
 
-    searchTimerId = setTimeout(() => {
+    // Запрос к matchmaking
+    fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/matchmaking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: userId,
+            threshold: miningThreshold,
+            stage: miningStage,
+            currency: miningCurrency
+        })
+    }).then(res => res.json()).then(data => {
         if (cancelled) return;
         overlay.remove();
 
-        // --- ВЫБОР БОТА ---
-        let selectedBot = null;
-        if (spartansEnabled) {
-            selectedBot = selectSpartanBot(miningStage);
-        }
-        if (selectedBot) {
-            currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin };
+        if (data.found) {
+            currentBot = { name: 'Игрок', speed: 800, botIndex: -1, shouldWin: false };
         } else {
-            let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
-            currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
+            let selectedBot = null;
+            if (spartansEnabled) selectedBot = selectSpartanBot(miningStage);
+            if (selectedBot) {
+                currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin };
+            } else {
+                let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
+                currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
+            }
         }
 
         const readyDiv = document.createElement('div');
@@ -246,7 +280,19 @@ function startSearch(mode = 'mining') {
                 }, 1000);
             }, 1500);
         });
-    }, 2500);
+    }).catch(() => {
+        overlay.remove();
+        // fallback to bot
+        let selectedBot = null;
+        if (spartansEnabled) selectedBot = selectSpartanBot(miningStage);
+        if (selectedBot) {
+            currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin };
+        } else {
+            let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
+            currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false };
+        }
+        // ... show readyDiv (same as above)
+    });
 }
 
 // --- Запуск дуэли (20 секунд) ---
@@ -354,13 +400,21 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
         resultDiv.innerHTML = `<h2>⚠️ Ошибка соединения</h2><p>Результат будет обработан позже</p><button id="continue-mining">Продолжить</button>`;
     }
 
+    if (currentBot.botIndex >= 0) {
+        const botWon = !win;
+        updateSpartanBot(currentBot.botIndex, botWon, miningStage, (miningThreshold * getPenaltyPercent()), (miningThreshold * getRewardPercent()));
+    }
+
     pendingMining = null;
     updateUI();
     document.getElementById('game-container').appendChild(resultDiv);
 
     document.getElementById('continue-mining')?.addEventListener('click', ()=>{
         resultDiv.remove();
-        if (miningCurrency === 'SRUM' && srum < miningThreshold) return alert('Недостаточно SRUM для продолжения');
+        if (miningCurrency === 'SRUM' && srum < miningThreshold) {
+            showSRUMShopModal();
+            return;
+        }
         if (miningCurrency === 'SRUM') srum -= miningThreshold;
         else rum -= miningThreshold;
         pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
@@ -451,7 +505,10 @@ function renderArena() {
             renderArena();
         });
         document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
-            if (srum < miningThreshold) return alert('Недостаточно SRUM');
+            if (srum < miningThreshold) {
+                showSRUMShopModal();
+                return;
+            }
             srum -= miningThreshold; miningCurrency = 'SRUM';
             pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
             arenaContent.innerHTML = '<h2>🔍 Поиск блока...</h2><p id="search-counter">5 сек</p>';
