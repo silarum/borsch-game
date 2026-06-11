@@ -24,7 +24,6 @@ let miningThreshold = 1;
 let pendingMining = null;
 let currentBot = null;
 let bandData = null;
-
 let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 
 const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
@@ -42,7 +41,12 @@ let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
 function saveAll() {
+    localStorage.setItem('rum', rum);
+    localStorage.setItem('srum', srum);
+    localStorage.setItem('ton', ton);
+    localStorage.setItem('usdt', usdt);
     localStorage.setItem('games', games);
+    localStorage.setItem('lastGameTime', window.lastGameTime);
     localStorage.setItem('clubs', JSON.stringify(clubs));
     if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
     localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
@@ -53,6 +57,8 @@ function saveAll() {
     localStorage.setItem('officialSrumTasks', JSON.stringify(officialSrumTasks));
     localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
     localStorage.setItem('userTasks', JSON.stringify(userTasks));
+    localStorage.setItem('miningStage', miningStage);
+    localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
 }
 
 const pot = document.getElementById('pot');
@@ -75,43 +81,86 @@ const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 
 // ================== ГИБРИДНАЯ ИНИЦИАЛИЗАЦИЯ ==================
-let userId = 123456789;
-window.lastGameTime = 0;
+let userId = null;
+window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
 (async function initApp() {
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     startVeggieAnimation();
-    updateUI();
-    if (games < maxGames) startRecovery();
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 
+    // Определяем userId из Telegram Web App
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
+    } else {
+        // Фолбэк — берём из localStorage или генерируем
+        userId = parseInt(localStorage.getItem('userId')) || Date.now();
+        localStorage.setItem('userId', userId);
     }
 
-    if (typeof loadUserData !== 'function') return;
-    try {
-        const userData = await loadUserData(userId);
-        if (userData) {
-            rum = userData.rum || 0;
-            srum = parseFloat(userData.srum) || 0;
-            ton = parseFloat(userData.ton) || 0;
-            usdt = parseFloat(userData.usdt) || 0;
-            userNickname = userData.nickname || userNickname;
-            userStatus = userData.status || 'solo';
-            miningStage = userData.mining_stage || 1;
-            if (userData.boost && userData.boost !== 'null') activeBoost = JSON.parse(userData.boost);
-            if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
-            if (!userData.bonus_claimed && typeof showBonusStep1 === 'function') {
-                showBonusStep1();
-            }
-        }
-        updateUI();
-    } catch (e) {
-        console.log('Облачная загрузка отложена, работаем локально');
+    // Загружаем данные из localStorage для быстрого старта
+    const savedRum = parseInt(localStorage.getItem('rum'));
+    const savedSrum = parseFloat(localStorage.getItem('srum'));
+    const savedTon = parseFloat(localStorage.getItem('ton'));
+    const savedUsdt = parseFloat(localStorage.getItem('usdt'));
+    const savedGames = parseInt(localStorage.getItem('games'));
+    const savedNickname = localStorage.getItem('nickname');
+    const savedStatus = localStorage.getItem('userStatus');
+    const savedStage = parseInt(localStorage.getItem('miningStage'));
+    const savedBoost = localStorage.getItem('activeBoost');
+    
+    if (!isNaN(savedRum)) rum = savedRum;
+    if (!isNaN(savedSrum)) srum = savedSrum;
+    if (!isNaN(savedTon)) ton = savedTon;
+    if (!isNaN(savedUsdt)) usdt = savedUsdt;
+    if (!isNaN(savedGames) && savedGames >= 0 && savedGames <= maxGames) games = savedGames;
+    if (savedNickname) userNickname = savedNickname;
+    if (savedStatus) userStatus = savedStatus;
+    if (!isNaN(savedStage) && savedStage >= 1 && savedStage <= 5) miningStage = savedStage;
+    if (savedBoost && savedBoost !== 'null') {
+        try { activeBoost = JSON.parse(savedBoost); } catch(e) { activeBoost = null; }
     }
+
+    updateUI();
+
+    // Загружаем данные из облака Supabase (перезаписывает локальные)
+    if (typeof loadUserData === 'function' && userId) {
+        try {
+            const userData = await loadUserData(userId);
+            if (userData) {
+                rum = userData.rum || rum;
+                srum = parseFloat(userData.srum) || srum;
+                ton = parseFloat(userData.ton) || ton;
+                usdt = parseFloat(userData.usdt) || usdt;
+                userNickname = userData.nickname || userNickname;
+                userStatus = userData.status || userStatus;
+                miningStage = userData.mining_stage || miningStage;
+                if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
+                if (userData.boost && userData.boost !== 'null') {
+                    try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
+                }
+                
+                // Приветственный бонус
+                if (!userData.bonus_claimed && typeof processWelcomeBonus === 'function') {
+                    processWelcomeBonus(userId, userData).then(claimed => {
+                        if (claimed) {
+                            srum += 1;
+                            updateUI();
+                        }
+                    });
+                }
+                
+                console.log('Данные загружены из облака');
+            }
+            updateUI();
+        } catch (e) {
+            console.log('Облачная загрузка отложена, работаем локально:', e.message);
+        }
+    }
+
+    if (games < maxGames) startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 })();
 
 function updateUI() {
@@ -151,8 +200,7 @@ function updateUI() {
             status: userStatus,
             mining_stage: miningStage,
             boost: activeBoost ? JSON.stringify(activeBoost) : null,
-            games: games,
-            last_rum_exchange: localStorage.getItem('lastRumExchange') || null
+            games: games
         }).catch(() => {});
     }
 }
@@ -181,7 +229,7 @@ function switchScreen(screenId) {
         hideViewSwitch();
         quickDuelCoin.classList.add('hidden');
         document.getElementById('user-profile').classList.add('hidden');
-        startBtn.style.display = 'none'; // СКРЫВАЕМ КНОПКУ НАЧАТЬ
+        startBtn.style.display = 'none';
         if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
         else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
         else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
@@ -192,7 +240,7 @@ function switchScreen(screenId) {
         showViewSwitch();
         quickDuelCoin.classList.remove('hidden');
         document.getElementById('user-profile').classList.remove('hidden');
-        updateUI(); // ВОЗВРАЩАЕМ КНОПКУ НАЧАТЬ, если должна быть видна
+        updateUI();
     }
 }
 document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
@@ -202,11 +250,10 @@ document.querySelectorAll('.nav-btn, .menu-dropdown button[data-screen]').forEac
 document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
     ev.stopPropagation();
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    if (duelActive) { }
     showViewSwitch();
     quickDuelCoin.classList.remove('hidden');
     document.getElementById('user-profile').classList.remove('hidden');
-    updateUI(); // Показываем кнопку Начать снова
+    updateUI();
 }));
 
 function preventDefaultMove(e) { e.preventDefault(); }
