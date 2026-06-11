@@ -2,7 +2,6 @@
 const SUPABASE_URL = 'https://hngfpdsnjgdpazmortix.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_JZOPRsRfMx2l6rsc4QfeBg_s5hf6QRg';
 
-// Универсальный запрос к Supabase REST API
 async function supabaseRequest(method, table, body = null, params = '') {
     const url = `${SUPABASE_URL}/rest/v1/${table}${params}`;
     const headers = {
@@ -20,7 +19,6 @@ async function supabaseRequest(method, table, body = null, params = '') {
     return response;
 }
 
-// Загрузка данных пользователя из облака
 async function loadUserData(userId) {
     if (!userId) {
         console.warn('loadUserData: userId не указан');
@@ -36,10 +34,9 @@ async function loadUserData(userId) {
         if (response.ok) {
             const users = await response.json();
             if (users.length > 0) {
-                return users[0]; // возвращаем объект пользователя
+                return users[0];
             }
         }
-        // Пользователь не найден — создаём нового
         await supabaseRequest('POST', 'users', {
             id: userId,
             nickname: 'Майнер',
@@ -69,7 +66,6 @@ async function loadUserData(userId) {
     }
 }
 
-// Сохранение данных пользователя в облако
 async function saveUserData(userId, data) {
     if (!userId) {
         console.warn('saveUserData: userId не указан');
