@@ -1,59 +1,61 @@
 // ================== СМАРТ-КОНТРАКТ ПОКУПКИ SRUM ==================
-// Принимает TON от игроков и эмитит событие для начисления SRUM через бэкенд.
+// Принимает TON от игроков, записывает транзакцию в лог.
 // Админ может выводить накопленные TON.
 
-import "@stdlib/deploy";
-
-// Админ-кошелёк (тот же, что во фронтенде)
+// Админ-кошелёк — сюда выводятся накопленные TON
 const ADMIN_WALLET: Address = address("UQCM95PSNxwcJi-IX_bAAs4-_6Txde_XxitDP09n2PhFcPIM");
 
-// Цена: 1 TON = 2 SRUM (настраивается админом)
-let exchangeRate: Int as uint32 = 2;
+// Курс обмена: сколько SRUM даётся за 1 TON (умножается на 10^9, т.к. TON в нанотонах)
+const EXCHANGE_RATE: Int = 2;
 
-// Суммарный баланс контракта в нанотонах
-let totalTonBalance: Int as coins = 0;
+// Баланс контракта в нанотонах
+let totalTonBalance: Int = 0;
 
-// Событие: игрок купил SRUM
-message BuySRUM {
+// Событие-лог при покупке (будет видно в транзакциях)
+event BuySrumLog {
     buyer: Address;
-    tonAmount: Int as coins;
-    srumAmount: Int as uint32;
+    tonAmount: Int;
+    srumAmount: Int;
 }
 
-// Инициализация контракта
-init() {
-    // Контракт может принимать только сообщения
-}
-
-// Приём внешнего сообщения (от кошелька игрока)
-receive(msg: BuySRUM) {
-    // Вычисляем количество SRUM по курсу
-    let srumAmount = msg.tonAmount * exchangeRate;
+// Приём любого сообщения с TON (игрок просто отправляет TON на контракт)
+receive() {
+    let tonAmount = context().value;
     
-    // Добавляем TON в баланс контракта
-    totalTonBalance += msg.tonAmount;
+    // Проверяем, что отправили больше 0
+    require(tonAmount > 0, "Отправьте TON для покупки SRUM");
     
-    // Эмитим событие для бэкенда (Supabase Edge Function слушает его)
-    emit(msg);
-}
-
-// Только админ может выводить TON
-receive("Withdraw") {
-    require(sender() == ADMIN_WALLET, "Только админ может выводить TON");
-    send(SendParameters{
-        to: ADMIN_WALLET,
-        value: totalTonBalance,
-        mode: SendRemainingValue
+    // Вычисляем количество SRUM: делим нанотоны на 10^9 и умножаем на курс
+    let srumAmount = (tonAmount / 1000000000) * EXCHANGE_RATE;
+    
+    // Увеличиваем баланс контракта
+    totalTonBalance += tonAmount;
+    
+    // Записываем событие в лог блокчейна
+    self.forward(context().sender, 0, BuySrumLog{
+        buyer: context().sender,
+        tonAmount: tonAmount,
+        srumAmount: srumAmount
     });
+}
+
+// Вывод TON админом
+receive("withdraw") {
+    require(context().sender == ADMIN_WALLET, "Только админ может выводить TON");
+    
+    let amount = totalTonBalance;
     totalTonBalance = 0;
+    
+    // Отправляем весь баланс админу
+    nativeSendMessage(ADMIN_WALLET, amount, null);
 }
 
-// Геттер: получить текущий курс обмена
-get fun exchangeRate(): Int {
-    return exchangeRate;
-}
-
-// Геттер: получить баланс контракта
+// Геттер: текущий баланс контракта в TON (для удобства отображения)
 get fun balance(): Int {
     return totalTonBalance;
+}
+
+// Геттер: курс обмена
+get fun exchangeRate(): Int {
+    return EXCHANGE_RATE;
 }
