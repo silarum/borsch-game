@@ -40,6 +40,7 @@ let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]'
 let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
+// ================== СОХРАНЕНИЕ В LOCALSTORAGE ==================
 function saveAll() {
     localStorage.setItem('rum', rum);
     localStorage.setItem('srum', srum);
@@ -61,6 +62,7 @@ function saveAll() {
     localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
 }
 
+// ================== DOM-ЭЛЕМЕНТЫ ==================
 const pot = document.getElementById('pot');
 const board = document.getElementById('board');
 const rumBal = document.getElementById('rum-balance');
@@ -74,11 +76,41 @@ const langBtn = document.getElementById('lang-btn-bottom');
 const boostDisplay = document.getElementById('boost-display');
 const energyDisplay = document.getElementById('energy-display');
 const startBtn = document.getElementById('start-btn');
+const startBtnContainer = document.getElementById('start-btn-container');
 const quickDuelCoin = document.getElementById('quick-duel-coin');
 const duelScoreboard = document.getElementById('duel-scoreboard');
 const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
+const userProfile = document.getElementById('user-profile');
+
+// ================== ГЛАВНЫЕ ЭЛЕМЕНТЫ (управляются при навигации) ==================
+// Все элементы, которые должны быть видны только на главном экране
+const mainScreenElements = [
+    viewSwitch,
+    rulesBtn,
+    langBtn,
+    quickDuelCoin,
+    startBtnContainer,
+    board,
+    userProfile
+];
+
+// Показать элементы главного экрана
+function showMainElements() {
+    mainScreenElements.forEach(el => {
+        if (el) el.style.display = '';
+    });
+    // Восстанавливаем кнопку СТАРТ по состоянию игры
+    updateUI();
+}
+
+// Скрыть элементы главного экрана
+function hideMainElements() {
+    mainScreenElements.forEach(el => {
+        if (el) el.style.display = 'none';
+    });
+}
 
 // ================== ГИБРИДНАЯ ИНИЦИАЛИЗАЦИЯ ==================
 let userId = null;
@@ -94,7 +126,6 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
     } else {
-        // Фолбэк — берём из localStorage или генерируем
         userId = parseInt(localStorage.getItem('userId')) || Date.now();
         localStorage.setItem('userId', userId);
     }
@@ -163,14 +194,19 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 })();
 
+// ================== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ==================
 function updateUI() {
     rumBal.textContent = `💰 RUM: ${rum}`;
     srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
     usdtBalTop.textContent = `💵 USDT: ${usdt.toFixed(2)}`;
     tonBalTop.textContent = `⚡ TON: ${ton.toFixed(2)}`;
-    document.getElementById('ton-balance') && (document.getElementById('ton-balance').textContent = ton.toFixed(2));
-    document.getElementById('usdt-balance') && (document.getElementById('usdt-balance').textContent = usdt.toFixed(2));
+    
+    const tonBal = document.getElementById('ton-balance');
+    const usdtBal = document.getElementById('usdt-balance');
+    if (tonBal) tonBal.textContent = ton.toFixed(2);
+    if (usdtBal) usdtBal.textContent = usdt.toFixed(2);
 
+    // Логика отображения кнопки СТАРТ и энергии
     if (games > 0 && !gameActive && !duelActive) {
         startBtn.style.display = 'inline-block';
         energyDisplay.textContent = `⚡ ${games}/${maxGames} игр`;
@@ -187,9 +223,12 @@ function updateUI() {
         const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
         energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
     }
+    
     updateBoostDisplay();
-    updateProfile();
+    if (typeof updateProfile === 'function') updateProfile();
     saveAll();
+    
+    // Сохраняем в облако
     if (typeof saveUserData === 'function' && userId) {
         saveUserData(userId, {
             nickname: userNickname,
@@ -220,40 +259,63 @@ function updateBoostDisplay() {
 setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
-// ================== НАВИГАЦИЯ ==================
-function hideViewSwitch() { viewSwitch.classList.add('hidden'); rulesBtn.classList.add('hidden'); langBtn.classList.add('hidden'); }
-function showViewSwitch() { viewSwitch.classList.remove('hidden'); rulesBtn.classList.remove('hidden'); langBtn.classList.remove('hidden'); }
+// ================== НАВИГАЦИЯ (ИСПРАВЛЕНО) ==================
+
+/**
+ * Переключение между экранами.
+ * @param {string|null} screenId — ID экрана ('shop', 'arena', ...) или null для главного.
+ */
 function switchScreen(screenId) {
+    // 1. Скрываем ВСЕ экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
     if (screenId) {
-        hideViewSwitch();
-        quickDuelCoin.classList.add('hidden');
-        document.getElementById('user-profile').classList.add('hidden');
-        startBtn.style.display = 'none';
-        if (screenId === 'tasks') { document.getElementById('tasks-screen').classList.add('active'); renderAvailableTasks(); }
-        else if (screenId === 'mining-club') { document.getElementById('mining-club-screen').classList.add('active'); renderMyClub(); }
-        else if (screenId === 'arena') { document.getElementById('arena-screen').classList.add('active'); renderArena(); }
-        else if (screenId === 'referral') { document.getElementById('referral-screen').classList.add('active'); renderReferralList(); }
-        else if (screenId === 'shop') { document.getElementById('shop-screen').classList.add('active'); renderShop(); }
-        else { const t = document.getElementById(screenId+'-screen'); if(t) t.classList.add('active'); }
+        // === ОТКРЫВАЕМ ДОЧЕРНИЙ ЭКРАН ===
+        hideMainElements(); // Скрываем все главные элементы
+        
+        // Показываем нужный экран
+        if (screenId === 'tasks') {
+            document.getElementById('tasks-screen').classList.add('active');
+            if (typeof renderAvailableTasks === 'function') renderAvailableTasks();
+        } else if (screenId === 'mining-club') {
+            document.getElementById('mining-club-screen').classList.add('active');
+            if (typeof renderMyClub === 'function') renderMyClub();
+        } else if (screenId === 'arena') {
+            document.getElementById('arena-screen').classList.add('active');
+            if (typeof renderArena === 'function') renderArena();
+        } else if (screenId === 'referral') {
+            document.getElementById('referral-screen').classList.add('active');
+            if (typeof renderReferralList === 'function') renderReferralList();
+        } else if (screenId === 'shop') {
+            document.getElementById('shop-screen').classList.add('active');
+            if (typeof renderShop === 'function') renderShop();
+        } else {
+            const target = document.getElementById(screenId + '-screen');
+            if (target) target.classList.add('active');
+        }
     } else {
-        showViewSwitch();
-        quickDuelCoin.classList.remove('hidden');
-        document.getElementById('user-profile').classList.remove('hidden');
-        updateUI();
+        // === ВОЗВРАЩАЕМСЯ НА ГЛАВНЫЙ ЭКРАН ===
+        showMainElements();
     }
 }
-document.getElementById('rules-btn-bottom').addEventListener('click', ()=> switchScreen('rules'));
+
+// Обработчики кнопок нижней панели и меню
 document.querySelectorAll('.nav-btn, .menu-dropdown button[data-screen]').forEach(b => {
-    b.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen));
+    b.addEventListener('click', (e) => {
+        const screenId = e.currentTarget.dataset.screen;
+        switchScreen(screenId);
+        // Закрываем выпадающее меню, если открыто
+        document.getElementById('menu-dropdown').classList.remove('active');
+    });
 });
+
+// Обработчик кнопки Правила (на главном экране)
+document.getElementById('rules-btn-bottom').addEventListener('click', () => switchScreen('rules'));
+
+// Обработчики ВСЕХ кнопок «Назад»
 document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
     ev.stopPropagation();
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    showViewSwitch();
-    quickDuelCoin.classList.remove('hidden');
-    document.getElementById('user-profile').classList.remove('hidden');
-    updateUI();
+    switchScreen(null); // Возврат на главный экран
 }));
 
 function preventDefaultMove(e) { e.preventDefault(); }
