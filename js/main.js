@@ -84,8 +84,7 @@ const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 const userProfile = document.getElementById('user-profile');
 
-// ================== ГЛАВНЫЕ ЭЛЕМЕНТЫ (управляются при навигации) ==================
-// Все элементы, которые должны быть видны только на главном экране
+// Все элементы, которые видны ТОЛЬКО на главном экране
 const mainScreenElements = [
     viewSwitch,
     rulesBtn,
@@ -101,7 +100,6 @@ function showMainElements() {
     mainScreenElements.forEach(el => {
         if (el) el.style.display = '';
     });
-    // Восстанавливаем кнопку СТАРТ по состоянию игры
     updateUI();
 }
 
@@ -155,7 +153,7 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
     updateUI();
 
-    // Загружаем данные из облака Supabase (перезаписывает локальные)
+    // Загружаем данные из облака Supabase
     if (typeof loadUserData === 'function' && userId) {
         try {
             const userData = await loadUserData(userId);
@@ -172,7 +170,6 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
                     try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
                 }
                 
-                // Приветственный бонус
                 if (!userData.bonus_claimed && typeof processWelcomeBonus === 'function') {
                     processWelcomeBonus(userId, userData).then(claimed => {
                         if (claimed) {
@@ -194,19 +191,15 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 })();
 
-// ================== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ==================
+// ================== ОБНОВЛЕНИЕ UI ==================
 function updateUI() {
     rumBal.textContent = `💰 RUM: ${rum}`;
     srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
     usdtBalTop.textContent = `💵 USDT: ${usdt.toFixed(2)}`;
     tonBalTop.textContent = `⚡ TON: ${ton.toFixed(2)}`;
-    
-    const tonBal = document.getElementById('ton-balance');
-    const usdtBal = document.getElementById('usdt-balance');
-    if (tonBal) tonBal.textContent = ton.toFixed(2);
-    if (usdtBal) usdtBal.textContent = usdt.toFixed(2);
+    document.getElementById('ton-balance') && (document.getElementById('ton-balance').textContent = ton.toFixed(2));
+    document.getElementById('usdt-balance') && (document.getElementById('usdt-balance').textContent = usdt.toFixed(2));
 
-    // Логика отображения кнопки СТАРТ и энергии
     if (games > 0 && !gameActive && !duelActive) {
         startBtn.style.display = 'inline-block';
         energyDisplay.textContent = `⚡ ${games}/${maxGames} игр`;
@@ -223,12 +216,9 @@ function updateUI() {
         const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
         energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
     }
-    
     updateBoostDisplay();
-    if (typeof updateProfile === 'function') updateProfile();
+    updateProfile();
     saveAll();
-    
-    // Сохраняем в облако
     if (typeof saveUserData === 'function' && userId) {
         saveUserData(userId, {
             nickname: userNickname,
@@ -260,20 +250,14 @@ setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
 // ================== НАВИГАЦИЯ (ИСПРАВЛЕНО) ==================
-
-/**
- * Переключение между экранами.
- * @param {string|null} screenId — ID экрана ('shop', 'arena', ...) или null для главного.
- */
 function switchScreen(screenId) {
-    // 1. Скрываем ВСЕ экраны
+    // Закрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
     if (screenId) {
-        // === ОТКРЫВАЕМ ДОЧЕРНИЙ ЭКРАН ===
-        hideMainElements(); // Скрываем все главные элементы
-        
-        // Показываем нужный экран
+        // === ПЕРЕХОД НА ДОЧЕРНИЙ ЭКРАН ===
+        hideMainElements();
+
         if (screenId === 'tasks') {
             document.getElementById('tasks-screen').classList.add('active');
             if (typeof renderAvailableTasks === 'function') renderAvailableTasks();
@@ -294,28 +278,27 @@ function switchScreen(screenId) {
             if (target) target.classList.add('active');
         }
     } else {
-        // === ВОЗВРАЩАЕМСЯ НА ГЛАВНЫЙ ЭКРАН ===
+        // === ВОЗВРАТ НА ГЛАВНЫЙ ЭКРАН ===
         showMainElements();
     }
 }
 
-// Обработчики кнопок нижней панели и меню
+// Кнопка «Правила» на главном экране
+document.getElementById('rules-btn-bottom').addEventListener('click', () => switchScreen('rules'));
+
+// Кнопки нижней панели и выпадающего меню
 document.querySelectorAll('.nav-btn, .menu-dropdown button[data-screen]').forEach(b => {
     b.addEventListener('click', (e) => {
         const screenId = e.currentTarget.dataset.screen;
         switchScreen(screenId);
-        // Закрываем выпадающее меню, если открыто
         document.getElementById('menu-dropdown').classList.remove('active');
     });
 });
 
-// Обработчик кнопки Правила (на главном экране)
-document.getElementById('rules-btn-bottom').addEventListener('click', () => switchScreen('rules'));
-
-// Обработчики ВСЕХ кнопок «Назад»
+// Все кнопки «Назад»
 document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
     ev.stopPropagation();
-    switchScreen(null); // Возврат на главный экран
+    switchScreen(null);
 }));
 
 function preventDefaultMove(e) { e.preventDefault(); }
