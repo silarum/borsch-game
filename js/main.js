@@ -40,7 +40,7 @@ let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]'
 let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
-// ================== СОХРАНЕНИЕ В LOCALSTORAGE ==================
+// ================== СОХРАНЕНИЕ ==================
 function saveAll() {
     localStorage.setItem('rum', rum);
     localStorage.setItem('srum', srum);
@@ -83,8 +83,9 @@ const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
 const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
 const duelTimerEl = document.getElementById('duelTimer');
 const userProfile = document.getElementById('user-profile');
+const bottomPanel = document.querySelector('.bottom-panel');
 
-// Все элементы, которые видны ТОЛЬКО на главном экране
+// Все элементы главного экрана (включая нижнюю панель)
 const mainScreenElements = [
     viewSwitch,
     rulesBtn,
@@ -92,10 +93,10 @@ const mainScreenElements = [
     quickDuelCoin,
     startBtnContainer,
     board,
-    userProfile
+    userProfile,
+    bottomPanel
 ];
 
-// Показать элементы главного экрана
 function showMainElements() {
     mainScreenElements.forEach(el => {
         if (el) el.style.display = '';
@@ -103,14 +104,13 @@ function showMainElements() {
     updateUI();
 }
 
-// Скрыть элементы главного экрана
 function hideMainElements() {
     mainScreenElements.forEach(el => {
         if (el) el.style.display = 'none';
     });
 }
 
-// ================== ГИБРИДНАЯ ИНИЦИАЛИЗАЦИЯ ==================
+// ================== ИНИЦИАЛИЗАЦИЯ ==================
 let userId = null;
 window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
@@ -119,7 +119,6 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
     document.getElementById('veggie-view').style.display = 'block';
     startVeggieAnimation();
 
-    // Определяем userId из Telegram Web App
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
@@ -128,7 +127,6 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
         localStorage.setItem('userId', userId);
     }
 
-    // Загружаем данные из localStorage для быстрого старта
     const savedRum = parseInt(localStorage.getItem('rum'));
     const savedSrum = parseFloat(localStorage.getItem('srum'));
     const savedTon = parseFloat(localStorage.getItem('ton'));
@@ -153,7 +151,6 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
     updateUI();
 
-    // Загружаем данные из облака Supabase
     if (typeof loadUserData === 'function' && userId) {
         try {
             const userData = await loadUserData(userId);
@@ -169,21 +166,15 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
                 if (userData.boost && userData.boost !== 'null') {
                     try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
                 }
-                
                 if (!userData.bonus_claimed && typeof processWelcomeBonus === 'function') {
                     processWelcomeBonus(userId, userData).then(claimed => {
-                        if (claimed) {
-                            srum += 1;
-                            updateUI();
-                        }
+                        if (claimed) { srum += 1; updateUI(); }
                     });
                 }
-                
-                console.log('Данные загружены из облака');
             }
             updateUI();
         } catch (e) {
-            console.log('Облачная загрузка отложена, работаем локально:', e.message);
+            console.log('Облачная загрузка отложена:', e.message);
         }
     }
 
@@ -191,7 +182,7 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 })();
 
-// ================== ОБНОВЛЕНИЕ UI ==================
+// ================== UI ==================
 function updateUI() {
     rumBal.textContent = `💰 RUM: ${rum}`;
     srumBal.textContent = `💎 SRUM: ${srum.toFixed(2)}`;
@@ -221,13 +212,8 @@ function updateUI() {
     saveAll();
     if (typeof saveUserData === 'function' && userId) {
         saveUserData(userId, {
-            nickname: userNickname,
-            rum: rum,
-            srum: srum,
-            ton: ton,
-            usdt: usdt,
-            status: userStatus,
-            mining_stage: miningStage,
+            nickname: userNickname, rum, srum, ton, usdt,
+            status: userStatus, mining_stage: miningStage,
             boost: activeBoost ? JSON.stringify(activeBoost) : null,
             games: games
         }).catch(() => {});
@@ -249,13 +235,13 @@ function updateBoostDisplay() {
 setInterval(updateBoostDisplay, 1000);
 setInterval(updateUI, 1000);
 
-// ================== НАВИГАЦИЯ (ИСПРАВЛЕНО) ==================
+// ================== НАВИГАЦИЯ ==================
 function switchScreen(screenId) {
     // Закрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
     if (screenId) {
-        // === ПЕРЕХОД НА ДОЧЕРНИЙ ЭКРАН ===
+        // === ПЕРЕХОД НА ЭКРАН ===
         hideMainElements();
 
         if (screenId === 'tasks') {
@@ -273,6 +259,8 @@ function switchScreen(screenId) {
         } else if (screenId === 'shop') {
             document.getElementById('shop-screen').classList.add('active');
             if (typeof renderShop === 'function') renderShop();
+        } else if (screenId === 'wallet') {
+            document.getElementById('wallet-screen').classList.add('active');
         } else {
             const target = document.getElementById(screenId + '-screen');
             if (target) target.classList.add('active');
@@ -283,19 +271,21 @@ function switchScreen(screenId) {
     }
 }
 
-// Кнопка «Правила» на главном экране
+// Кнопка Правила
 document.getElementById('rules-btn-bottom').addEventListener('click', () => switchScreen('rules'));
 
-// Кнопки нижней панели и выпадающего меню
+// Нижняя панель и меню
 document.querySelectorAll('.nav-btn, .menu-dropdown button[data-screen]').forEach(b => {
     b.addEventListener('click', (e) => {
         const screenId = e.currentTarget.dataset.screen;
-        switchScreen(screenId);
-        document.getElementById('menu-dropdown').classList.remove('active');
+        if (screenId) {
+            switchScreen(screenId);
+            document.getElementById('menu-dropdown').classList.remove('active');
+        }
     });
 });
 
-// Все кнопки «Назад»
+// Все кнопки Назад
 document.querySelectorAll('.back-btn').forEach(b => b.addEventListener('click', (ev) => {
     ev.stopPropagation();
     switchScreen(null);
