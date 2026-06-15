@@ -85,7 +85,7 @@ const duelTimerEl = document.getElementById('duelTimer');
 const userProfile = document.getElementById('user-profile');
 const bottomPanel = document.querySelector('.bottom-panel');
 
-// Все элементы главного экрана (включая нижнюю панель)
+// Все элементы, которые видны только на главном экране
 const mainScreenElements = [
     viewSwitch,
     rulesBtn,
@@ -97,6 +97,7 @@ const mainScreenElements = [
     bottomPanel
 ];
 
+// Показать элементы главного экрана
 function showMainElements() {
     mainScreenElements.forEach(el => {
         if (el) el.style.display = '';
@@ -104,6 +105,7 @@ function showMainElements() {
     updateUI();
 }
 
+// Скрыть элементы главного экрана
 function hideMainElements() {
     mainScreenElements.forEach(el => {
         if (el) el.style.display = 'none';
@@ -119,6 +121,7 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
     document.getElementById('veggie-view').style.display = 'block';
     startVeggieAnimation();
 
+    // Определяем userId из Telegram Web App
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
@@ -127,6 +130,7 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
         localStorage.setItem('userId', userId);
     }
 
+    // Загружаем данные из localStorage
     const savedRum = parseInt(localStorage.getItem('rum'));
     const savedSrum = parseFloat(localStorage.getItem('srum'));
     const savedTon = parseFloat(localStorage.getItem('ton'));
@@ -151,6 +155,7 @@ window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
     updateUI();
 
+    // Загружаем данные из облака Supabase
     if (typeof loadUserData === 'function' && userId) {
         try {
             const userData = await loadUserData(userId);
@@ -208,11 +213,11 @@ function updateUI() {
         energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
     }
     updateBoostDisplay();
-    updateProfile();
+    if (typeof updateProfile === 'function') updateProfile();
     saveAll();
     if (typeof saveUserData === 'function' && userId) {
         saveUserData(userId, {
-            nickname: userNickname, rum, srum, ton, usdt,
+            nickname: userNickname, rum: rum, srum: srum, ton: ton, usdt: usdt,
             status: userStatus, mining_stage: miningStage,
             boost: activeBoost ? JSON.stringify(activeBoost) : null,
             games: games
@@ -237,7 +242,6 @@ setInterval(updateUI, 1000);
 
 // ================== НАВИГАЦИЯ ==================
 function switchScreen(screenId) {
-    // Закрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
     if (screenId) {
