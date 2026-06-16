@@ -33,7 +33,7 @@ function saveAll() {
     localStorage.setItem('ton', ton);
     localStorage.setItem('usdt', usdt);
     localStorage.setItem('games', games);
-    localStorage.setItem('lastGameTime', window.lastGameTime);
+    localStorage.setItem('lastGameTime', window.lastGameTime || 0);
     localStorage.setItem('clubs', JSON.stringify(clubs));
     if (myClubId) localStorage.setItem('myClubId', myClubId); else localStorage.removeItem('myClubId');
     localStorage.setItem('pausedSessions', JSON.stringify(pausedSessions));
@@ -48,14 +48,15 @@ function saveAll() {
     localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
 }
 
-// ================== DOM-ЭЛЕМЕНТЫ (заполняются после загрузки) ==================
+// ================== DOM-ЭЛЕМЕНТЫ (кэшируются при инициализации) ==================
 let pot, board, rumBal, srumBal, usdtBalTop, tonBalTop, holes;
 let viewSwitch, rulesBtn, langBtn, boostDisplay, energyDisplay;
 let startBtn, startBtnContainer, quickDuelCoin;
 let duelScoreboard, duelPlayerScoreEl, duelOpponentScoreEl, duelTimerEl;
 let userProfile, bottomPanel;
+let isOnMainScreen = true; // флаг: мы на главном экране?
 
-function cacheDomElements() {
+function cacheDom() {
     pot = document.getElementById('pot');
     board = document.getElementById('board');
     rumBal = document.getElementById('rum-balance');
@@ -79,31 +80,68 @@ function cacheDomElements() {
     bottomPanel = document.getElementById('bottom-panel');
 }
 
-// ================== ПОКАЗАТЬ/СКРЫТЬ ГЛАВНЫЙ ЭКРАН ==================
-function getMainScreenElements() {
-    return [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].filter(Boolean);
+// ================== УПРАВЛЕНИЕ ВИДИМОСТЬЮ ГЛАВНОГО ЭКРАНА ==================
+function hideMainElements() {
+    [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].forEach(el => {
+        if (el) el.style.display = 'none';
+    });
+    isOnMainScreen = false;
 }
 
 function showMainElements() {
-    getMainScreenElements().forEach(el => { el.style.display = ''; });
+    [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].forEach(el => {
+        if (el) el.style.display = '';
+    });
+    isOnMainScreen = true;
     updateUI();
 }
 
-function hideMainElements() {
-    getMainScreenElements().forEach(el => { el.style.display = 'none'; });
+// ================== НАВИГАЦИЯ ==================
+function switchScreen(screenId) {
+    // Закрываем все экраны
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+    if (screenId) {
+        hideMainElements();
+
+        if (screenId === 'tasks') {
+            document.getElementById('tasks-screen').classList.add('active');
+            if (typeof renderAvailableTasks === 'function') renderAvailableTasks();
+        } else if (screenId === 'mining-club') {
+            document.getElementById('mining-club-screen').classList.add('active');
+            if (typeof renderMyClub === 'function') renderMyClub();
+        } else if (screenId === 'arena') {
+            document.getElementById('arena-screen').classList.add('active');
+            if (typeof renderArena === 'function') renderArena();
+        } else if (screenId === 'referral') {
+            document.getElementById('referral-screen').classList.add('active');
+            if (typeof renderReferralList === 'function') renderReferralList();
+        } else if (screenId === 'shop') {
+            document.getElementById('shop-screen').classList.add('active');
+            if (typeof renderShop === 'function') renderShop();
+        } else if (screenId === 'wallet') {
+            document.getElementById('wallet-screen').classList.add('active');
+        } else {
+            const target = document.getElementById(screenId + '-screen');
+            if (target) target.classList.add('active');
+        }
+    } else {
+        showMainElements();
+    }
 }
 
-// ================== ИНИЦИАЛИЗАЦИЯ ==================
+// ================== ИНИЦИАЛИЗАЦИЯ (ЖДЁМ DOM) ==================
 let userId = null;
 window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
 function initApp() {
-    cacheDomElements();
+    cacheDom();
+
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     if (typeof startVeggieAnimation === 'function') startVeggieAnimation();
 
-    // Telegram Web App
+    // Telegram ID
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
@@ -112,7 +150,7 @@ function initApp() {
         localStorage.setItem('userId', userId);
     }
 
-    // Загружаем localStorage
+    // Локальные данные
     const savedRum = parseInt(localStorage.getItem('rum'));
     const savedSrum = parseFloat(localStorage.getItem('srum'));
     const savedTon = parseFloat(localStorage.getItem('ton'));
@@ -122,7 +160,6 @@ function initApp() {
     const savedStatus = localStorage.getItem('userStatus');
     const savedStage = parseInt(localStorage.getItem('miningStage'));
     const savedBoost = localStorage.getItem('activeBoost');
-    
     if (!isNaN(savedRum)) rum = savedRum;
     if (!isNaN(savedSrum)) srum = savedSrum;
     if (!isNaN(savedTon)) ton = savedTon;
@@ -159,42 +196,70 @@ function initApp() {
                 }
             }
             updateUI();
-        }).catch(e => console.log('Облачная загрузка отложена:', e.message));
+        }).catch(e => console.log('Облако отложено:', e.message));
     }
 
     if (games < maxGames && typeof startRecovery === 'function') startRecovery();
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 
-    // ====== ВЕШАЕМ ОБРАБОТЧИКИ НАВИГАЦИИ ======
-    // Правила
-    if (rulesBtn) rulesBtn.addEventListener('click', () => switchScreen('rules'));
+    // ====== ОБРАБОТЧИКИ КНОПОК (после того как DOM готов) ======
+    if (rulesBtn) {
+        rulesBtn.addEventListener('click', () => switchScreen('rules'));
+    }
 
-    // Нижняя панель
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const screenId = this.getAttribute('data-screen');
-            if (screenId) switchScreen(screenId);
-        });
-    });
-
-    // Меню
-    document.querySelectorAll('.menu-dropdown button[data-screen]').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            const screenId = this.getAttribute('data-screen');
-            if (screenId) {
-                switchScreen(screenId);
-                document.getElementById('menu-dropdown').classList.remove('active');
+    // Нижняя панель — используем делегирование на контейнере
+    const bp = document.getElementById('bottom-panel');
+    if (bp) {
+        bp.addEventListener('click', function(e) {
+            // Ищем ближайшую кнопку с data-screen
+            let target = e.target;
+            while (target && target !== bp) {
+                if (target.classList.contains('nav-btn') && target.dataset.screen) {
+                    switchScreen(target.dataset.screen);
+                    return;
+                }
+                target = target.parentElement;
             }
         });
+    }
+
+    // Выпадающее меню
+    const menu = document.getElementById('menu-dropdown');
+    if (menu) {
+        menu.addEventListener('click', function(e) {
+            let target = e.target;
+            while (target && target !== menu) {
+                if (target.tagName === 'BUTTON' && target.dataset.screen) {
+                    switchScreen(target.dataset.screen);
+                    menu.classList.remove('active');
+                    return;
+                }
+                target = target.parentElement;
+            }
+        });
+    }
+
+    // Все кнопки «Назад» — делегирование на game-container
+    document.getElementById('game-container').addEventListener('click', function(e) {
+        let target = e.target;
+        while (target) {
+            if (target.classList.contains('back-btn')) {
+                e.stopPropagation();
+                switchScreen(null);
+                return;
+            }
+            if (target === this) break;
+            target = target.parentElement;
+        }
     });
 
-    // Все кнопки Назад
-    document.querySelectorAll('.back-btn').forEach(btn => {
-        btn.addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            switchScreen(null);
-        });
-    });
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+}
+
+// Ждём полной загрузки DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
 
 // ================== UI ==================
@@ -212,19 +277,17 @@ function updateUI() {
     if (games > 0 && !gameActive && !duelActive) {
         if (startBtn) startBtn.style.display = 'inline-block';
         if (energyDisplay) energyDisplay.textContent = `⚡ ${games}/${maxGames} игр`;
-    } else if (gameActive) {
-        if (startBtn) startBtn.style.display = 'none';
-        if (energyDisplay) energyDisplay.textContent = '';
-    } else if (duelActive) {
-        if (startBtn) startBtn.style.display = 'none';
-        if (energyDisplay) energyDisplay.textContent = '';
     } else {
         if (startBtn) startBtn.style.display = 'none';
         if (energyDisplay) {
-            const now = Date.now(), last = window.lastGameTime || 0;
-            const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
-            const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
-            energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
+            if (gameActive || duelActive) {
+                energyDisplay.textContent = '';
+            } else {
+                const now = Date.now(), last = window.lastGameTime || 0;
+                const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
+                const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
+                energyDisplay.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
+            }
         }
     }
     updateBoostDisplay();
@@ -234,8 +297,7 @@ function updateUI() {
         saveUserData(userId, {
             nickname: userNickname, rum, srum, ton, usdt,
             status: userStatus, mining_stage: miningStage,
-            boost: activeBoost ? JSON.stringify(activeBoost) : null,
-            games
+            boost: activeBoost ? JSON.stringify(activeBoost) : null, games
         }).catch(() => {});
     }
 }
@@ -254,43 +316,4 @@ function updateBoostDisplay() {
     }
 }
 setInterval(updateBoostDisplay, 1000);
-setInterval(updateUI, 1000);
-
-// ================== НАВИГАЦИЯ ==================
-function switchScreen(screenId) {
-    // Закрываем все экраны
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-
-    if (screenId) {
-        // Переход на экран — скрываем главные элементы
-        hideMainElements();
-
-        if (screenId === 'tasks') {
-            document.getElementById('tasks-screen').classList.add('active');
-            if (typeof renderAvailableTasks === 'function') renderAvailableTasks();
-        } else if (screenId === 'mining-club') {
-            document.getElementById('mining-club-screen').classList.add('active');
-            if (typeof renderMyClub === 'function') renderMyClub();
-        } else if (screenId === 'arena') {
-            document.getElementById('arena-screen').classList.add('active');
-            if (typeof renderArena === 'function') renderArena();
-        } else if (screenId === 'referral') {
-            document.getElementById('referral-screen').classList.add('active');
-            if (typeof renderReferralList === 'function') renderReferralList();
-        } else if (screenId === 'shop') {
-            document.getElementById('shop-screen').classList.add('active');
-            if (typeof renderShop === 'function') renderShop();
-        } else if (screenId === 'wallet') {
-            document.getElementById('wallet-screen').classList.add('active');
-        } else {
-            const target = document.getElementById(screenId + '-screen');
-            if (target) target.classList.add('active');
-        }
-    } else {
-        // Возврат на главный экран
-        showMainElements();
-    }
-}
-
-// Старт после загрузки DOM
-document.addEventListener('DOMContentLoaded', initApp);
+setInterval(updateUI, 5000);
