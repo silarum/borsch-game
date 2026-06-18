@@ -12,14 +12,13 @@ var pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
 var miningStage = 1, miningCurrency = 'SRUM', miningThreshold = 1;
 var pendingMining = null, currentBot = null, bandData = null;
 var spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
-
-const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
+var officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
     { id:2, desc:'Сделать репост', reward:100, maxCompletions:100, completionsDone:0, checking:false },
     { id:3, desc:'Пригласить друга', reward:200, maxCompletions:100, completionsDone:0, checking:false },
     { id:4, desc:'Сыграть 5 раундов', reward:300, maxCompletions:100, completionsDone:0, checking:false }
 ];
-const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
+var officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
     { id:101, desc:'Подпишись на Twitter', reward:0.1, maxCompletions:100, completionsDone:0, checking:false },
     { id:102, desc:'Поставь лайк проекту', reward:0.15, maxCompletions:100, completionsDone:0, checking:false }
 ];
@@ -71,13 +70,12 @@ const duelTimerEl = document.getElementById('duelTimer');
 const userProfile = document.getElementById('user-profile');
 const bottomPanel = document.getElementById('bottom-panel');
 
-// ================== УПРАВЛЕНИЕ ГЛАВНЫМ ЭКРАНОМ ==================
+// ================== ГЛАВНЫЙ ЭКРАН ==================
 function hideMainElements() {
     [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].forEach(el => {
         if (el) el.style.display = 'none';
     });
 }
-
 function showMainElements() {
     [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].forEach(el => {
         if (el) el.style.display = '';
@@ -85,31 +83,65 @@ function showMainElements() {
     updateUI();
 }
 
+// ================== ТОПЫ ИГРОКОВ ==================
+async function loadTopPlayers(type) {
+    const screenId = type === 'rum' ? 'top-tappers-screen' : 'top-miners-screen';
+    const screen = document.getElementById(screenId);
+    if (!screen) return;
+    
+    // Показываем загрузку
+    screen.querySelector('.info-card').innerHTML = '<p style="text-align:center;color:#FFD700;">⏳ Загрузка...</p>';
+    
+    try {
+        const order = type === 'rum' ? 'rum.desc' : 'srum.desc';
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/users?select=nickname,rum,srum&order=${order}&limit=20`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+        });
+        const players = await res.json();
+        
+        let html = '';
+        if (!players.length) {
+            html = '<p style="color:#aaa;">Нет данных</p>';
+        } else {
+            const medals = ['🥇', '🥈', '🥉'];
+            players.forEach((p, i) => {
+                const medal = i < 3 ? medals[i] : `${i+1}.`;
+                const value = type === 'rum' ? (p.rum || 0).toLocaleString() : parseFloat(p.srum || 0).toFixed(2);
+                const currency = type === 'rum' ? 'RUM' : 'SRUM';
+                const isMe = p.nickname === userNickname;
+                html += `<div style="background:${isMe ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.05)'}; padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; ${isMe ? 'border:1px solid gold;' : ''}">
+                    <span>${medal} ${p.nickname || 'Майнер'} ${isMe ? '👈' : ''}</span>
+                    <span style="color:#FFD700; font-weight:bold;">${value} ${currency}</span>
+                </div>`;
+            });
+        }
+        screen.querySelector('.info-card').innerHTML = html;
+    } catch(e) {
+        console.error('Ошибка загрузки топов:', e);
+        screen.querySelector('.info-card').innerHTML = '<p style="color:#e74c3c;">Ошибка загрузки</p>';
+    }
+}
+
 // ================== НАВИГАЦИЯ ==================
 function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-
     if (screenId) {
         hideMainElements();
-
-        if (screenId === 'tasks') {
-            document.getElementById('tasks-screen').classList.add('active');
-            if (typeof renderAvailableTasks === 'function') renderAvailableTasks();
-        } else if (screenId === 'mining-club') {
-            document.getElementById('mining-club-screen').classList.add('active');
-            if (typeof renderMyClub === 'function') renderMyClub();
-        } else if (screenId === 'arena') {
-            document.getElementById('arena-screen').classList.add('active');
-            if (typeof renderArena === 'function') renderArena();
-        } else if (screenId === 'referral') {
-            document.getElementById('referral-screen').classList.add('active');
-            if (typeof renderReferralList === 'function') renderReferralList();
-        } else if (screenId === 'shop') {
-            document.getElementById('shop-screen').classList.add('active');
-            if (typeof renderShop === 'function') renderShop();
-        } else if (screenId === 'wallet') {
-            document.getElementById('wallet-screen').classList.add('active');
-        } else {
+        const screenMap = {
+            'tasks': () => { document.getElementById('tasks-screen').classList.add('active'); if (typeof renderAvailableTasks === 'function') renderAvailableTasks(); },
+            'mining-club': () => { document.getElementById('mining-club-screen').classList.add('active'); if (typeof renderMyClub === 'function') renderMyClub(); },
+            'arena': () => { document.getElementById('arena-screen').classList.add('active'); if (typeof renderArena === 'function') renderArena(); },
+            'referral': () => { document.getElementById('referral-screen').classList.add('active'); if (typeof renderReferralList === 'function') renderReferralList(); },
+            'shop': () => { document.getElementById('shop-screen').classList.add('active'); if (typeof renderShop === 'function') renderShop(); },
+            'wallet': () => { document.getElementById('wallet-screen').classList.add('active'); },
+            'top-tappers': () => { document.getElementById('top-tappers-screen').classList.add('active'); loadTopPlayers('rum'); },
+            'top-miners': () => { document.getElementById('top-miners-screen').classList.add('active'); loadTopPlayers('srum'); }
+        };
+        if (screenMap[screenId]) screenMap[screenId]();
+        else {
             const target = document.getElementById(screenId + '-screen');
             if (target) target.classList.add('active');
         }
@@ -122,12 +154,11 @@ function switchScreen(screenId) {
 var userId = null;
 window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
-document.addEventListener('DOMContentLoaded', function() {
+function initApp() {
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     if (typeof startVeggieAnimation === 'function') startVeggieAnimation();
 
-    // Telegram ID
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
         userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
@@ -136,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('userId', userId);
     }
 
-    // Локальные данные
     const savedRum = parseInt(localStorage.getItem('rum'));
     const savedSrum = parseFloat(localStorage.getItem('srum'));
     const savedTon = parseFloat(localStorage.getItem('ton'));
@@ -160,7 +190,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateUI();
 
-    // Supabase
     if (typeof loadUserData === 'function' && userId) {
         loadUserData(userId).then(userData => {
             if (userData) {
@@ -176,9 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
                 }
                 if (!userData.bonus_claimed && typeof processWelcomeBonus === 'function') {
-                    processWelcomeBonus(userId, userData).then(claimed => {
-                        if (claimed) { srum += 1; updateUI(); }
-                    });
+                    processWelcomeBonus(userId, userData).then(claimed => { if (claimed) { srum += 1; updateUI(); } });
                 }
             }
             updateUI();
@@ -186,53 +213,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (games < maxGames && typeof startRecovery === 'function') startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+}
 
-    // Обработчики навигации
+window.addEventListener('load', function() {
+    initApp();
+
     if (rulesBtn) rulesBtn.addEventListener('click', () => switchScreen('rules'));
 
-    const bp = document.getElementById('bottom-panel');
-    if (bp) {
-        bp.addEventListener('click', function(e) {
-            let target = e.target;
-            while (target && target !== bp) {
-                if (target.classList.contains('nav-btn') && target.dataset.screen) {
-                    switchScreen(target.dataset.screen);
-                    return;
-                }
-                target = target.parentElement;
-            }
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const screenId = this.getAttribute('data-screen');
+            if (screenId) switchScreen(screenId);
         });
-    }
-
-    const menu = document.getElementById('menu-dropdown');
-    if (menu) {
-        menu.addEventListener('click', function(e) {
-            let target = e.target;
-            while (target && target !== menu) {
-                if (target.tagName === 'BUTTON' && target.dataset.screen) {
-                    switchScreen(target.dataset.screen);
-                    menu.classList.remove('active');
-                    return;
-                }
-                target = target.parentElement;
-            }
-        });
-    }
-
-    document.getElementById('game-container').addEventListener('click', function(e) {
-        let target = e.target;
-        while (target) {
-            if (target.classList.contains('back-btn')) {
-                e.stopPropagation();
-                switchScreen(null);
-                return;
-            }
-            if (target === this) break;
-            target = target.parentElement;
-        }
     });
 
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    document.querySelectorAll('.menu-dropdown button[data-screen]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const screenId = this.getAttribute('data-screen');
+            if (screenId) {
+                switchScreen(screenId);
+                document.getElementById('menu-dropdown').classList.remove('active');
+            }
+        });
+    });
+
+    document.querySelectorAll('.back-btn').forEach(btn => {
+        btn.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            switchScreen(null);
+        });
+    });
 });
 
 // ================== UI ==================
@@ -253,9 +264,8 @@ function updateUI() {
     } else {
         if (startBtn) startBtn.style.display = 'none';
         if (energyDisplay) {
-            if (gameActive || duelActive) {
-                energyDisplay.textContent = '';
-            } else {
+            if (gameActive || duelActive) energyDisplay.textContent = '';
+            else {
                 const now = Date.now(), last = window.lastGameTime || 0;
                 const remaining = Math.max(0, gameRecoveryTime - (now - last) / 1000);
                 const mins = Math.floor(remaining / 60), secs = Math.floor(remaining % 60);
