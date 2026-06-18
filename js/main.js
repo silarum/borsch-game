@@ -1,17 +1,17 @@
 // ================== ГЛОБАЛЬНЫЕ ДАННЫЕ ==================
 const GOOD = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 const BAD = ['💩','🪱','🧀','🥀','🍄'];
-let rum = 0, invest = 0, srum = 0, ton = 0, usdt = 0, games = 3;
+var rum = 0, invest = 0, srum = 0, ton = 0, usdt = 0, games = 3;
 const maxGames = 3, gameRecoveryTime = 600;
-let gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
-let activeBoost = null, streak = 0, duelActive = false;
-let userStatus = 'solo', userNickname = 'Майнер';
-let myClubId = localStorage.getItem('myClubId') || null;
-let clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
-let pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
-let miningStage = 1, miningCurrency = 'SRUM', miningThreshold = 1;
-let pendingMining = null, currentBot = null, bandData = null;
-let spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
+var gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg = {};
+var activeBoost = null, streak = 0, duelActive = false;
+var userStatus = 'solo', userNickname = 'Майнер';
+var myClubId = localStorage.getItem('myClubId') || null;
+var clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
+var pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
+var miningStage = 1, miningCurrency = 'SRUM', miningThreshold = 1;
+var pendingMining = null, currentBot = null, bandData = null;
+var spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 
 const officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
@@ -23,9 +23,9 @@ const officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) 
     { id:101, desc:'Подпишись на Twitter', reward:0.1, maxCompletions:100, completionsDone:0, checking:false },
     { id:102, desc:'Поставь лайк проекту', reward:0.15, maxCompletions:100, completionsDone:0, checking:false }
 ];
-let globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
-let userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-let referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
+var globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
+var userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
+var referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
 function saveAll() {
     localStorage.setItem('rum', rum);
@@ -49,35 +49,27 @@ function saveAll() {
 }
 
 // ================== DOM-ЭЛЕМЕНТЫ ==================
-let pot, board, rumBal, srumBal, usdtBalTop, tonBalTop, holes;
-let viewSwitch, rulesBtn, langBtn, boostDisplay, energyDisplay;
-let startBtn, startBtnContainer, quickDuelCoin;
-let duelScoreboard, duelPlayerScoreEl, duelOpponentScoreEl, duelTimerEl;
-let userProfile, bottomPanel;
-
-function cacheDom() {
-    pot = document.getElementById('pot');
-    board = document.getElementById('board');
-    rumBal = document.getElementById('rum-balance');
-    srumBal = document.getElementById('srum-balance');
-    usdtBalTop = document.getElementById('usdt-balance-top');
-    tonBalTop = document.getElementById('ton-balance-top');
-    holes = document.querySelectorAll('.hole');
-    viewSwitch = document.getElementById('view-switch');
-    rulesBtn = document.getElementById('rules-btn-bottom');
-    langBtn = document.getElementById('lang-btn-bottom');
-    boostDisplay = document.getElementById('boost-display');
-    energyDisplay = document.getElementById('energy-display');
-    startBtn = document.getElementById('start-btn');
-    startBtnContainer = document.getElementById('start-btn-container');
-    quickDuelCoin = document.getElementById('quick-duel-coin');
-    duelScoreboard = document.getElementById('duel-scoreboard');
-    duelPlayerScoreEl = document.getElementById('duelPlayerScore');
-    duelOpponentScoreEl = document.getElementById('duelOpponentScore');
-    duelTimerEl = document.getElementById('duelTimer');
-    userProfile = document.getElementById('user-profile');
-    bottomPanel = document.getElementById('bottom-panel');
-}
+const pot = document.getElementById('pot');
+const board = document.getElementById('board');
+const rumBal = document.getElementById('rum-balance');
+const srumBal = document.getElementById('srum-balance');
+const usdtBalTop = document.getElementById('usdt-balance-top');
+const tonBalTop = document.getElementById('ton-balance-top');
+const holes = document.querySelectorAll('.hole');
+const viewSwitch = document.getElementById('view-switch');
+const rulesBtn = document.getElementById('rules-btn-bottom');
+const langBtn = document.getElementById('lang-btn-bottom');
+const boostDisplay = document.getElementById('boost-display');
+const energyDisplay = document.getElementById('energy-display');
+const startBtn = document.getElementById('start-btn');
+const startBtnContainer = document.getElementById('start-btn-container');
+const quickDuelCoin = document.getElementById('quick-duel-coin');
+const duelScoreboard = document.getElementById('duel-scoreboard');
+const duelPlayerScoreEl = document.getElementById('duelPlayerScore');
+const duelOpponentScoreEl = document.getElementById('duelOpponentScore');
+const duelTimerEl = document.getElementById('duelTimer');
+const userProfile = document.getElementById('user-profile');
+const bottomPanel = document.getElementById('bottom-panel');
 
 // ================== УПРАВЛЕНИЕ ГЛАВНЫМ ЭКРАНОМ ==================
 function hideMainElements() {
@@ -127,12 +119,10 @@ function switchScreen(screenId) {
 }
 
 // ================== ИНИЦИАЛИЗАЦИЯ ==================
-let userId = null;
+var userId = null;
 window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
-function initApp() {
-    cacheDom();
-
+document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     if (typeof startVeggieAnimation === 'function') startVeggieAnimation();
@@ -197,7 +187,7 @@ function initApp() {
 
     if (games < maxGames && typeof startRecovery === 'function') startRecovery();
 
-    // Обработчики
+    // Обработчики навигации
     if (rulesBtn) rulesBtn.addEventListener('click', () => switchScreen('rules'));
 
     const bp = document.getElementById('bottom-panel');
@@ -243,18 +233,7 @@ function initApp() {
     });
 
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-
-    // Запускаем game-engine после инициализации DOM
-    if (typeof window.initGameEngine === 'function') {
-        setTimeout(window.initGameEngine, 300);
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
-} else {
-    initApp();
-}
+});
 
 // ================== UI ==================
 function updateUI() {
