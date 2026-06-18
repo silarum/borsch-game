@@ -1,19 +1,7 @@
 // ================== ТАПАЛКА И ФОНЫ ==================
-
-// Ждём, пока main.js закэширует DOM-элементы
-function initGameEngine() {
-    // Эти переменные будут доступны из main.js
-    if (typeof startBtn === 'undefined' || typeof board === 'undefined') {
-        setTimeout(initGameEngine, 100);
-        return;
-    }
-
-    startBtn.addEventListener('click', startGame);
-    board.addEventListener('touchstart', handleTouchStart, {passive: false});
-    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-}
-
 function showCoinFountain(count = 10) {
+    const pot = document.getElementById('pot');
+    if (!pot) return;
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
     const cx = potRect.left + potRect.width/2 - containerRect.left;
@@ -29,6 +17,8 @@ function showCoinFountain(count = 10) {
 }
 
 function showPoopFountain(count = 5) {
+    const pot = document.getElementById('pot');
+    if (!pot) return;
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
     const cx = potRect.left + potRect.width/2 - containerRect.left;
@@ -44,44 +34,66 @@ function showPoopFountain(count = 5) {
 }
 
 function spawnAll() {
+    const holes = document.querySelectorAll('.hole');
+    if (!holes.length) return;
     holes.forEach(h => h.innerHTML = '');
-    currentVeg = {};
+    window.currentVeg = {};
     for (let i=0; i<holes.length; i++) {
         const isBad = Math.random() < 0.25;
         const pool = isBad ? BAD : GOOD;
         holes[i].innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
-        currentVeg[i] = { type: isBad ? 'bad' : 'good' };
+        window.currentVeg[i] = { type: isBad ? 'bad' : 'good' };
     }
 }
 
 function processHit(hole, touch) {
-    if (!gameActive) return;
+    if (!window.gameActive) return;
+    const holes = document.querySelectorAll('.hole');
     const num = [...holes].indexOf(hole);
-    if (num === -1 || !currentVeg[num]) { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); return; }
-    if (currentVeg[num].type === 'good') {
-        streak++;
-        let multiplier = Math.pow(2, Math.floor((streak-1) / 10));
+    if (num === -1 || !window.currentVeg || !window.currentVeg[num]) {
+        window.rum = Math.max(0, (window.rum || 0) - 20);
+        window.streak = 0;
+        showPoopFountain();
+        if (typeof updateUI === 'function') updateUI();
+        return;
+    }
+    if (window.currentVeg[num].type === 'good') {
+        window.streak = (window.streak || 0) + 1;
+        let multiplier = Math.pow(2, Math.floor(((window.streak || 1) - 1) / 10));
         let gain = 10 * multiplier;
-        if (activeBoost && activeBoost.endTime > Date.now()) gain *= activeBoost.type;
-        rum += Math.floor(gain);
+        if (window.activeBoost && window.activeBoost.endTime > Date.now()) gain *= window.activeBoost.type;
+        window.rum = (window.rum || 0) + Math.floor(gain);
         flyVegToPot(hole, hole.querySelector('.veg').textContent);
         showCoinFountain();
-        if (streak % 20 === 0) triggerRocket();
-    } else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); }
-    delete currentVeg[num]; hole.innerHTML = ''; updateUI();
+        if (window.streak % 20 === 0) triggerRocket();
+    } else {
+        window.rum = Math.max(0, (window.rum || 0) - 20);
+        window.streak = 0;
+        showPoopFountain();
+    }
+    delete window.currentVeg[num];
+    hole.innerHTML = '';
+    if (typeof updateUI === 'function') updateUI();
 }
 
 function handleTouchStart(e) {
     e.preventDefault();
-    if (!gameActive) return;
+    if (!window.gameActive) return;
     [...e.changedTouches].forEach(touch => {
         const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
         if (hole) processHit(hole, touch);
-        else { rum = Math.max(0, rum - 20); streak = 0; showPoopFountain(); updateUI(); }
+        else {
+            window.rum = Math.max(0, (window.rum || 0) - 20);
+            window.streak = 0;
+            showPoopFountain();
+            if (typeof updateUI === 'function') updateUI();
+        }
     });
 }
 
 function flyVegToPot(hole, emoji) {
+    const pot = document.getElementById('pot');
+    if (!pot || !hole) return;
     const holeRect = hole.getBoundingClientRect();
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
@@ -97,6 +109,8 @@ function flyVegToPot(hole, emoji) {
 }
 
 function triggerRocket() {
+    const pot = document.getElementById('pot');
+    if (!pot) return;
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
     const startX = potRect.left + potRect.width/2 - containerRect.left;
@@ -118,27 +132,35 @@ function triggerRocket() {
 }
 
 function startGame() {
-    if (games <= 0 || gameActive) return;
-    window._rumBeforeGame = rum;
-    gameActive = true; gameTimeLeft = 60; streak = 0;
-    updateUI(); spawnAll();
+    if ((window.games || 0) <= 0 || window.gameActive) return;
+    window._rumBeforeGame = window.rum || 0;
+    window.gameActive = true;
+    window.gameTimeLeft = 60;
+    window.streak = 0;
+    if (typeof updateUI === 'function') updateUI();
+    spawnAll();
     let interval = 1800;
-    spawnInterval = setInterval(() => {
-        if (!gameActive) return;
+    window.spawnInterval = setInterval(() => {
+        if (!window.gameActive) return;
         spawnAll();
         interval = Math.max(450, interval-80);
-        clearInterval(spawnInterval);
-        spawnInterval = setInterval(() => { if (gameActive) spawnAll(); }, interval);
+        clearInterval(window.spawnInterval);
+        window.spawnInterval = setInterval(() => { if (window.gameActive) spawnAll(); }, interval);
     }, interval);
-    gameTimer = setInterval(() => { gameTimeLeft--; updateUI(); if (gameTimeLeft <= 0) endGame(); }, 1000);
+    window.gameTimer = setInterval(() => {
+        window.gameTimeLeft--;
+        if (typeof updateUI === 'function') updateUI();
+        if (window.gameTimeLeft <= 0) endGame();
+    }, 1000);
 }
 
 async function endGame() {
-    gameActive = false;
-    clearInterval(gameTimer); clearInterval(spawnInterval);
-    holes.forEach(h => h.innerHTML = '');
-    currentVeg = {};
-    games = Math.max(0, games - 1);
+    window.gameActive = false;
+    clearInterval(window.gameTimer);
+    clearInterval(window.spawnInterval);
+    document.querySelectorAll('.hole').forEach(h => h.innerHTML = '');
+    window.currentVeg = {};
+    window.games = Math.max(0, (window.games || 0) - 1);
     window.lastGameTime = Date.now();
 
     try {
@@ -146,36 +168,36 @@ async function endGame() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                user_id: userId,
+                user_id: window.userId,
                 type: 'rum_mining',
                 data: {
-                    rum_earned: rum - (window._rumBeforeGame || 0),
-                    games_used: games,
-                    streak: streak
+                    rum_earned: (window.rum || 0) - (window._rumBeforeGame || 0),
+                    games_used: window.games,
+                    streak: window.streak
                 }
             })
         });
         if (res.ok) {
             const data = await res.json();
-            rum = data.rum;
+            window.rum = data.rum;
         }
     } catch (e) {
         console.error('Ошибка синхронизации RUM:', e);
     }
 
-    updateUI();
-    if (games < maxGames) startRecovery();
+    if (typeof updateUI === 'function') updateUI();
+    if ((window.games || 0) < maxGames) startRecovery();
 }
 
 function startRecovery() {
     if (window.recoveryInterval) clearInterval(window.recoveryInterval);
     window.recoveryInterval = setInterval(() => {
-        if (games >= maxGames) { clearInterval(window.recoveryInterval); return; }
+        if ((window.games || 0) >= maxGames) { clearInterval(window.recoveryInterval); return; }
         if (Date.now() - (window.lastGameTime || 0) >= gameRecoveryTime * 1000) {
-            games = Math.min(maxGames, games + 1);
+            window.games = Math.min(maxGames, (window.games || 0) + 1);
             window.lastGameTime = Date.now();
-            updateUI();
-            if (games >= maxGames) clearInterval(window.recoveryInterval);
+            if (typeof updateUI === 'function') updateUI();
+            if ((window.games || 0) >= maxGames) clearInterval(window.recoveryInterval);
         }
     }, 1000);
 }
@@ -192,33 +214,36 @@ window.cycleView = function() {
     document.getElementById('smile-view').style.display = view === 'smile' ? 'block' : 'none';
     document.getElementById('veggie-view').style.display = view === 'veggie' ? 'block' : 'none';
     const btn = document.getElementById('view-switch');
+    if (!btn) return;
     if (view === 'veggie') { btn.innerHTML = '🥬 Овощи'; startVeggieAnimation(); }
     else if (view === 'matrix') { btn.innerHTML = '🟢 Матрица'; startMatrix(); }
     else if (view === 'smile') { btn.innerHTML = '😊 Смайлы'; startSmileAnimation(); }
 };
 
 const matrixCanvas = document.getElementById('matrixCanvas');
-const matrixCtx = matrixCanvas.getContext('2d');
+const matrixCtx = matrixCanvas ? matrixCanvas.getContext('2d') : null;
 let matrixParticles = [];
 function startMatrix() {
+    if (!matrixCanvas) return;
     matrixCanvas.width = matrixCanvas.parentElement.clientWidth;
     matrixCanvas.height = matrixCanvas.parentElement.clientHeight;
     matrixParticles = [];
     for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
 }
 function drawMatrix() {
-    if (views[currentViewIndex] !== 'matrix') return;
+    if (!matrixCtx || views[currentViewIndex] !== 'matrix') return;
     matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
     matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
     matrixParticles.forEach(p => { matrixCtx.fillText(p.char,p.x,p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
 }
-startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix);
+if (matrixCanvas) { startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix); }
 
 const smileCanvas = document.getElementById('smileCanvas');
-const smileCtx = smileCanvas.getContext('2d');
+const smileCtx = smileCanvas ? smileCanvas.getContext('2d') : null;
 let smileParticles = [];
 const emojis = ['😊','😂','😎','🥳','😍','🤩','😇'];
 function startSmileAnimation() {
+    if (!smileCanvas) return;
     smileCanvas.width = smileCanvas.parentElement.clientWidth;
     smileCanvas.height = smileCanvas.parentElement.clientHeight;
     smileParticles = [];
@@ -228,7 +253,7 @@ function startSmileAnimation() {
     if (!window.smileInterval) window.smileInterval = setInterval(drawSmile, 50);
 }
 function drawSmile() {
-    if (views[currentViewIndex] !== 'smile') return;
+    if (!smileCtx || views[currentViewIndex] !== 'smile') return;
     smileCtx.clearRect(0,0,smileCanvas.width,smileCanvas.height);
     smileParticles.forEach(p => {
         if (!p.popping) { p.y -= p.speed; if(p.y<-20){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; } }
@@ -242,10 +267,11 @@ function drawSmile() {
 window.addEventListener('resize', startSmileAnimation);
 
 const veggieCanvas = document.getElementById('veggieCanvas');
-const veggieCtx = veggieCanvas.getContext('2d');
+const veggieCtx = veggieCanvas ? veggieCanvas.getContext('2d') : null;
 let veggieParticles = [];
 const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
 function startVeggieAnimation() {
+    if (!veggieCanvas) return;
     veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
     veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
     veggieParticles = [];
@@ -255,7 +281,7 @@ function startVeggieAnimation() {
     if (!window.veggieInterval) window.veggieInterval = setInterval(drawVeggie, 50);
 }
 function drawVeggie() {
-    if (views[currentViewIndex] !== 'veggie') return;
+    if (!veggieCtx || views[currentViewIndex] !== 'veggie') return;
     veggieCtx.clearRect(0,0,veggieCanvas.width,veggieCanvas.height);
     veggieParticles.forEach(p => {
         p.y -= p.speed;
@@ -267,5 +293,19 @@ function drawVeggie() {
 }
 window.addEventListener('resize', startVeggieAnimation);
 
-// ====== ВЫЗОВ ПОСЛЕ ГОТОВНОСТИ MAIN.JS ======
-window.initGameEngine = initGameEngine;
+// ====== ПОДКЛЮЧАЕМ ОБРАБОТЧИКИ ПОСЛЕ ЗАГРУЗКИ DOM ======
+function attachGameEvents() {
+    const startBtn = document.getElementById('start-btn');
+    const board = document.getElementById('board');
+    if (startBtn) startBtn.addEventListener('click', startGame);
+    if (board) {
+        board.addEventListener('touchstart', handleTouchStart, {passive: false});
+        board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachGameEvents);
+} else {
+    attachGameEvents();
+}
