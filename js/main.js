@@ -48,13 +48,12 @@ function saveAll() {
     localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
 }
 
-// ================== DOM-ЭЛЕМЕНТЫ (кэшируются при инициализации) ==================
+// ================== DOM-ЭЛЕМЕНТЫ ==================
 let pot, board, rumBal, srumBal, usdtBalTop, tonBalTop, holes;
 let viewSwitch, rulesBtn, langBtn, boostDisplay, energyDisplay;
 let startBtn, startBtnContainer, quickDuelCoin;
 let duelScoreboard, duelPlayerScoreEl, duelOpponentScoreEl, duelTimerEl;
 let userProfile, bottomPanel;
-let isOnMainScreen = true; // флаг: мы на главном экране?
 
 function cacheDom() {
     pot = document.getElementById('pot');
@@ -80,25 +79,22 @@ function cacheDom() {
     bottomPanel = document.getElementById('bottom-panel');
 }
 
-// ================== УПРАВЛЕНИЕ ВИДИМОСТЬЮ ГЛАВНОГО ЭКРАНА ==================
+// ================== УПРАВЛЕНИЕ ГЛАВНЫМ ЭКРАНОМ ==================
 function hideMainElements() {
     [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].forEach(el => {
         if (el) el.style.display = 'none';
     });
-    isOnMainScreen = false;
 }
 
 function showMainElements() {
     [viewSwitch, rulesBtn, langBtn, quickDuelCoin, startBtnContainer, board, userProfile, bottomPanel].forEach(el => {
         if (el) el.style.display = '';
     });
-    isOnMainScreen = true;
     updateUI();
 }
 
 // ================== НАВИГАЦИЯ ==================
 function switchScreen(screenId) {
-    // Закрываем все экраны
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
     if (screenId) {
@@ -130,7 +126,7 @@ function switchScreen(screenId) {
     }
 }
 
-// ================== ИНИЦИАЛИЗАЦИЯ (ЖДЁМ DOM) ==================
+// ================== ИНИЦИАЛИЗАЦИЯ ==================
 let userId = null;
 window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
 
@@ -201,16 +197,12 @@ function initApp() {
 
     if (games < maxGames && typeof startRecovery === 'function') startRecovery();
 
-    // ====== ОБРАБОТЧИКИ КНОПОК (после того как DOM готов) ======
-    if (rulesBtn) {
-        rulesBtn.addEventListener('click', () => switchScreen('rules'));
-    }
+    // Обработчики
+    if (rulesBtn) rulesBtn.addEventListener('click', () => switchScreen('rules'));
 
-    // Нижняя панель — используем делегирование на контейнере
     const bp = document.getElementById('bottom-panel');
     if (bp) {
         bp.addEventListener('click', function(e) {
-            // Ищем ближайшую кнопку с data-screen
             let target = e.target;
             while (target && target !== bp) {
                 if (target.classList.contains('nav-btn') && target.dataset.screen) {
@@ -222,7 +214,6 @@ function initApp() {
         });
     }
 
-    // Выпадающее меню
     const menu = document.getElementById('menu-dropdown');
     if (menu) {
         menu.addEventListener('click', function(e) {
@@ -238,7 +229,6 @@ function initApp() {
         });
     }
 
-    // Все кнопки «Назад» — делегирование на game-container
     document.getElementById('game-container').addEventListener('click', function(e) {
         let target = e.target;
         while (target) {
@@ -253,9 +243,13 @@ function initApp() {
     });
 
     document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+
+    // Запускаем game-engine после инициализации DOM
+    if (typeof window.initGameEngine === 'function') {
+        setTimeout(window.initGameEngine, 300);
+    }
 }
 
-// Ждём полной загрузки DOM
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
 } else {
