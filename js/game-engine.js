@@ -2,7 +2,7 @@
 function showCoinFountain(count = 10) {
     const pot = document.getElementById('pot');
     if (!pot) return;
-    const potRect = pot.getBoundingClientRect();
+    const potRect = pot.getBetttingBoundingClientRect ? pot.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
     const cx = potRect.left + potRect.width/2 - containerRect.left;
     const cy = potRect.top - containerRect.top + 8;
@@ -269,7 +269,8 @@ window.addEventListener('resize', startSmileAnimation);
 const veggieCanvas = document.getElementById('veggieCanvas');
 const veggieCtx = veggieCanvas ? veggieCanvas.getContext('2d') : null;
 let veggieParticles = [];
-const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅'];
+// Добавлены символы криптовалют
+const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅','₿','Ξ','Ł','$','♦'];
 function startVeggieAnimation() {
     if (!veggieCanvas) return;
     veggieCanvas.width = veggieCanvas.parentElement.clientWidth;
@@ -293,7 +294,7 @@ function drawVeggie() {
 }
 window.addEventListener('resize', startVeggieAnimation);
 
-// ====== ПОДКЛЮЧАЕМ ОБРАБОТЧИКИ ПОСЛЕ ЗАГРУЗКИ DOM ======
+// ====== ПОДКЛЮЧАЕМ ОБРАБОТЧИКИ ИГРЫ ======
 function attachGameEvents() {
     const startBtn = document.getElementById('start-btn');
     const board = document.getElementById('board');
