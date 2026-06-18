@@ -1,4 +1,18 @@
 // ================== ТАПАЛКА И ФОНЫ ==================
+
+// Ждём, пока main.js закэширует DOM-элементы
+function initGameEngine() {
+    // Эти переменные будут доступны из main.js
+    if (typeof startBtn === 'undefined' || typeof board === 'undefined') {
+        setTimeout(initGameEngine, 100);
+        return;
+    }
+
+    startBtn.addEventListener('click', startGame);
+    board.addEventListener('touchstart', handleTouchStart, {passive: false});
+    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+}
+
 function showCoinFountain(count = 10) {
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
@@ -13,6 +27,7 @@ function showCoinFountain(count = 10) {
         coin.addEventListener('animationend', () => coin.remove());
     }
 }
+
 function showPoopFountain(count = 5) {
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
@@ -252,6 +267,5 @@ function drawVeggie() {
 }
 window.addEventListener('resize', startVeggieAnimation);
 
-startBtn.addEventListener('click', startGame);
-board.addEventListener('touchstart', handleTouchStart, {passive: false});
-board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+// ====== ВЫЗОВ ПОСЛЕ ГОТОВНОСТИ MAIN.JS ======
+window.initGameEngine = initGameEngine;
