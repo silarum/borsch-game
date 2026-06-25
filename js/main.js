@@ -88,19 +88,13 @@ async function loadTopPlayers(type) {
     const screenId = type === 'rum' ? 'top-tappers-screen' : 'top-miners-screen';
     const screen = document.getElementById(screenId);
     if (!screen) return;
-    
     screen.querySelector('.info-card').innerHTML = '<p style="text-align:center;color:#FFD700;">⏳ Загрузка...</p>';
-    
     try {
         const order = type === 'rum' ? 'rum.desc' : 'srum.desc';
         const res = await fetch(`${SUPABASE_URL}/rest/v1/users?select=nickname,rum,srum&order=${order}&limit=20`, {
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         });
         const players = await res.json();
-        
         let html = '';
         if (!players.length) {
             html = '<p style="color:#aaa;">Нет данных</p>';
@@ -119,7 +113,6 @@ async function loadTopPlayers(type) {
         }
         screen.querySelector('.info-card').innerHTML = html;
     } catch(e) {
-        console.error('Ошибка загрузки топов:', e);
         screen.querySelector('.info-card').innerHTML = '<p style="color:#e74c3c;">Ошибка загрузки</p>';
     }
 }
@@ -166,6 +159,46 @@ function initApp() {
         localStorage.setItem('userId', userId);
     }
 
+    if (typeof loadUserData === 'function' && userId) {
+        loadUserData(userId).then(userData => {
+            if (userData) {
+                rum = userData.rum || 0;
+                srum = parseFloat(userData.srum) || 0;
+                ton = parseFloat(userData.ton) || 0;
+                usdt = parseFloat(userData.usdt) || 0;
+                userNickname = userData.nickname || userNickname;
+                userStatus = userData.status || 'solo';
+                miningStage = userData.mining_stage || 1;
+                if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
+                if (userData.boost && userData.boost !== 'null') {
+                    try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
+                }
+                saveAll();
+                if (!userData.bonus_claimed && typeof processWelcomeBonus === 'function') {
+                    processWelcomeBonus(userId, userData).then(claimed => {
+                        if (claimed) { srum += 1; saveAll(); }
+                        updateUI();
+                    });
+                }
+            } else {
+                loadFromLocalStorage();
+            }
+            updateUI();
+        }).catch(e => {
+            console.log('Облако недоступно:', e.message);
+            loadFromLocalStorage();
+            updateUI();
+        });
+    } else {
+        loadFromLocalStorage();
+        updateUI();
+    }
+
+    if (games < maxGames && typeof startRecovery === 'function') startRecovery();
+    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+}
+
+function loadFromLocalStorage() {
     const savedRum = parseInt(localStorage.getItem('rum'));
     const savedSrum = parseFloat(localStorage.getItem('srum'));
     const savedTon = parseFloat(localStorage.getItem('ton'));
@@ -186,62 +219,25 @@ function initApp() {
     if (savedBoost && savedBoost !== 'null') {
         try { activeBoost = JSON.parse(savedBoost); } catch(e) { activeBoost = null; }
     }
-
-    updateUI();
-
-    if (typeof loadUserData === 'function' && userId) {
-        loadUserData(userId).then(userData => {
-            if (userData) {
-                rum = userData.rum || rum;
-                srum = parseFloat(userData.srum) || srum;
-                ton = parseFloat(userData.ton) || ton;
-                usdt = parseFloat(userData.usdt) || usdt;
-                userNickname = userData.nickname || userNickname;
-                userStatus = userData.status || userStatus;
-                miningStage = userData.mining_stage || miningStage;
-                if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
-                if (userData.boost && userData.boost !== 'null') {
-                    try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
-                }
-                if (!userData.bonus_claimed && typeof processWelcomeBonus === 'function') {
-                    processWelcomeBonus(userId, userData).then(claimed => { if (claimed) { srum += 1; updateUI(); } });
-                }
-            }
-            updateUI();
-        }).catch(e => console.log('Облако отложено:', e.message));
-    }
-
-    if (games < maxGames && typeof startRecovery === 'function') startRecovery();
-    document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 }
 
 window.addEventListener('load', function() {
     initApp();
-
     if (rulesBtn) rulesBtn.addEventListener('click', () => switchScreen('rules'));
-
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const screenId = this.getAttribute('data-screen');
             if (screenId) switchScreen(screenId);
         });
     });
-
     document.querySelectorAll('.menu-dropdown button[data-screen]').forEach(btn => {
         btn.addEventListener('click', function() {
             const screenId = this.getAttribute('data-screen');
-            if (screenId) {
-                switchScreen(screenId);
-                document.getElementById('menu-dropdown').classList.remove('active');
-            }
+            if (screenId) { switchScreen(screenId); document.getElementById('menu-dropdown').classList.remove('active'); }
         });
     });
-
     document.querySelectorAll('.back-btn').forEach(btn => {
-        btn.addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            switchScreen(null);
-        });
+        btn.addEventListener('click', function(ev) { ev.stopPropagation(); switchScreen(null); });
     });
 });
 
@@ -256,7 +252,6 @@ function updateUI() {
     const usdtBal = document.getElementById('usdt-balance');
     if (tonBal) tonBal.textContent = ton.toFixed(2);
     if (usdtBal) usdtBal.textContent = usdt.toFixed(2);
-
     if (games > 0 && !gameActive && !duelActive) {
         if (startBtn) startBtn.style.display = 'inline-block';
         if (energyDisplay) energyDisplay.textContent = `⚡ ${games}/${maxGames} игр`;
@@ -276,11 +271,7 @@ function updateUI() {
     if (typeof updateProfile === 'function') updateProfile();
     saveAll();
     if (typeof saveUserData === 'function' && userId) {
-        saveUserData(userId, {
-            nickname: userNickname, rum, srum, ton, usdt,
-            status: userStatus, mining_stage: miningStage,
-            boost: activeBoost ? JSON.stringify(activeBoost) : null, games
-        }).catch(() => {});
+        saveUserData(userId, { nickname: userNickname, rum, srum, ton, usdt, status: userStatus, mining_stage: miningStage, boost: activeBoost ? JSON.stringify(activeBoost) : null, games }).catch(() => {});
     }
 }
 
