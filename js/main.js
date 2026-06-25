@@ -89,7 +89,6 @@ async function loadTopPlayers(type) {
     const screen = document.getElementById(screenId);
     if (!screen) return;
     
-    // Показываем загрузку
     screen.querySelector('.info-card').innerHTML = '<p style="text-align:center;color:#FFD700;">⏳ Загрузка...</p>';
     
     try {
@@ -136,7 +135,7 @@ function switchScreen(screenId) {
             'arena': () => { document.getElementById('arena-screen').classList.add('active'); if (typeof renderArena === 'function') renderArena(); },
             'referral': () => { document.getElementById('referral-screen').classList.add('active'); if (typeof renderReferralList === 'function') renderReferralList(); },
             'shop': () => { document.getElementById('shop-screen').classList.add('active'); if (typeof renderShop === 'function') renderShop(); },
-            'wallet': () => { document.getElementById('wallet-screen').classList.add('active'); },
+            'wallet': () => { document.getElementById('wallet-screen').classList.add('active'); if (typeof renderWallet === 'function') renderWallet(); },
             'top-tappers': () => { document.getElementById('top-tappers-screen').classList.add('active'); loadTopPlayers('rum'); },
             'top-miners': () => { document.getElementById('top-miners-screen').classList.add('active'); loadTopPlayers('srum'); }
         };
