@@ -1,122 +1,262 @@
-// ================== TON CONNECT + ВЫВОД USDT ==================
+// ================== TON CONNECT + ОБМЕН SRUM ==================
 
-// Глобальные переменные для TON Connect
-let tonConnectUI = null;         // Экземпляр TonConnectUI
-let currentWalletAddress = null; // Адрес подключённого кошелька
-let tonConnectInitialized = false; // Флаг успешной инициализации
+let tonConnectUI = null;
+let currentWalletAddress = null;
+let tonConnectInitialized = false;
 
-// ================== ИНИЦИАЛИЗАЦИЯ TON CONNECT ==================
+// Курсы обмена: 1 SRUM = X
+const EXCHANGE_RATE = {
+    USDT: 1,    // 1 SRUM = 1 USDT
+    TON: 0.2    // 1 SRUM = 0.2 TON
+};
+
+// Инициализация TON Connect
 function initTonConnect() {
-    // Проверяем, загружена ли библиотека TON Connect UI
     if (typeof TON_CONNECT_UI === 'undefined') {
-        console.warn('TON Connect UI не загружен. Кошелёк будет недоступен.');
-        // Показываем заглушку в контейнере кошелька
+        console.warn('TON Connect UI не загружен');
         const container = document.getElementById('ton-connect-container');
-        if (container) {
-            container.innerHTML = '<p style="color:#aaa;text-align:center;">Загрузка кошелька...</p>';
-        }
+        if (container) container.innerHTML = '<p style="color:#aaa;text-align:center;">Загрузка кошелька...</p>';
         return;
     }
 
     try {
-        // Создаём экземпляр TonConnectUI с манифестом
         tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://silarum.github.io/borsch-game/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-container'
         });
 
-        // Восстанавливаем сессию — если кошелёк был подключён ранее, подхватится автоматически
         tonConnectUI.connectionRestored.then((restored) => {
-            if (restored) {
-                console.log('Сессия TON Connect восстановлена');
-            } else {
-                console.log('Сессия не восстановлена — требуется ручное подключение');
-            }
+            console.log(restored ? 'Сессия восстановлена' : 'Требуется подключение');
         });
 
-        // Отслеживаем изменения статуса кошелька
         tonConnectUI.onStatusChange((wallet) => {
             if (wallet) {
-                // Кошелёк подключён
                 currentWalletAddress = wallet.account.address;
                 const shortAddr = `${currentWalletAddress.slice(0, 6)}...${currentWalletAddress.slice(-4)}`;
                 document.getElementById('wallet-address').textContent = `Кошелёк: ${shortAddr}`;
-                console.log('Кошелёк подключён:', shortAddr);
                 tonConnectInitialized = true;
             } else {
-                // Кошелёк отключён
                 currentWalletAddress = null;
                 document.getElementById('wallet-address').textContent = 'Кошелёк не подключён';
-                console.log('Кошелёк отключён');
                 tonConnectInitialized = false;
             }
-            updateUI(); // Обновляем интерфейс
+            updateExchangeUI();
+            updateUI();
         });
-
     } catch (e) {
-        console.error('Ошибка инициализации TON Connect:', e);
-        const container = document.getElementById('ton-connect-container');
-        if (container) {
-            container.innerHTML = '<p style="color:#ff6666;text-align:center;">Ошибка загрузки кошелька</p>';
-        }
+        console.error('Ошибка TON Connect:', e);
     }
 }
 
-// Запускаем инициализацию после полной загрузки страницы
 window.addEventListener('load', () => {
-    // Небольшая задержка, чтобы убедиться, что DOM и внешние скрипты готовы
     setTimeout(initTonConnect, 1500);
 });
 
-// ================== ВЫВОД USDT ==================
+// ================== РЕНДЕР КОШЕЛЬКА ==================
+function renderWallet() {
+    const walletCard = document.getElementById('wallet-card');
+    if (!walletCard) return;
 
-/**
- * Создаёт заявку на вывод USDT через Supabase.
- * Проверяет подключение кошелька, лимиты статуса и баланс.
- */
-async function requestWithdrawal() {
-    // Проверка: подключён ли кошелёк
-    if (!currentWalletAddress) {
-        alert('Сначала подключите кошелёк TON (кнопка в разделе "Кошелёк")');
-        return;
+    walletCard.innerHTML = `
+        <div style="text-align:center;">
+            <p style="font-size:1.2rem;">💎 SRUM: <b style="color:#FFD700;">${srum.toFixed(2)}</b></p>
+            <p style="font-size:0.9rem;">💵 USDT: <b style="color:#4CAF50;">${usdt.toFixed(2)}</b> | ⚡ TON: <b style="color:#2196F3;">${ton.toFixed(2)}</b></p>
+        </div>
+
+        <div id="ton-connect-container" style="display:flex;justify-content:center;margin:15px 0;"></div>
+        <p style="font-size:0.8rem;color:#aaa;text-align:center;" id="wallet-address"></p>
+
+        <!-- Обменник -->
+        <div style="background:rgba(255,215,0,0.05); border:1px solid rgba(255,215,0,0.2); border-radius:15px; padding:15px; margin-top:15px;">
+            <h3 style="color:#FFD700; text-align:center; margin-bottom:10px;">🔄 Обменять SRUM</h3>
+            
+            <input type="number" id="exchange-amount" placeholder="Введите сумму SRUM" min="0.01" step="0.01" 
+                   style="width:100%; padding:14px; margin:8px 0; border-radius:12px; border:1px solid rgba(255,215,0,0.3); 
+                          background:rgba(0,0,0,0.5); color:white; font-size:1.2rem; text-align:center;">
+
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button id="exchange-usdt-btn" class="ex-btn" disabled
+                        style="background:linear-gradient(180deg,#4CAF50,#2E7D32);">
+                    💵 <span id="usdt-amount">0.00</span> USDT
+                </button>
+                <button id="exchange-ton-btn" class="ex-btn" disabled
+                        style="background:linear-gradient(180deg,#2196F3,#1565C0);">
+                    ⚡ <span id="ton-amount">0.0000</span> TON
+                </button>
+            </div>
+            
+            <p id="exchange-error" style="font-size:0.75rem; color:#e74c3c; text-align:center; margin-top:8px; min-height:18px;"></p>
+        </div>
+    `;
+
+    // Стили кнопок
+    const style = document.createElement('style');
+    style.textContent = `
+        .ex-btn {
+            flex:1; padding:14px 8px; border:none; border-radius:12px; font-weight:bold; font-size:0.9rem;
+            color:white; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:transform 0.1s;
+        }
+        .ex-btn:active { transform:scale(0.96); }
+        .ex-btn:disabled { background:#555 !important; color:#999; cursor:not-allowed; box-shadow:none; }
+    `;
+    document.head.appendChild(style);
+
+    // Обработчик ввода
+    document.getElementById('exchange-amount').addEventListener('input', updateExchangeUI);
+
+    // Кнопки обмена
+    document.getElementById('exchange-usdt-btn').addEventListener('click', () => doExchange('USDT'));
+    document.getElementById('exchange-ton-btn').addEventListener('click', () => doExchange('TON'));
+
+    // Пересоздаём кнопку TON Connect
+    if (typeof TON_CONNECT_UI !== 'undefined' && !tonConnectUI) {
+        setTimeout(initTonConnect, 500);
+    } else if (tonConnectUI) {
+        tonConnectUI.buttonRootId = 'ton-connect-container';
+    }
+}
+
+// Обновление сумм при вводе
+function updateExchangeUI() {
+    const input = document.getElementById('exchange-amount');
+    const usdtSpan = document.getElementById('usdt-amount');
+    const tonSpan = document.getElementById('ton-amount');
+    const usdtBtn = document.getElementById('exchange-usdt-btn');
+    const tonBtn = document.getElementById('exchange-ton-btn');
+    const errorP = document.getElementById('exchange-error');
+
+    if (!input) return;
+
+    const amount = parseFloat(input.value) || 0;
+    
+    if (usdtSpan) usdtSpan.textContent = (amount * EXCHANGE_RATE.USDT).toFixed(2);
+    if (tonSpan) tonSpan.textContent = (amount * EXCHANGE_RATE.TON).toFixed(4);
+
+    // Валидация
+    let errorMsg = '';
+    let valid = true;
+
+    if (amount <= 0) {
+        valid = false;
+    } else if (amount > srum) {
+        errorMsg = 'Недостаточно SRUM';
+        valid = false;
+    } else {
+        // Проверка лимита по статусу
+        let limit = 50;
+        switch (userStatus) {
+            case 'silver': limit = 200; break;
+            case 'gold': limit = 500; break;
+            case 'platinum': limit = 1000; break;
+        }
+        if (amount > limit) {
+            errorMsg = `Лимит: ${limit} SRUM/сутки. Повысьте статус в Магазине.`;
+            valid = false;
+        }
     }
 
-    // Определяем дневной лимит вывода в зависимости от статуса
-    let limit = 50; // Базовый лимит для обычных игроков
-    switch (userStatus) {
-        case 'silver':  limit = 200; break;
-        case 'gold':    limit = 500; break;
-        case 'platinum': limit = 1000; break;
-        default:        limit = 50;  break;
+    if (usdtBtn) usdtBtn.disabled = !valid;
+    if (tonBtn) tonBtn.disabled = !valid;
+    if (errorP) errorP.textContent = errorMsg;
+}
+
+// Выполнение обмена
+async function doExchange(currency) {
+    const input = document.getElementById('exchange-amount');
+    const amount = parseFloat(input?.value) || 0;
+
+    if (amount <= 0 || amount > srum) return;
+
+    let received, receivedCurrency;
+    if (currency === 'USDT') {
+        received = amount * EXCHANGE_RATE.USDT;
+        receivedCurrency = 'USDT';
+    } else {
+        received = amount * EXCHANGE_RATE.TON;
+        receivedCurrency = 'TON';
     }
 
-    // Запрашиваем сумму у пользователя
-    const amountSRUM = prompt(
-        `Введите сумму SRUM для вывода:\n` +
-        `Ваш лимит: ${limit} SRUM (1 SRUM = 1 USDT)\n` +
-        `Ваш баланс: ${srum.toFixed(2)} SRUM`
+    // Подтверждение
+    const confirmed = confirm(
+        `Обменять ${amount.toFixed(2)} SRUM?\n\n` +
+        `Вы получите: ${received.toFixed(currency === 'TON' ? 4 : 2)} ${receivedCurrency}\n\n` +
+        `Подтвердите операцию.`
     );
 
-    // Проверка: введено ли число
-    if (!amountSRUM || isNaN(amountSRUM) || parseFloat(amountSRUM) <= 0) {
-        return; // Пользователь нажал "Отмена" или ввёл не число
+    if (!confirmed) return;
+
+    // Списываем SRUM, начисляем валюту
+    srum -= amount;
+    if (currency === 'USDT') {
+        usdt += received;
+    } else {
+        ton += received;
     }
 
+    updateUI();
+    saveAll();
+
+    // Сохраняем в облако
+    if (typeof saveUserData === 'function' && userId) {
+        saveUserData(userId, { srum, usdt, ton }).catch(() => {});
+    }
+
+    // Логируем транзакцию
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/transactions`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                type: 'exchange',
+                amount: amount,
+                currency: 'SRUM',
+                srum_amount: -amount,
+                tx_hash: 'exchange_' + receivedCurrency + '_' + Date.now(),
+                created_at: new Date().toISOString()
+            })
+        });
+    } catch (e) {
+        console.error('Ошибка логирования:', e);
+    }
+
+    // Обновляем интерфейс
+    renderWallet();
+    alert(`✅ Обменяно! ${amount.toFixed(2)} SRUM → ${received.toFixed(currency === 'TON' ? 4 : 2)} ${receivedCurrency}`);
+}
+
+// ================== ЗАПРОС ВЫВОДА USDT (СТАРЫЙ МЕТОД, ОСТАВЛЕН) ==================
+async function requestWithdrawal() {
+    if (!currentWalletAddress) {
+        alert('Сначала подключите кошелёк TON');
+        return;
+    }
+
+    let limit = 50;
+    switch (userStatus) {
+        case 'silver': limit = 200; break;
+        case 'gold': limit = 500; break;
+        case 'platinum': limit = 1000; break;
+    }
+
+    const amountSRUM = prompt(`Введите сумму SRUM для вывода (макс. ${limit}):`);
+    if (!amountSRUM || isNaN(amountSRUM) || parseFloat(amountSRUM) <= 0) return;
     const amount = parseFloat(amountSRUM);
 
-    // Проверка: не превышен ли лимит
     if (amount > limit) {
-        alert(`Ваш лимит вывода: ${limit} SRUM в сутки. Повысьте статус в Магазине.`);
+        alert(`Лимит: ${limit} SRUM/сутки.`);
         return;
     }
-
-    // Проверка: хватает ли баланса
     if (amount > srum) {
-        alert(`Недостаточно SRUM на балансе. У вас: ${srum.toFixed(2)} SRUM`);
+        alert('Недостаточно SRUM');
         return;
     }
 
-    // Отправляем заявку в Supabase
     try {
         const response = await fetch(`${SUPABASE_URL}/rest/v1/withdrawal_requests`, {
             method: 'POST',
@@ -131,24 +271,25 @@ async function requestWithdrawal() {
                 nickname: userNickname,
                 wallet_address: currentWalletAddress,
                 amount: amount,
-                usdt_amount: amount, // 1 SRUM = 1 USDT
+                usdt_amount: amount,
                 status: 'pending',
                 created_at: new Date().toISOString()
             })
         });
 
         if (response.ok) {
-            // Списываем SRUM с баланса
             srum -= amount;
             updateUI();
-            alert(`✅ Заявка на вывод ${amount} USDT создана!\nОжидайте подтверждения администратором.`);
+            saveAll();
+            if (typeof saveUserData === 'function' && userId) {
+                saveUserData(userId, { srum }).catch(() => {});
+            }
+            alert('✅ Заявка на вывод создана!');
         } else {
-            const errText = await response.text();
-            console.error('Ошибка создания заявки:', errText);
-            alert('Ошибка при создании заявки. Попробуйте позже.');
+            alert('Ошибка создания заявки.');
         }
     } catch (e) {
-        console.error('Ошибка сети при создании заявки:', e);
-        alert('Ошибка соединения с сервером. Проверьте интернет.');
+        console.error(e);
+        alert('Ошибка соединения.');
     }
 }
