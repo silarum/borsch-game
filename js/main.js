@@ -26,6 +26,41 @@ var globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]'
 var userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 var referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
+// Проекты для инвестиций
+var investProjects = JSON.parse(localStorage.getItem('investProjects')) || [
+    {
+        id: 1,
+        name: 'iSayMobil — Интерактивная система аудио оповещения населения',
+        icon: '🚗',
+        desc: 'Доставка голосовых сообщений на адрес. Поздравь с днём рождения красиво — машина подъезжает и передаёт аудиообращение адресату. Интерактивное оповещение для событий и праздников.',
+        target: 100000,
+        collected: 0,
+        share: 10,
+        endDate: Date.now() + 30 * 86400000
+    },
+    {
+        id: 2,
+        name: 'Голодные Волки — FGSPI (Food Game Sport People Interactive)',
+        icon: '🐺',
+        desc: 'Спорт-гейм-клуб быстрого питания. Сражайся с противниками по телефону и в игре, получай бесплатную еду на команду. Битвы между фастфуд-клубами. Спорт, игра, люди, интерактив.',
+        target: 50000,
+        collected: 0,
+        share: 5,
+        endDate: Date.now() + 60 * 86400000
+    },
+    {
+        id: 3,
+        name: 'WMW — Всемирная стена памяти (World Memory Wall)',
+        icon: '🕯️',
+        desc: 'Три части одного проекта: 1. Портал памяти — зажги свечу и создай страницу. 2. Царствие небесное — сайт в память о человеке. 3. Книга жизни — каждый лист это история чьей-то прожитой жизни. Не важно, кем был человек — важно, что его память чтят.',
+        target: 25000,
+        collected: 0,
+        share: 3,
+        endDate: Date.now() + 45 * 86400000
+    }
+];
+var myInvestments = JSON.parse(localStorage.getItem('myInvestments')) || [];
+
 function saveAll() {
     localStorage.setItem('rum', rum);
     localStorage.setItem('srum', srum);
@@ -45,6 +80,8 @@ function saveAll() {
     localStorage.setItem('userTasks', JSON.stringify(userTasks));
     localStorage.setItem('miningStage', miningStage);
     localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
+    localStorage.setItem('investProjects', JSON.stringify(investProjects));
+    localStorage.setItem('myInvestments', JSON.stringify(myInvestments));
 }
 
 // ================== DOM-ЭЛЕМЕНТЫ ==================
@@ -83,7 +120,7 @@ function showMainElements() {
     updateUI();
 }
 
-// ================== ТОПЫ ИГРОКОВ ==================
+// ================== ТОПЫ ==================
 async function loadTopPlayers(type) {
     const screenId = type === 'rum' ? 'top-tappers-screen' : 'top-miners-screen';
     const screen = document.getElementById(screenId);
@@ -117,6 +154,143 @@ async function loadTopPlayers(type) {
     }
 }
 
+// ================== ИНВЕСТИЦИИ ==================
+function renderInvest() {
+    const screen = document.getElementById('invest-screen');
+    if (!screen) return;
+
+    let html = '<h2>📈 Инвестиции</h2><p style="color:#aaa; font-size:0.8rem; margin-bottom:15px;">Вкладывай RUM в реальные проекты и получай долю от будущей прибыли</p>';
+    html += `<div style="background:rgba(255,215,0,0.1); padding:10px; border-radius:10px; margin-bottom:15px; text-align:center;">
+        <p style="color:#FFD700;">💰 Твой портфель: <b>${invest.toLocaleString()} RUM</b></p>
+    </div>`;
+
+    investProjects.forEach(project => {
+        const myInv = myInvestments.find(i => i.projectId === project.id);
+        const myAmount = myInv ? myInv.amount : 0;
+        const progress = Math.min(100, (project.collected / project.target) * 100);
+        const daysLeft = Math.max(0, Math.ceil((project.endDate - Date.now()) / 86400000));
+
+        html += `
+        <div class="info-card" style="text-align:left;">
+            <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px;">
+                <span style="font-size:2.5rem;">${project.icon}</span>
+                <div>
+                    <strong style="color:#FFD700;">${project.name}</strong>
+                    <p style="font-size:0.7rem; color:#ccc; margin-top:4px; line-height:1.4;">${project.desc}</p>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05); border-radius:10px; height:10px; margin:10px 0;">
+                <div style="background:linear-gradient(90deg,#FFD700,#FFA500); height:100%; border-radius:10px; width:${progress}%; transition:width 0.5s;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#aaa;">
+                <span>Собрано: ${project.collected.toLocaleString()} / ${project.target.toLocaleString()} RUM</span>
+                <span>Доля: ${project.share}%</span>
+            </div>
+            <p style="font-size:0.7rem; color:#aaa;">⏳ ${daysLeft} дн. до конца</p>
+            ${myAmount > 0 ? `<p style="color:#4CAF50; font-size:0.8rem;">✅ Твой вклад: ${myAmount.toLocaleString()} RUM</p>` : ''}
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <input type="number" id="invest-amount-${project.id}" placeholder="Сумма RUM" min="100" step="100" 
+                       style="flex:2; padding:10px; border-radius:8px; border:1px solid rgba(255,215,0,0.3); background:rgba(0,0,0,0.5); color:white; font-size:0.85rem;">
+                <button onclick="window.investInProject(${project.id})" style="flex:1; padding:10px; border:none; border-radius:8px; 
+                        background:linear-gradient(180deg,#FFD700,#FFA500); color:#000; font-weight:bold; font-size:0.85rem; cursor:pointer;">💰 Вложить</button>
+            </div>
+            ${myAmount > 0 ? `<button onclick="window.withdrawInvest(${project.id})" style="width:100%; margin-top:8px; padding:8px; 
+                    border:1px solid #e74c3c; border-radius:8px; background:transparent; color:#e74c3c; font-size:0.75rem; cursor:pointer;">📤 Вывести (штраф 10%)</button>` : ''}
+        </div>`;
+    });
+
+    // Кнопка «Предложить проект»
+    html += `
+        <div class="info-card" style="text-align:center;">
+            <p style="color:#aaa; font-size:0.8rem;">Есть идея проекта?</p>
+            <button onclick="window.suggestProject()" style="padding:12px 20px; border:1px dashed #FFD700; border-radius:10px; 
+                    background:transparent; color:#FFD700; font-size:0.9rem; cursor:pointer;">💡 Предложить проект</button>
+        </div>
+    `;
+
+    screen.innerHTML = html;
+
+    // Обработчики
+    window.investInProject = function(projectId) {
+        const input = document.getElementById(`invest-amount-${projectId}`);
+        const amount = parseInt(input?.value) || 0;
+        if (amount <= 0) return alert('Введите сумму');
+        if (amount > rum) return alert('Недостаточно RUM');
+
+        const project = investProjects.find(p => p.id === projectId);
+        if (!project) return;
+
+        if (!confirm(`Вложить ${amount.toLocaleString()} RUM в проект «${project.name}»?\nТвоя доля: ${project.share}% от прибыли`)) return;
+
+        rum -= amount;
+        invest += amount;
+        project.collected += amount;
+
+        let myInv = myInvestments.find(i => i.projectId === projectId);
+        if (myInv) {
+            myInv.amount += amount;
+        } else {
+            myInvestments.push({ projectId, amount });
+        }
+
+        updateUI();
+        saveAll();
+        if (typeof saveUserData === 'function' && userId) {
+            saveUserData(userId, { rum, invest }).catch(() => {});
+        }
+        renderInvest();
+        alert(`✅ Вложено ${amount.toLocaleString()} RUM в «${project.name}»!`);
+    };
+
+    window.withdrawInvest = function(projectId) {
+        const myInv = myInvestments.find(i => i.projectId === projectId);
+        if (!myInv || myInv.amount <= 0) return;
+
+        const project = investProjects.find(p => p.id === projectId);
+        if (!project) return;
+
+        const penalty = Math.floor(myInv.amount * 0.1);
+        const returnAmount = myInv.amount - penalty;
+
+        if (!confirm(`Вывести вклад из «${project.name}»?\nСумма: ${myInv.amount.toLocaleString()} RUM\nШтраф 10%: -${penalty.toLocaleString()} RUM\nК получению: ${returnAmount.toLocaleString()} RUM`)) return;
+
+        rum += returnAmount;
+        project.collected = Math.max(0, project.collected - myInv.amount);
+        myInvestments = myInvestments.filter(i => i.projectId !== projectId);
+
+        updateUI();
+        saveAll();
+        if (typeof saveUserData === 'function' && userId) {
+            saveUserData(userId, { rum }).catch(() => {});
+        }
+        renderInvest();
+        alert(`✅ Возвращено ${returnAmount.toLocaleString()} RUM`);
+    };
+
+    window.suggestProject = function() {
+        const name = prompt('Название проекта:');
+        if (!name) return;
+        const desc = prompt('Краткое описание:');
+        if (!desc) return;
+        const target = prompt('Целевая сумма (RUM):', '10000');
+        if (!target || isNaN(target)) return;
+
+        investProjects.push({
+            id: Date.now(),
+            name,
+            icon: '💡',
+            desc,
+            target: parseInt(target),
+            collected: 0,
+            share: 1,
+            endDate: Date.now() + 90 * 86400000
+        });
+        saveAll();
+        renderInvest();
+        alert('✅ Проект предложен! После модерации он появится в витрине.');
+    };
+}
+
 // ================== НАВИГАЦИЯ ==================
 function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -130,7 +304,8 @@ function switchScreen(screenId) {
             'shop': () => { document.getElementById('shop-screen').classList.add('active'); if (typeof renderShop === 'function') renderShop(); },
             'wallet': () => { document.getElementById('wallet-screen').classList.add('active'); if (typeof renderWallet === 'function') renderWallet(); },
             'top-tappers': () => { document.getElementById('top-tappers-screen').classList.add('active'); loadTopPlayers('rum'); },
-            'top-miners': () => { document.getElementById('top-miners-screen').classList.add('active'); loadTopPlayers('srum'); }
+            'top-miners': () => { document.getElementById('top-miners-screen').classList.add('active'); loadTopPlayers('srum'); },
+            'invest': () => { document.getElementById('invest-screen').classList.add('active'); renderInvest(); }
         };
         if (screenMap[screenId]) screenMap[screenId]();
         else {
@@ -166,6 +341,7 @@ function initApp() {
                 srum = parseFloat(userData.srum) || 0;
                 ton = parseFloat(userData.ton) || 0;
                 usdt = parseFloat(userData.usdt) || 0;
+                invest = userData.invest || 0;
                 userNickname = userData.nickname || userNickname;
                 userStatus = userData.status || 'solo';
                 miningStage = userData.mining_stage || 1;
@@ -203,6 +379,7 @@ function loadFromLocalStorage() {
     const savedSrum = parseFloat(localStorage.getItem('srum'));
     const savedTon = parseFloat(localStorage.getItem('ton'));
     const savedUsdt = parseFloat(localStorage.getItem('usdt'));
+    const savedInvest = parseInt(localStorage.getItem('invest'));
     const savedGames = parseInt(localStorage.getItem('games'));
     const savedNickname = localStorage.getItem('nickname');
     const savedStatus = localStorage.getItem('userStatus');
@@ -212,6 +389,7 @@ function loadFromLocalStorage() {
     if (!isNaN(savedSrum)) srum = savedSrum;
     if (!isNaN(savedTon)) ton = savedTon;
     if (!isNaN(savedUsdt)) usdt = savedUsdt;
+    if (!isNaN(savedInvest)) invest = savedInvest;
     if (!isNaN(savedGames) && savedGames >= 0 && savedGames <= maxGames) games = savedGames;
     if (savedNickname) userNickname = savedNickname;
     if (savedStatus) userStatus = savedStatus;
@@ -271,7 +449,7 @@ function updateUI() {
     if (typeof updateProfile === 'function') updateProfile();
     saveAll();
     if (typeof saveUserData === 'function' && userId) {
-        saveUserData(userId, { nickname: userNickname, rum, srum, ton, usdt, status: userStatus, mining_stage: miningStage, boost: activeBoost ? JSON.stringify(activeBoost) : null, games }).catch(() => {});
+        saveUserData(userId, { nickname: userNickname, rum, srum, ton, usdt, invest, status: userStatus, mining_stage: miningStage, boost: activeBoost ? JSON.stringify(activeBoost) : null, games }).catch(() => {});
     }
 }
 
