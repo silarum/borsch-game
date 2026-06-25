@@ -6,7 +6,7 @@ function updateProfile() {
     document.getElementById('user-status').textContent = club && club.master === 'Игрок' ? 'Глава клуба' : 'Одиночка';
 }
 
-// Статистика (короткое нажатие)
+// Статистика (короткое нажатие на аватар)
 document.getElementById('user-avatar').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('stats-nickname').textContent = userNickname;
@@ -17,11 +17,13 @@ document.getElementById('user-avatar').addEventListener('click', (e) => {
     document.getElementById('stats-modal').classList.add('active');
 });
 
+// Кнопка меню
 document.getElementById('user-menu-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('menu-dropdown').classList.toggle('active');
 });
 
+// Закрытие меню при клике вне его
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('menu-dropdown');
     const menuBtn = document.getElementById('user-menu-btn');
@@ -30,6 +32,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Пункты меню
 document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
     btn.addEventListener('click', (e) => {
         document.getElementById('menu-dropdown').classList.remove('active');
@@ -41,7 +44,7 @@ document.querySelectorAll('#menu-dropdown button[data-screen]').forEach(btn => {
 let adminPressTimer;
 const ADMIN_LOGIN = 'admin';
 const ADMIN_PASS = 'admin';
-let currentAdminTab = 'dashboard'; // dashboard | players | transactions | withdrawals | tournaments | shop | settings
+let currentAdminTab = 'dashboard';
 
 function startPressAdmin(e) {
     e.preventDefault();
@@ -128,7 +131,7 @@ function renderAdminPanel() {
         </div>
     `;
 
-    // Стили
+    // Стили для админки
     if (!document.getElementById('admin-styles')) {
         const style = document.createElement('style');
         style.id = 'admin-styles';
@@ -234,8 +237,7 @@ async function loadPlayers(container) {
     `;
 
     document.getElementById('player-search').addEventListener('input', async (e) => {
-        const query = e.target.value.trim();
-        await renderPlayersTable(query);
+        await renderPlayersTable(e.target.value.trim());
     });
 
     await renderPlayersTable('');
@@ -311,10 +313,7 @@ window.deletePlayer = function(id) {
     if (!confirm('Удалить игрока? Это необратимо!')) return;
     fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${id}`, {
         method: 'DELETE',
-        headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        }
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
     }).then(() => {
         alert('Игрок удалён');
         loadAdminTabContent('players');
@@ -608,6 +607,3 @@ window.resetAllData = function() {
     if (!confirm('СБРОСИТЬ ВСЕ ДАННЫЕ? Это удалит всё!')) return;
     if (!confirm('Точно? Отменить будет нельзя!')) return;
     localStorage.clear();
-    alert('Данные сброшены. Перезагрузите страницу.');
-    location.reload();
-};
