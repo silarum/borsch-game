@@ -41,10 +41,6 @@
             </div>
         </div>
 
-        <div class="admin-modal" id="admin-modal">
-            <div class="admin-box" id="admin-content"></div>
-        </div>
-
         <button id="view-switch" onclick="cycleView()">🥬 Овощи</button>
         <button id="rules-btn-bottom">📜 Правила</button>
         <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
@@ -127,7 +123,7 @@
     <div class="screen" id="invest-screen">
         <button class="back-btn">← Назад</button>
         <h2>📈 Инвестиции</h2>
-        <div class="info-card"><p>Вкладывай RUM в реальные проекты и становись совладельцем прибыли.</p></div>
+        <div id="invest-content" style="width:100%;"></div>
     </div>
 
     <div class="screen" id="wallet-screen">
@@ -175,9 +171,9 @@
         <button class="back-btn">← Назад</button>
         <h2>📜 Правила игры</h2>
         <div class="rules-scroll">
-            <div class="info-card"><p><strong>🍲 RUM‑майнинг</strong><br>Нажимай на овощи — получай RUM. Серии удваивают награду. 3 игры в час.</p></div>
-            <div class="info-card"><p><strong>⛏️ Криптобеспредел (PvP)</strong><br>Ставка SRUM, дуэль 20 сек. Победитель получает USDT.</p></div>
-            <div class="info-card"><p><strong>💎 Статусы и вывод USDT</strong><br>Серебро — до 200, Золото — до 500, Платина — до 1000 USDT/сутки.</p></div>
+            <div class="info-card"><p><strong>🍲 RUM‑майнинг</strong><br>Нажимай на овощи — получай RUM.</p></div>
+            <div class="info-card"><p><strong>⛏️ Криптобеспредел</strong><br>Ставка SRUM, дуэль 20 сек.</p></div>
+            <div class="info-card"><p><strong>💎 Статусы и вывод</strong><br>Серебро/Золото/Платина.</p></div>
         </div>
     </div>
 
@@ -185,6 +181,12 @@
         <button class="back-btn">← Назад</button>
         <h2>📖 О проекте</h2>
         <div class="rules-scroll"><div class="info-card"><p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram.</p></div></div>
+    </div>
+
+    <!-- Админ-панель как полноценный экран -->
+    <div class="screen" id="admin-screen">
+        <button class="back-btn">← Назад</button>
+        <div id="admin-screen-content" style="width:100%; height:100%;"></div>
     </div>
 
     <div id="language-modal" class="language-modal hidden">
@@ -197,7 +199,7 @@
         </div>
     </div>
 
-    <!-- Нижняя панель (самый верхний слой) -->
+    <!-- Нижняя панель (скрыта на всех экранах) -->
     <div class="bottom-panel" id="bottom-panel">
         <button class="nav-btn" data-screen="arena">🏟️ Арена</button>
         <button class="nav-btn" data-screen="mining-club">🐺 Клуб</button>
