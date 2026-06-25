@@ -34,21 +34,21 @@ async function loadUserData(userId) {
         if (response.ok) {
             const users = await response.json();
             if (users.length > 0) {
-                return users[0]; // Пользователь уже существует — возвращаем данные
+                return users[0];
             }
         }
-        // Новый игрок — создаём с приветственным бонусом 1 SRUM
+        // Новый игрок — приветственный бонус 1 SRUM
         const newUser = {
             id: userId,
             nickname: 'Майнер',
             rum: 0,
-            srum: 1,           // Приветственный бонус
+            srum: 1,
             ton: 0,
             usdt: 0,
             status: 'solo',
             mining_stage: 1,
             games: 3,
-            bonus_claimed: false, // Ещё не получил бонус за подписки
+            bonus_claimed: false,
             created_at: new Date().toISOString()
         };
         await supabaseRequest('POST', 'users', newUser);
@@ -65,10 +65,7 @@ async function saveUserData(userId, data) {
         return;
     }
     try {
-        const body = {
-            ...data,
-            updated_at: new Date().toISOString()
-        };
+        const body = { ...data, updated_at: new Date().toISOString() };
         await supabaseRequest('PATCH', `users?id=eq.${userId}`, body);
     } catch (e) {
         console.error('Ошибка сохранения в Supabase:', e);
