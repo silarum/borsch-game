@@ -1,34 +1,55 @@
 // ================== ТАПАЛКА И ФОНЫ ==================
-function showCoinFountain(count = 10) {
+
+// Фонтан монеток — летят вверх из кастрюли
+function showCoinFountain(count = 15) {
     const pot = document.getElementById('pot');
     if (!pot) return;
-    const potRect = pot.getBetttingBoundingClientRect ? pot.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
-    const containerRect = document.getElementById('game-container').getBoundingClientRect();
-    const cx = potRect.left + potRect.width/2 - containerRect.left;
-    const cy = potRect.top - containerRect.top + 8;
-    for (let i=0; i<count; i++) {
-        const coin = document.createElement('div'); coin.className = 'coin-fountain'; coin.textContent = '💰';
-        coin.style.left = (cx + (Math.random()-0.5)*80) + 'px';
+    const potRect = pot.getBoundingClientRect();
+    const container = document.getElementById('game-container');
+    const containerRect = container.getBoundingClientRect();
+    
+    // Центр кастрюли относительно game-container
+    const cx = potRect.left + potRect.width / 2 - containerRect.left;
+    const cy = potRect.top - containerRect.top;
+    
+    for (let i = 0; i < count; i++) {
+        const coin = document.createElement('div');
+        coin.className = 'coin-fountain';
+        // Разные монетки для разнообразия
+        const coinTypes = ['💰', '🪙', '💎', '✨', '🪙'];
+        coin.textContent = coinTypes[Math.floor(Math.random() * coinTypes.length)];
+        coin.style.left = (cx + (Math.random() - 0.5) * 120) + 'px';
         coin.style.top = cy + 'px';
-        coin.style.animationDuration = (0.7 + Math.random()*0.5) + 's';
-        document.getElementById('game-container').appendChild(coin);
+        coin.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+        coin.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+        coin.style.animationDelay = (Math.random() * 0.3) + 's';
+        container.appendChild(coin);
         coin.addEventListener('animationend', () => coin.remove());
     }
 }
 
-function showPoopFountain(count = 5) {
+// Фонтан какашек — падают вниз из кастрюли
+function showPoopFountain(count = 8) {
     const pot = document.getElementById('pot');
     if (!pot) return;
     const potRect = pot.getBoundingClientRect();
-    const containerRect = document.getElementById('game-container').getBoundingClientRect();
-    const cx = potRect.left + potRect.width/2 - containerRect.left;
-    const cy = potRect.top - containerRect.top + 8;
-    for (let i=0; i<count; i++) {
-        const poop = document.createElement('div'); poop.className = 'poop-fountain'; poop.textContent = '💩';
-        poop.style.left = (cx + (Math.random()-0.5)*80) + 'px';
+    const container = document.getElementById('game-container');
+    const containerRect = container.getBoundingClientRect();
+    
+    const cx = potRect.left + potRect.width / 2 - containerRect.left;
+    const cy = potRect.top + potRect.height / 2 - containerRect.top;
+    
+    for (let i = 0; i < count; i++) {
+        const poop = document.createElement('div');
+        poop.className = 'poop-fountain';
+        const poopTypes = ['💩', '🪱', '💨', '😤'];
+        poop.textContent = poopTypes[Math.floor(Math.random() * poopTypes.length)];
+        poop.style.left = (cx + (Math.random() - 0.5) * 100) + 'px';
         poop.style.top = cy + 'px';
-        poop.style.animationDuration = (0.6 + Math.random()*0.5) + 's';
-        document.getElementById('game-container').appendChild(poop);
+        poop.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+        poop.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+        poop.style.animationDelay = (Math.random() * 0.2) + 's';
+        container.appendChild(poop);
         poop.addEventListener('animationend', () => poop.remove());
     }
 }
@@ -38,7 +59,7 @@ function spawnAll() {
     if (!holes.length) return;
     holes.forEach(h => h.innerHTML = '');
     window.currentVeg = {};
-    for (let i=0; i<holes.length; i++) {
+    for (let i = 0; i < holes.length; i++) {
         const isBad = Math.random() < 0.25;
         const pool = isBad ? BAD : GOOD;
         holes[i].innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
@@ -97,12 +118,14 @@ function flyVegToPot(hole, emoji) {
     const holeRect = hole.getBoundingClientRect();
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
-    const vegEl = document.createElement('div'); vegEl.className = 'flying-veg'; vegEl.textContent = emoji;
-    vegEl.style.left = (holeRect.left + holeRect.width/2 - containerRect.left) + 'px';
-    vegEl.style.top = (holeRect.top + holeRect.height/2 - containerRect.top) + 'px';
-    vegEl.style.setProperty('--dx', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
+    const vegEl = document.createElement('div');
+    vegEl.className = 'flying-veg';
+    vegEl.textContent = emoji;
+    vegEl.style.left = (holeRect.left + holeRect.width / 2 - containerRect.left) + 'px';
+    vegEl.style.top = (holeRect.top + holeRect.height / 2 - containerRect.top) + 'px';
+    vegEl.style.setProperty('--dx', (potRect.left + potRect.width / 2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
     vegEl.style.setProperty('--dy', '-60px');
-    vegEl.style.setProperty('--ex', (potRect.left + potRect.width/2 - containerRect.left - parseFloat(vegEl.style.left)) + 'px');
+    vegEl.style.setProperty('--ex', (potRect.left + potRect.width / 2 - containerRect.left - parseFloat(vegEl.style.left)) + 'px');
     vegEl.style.setProperty('--ey', (potRect.top - containerRect.top + 5 - parseFloat(vegEl.style.top)) + 'px');
     document.getElementById('game-container').appendChild(vegEl);
     vegEl.addEventListener('animationend', () => vegEl.remove());
@@ -113,18 +136,27 @@ function triggerRocket() {
     if (!pot) return;
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
-    const startX = potRect.left + potRect.width/2 - containerRect.left;
-    const startY = potRect.top + potRect.height/2 - containerRect.top;
-    const rocket = document.createElement('div'); rocket.className = 'rocket'; rocket.textContent = '🚀';
-    rocket.style.left = startX + 'px'; rocket.style.top = startY + 'px';
+    const startX = potRect.left + potRect.width / 2 - containerRect.left;
+    const startY = potRect.top + potRect.height / 2 - containerRect.top;
+    const rocket = document.createElement('div');
+    rocket.className = 'rocket';
+    rocket.textContent = '🚀';
+    rocket.style.left = startX + 'px';
+    rocket.style.top = startY + 'px';
     document.getElementById('game-container').appendChild(rocket);
     rocket.addEventListener('animationend', () => {
         rocket.remove();
-        for (let i = 0; i < 12; i++) {
-            const spark = document.createElement('div'); spark.className = 'spark'; spark.textContent = '✨';
-            spark.style.left = startX + 'px'; spark.style.top = startY + 'px';
-            spark.style.setProperty('--sx', (Math.random() - 0.5) * 150 + 'px');
-            spark.style.setProperty('--sy', (Math.random() - 0.5) * 150 + 'px');
+        for (let i = 0; i < 15; i++) {
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            const sparkEmojis = ['✨', '💫', '🌟', '⭐', '💥'];
+            spark.textContent = sparkEmojis[Math.floor(Math.random() * sparkEmojis.length)];
+            spark.style.left = startX + 'px';
+            spark.style.top = startY + 'px';
+            spark.style.setProperty('--sx', (Math.random() - 0.5) * 200 + 'px');
+            spark.style.setProperty('--sy', (Math.random() - 0.5) * 200 + 'px');
+            spark.style.fontSize = (1 + Math.random() * 2) + 'rem';
+            spark.style.animationDuration = (0.6 + Math.random() * 0.8) + 's';
             document.getElementById('game-container').appendChild(spark);
             spark.addEventListener('animationend', () => spark.remove());
         }
@@ -143,7 +175,7 @@ function startGame() {
     window.spawnInterval = setInterval(() => {
         if (!window.gameActive) return;
         spawnAll();
-        interval = Math.max(450, interval-80);
+        interval = Math.max(450, interval - 80);
         clearInterval(window.spawnInterval);
         window.spawnInterval = setInterval(() => { if (window.gameActive) spawnAll(); }, interval);
     }, interval);
@@ -202,7 +234,7 @@ function startRecovery() {
     }, 1000);
 }
 
-// Фоны
+// ================== ФОНЫ ==================
 const views = ['veggie', 'smile', 'matrix'];
 let currentViewIndex = 0;
 window.cycleView = function() {
@@ -228,13 +260,13 @@ function startMatrix() {
     matrixCanvas.width = matrixCanvas.parentElement.clientWidth;
     matrixCanvas.height = matrixCanvas.parentElement.clientHeight;
     matrixParticles = [];
-    for (let i=0; i<150; i++) matrixParticles.push({ x: Math.random()*matrixCanvas.width, y: Math.random()*matrixCanvas.height, speed: 1+Math.random()*2, char: String.fromCharCode(0x30A0+Math.random()*96), opacity: Math.random() });
+    for (let i = 0; i < 150; i++) matrixParticles.push({ x: Math.random() * matrixCanvas.width, y: Math.random() * matrixCanvas.height, speed: 1 + Math.random() * 2, char: String.fromCharCode(0x30A0 + Math.random() * 96), opacity: Math.random() });
 }
 function drawMatrix() {
     if (!matrixCtx || views[currentViewIndex] !== 'matrix') return;
-    matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0,0,matrixCanvas.width,matrixCanvas.height);
+    matrixCtx.fillStyle = 'rgba(0,0,0,0.05)'; matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
     matrixCtx.fillStyle = '#0F0'; matrixCtx.font = '14px monospace';
-    matrixParticles.forEach(p => { matrixCtx.fillText(p.char,p.x,p.y); p.y -= p.speed; if(p.y<-20){ p.y=matrixCanvas.height+20; p.x=Math.random()*matrixCanvas.width; } });
+    matrixParticles.forEach(p => { matrixCtx.fillText(p.char, p.x, p.y); p.y -= p.speed; if (p.y < -20) { p.y = matrixCanvas.height + 20; p.x = Math.random() * matrixCanvas.width; } });
 }
 if (matrixCanvas) { startMatrix(); setInterval(drawMatrix, 50); window.addEventListener('resize', startMatrix); }
 
@@ -248,28 +280,27 @@ function startSmileAnimation() {
     smileCanvas.height = smileCanvas.parentElement.clientHeight;
     smileParticles = [];
     for (let i = 0; i < 25; i++) {
-        smileParticles.push({ x: Math.random()*smileCanvas.width, y: smileCanvas.height+Math.random()*60, speed: 0.5+Math.random()*1.5, size: 16+Math.random()*14, emoji: emojis[Math.floor(Math.random()*emojis.length)], opacity: 1, popping: false });
+        smileParticles.push({ x: Math.random() * smileCanvas.width, y: smileCanvas.height + Math.random() * 60, speed: 0.5 + Math.random() * 1.5, size: 16 + Math.random() * 14, emoji: emojis[Math.floor(Math.random() * emojis.length)], opacity: 1, popping: false });
     }
     if (!window.smileInterval) window.smileInterval = setInterval(drawSmile, 50);
 }
 function drawSmile() {
     if (!smileCtx || views[currentViewIndex] !== 'smile') return;
-    smileCtx.clearRect(0,0,smileCanvas.width,smileCanvas.height);
+    smileCtx.clearRect(0, 0, smileCanvas.width, smileCanvas.height);
     smileParticles.forEach(p => {
-        if (!p.popping) { p.y -= p.speed; if(p.y<-20){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; } }
+        if (!p.popping) { p.y -= p.speed; if (p.y < -20) { p.y = smileCanvas.height + 20; p.x = Math.random() * smileCanvas.width; } }
         smileCtx.font = `${p.size}px Arial`;
         smileCtx.fillStyle = `rgba(255,215,0,${p.opacity})`;
         smileCtx.fillText(p.emoji, p.x, p.y);
-        if (p.popping) { p.opacity -= 0.02; p.size += 1; if(p.opacity<=0){ p.y=smileCanvas.height+20; p.x=Math.random()*smileCanvas.width; p.opacity=1; p.size=16+Math.random()*14; p.popping=false; } }
+        if (p.popping) { p.opacity -= 0.02; p.size += 1; if (p.opacity <= 0) { p.y = smileCanvas.height + 20; p.x = Math.random() * smileCanvas.width; p.opacity = 1; p.size = 16 + Math.random() * 14; p.popping = false; } }
     });
-    if (Math.random() < 0.02) { const r = smileParticles[Math.floor(Math.random()*smileParticles.length)]; if(r&&!r.popping) r.popping = true; }
+    if (Math.random() < 0.02) { const r = smileParticles[Math.floor(Math.random() * smileParticles.length)]; if (r && !r.popping) r.popping = true; }
 }
 window.addEventListener('resize', startSmileAnimation);
 
 const veggieCanvas = document.getElementById('veggieCanvas');
 const veggieCtx = veggieCanvas ? veggieCanvas.getContext('2d') : null;
 let veggieParticles = [];
-// Добавлены символы криптовалют
 const veggieEmojis = ['🥬','🧅','🥔','🥕','🫑','🌿','🫘','🧄','🍅','₿','Ξ','Ł','$','♦'];
 function startVeggieAnimation() {
     if (!veggieCanvas) return;
@@ -277,13 +308,13 @@ function startVeggieAnimation() {
     veggieCanvas.height = veggieCanvas.parentElement.clientHeight;
     veggieParticles = [];
     for (let i = 0; i < 40; i++) {
-        veggieParticles.push({ x: Math.random()*veggieCanvas.width, y: veggieCanvas.height+Math.random()*60, speed: 0.8+Math.random()*2, size: 16+Math.random()*14, emoji: veggieEmojis[Math.floor(Math.random()*veggieEmojis.length)], opacity: 1 });
+        veggieParticles.push({ x: Math.random() * veggieCanvas.width, y: veggieCanvas.height + Math.random() * 60, speed: 0.8 + Math.random() * 2, size: 16 + Math.random() * 14, emoji: veggieEmojis[Math.floor(Math.random() * veggieEmojis.length)], opacity: 1 });
     }
     if (!window.veggieInterval) window.veggieInterval = setInterval(drawVeggie, 50);
 }
 function drawVeggie() {
     if (!veggieCtx || views[currentViewIndex] !== 'veggie') return;
-    veggieCtx.clearRect(0,0,veggieCanvas.width,veggieCanvas.height);
+    veggieCtx.clearRect(0, 0, veggieCanvas.width, veggieCanvas.height);
     veggieParticles.forEach(p => {
         p.y -= p.speed;
         if (p.y < -20) { p.y = veggieCanvas.height + 20; p.x = Math.random() * veggieCanvas.width; }
@@ -294,7 +325,7 @@ function drawVeggie() {
 }
 window.addEventListener('resize', startVeggieAnimation);
 
-// ====== ПОДКЛЮЧАЕМ ОБРАБОТЧИКИ ИГРЫ ======
+// ====== ПОДКЛЮЧАЕМ ОБРАБОТЧИКИ ======
 function attachGameEvents() {
     const startBtn = document.getElementById('start-btn');
     const board = document.getElementById('board');
