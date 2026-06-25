@@ -118,3 +118,6 @@
 .club-cloud h3{font-size:1.5rem;color:#FFD700;margin-bottom:10px}
 .club-cloud p{margin:5px 0}
 .club-cloud button{margin:5px;padding:10px 15px;border:none;border-radius:12px;font-weight:bold;background:linear-gradient(180deg,#FFD700,#FFA500);color:#000;cursor:pointer}
+#shop-screen{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:80px!important}
+#wallet-screen{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+#admin-tab-content{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
