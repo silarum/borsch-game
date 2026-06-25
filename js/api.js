@@ -34,34 +34,25 @@ async function loadUserData(userId) {
         if (response.ok) {
             const users = await response.json();
             if (users.length > 0) {
-                return users[0];
+                return users[0]; // Пользователь уже существует — возвращаем данные
             }
         }
-        // Новый игрок — создаём с бонусом 1 SRUM
-        await supabaseRequest('POST', 'users', {
+        // Новый игрок — создаём с приветственным бонусом 1 SRUM
+        const newUser = {
             id: userId,
             nickname: 'Майнер',
             rum: 0,
-            srum: 1,  // <-- СТАРТОВЫЙ БОНУС 1 SRUM
+            srum: 1,           // Приветственный бонус
             ton: 0,
             usdt: 0,
             status: 'solo',
             mining_stage: 1,
             games: 3,
-            bonus_claimed: true  // Сразу помечаем, чтобы не начислять повторно
-        });
-        return {
-            id: userId,
-            nickname: 'Майнер',
-            rum: 0,
-            srum: 1,  // <-- СТАРТОВЫЙ БОНУС
-            ton: 0,
-            usdt: 0,
-            status: 'solo',
-            mining_stage: 1,
-            games: 3,
-            bonus_claimed: true
+            bonus_claimed: false, // Ещё не получил бонус за подписки
+            created_at: new Date().toISOString()
         };
+        await supabaseRequest('POST', 'users', newUser);
+        return newUser;
     } catch (e) {
         console.error('Ошибка загрузки из Supabase:', e);
         return null;
