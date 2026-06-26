@@ -34,14 +34,14 @@ quickDuelCoin.addEventListener('click', () => {
     showMiningModal();
 });
 
-// --- Окно покупки SRUM (вместо старого showSRUMShopModal) ---
+// --- Окно добычи SRUM ---
 function showBuySRUMModal() {
     const modal = document.createElement('div');
     modal.className = 'quick-duel-modal';
     modal.innerHTML = `
         <div class="quick-duel-box" style="border: none; background: transparent; padding: 0;">
             <div class="pool-cloud" style="background: radial-gradient(circle at 20% 20%, #1a3a1a, #0d1f0d);">
-                <h2>🛒 Купить SRUM</h2>
+                <h2>⛏️ Добыть SRUM</h2>
                 <p style="color:#ccc; margin-bottom:15px;">Введите сумму и выберите валюту</p>
                 
                 <input type="number" id="buy-srum-amount" placeholder="Сумма SRUM" min="1" step="1" 
@@ -51,11 +51,11 @@ function showBuySRUMModal() {
                 <div style="display:flex; gap:10px; margin-top:15px;">
                     <button id="buy-srum-ton-btn" class="buy-srum-btn" disabled
                             style="background:linear-gradient(180deg,#2196F3,#1565C0);">
-                        ⚡ Купить за<br><span id="ton-price-preview">0.00</span> TON
+                        ⚡ Добыть за<br><span id="ton-price-preview">0.00</span> TON
                     </button>
                     <button id="buy-srum-usdt-btn" class="buy-srum-btn" disabled
                             style="background:linear-gradient(180deg,#4CAF50,#2E7D32);">
-                        💵 Купить за<br><span id="usdt-price-preview">0.00</span> USDT
+                        💵 Добыть за<br><span id="usdt-price-preview">0.00</span> USDT
                     </button>
                 </div>
                 
@@ -67,7 +67,6 @@ function showBuySRUMModal() {
     `;
     document.getElementById('game-container').appendChild(modal);
 
-    // Стили кнопок
     if (!document.getElementById('buy-srum-style')) {
         const style = document.createElement('style');
         style.id = 'buy-srum-style';
@@ -88,81 +87,52 @@ function showBuySRUMModal() {
     const usdtPrice = document.getElementById('usdt-price-preview');
     const tonBtn = document.getElementById('buy-srum-ton-btn');
     const usdtBtn = document.getElementById('buy-srum-usdt-btn');
-
-    // Курсы покупки (сколько платим за 1 SRUM)
     const BUY_RATE = { TON: 0.5, USDT: 1 };
 
     amountInput.addEventListener('input', () => {
         const amount = parseFloat(amountInput.value) || 0;
         const valid = amount > 0;
-        
         tonPrice.textContent = (amount * BUY_RATE.TON).toFixed(2);
         usdtPrice.textContent = (amount * BUY_RATE.USDT).toFixed(2);
-        
         tonBtn.disabled = !valid;
         usdtBtn.disabled = !valid;
     });
 
-    // Кнопка «Купить за TON»
     tonBtn.addEventListener('click', async () => {
         const amount = parseFloat(amountInput.value) || 0;
         if (amount <= 0) return;
         modal.remove();
-        
         const tonNeeded = amount * BUY_RATE.TON;
-        if (!currentWalletAddress) {
-            alert('Подключите TON кошелёк (раздел Кошелёк)');
-            return;
-        }
-        if (ton < tonNeeded) {
-            alert(`Недостаточно TON. Нужно ${tonNeeded.toFixed(2)} TON, у вас ${ton.toFixed(2)} TON`);
-            return;
-        }
-        if (!confirm(`Купить ${amount} SRUM за ${tonNeeded.toFixed(2)} TON?`)) return;
-        
+        if (!currentWalletAddress) { alert('Подключите TON кошелёк (раздел Кошелёк)'); return; }
+        if (ton < tonNeeded) { alert(`Недостаточно TON. Нужно ${tonNeeded.toFixed(2)} TON, у вас ${ton.toFixed(2)} TON`); return; }
+        if (!confirm(`Добыть ${amount} SRUM за ${tonNeeded.toFixed(2)} TON?`)) return;
         ton -= tonNeeded;
         srum += amount;
         updateUI();
         saveAll();
-        if (typeof saveUserData === 'function' && userId) {
-            saveUserData(userId, { ton, srum }).catch(() => {});
-        }
-        alert(`✅ Куплено ${amount} SRUM!`);
-        // Если была pending-сессия — продолжаем
-        if (pendingMining) {
-            showMiningModal();
-        }
+        if (typeof saveUserData === 'function' && userId) { saveUserData(userId, { ton, srum }).catch(() => {}); }
+        alert(`✅ Добыто ${amount} SRUM!`);
+        if (pendingMining) { showMiningModal(); }
     });
 
-    // Кнопка «Купить за USDT»
     usdtBtn.addEventListener('click', async () => {
         const amount = parseFloat(amountInput.value) || 0;
         if (amount <= 0) return;
         modal.remove();
-        
         const usdtNeeded = amount * BUY_RATE.USDT;
-        if (usdt < usdtNeeded) {
-            alert(`Недостаточно USDT. Нужно ${usdtNeeded.toFixed(2)} USDT, у вас ${usdt.toFixed(2)} USDT`);
-            return;
-        }
-        if (!confirm(`Купить ${amount} SRUM за ${usdtNeeded.toFixed(2)} USDT?`)) return;
-        
+        if (usdt < usdtNeeded) { alert(`Недостаточно USDT. Нужно ${usdtNeeded.toFixed(2)} USDT, у вас ${usdt.toFixed(2)} USDT`); return; }
+        if (!confirm(`Добыть ${amount} SRUM за ${usdtNeeded.toFixed(2)} USDT?`)) return;
         usdt -= usdtNeeded;
         srum += amount;
         updateUI();
         saveAll();
-        if (typeof saveUserData === 'function' && userId) {
-            saveUserData(userId, { usdt, srum }).catch(() => {});
-        }
-        alert(`✅ Куплено ${amount} SRUM!`);
-        if (pendingMining) {
-            showMiningModal();
-        }
+        if (typeof saveUserData === 'function' && userId) { saveUserData(userId, { usdt, srum }).catch(() => {}); }
+        alert(`✅ Добыто ${amount} SRUM!`);
+        if (pendingMining) { showMiningModal(); }
     });
 
     document.getElementById('cancel-buy-srum').addEventListener('click', () => {
         modal.remove();
-        // Возвращаем SRUM, если они были зарезервированы
         if (pendingMining) {
             if (pendingMining.currency === 'SRUM') srum += pendingMining.threshold;
             else rum += pendingMining.threshold;
@@ -216,7 +186,7 @@ function showMiningModal() {
         miningThreshold = parseFloat(slider.value);
         if (miningCurrency === 'SRUM' && srum < miningThreshold) {
             modal.remove();
-            showBuySRUMModal(); // НОВОЕ: открываем окно покупки вместо перехода в магазин
+            showBuySRUMModal();
             return;
         }
         if (miningCurrency === 'RUM' && rum < miningThreshold) return alert('Недостаточно RUM');
@@ -267,7 +237,7 @@ function showTournamentModal() {
         miningThreshold = parseFloat(slider.value);
         if (srum < miningThreshold) {
             tourModal.remove();
-            showBuySRUMModal(); // НОВОЕ
+            showBuySRUMModal();
             return;
         }
         srum -= miningThreshold;
@@ -305,12 +275,7 @@ function startSearch(mode = 'mining') {
     fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/matchmaking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            user_id: userId,
-            threshold: miningThreshold,
-            stage: miningStage,
-            currency: miningCurrency
-        })
+        body: JSON.stringify({ user_id: userId, threshold: miningThreshold, stage: miningStage, currency: miningCurrency })
     }).then(res => res.json()).then(data => {
         if (cancelled) return;
         overlay.remove();
@@ -369,8 +334,7 @@ function startSearch(mode = 'mining') {
 
 // --- Запуск дуэли ---
 function startDuel() {
-    duelActive = true;
-    gameActive = false;
+    duelActive = true; gameActive = false;
     clearInterval(gameTimer); clearInterval(spawnInterval);
     board.removeEventListener('touchstart', handleTouchStart);
     board.removeEventListener('touchmove', preventDefaultMove);
@@ -399,8 +363,7 @@ function duelTouchHandler(e) {
         if (hole) {
             const num = [...holes].indexOf(hole);
             if (num !== -1 && currentVeg[num]) {
-                const isGood = currentVeg[num].type === 'good';
-                if (isGood) { duelPlayerScore++; flyVegToPot(hole, hole.querySelector('.veg').textContent); }
+                if (currentVeg[num].type === 'good') { duelPlayerScore++; flyVegToPot(hole, hole.querySelector('.veg').textContent); }
                 else { duelPlayerScore = Math.max(0, duelPlayerScore - 2); }
                 delete currentVeg[num]; hole.innerHTML = ''; updateDuelScore();
             }
@@ -427,11 +390,7 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
         const res = await fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/update-balance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: userId,
-                type: 'pvp_result',
-                data: { win, threshold: miningThreshold, stage: miningStage, currency: miningCurrency }
-            })
+            body: JSON.stringify({ user_id: userId, type: 'pvp_result', data: { win, threshold: miningThreshold, stage: miningStage, currency: miningCurrency } })
         });
         if (res.ok) {
             const data = await res.json();
@@ -532,12 +491,7 @@ function renderArena() {
 
     if (currentArenaTab === 'mining') {
         const slider = document.getElementById('threshold-slider-arena');
-        if (slider) {
-            slider.addEventListener('input', function() {
-                miningThreshold = parseFloat(this.value);
-                document.getElementById('arena-stake').textContent = miningThreshold.toFixed(1);
-            });
-        }
+        if (slider) slider.addEventListener('input', function() { miningThreshold = parseFloat(this.value); document.getElementById('arena-stake').textContent = miningThreshold.toFixed(1); });
         document.getElementById('start-mining-btn')?.addEventListener('click', ()=>{
             if (srum < miningThreshold) { showBuySRUMModal(); return; }
             srum -= miningThreshold; miningCurrency = 'SRUM';
@@ -553,106 +507,76 @@ function renderArena() {
     renderPausedSessions();
 }
 
-// ================== БАНДА (КОМАНДНЫЙ PVP) ==================
+// ================== БАНДА ==================
 function renderBandTab() {
     if (!bandData) {
         return `<div style="text-align:center;">
             <h2>🐺 Командный майнинг</h2>
-            <div class="info-card">
-                <p>Собери банду из 5 бойцов и сразись с другой бандой!</p>
-                <p>💰 Взнос: ${miningThreshold.toFixed(1)} SRUM × 5 = ${(miningThreshold * 5).toFixed(1)} SRUM</p>
-                <p>🏆 Приз: ${(miningThreshold * 4).toFixed(1)} USDT на банду</p>
-            </div>
+            <div class="info-card"><p>Собери банду из 5 бойцов и сразись с другой бандой!</p>
+            <p>💰 Взнос: ${miningThreshold.toFixed(1)} SRUM × 5 = ${(miningThreshold*5).toFixed(1)} SRUM</p>
+            <p>🏆 Приз: ${(miningThreshold*4).toFixed(1)} USDT</p></div>
             <button class="shop-btn" id="create-band-btn">🐺 Создать банду</button>
-            <button class="shop-btn" id="invite-band-btn" style="background:linear-gradient(180deg,#8e44ad,#6c3483);">👥 Пригласить бойцов</button>
-        </div>`;
+            <button class="shop-btn" id="invite-band-btn" style="background:linear-gradient(180deg,#8e44ad,#6c3483);">👥 Пригласить</button></div>`;
     } else {
         let fightersHtml = '';
-        bandData.fighters.forEach((f, i) => {
-            fightersHtml += `<div style="background:rgba(255,255,255,0.05); padding:8px; margin:4px 0; border-radius:6px;">${i === 0 ? '👑' : '⚔️'} ${f}</div>`;
-        });
-        return `<div style="text-align:center;">
-            <h2>🐺 ${bandData.name}</h2>
-            <p>Порог: <b>${bandData.threshold.toFixed(1)} SRUM</b> × ${bandData.fighters.length}</p>
+        bandData.fighters.forEach((f, i) => { fightersHtml += `<div style="background:rgba(255,255,255,0.05); padding:8px; margin:4px 0; border-radius:6px;">${i===0?'👑':'⚔️'} ${f}</div>`; });
+        return `<div style="text-align:center;"><h2>🐺 ${bandData.name}</h2><p>Порог: <b>${bandData.threshold.toFixed(1)} SRUM</b> × ${bandData.fighters.length}</p>
             <div style="max-height:200px; overflow-y:auto; margin:10px 0;">${fightersHtml}</div>
-            <button class="shop-btn" id="start-band-match" ${bandData.fighters.length < 5 ? 'disabled' : ''}>⚔️ В бой!</button>
+            <button class="shop-btn" id="start-band-match" ${bandData.fighters.length<5?'disabled':''}>⚔️ В бой!</button>
             <button class="shop-btn" id="invite-band-btn" style="background:linear-gradient(180deg,#8e44ad,#6c3483);">👥 Пригласить</button>
             <button class="shop-btn" id="leave-band-btn" style="background:linear-gradient(180deg,#e74c3c,#c0392b);">🚪 Покинуть</button>
-            <button class="shop-btn" id="disband-btn" style="background:linear-gradient(180deg,#95a5a6,#7f8c8d);">🗑️ Распустить</button>
-        </div>`;
+            <button class="shop-btn" id="disband-btn" style="background:linear-gradient(180deg,#95a5a6,#7f8c8d);">🗑️ Распустить</button></div>`;
     }
 }
 
 arenaContent.addEventListener('click', function(e) {
     const target = e.target;
-
     if (target.id === 'create-band-btn') {
-        const name = prompt('Название банды:');
-        if (!name) return;
-        bandData = { name, threshold: miningThreshold, fighters: [userNickname || 'Ты'], boss: userId };
-        alert(`Банда "${name}" создана! Пригласите ещё 4 бойцов.`);
-        renderArena();
+        const name = prompt('Название банды:'); if (!name) return;
+        bandData = { name, threshold: miningThreshold, fighters: [userNickname||'Ты'], boss: userId };
+        alert(`Банда "${name}" создана!`); renderArena();
     }
-
     if (target.id === 'invite-band-btn') {
         if (!bandData) return;
-        const choice = prompt('Пригласить:\n1. По никнейму\n2. Из клуба\n3. Из рефералов\nВведи 1, 2, 3 или ник:');
+        const choice = prompt('Пригласить:\n1. По никнейму\n2. Из клуба\n3. Из рефералов');
         if (!choice) return;
         if (choice === '2') {
             if (!myClubId) return alert('Вы не в клубе');
             const club = clubs.find(c => c.id == myClubId);
             const members = club?.members?.filter(m => m !== userNickname && !bandData.fighters.includes(m)) || [];
-            if (!members.length) return alert('Некого приглашать');
+            if (!members.length) return alert('Некого');
             const name = prompt(`Кого?\n${members.join(', ')}`);
             if (name && members.includes(name)) { bandData.fighters.push(name); alert(`${name} в банде!`); renderArena(); }
         } else if (choice === '3') {
             const refs = referrals.filter(r => !bandData.fighters.includes(r.code));
-            if (!refs.length) return alert('Некого приглашать');
-            const name = prompt(`Кого?\n${refs.map(r => r.code).join(', ')}`);
-            if (name && refs.find(r => r.code === name)) { bandData.fighters.push(name); alert(`${name} в банде!`); renderArena(); }
+            if (!refs.length) return alert('Некого');
+            const name = prompt(`Кого?\n${refs.map(r=>r.code).join(', ')}`);
+            if (name && refs.find(r=>r.code===name)) { bandData.fighters.push(name); alert(`${name} в банде!`); renderArena(); }
         } else {
             if (bandData.fighters.includes(choice)) return alert('Уже в банде');
-            bandData.fighters.push(choice);
-            alert(`${choice} в банде!`);
-            renderArena();
+            bandData.fighters.push(choice); alert(`${choice} в банде!`); renderArena();
         }
     }
-
     if (target.id === 'start-band-match') {
         if (!bandData || bandData.fighters.length < 5) return alert('Нужно 5 бойцов');
         const totalStake = bandData.threshold * bandData.fighters.length;
         if (srum < totalStake) return alert(`Недостаточно SRUM (нужно ${totalStake.toFixed(1)})`);
         if (!confirm(`Взнос ${totalStake.toFixed(1)} SRUM. Начать бой?`)) return;
-        srum -= totalStake;
-        updateUI();
-
-        const overlay = document.createElement('div');
-        overlay.className = 'countdown-overlay';
+        srum -= totalStake; updateUI();
+        const overlay = document.createElement('div'); overlay.className = 'countdown-overlay';
         overlay.innerHTML = '<div style="text-align:center;"><h2>⚔️ Битва банд!</h2><p>Идёт сражение...</p></div>';
         document.getElementById('game-container').appendChild(overlay);
-
         setTimeout(() => {
             overlay.remove();
             const win = Math.random() > 0.4;
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'result-overlay';
-            if (win) {
-                const reward = bandData.threshold * 4;
-                usdt += reward;
-                resultDiv.innerHTML = `<h2>🏆 Победа банды!</h2><p>+${reward.toFixed(2)} USDT</p><p>Бойцы: ${bandData.fighters.join(', ')}</p><button id="close-band-result">ОК</button>`;
-            } else {
-                resultDiv.innerHTML = `<h2>💔 Поражение</h2><p>Взнос потерян.</p><p>Бойцы: ${bandData.fighters.join(', ')}</p><button id="close-band-result">ОК</button>`;
-            }
+            const resultDiv = document.createElement('div'); resultDiv.className = 'result-overlay';
+            if (win) { const reward = bandData.threshold * 4; usdt += reward;
+                resultDiv.innerHTML = `<h2>🏆 Победа!</h2><p>+${reward.toFixed(2)} USDT</p><button id="close-band-result">ОК</button>`; }
+            else { resultDiv.innerHTML = `<h2>💔 Поражение</h2><p>Взнос потерян.</p><button id="close-band-result">ОК</button>`; }
             document.getElementById('game-container').appendChild(resultDiv);
-            document.getElementById('close-band-result').addEventListener('click', () => {
-                resultDiv.remove();
-                bandData = null;
-                updateUI();
-                renderArena();
-            });
+            document.getElementById('close-band-result').addEventListener('click', ()=>{ resultDiv.remove(); bandData = null; updateUI(); renderArena(); });
         }, 3000);
     }
-
     if (target.id === 'leave-band-btn') {
         if (!bandData) return;
         bandData.fighters = bandData.fighters.filter(f => f !== userNickname && f !== 'Ты');
@@ -660,18 +584,12 @@ arenaContent.addEventListener('click', function(e) {
         else alert('Вы покинули банду.');
         renderArena();
     }
-
-    if (target.id === 'disband-btn') {
-        if (!bandData) return;
-        if (confirm('Распустить банду?')) { bandData = null; renderArena(); }
-    }
+    if (target.id === 'disband-btn') { if (!bandData) return; if (confirm('Распустить?')) { bandData = null; renderArena(); } }
 });
 
 arenaTabs.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
         arenaTabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentArenaTab = btn.dataset.tab;
-        renderArena();
+        btn.classList.add('active'); currentArenaTab = btn.dataset.tab; renderArena();
     });
 });
