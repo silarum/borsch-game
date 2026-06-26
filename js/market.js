@@ -15,35 +15,112 @@ const defaultShopItems = [
 let shopItems = JSON.parse(localStorage.getItem('shopItems')) || defaultShopItems;
 if (!localStorage.getItem('shopItems')) localStorage.setItem('shopItems', JSON.stringify(defaultShopItems));
 
+// Стили магазина (добавляем один раз)
+function injectShopStyles() {
+    if (document.getElementById('shop-custom-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'shop-custom-styles';
+    style.textContent = `
+        .shop-screen-inner { padding:10px 10px 80px; width:100%; max-width:420px; margin:0 auto; }
+        .shop-grid-new { display:flex; flex-direction:column; gap:12px; }
+        .shop-card-new { 
+            background:linear-gradient(145deg, #1a1a3e 0%, #252550 100%);
+            border:1px solid rgba(255,215,0,0.15);
+            border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.3); transition:all 0.3s ease;
+            position:relative; overflow:hidden;
+        }
+        .shop-card-new::before {
+            content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+            background:radial-gradient(circle, rgba(255,215,0,0.03) 0%, transparent 70%);
+            pointer-events:none;
+        }
+        .shop-card-new:active { transform:scale(0.98); border-color:rgba(255,215,0,0.4); }
+        .shop-card-icon { 
+            font-size:2.5rem; min-width:50px; text-align:center;
+            filter:drop-shadow(0 0 8px rgba(255,215,0,0.4));
+        }
+        .shop-card-info { flex:1; }
+        .shop-card-info .name { font-weight:bold; font-size:0.9rem; color:#FFD700; margin-bottom:2px; }
+        .shop-card-info .desc { font-size:0.65rem; color:#888; margin-bottom:4px; line-height:1.3; }
+        .shop-card-info .price { font-size:0.95rem; font-weight:900; }
+        .shop-card-info .price .val { color:#fff; }
+        .shop-card-info .price .cur { font-size:0.7rem; color:#aaa; margin-left:3px; }
+        .shop-card-btn {
+            padding:10px 16px; border:none; border-radius:10px; font-weight:bold; font-size:0.8rem;
+            cursor:pointer; min-width:70px; text-align:center; transition:all 0.2s;
+            background:linear-gradient(180deg,#FFD700,#FFA500); color:#000;
+            box-shadow:0 4px 0 #b8860b, 0 0 12px rgba(255,215,0,0.3);
+        }
+        .shop-card-btn:active { transform:translateY(2px); box-shadow:0 1px 0 #b8860b, 0 0 6px rgba(255,215,0,0.3); }
+        .shop-card-btn:disabled { background:#555; box-shadow:none; color:#999; }
+        .shop-card-badge {
+            position:absolute; top:8px; right:8px; font-size:0.6rem; padding:2px 8px; border-radius:6px;
+            font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;
+        }
+        .badge-hot { background:#e74c3c; color:white; }
+        .badge-new { background:#27ae60; color:white; }
+        .badge-pop { background:#8e44ad; color:white; }
+    `;
+    document.head.appendChild(style);
+}
+
 function renderShop() {
-    const grid = document.getElementById('shop-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
+    injectShopStyles();
 
-    shopItems.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'shop-card';
+    const screen = document.getElementById('shop-screen');
+    if (!screen) return;
+    
+    // Очищаем экран и создаём новую структуру
+    const backBtn = screen.querySelector('.back-btn');
+    const title = screen.querySelector('h2');
+    screen.innerHTML = '';
+    if (backBtn) screen.appendChild(backBtn);
+    if (title) screen.appendChild(title);
 
+    const inner = document.createElement('div');
+    inner.className = 'shop-screen-inner';
+    
+    const grid = document.createElement('div');
+    grid.className = 'shop-grid-new';
+
+    shopItems.forEach((item, index) => {
         let priceDisplay = '';
+        let priceColor = '#fff';
         switch (item.currency) {
-            case 'TON':   priceDisplay = `⚡ ${item.price} TON`; break;
-            case 'STARS': priceDisplay = `⭐ ${item.price} Stars`; break;
-            case 'RUM':   priceDisplay = `🪙 ${item.price.toLocaleString()} RUM`; break;
-            case 'SRUM':  priceDisplay = `💎 ${item.price} SRUM`; break;
-            default:      priceDisplay = `${item.price} ${item.currency}`;
+            case 'TON':   priceDisplay = `${item.price} <span class="cur">TON</span>`; priceColor = '#2196F3'; break;
+            case 'STARS': priceDisplay = `${item.price} <span class="cur">Stars</span>`; priceColor = '#FFD700'; break;
+            case 'RUM':   priceDisplay = `${item.price.toLocaleString()} <span class="cur">RUM</span>`; priceColor = '#4CAF50'; break;
+            case 'SRUM':  priceDisplay = `${item.price} <span class="cur">SRUM</span>`; priceColor = '#FFD700'; break;
+            default:      priceDisplay = `${item.price} <span class="cur">${item.currency}</span>`;
         }
 
+        // Бейджи для товаров
+        let badge = '';
+        if (index < 3) badge = '<span class="shop-card-badge badge-hot">ХИТ</span>';
+        else if (index === 8) badge = '<span class="shop-card-badge badge-new">NEW</span>';
+        else if (index >= 4 && index <= 6) badge = '<span class="shop-card-badge badge-pop">ТОП</span>';
+
+        const card = document.createElement('div');
+        card.className = 'shop-card-new';
         card.innerHTML = `
-            <div class="icon">${item.icon}</div>
-            <div class="name">${item.name}</div>
-            <div class="price">${priceDisplay}</div>
-            <div style="font-size:0.7rem;color:#aaa;margin:4px 0;">${item.description}</div>
-            <button class="buy-btn" data-id="${item.id}">Обменять</button>
+            ${badge}
+            <div class="shop-card-icon">${item.icon}</div>
+            <div class="shop-card-info">
+                <div class="name">${item.name}</div>
+                <div class="desc">${item.description}</div>
+                <div class="price"><span class="val" style="color:${priceColor}">${priceDisplay}</span></div>
+            </div>
+            <button class="shop-card-btn" data-id="${item.id}">Обменять</button>
         `;
         grid.appendChild(card);
     });
 
-    document.querySelectorAll('.buy-btn').forEach(btn => {
+    inner.appendChild(grid);
+    screen.appendChild(inner);
+
+    // Обработчики кнопок
+    screen.querySelectorAll('.shop-card-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const id = parseInt(e.target.dataset.id);
             const item = shopItems.find(i => i.id === id);
@@ -167,8 +244,11 @@ async function buyWithStars(amount) {
     });
 }
 
+// Наблюдатель за открытием экрана магазина
 const shopScreenObserver = new MutationObserver(() => {
-    if (document.getElementById('shop-screen').classList.contains('active')) renderShop();
+    if (document.getElementById('shop-screen').classList.contains('active')) {
+        renderShop();
+    }
 });
 shopScreenObserver.observe(document.getElementById('shop-screen'), { attributes: true });
 if (document.getElementById('shop-screen').classList.contains('active')) renderShop();
