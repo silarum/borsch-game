@@ -37,7 +37,7 @@ async function loadUserData(userId) {
                 return users[0];
             }
         }
-        // Новый игрок — приветственный бонус 1 SRUM
+        // Новый игрок — приветственный бонус 1 SRUM + флаги
         const newUser = {
             id: userId,
             nickname: 'Майнер',
@@ -45,10 +45,13 @@ async function loadUserData(userId) {
             srum: 1,
             ton: 0,
             usdt: 0,
+            invest: 0,
             status: 'solo',
             mining_stage: 1,
             games: 3,
             bonus_claimed: false,
+            channel_bonus: false,
+            group_bonus: false,
             created_at: new Date().toISOString()
         };
         await supabaseRequest('POST', 'users', newUser);
