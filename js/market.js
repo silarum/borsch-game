@@ -7,9 +7,9 @@ const defaultShopItems = [
     { id: 4,  name: 'Статус Серебро',     icon: '🥈',       price: 100,   currency: 'SRUM',  description: '+1M RUM, вывод от 200 SRUM' },
     { id: 5,  name: 'Статус Золото',      icon: '🥇',       price: 200,   currency: 'SRUM',  description: '+2M RUM, вывод от 100 SRUM' },
     { id: 6,  name: 'Статус Платина',     icon: '💠',       price: 300,   currency: 'SRUM',  description: '+3M RUM, вывод от 25 SRUM' },
-    { id: 7,  name: 'Обменять TON → SRUM', icon: '⚡→💎',    price: 1,     currency: 'TON',   description: '1 TON = 2 SRUM (через кошелёк)' },
-    { id: 8,  name: 'Обменять RUM → SRUM', icon: '🪙→💎',    price: 10000, currency: 'RUM',   description: '10 000 RUM = 1 SRUM (раз в 24 часа)' },
-    { id: 9,  name: 'Обменять Stars → SRUM', icon: '⭐→💎',   price: 50,    currency: 'STARS', description: '50 Stars = 1 SRUM (оплата картой)' }
+    { id: 7,  name: 'Добыть SRUM за TON', icon: '⚡→💎',    price: 1,     currency: 'TON',   description: '1 TON = 2 SRUM (через кошелёк)' },
+    { id: 8,  name: 'Добыть SRUM за RUM', icon: '🪙→💎',    price: 10000, currency: 'RUM',   description: '10 000 RUM = 1 SRUM (раз в 24 часа)' },
+    { id: 9,  name: 'Добыть SRUM за Stars', icon: '⭐→💎',   price: 50,    currency: 'STARS', description: '50 Stars = 1 SRUM (оплата картой)' }
 ];
 
 let shopItems = JSON.parse(localStorage.getItem('shopItems')) || defaultShopItems;
@@ -46,7 +46,6 @@ function renderShop() {
     const screen = document.getElementById('shop-screen');
     if (!screen) return;
     
-    // Сохраняем кнопку назад и заголовок
     const backBtn = screen.querySelector('.back-btn');
     const title = screen.querySelector('h2');
     screen.innerHTML = '';
@@ -79,7 +78,7 @@ function renderShop() {
                 <div class="sdesc">${item.description}</div>
                 <div class="sprice"><span class="sval" style="color:${priceColor}">${item.price.toLocaleString()} <span class="scur">${item.currency}</span></span></div>
             </div>
-            <button class="shop-btn" data-id="${item.id}">Обменять</button>
+            <button class="shop-btn" data-id="${item.id}">Добыть</button>
         `;
         list.appendChild(card);
     });
@@ -102,7 +101,7 @@ async function purchaseItem(item) {
         if (!currentWalletAddress) { alert('Подключите TON кошелёк в разделе 👛 Кошелёк'); return; }
         const tonNeeded = item.price;
         if (ton < tonNeeded) { alert(`Недостаточно TON. Нужно ${tonNeeded.toFixed(2)} TON`); return; }
-        if (!confirm(`Обменять ${tonNeeded} TON → ${tonNeeded * 2} SRUM?`)) return;
+        if (!confirm(`Добыть ${tonNeeded * 2} SRUM за ${tonNeeded} TON?`)) return;
         const success = await buySRUMWithTON(item.price);
         if (success) { ton -= tonNeeded; srum += tonNeeded * 2; updateUI(); saveAll(); }
         return;
@@ -111,13 +110,13 @@ async function purchaseItem(item) {
     if (item.id === 8) {
         const now = Date.now();
         const lastExchange = parseInt(localStorage.getItem('lastRumExchange') || '0');
-        if (now - lastExchange < 86400000) { alert(`Обмен раз в 24 часа. Осталось ~${Math.ceil((86400000-(now-lastExchange))/3600000)} ч.`); return; }
+        if (now - lastExchange < 86400000) { alert(`Добыча раз в 24 часа. Осталось ~${Math.ceil((86400000-(now-lastExchange))/3600000)} ч.`); return; }
         if (rum < 10000) return alert('Недостаточно RUM');
-        if (!confirm('Обменять 10 000 RUM → 1 SRUM?')) return;
+        if (!confirm('Добыть 1 SRUM за 10 000 RUM?')) return;
         rum -= 10000; srum += 1;
         localStorage.setItem('lastRumExchange', now.toString());
         if (userId && typeof saveUserData === 'function') { saveUserData(userId, { rum, srum }).catch(console.error); }
-        alert('✅ Обменяно!'); updateUI();
+        alert('✅ Добыто!'); updateUI();
         return;
     }
     let balance = item.currency === 'SRUM' ? srum : rum;
@@ -141,7 +140,7 @@ function applyItemEffect(item) {
 async function buyWithStars(amount) {
     if (!window.Telegram || !Telegram.WebApp) { alert('Только в Telegram'); return; }
     Telegram.WebApp.openInvoice({
-        title: 'Обмен Stars → SRUM', description: `${amount} Stars → ${amount} SRUM`,
+        title: 'Добыча SRUM', description: `${amount} Stars → ${amount} SRUM`,
         payload: JSON.stringify({ type: 'buy_srum', amount }), provider_token: '', currency: 'XTR',
         prices: [{ label: 'SRUM', amount }]
     }, async (status) => {
@@ -149,7 +148,7 @@ async function buyWithStars(amount) {
             srum += amount; updateUI(); saveAll();
             if (userId && typeof saveUserData === 'function') { saveUserData(userId, { srum }).catch(console.error); }
             try { await fetch(`${SUPABASE_URL}/rest/v1/transactions`, { method:'POST', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify({ user_id:userId, type:'buy_srum_stars', amount, currency:'STARS', srum_amount:amount, tx_hash:'stars_'+Date.now(), created_at:new Date().toISOString() }) }); } catch(e) {}
-            alert(`✅ ${amount} SRUM!`);
+            alert(`✅ Добыто ${amount} SRUM!`);
         } else if (status === 'failed') { alert('Не прошло'); }
     });
 }
