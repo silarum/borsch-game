@@ -227,10 +227,10 @@ async function doExchange(currency) {
 
     // Обновляем интерфейс
     renderWallet();
-    alert(`✅ Обменяно! ${amount.toFixed(2)} SRUM → ${received.toFixed(currency === 'TON' ? 4 : 2)} ${receivedCurrency}`);
+    alert(`✅ Готово! ${amount.toFixed(2)} SRUM → ${received.toFixed(currency === 'TON' ? 4 : 2)} ${receivedCurrency}`);
 }
 
-// ================== ЗАПРОС ВЫВОДА USDT (СТАРЫЙ МЕТОД, ОСТАВЛЕН) ==================
+// ================== ЗАПРОС ВЫВОДА СРЕДСТВ ==================
 async function requestWithdrawal() {
     if (!currentWalletAddress) {
         alert('Сначала подключите кошелёк TON');
