@@ -11,6 +11,7 @@ var clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
 var pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
 var miningStage = 1, miningCurrency = 'SRUM', miningThreshold = 1;
 var pendingMining = null, currentBot = null, bandData = null;
+var frozenStake = 0; // Замороженная ставка в пуле
 var spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 var officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
@@ -65,6 +66,7 @@ function saveAll() {
     localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
     localStorage.setItem('userTasks', JSON.stringify(userTasks));
     localStorage.setItem('miningStage', miningStage);
+    localStorage.setItem('frozenStake', frozenStake);
     localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
     localStorage.setItem('investProjects', JSON.stringify(investProjects));
     localStorage.setItem('myInvestments', JSON.stringify(myInvestments));
@@ -336,13 +338,13 @@ function initApp() {
                 userNickname = userData.nickname || userNickname;
                 userStatus = userData.status || 'solo';
                 miningStage = userData.mining_stage || 1;
+                frozenStake = parseFloat(userData.frozen_stake) || 0;
                 if (typeof userData.games === 'number' && userData.games >= 0) games = userData.games;
                 if (userData.boost && userData.boost !== 'null') {
                     try { activeBoost = JSON.parse(userData.boost); } catch(e) { activeBoost = null; }
                 }
                 saveAll();
 
-                // Приветственные бонусы за подписки (канал + группа)
                 if (typeof processWelcomeBonus === 'function') {
                     processWelcomeBonus(userId, userData).then(claimed => {
                         if (claimed) {
@@ -380,6 +382,7 @@ function loadFromLocalStorage() {
     const savedNickname = localStorage.getItem('nickname');
     const savedStatus = localStorage.getItem('userStatus');
     const savedStage = parseInt(localStorage.getItem('miningStage'));
+    const savedFrozenStake = parseFloat(localStorage.getItem('frozenStake'));
     const savedBoost = localStorage.getItem('activeBoost');
     if (!isNaN(savedRum)) rum = savedRum;
     if (!isNaN(savedSrum)) srum = savedSrum;
@@ -390,6 +393,7 @@ function loadFromLocalStorage() {
     if (savedNickname) userNickname = savedNickname;
     if (savedStatus) userStatus = savedStatus;
     if (!isNaN(savedStage) && savedStage >= 1 && savedStage <= 5) miningStage = savedStage;
+    if (!isNaN(savedFrozenStake) && savedFrozenStake >= 0) frozenStake = savedFrozenStake;
     if (savedBoost && savedBoost !== 'null') {
         try { activeBoost = JSON.parse(savedBoost); } catch(e) { activeBoost = null; }
     }
@@ -445,7 +449,7 @@ function updateUI() {
     if (typeof updateProfile === 'function') updateProfile();
     saveAll();
     if (typeof saveUserData === 'function' && userId) {
-        saveUserData(userId, { nickname: userNickname, rum, srum, ton, usdt, invest, status: userStatus, mining_stage: miningStage, boost: activeBoost ? JSON.stringify(activeBoost) : null, games }).catch(() => {});
+        saveUserData(userId, { nickname: userNickname, rum, srum, ton, usdt, invest, status: userStatus, mining_stage: miningStage, frozen_stake: frozenStake, boost: activeBoost ? JSON.stringify(activeBoost) : null, games }).catch(() => {});
     }
 }
 
