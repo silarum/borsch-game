@@ -11,6 +11,7 @@ var clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
 var pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
 var miningStage = 1, miningCurrency = 'SRUM', miningThreshold = 1;
 var pendingMining = null, currentBot = null, bandData = null;
+var frozenStake = 0; // Замороженная ставка в пуле
 var spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
 var officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
@@ -26,7 +27,6 @@ var globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]'
 var userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
 var referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
 
-// Проекты для инвестиций
 var investProjects = JSON.parse(localStorage.getItem('investProjects')) || [
     { id: 1, name: 'iSayMobil — Интерактивная система аудио оповещения населения', icon: '🚗', desc: 'Доставка голосовых сообщений на адрес.', target: 100000, collected: 0, share: 10, endDate: Date.now() + 30 * 86400000 },
     { id: 2, name: 'Голодные Волки — FGSPI', icon: '🐺', desc: 'Спорт-гейм-клуб быстрого питания.', target: 50000, collected: 0, share: 5, endDate: Date.now() + 60 * 86400000 },
@@ -53,6 +53,7 @@ function saveAll() {
     localStorage.setItem('globalUserTasks', JSON.stringify(globalUserTasks));
     localStorage.setItem('userTasks', JSON.stringify(userTasks));
     localStorage.setItem('miningStage', miningStage);
+    localStorage.setItem('frozenStake', frozenStake);
     localStorage.setItem('activeBoost', activeBoost ? JSON.stringify(activeBoost) : null);
     localStorage.setItem('investProjects', JSON.stringify(investProjects));
     localStorage.setItem('myInvestments', JSON.stringify(myInvestments));
@@ -170,4 +171,199 @@ function renderInvest() {
         '<p style="font-size:2rem;font-weight:bold;color:white;">' + totalInvested.toLocaleString() + ' RUM</p>' +
         '<p style="color:#aaa;font-size:0.7rem;">' + myInvestments.length + ' проектов</p></div>';
 
-    for (var j = 0; j < investProjects.length;
+    for (var j = 0; j < investProjects.length; j++) {
+        var project = investProjects[j];
+        var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
+        var myAmount = myInv ? myInv.amount : 0;
+        var progress = Math.min(100, (project.collected / project.target) * 100);
+        var daysLeft = Math.max(0, Math.ceil((project.endDate - Date.now()) / 86400000));
+        var investorShare = project.target > 0 ? (myAmount / project.target) * 100 : 0;
+        var projectedProfit = (project.target * (project.share / 100)) * (investorShare / 100);
+        html += '<div class="info-card" style="text-align:left;position:relative;">' +
+            (myAmount > 0 ? '<div style="position:absolute;top:0;right:0;background:#FFD700;color:#000;padding:3px 10px;border-radius:0 0 0 10px;font-size:0.65rem;">Ты в деле!</div>' : '') +
+            '<div style="display:flex;gap:10px;"><span style="font-size:2.5rem;">' + project.icon + '</span><div><strong style="color:#FFD700;">' + project.name + '</strong><p style="font-size:0.7rem;color:#ccc;">' + project.desc + '</p></div></div>' +
+            '<div style="background:rgba(255,255,255,0.05);border-radius:10px;height:14px;margin:10px 0;overflow:hidden;"><div style="background:linear-gradient(90deg,#FFD700,#FFA500,#FF6347);height:100%;width:' + progress + '%;"></div></div>' +
+            '<div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#aaa;"><span>' + project.collected.toLocaleString() + ' / ' + project.target.toLocaleString() + ' RUM</span><span>Доля: ' + project.share + '%</span></div>' +
+            '<p style="font-size:0.7rem;color:#aaa;">⏳ ' + daysLeft + ' дн.</p>';
+        if (myAmount > 0) {
+            html += '<div style="background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);border-radius:10px;padding:10px;margin:10px 0;">' +
+                '<p style="color:#4CAF50;">✅ Вклад: <b>' + myAmount.toLocaleString() + ' RUM</b> | Доля: <b>' + investorShare.toFixed(2) + '%</b></p>' +
+                '<p style="color:#FFD700;">📈 Прогноз: ~' + projectedProfit.toFixed(0) + ' RUM</p></div>';
+        }
+        html += '<div style="display:flex;gap:8px;"><input type="number" id="invest-amount-' + project.id + '" placeholder="Сумма RUM" style="flex:2;padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;"><button id="invest-btn-' + project.id + '" style="flex:1;padding:10px;border:none;border-radius:8px;background:linear-gradient(180deg,#FFD700,#FFA500);color:#000;font-weight:bold;">💰 Вложить</button></div>';
+        if (myAmount > 0) html += '<button id="withdraw-btn-' + project.id + '" style="width:100%;margin-top:8px;padding:8px;border:1px solid #e74c3c;border-radius:8px;background:transparent;color:#e74c3c;">📤 Вывести (штраф 10%)</button>';
+        html += '</div>';
+    }
+    screen.innerHTML = html;
+
+    for (var k = 0; k < investProjects.length; k++) {
+        (function(project) {
+            var btn = document.getElementById('invest-btn-' + project.id);
+            if (btn) btn.addEventListener('click', function() {
+                var input = document.getElementById('invest-amount-' + project.id);
+                var amount = parseInt(input.value) || 0;
+                if (amount <= 0) return alert('Введите сумму');
+                if (amount > rum) return alert('Недостаточно RUM');
+                if (!confirm('Вложить ' + amount.toLocaleString() + ' RUM?')) return;
+                rum -= amount; invest += amount; project.collected += amount;
+                var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
+                if (myInv) { myInv.amount += amount; } else { myInvestments.push({ projectId: project.id, amount: amount }); }
+                investHistory.push({ projectId: project.id, amount: amount, date: Date.now() });
+                updateUI(); saveAll();
+                if (typeof saveUserData === 'function') saveUserData(userId, { rum: rum, invest: invest }).catch(function(){});
+                renderInvest();
+            });
+            var wb = document.getElementById('withdraw-btn-' + project.id);
+            if (wb) wb.addEventListener('click', function() {
+                var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
+                if (!myInv) return;
+                var penalty = Math.floor(myInv.amount * 0.1);
+                var ret = myInv.amount - penalty;
+                if (!confirm('Вывести ' + myInv.amount.toLocaleString() + ' RUM? Штраф ' + penalty.toLocaleString() + ', к получению ' + ret.toLocaleString())) return;
+                rum += ret; project.collected = Math.max(0, project.collected - myInv.amount);
+                myInvestments = myInvestments.filter(function(i) { return i.projectId !== project.id; });
+                updateUI(); saveAll(); renderInvest();
+            });
+        })(investProjects[k]);
+    }
+}
+
+// ================== ИНИЦИАЛИЗАЦИЯ ==================
+var userId = null;
+window.lastGameTime = parseInt(localStorage.getItem('lastGameTime') || '0');
+
+function initApp() {
+    cacheDom();
+    document.getElementById('main-game').style.display = 'block';
+    document.getElementById('veggie-view').style.display = 'block';
+    if (typeof startVeggieAnimation === 'function') startVeggieAnimation();
+
+    if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+        userId = Telegram.WebApp.initDataUnsafe.user.id;
+        userNickname = Telegram.WebApp.initDataUnsafe.user.first_name || 'Майнер';
+    } else {
+        userId = parseInt(localStorage.getItem('userId')) || Date.now();
+        localStorage.setItem('userId', userId);
+    }
+
+    if (typeof loadUserData === 'function' && userId) {
+        loadUserData(userId).then(function(userData) {
+            if (userData) {
+                rum = userData.rum || 0; srum = parseFloat(userData.srum) || 0;
+                ton = parseFloat(userData.ton) || 0; usdt = parseFloat(userData.usdt) || 0;
+                invest = userData.invest || 0;
+                userNickname = userData.nickname || userNickname;
+                userStatus = userData.status || 'solo';
+                miningStage = userData.mining_stage || 1;
+                frozenStake = parseFloat(userData.frozen_stake) || 0;
+                if (typeof userData.games === 'number') games = userData.games;
+                if (userData.boost && userData.boost !== 'null') { try { activeBoost = JSON.parse(userData.boost); } catch(e) {} }
+                saveAll();
+                if (typeof processWelcomeBonus === 'function') {
+                    processWelcomeBonus(userId, userData).then(function(claimed) { if (claimed) { srum = window.srum; saveAll(); } updateUI(); });
+                }
+            } else { loadFromLocalStorage(); }
+            updateUI();
+        }).catch(function(e) { console.log('Облако:', e.message); loadFromLocalStorage(); updateUI(); });
+    } else { loadFromLocalStorage(); updateUI(); }
+
+    if (games < maxGames && typeof startRecovery === 'function') startRecovery();
+    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, {passive: false});
+
+    if (rulesBtn) rulesBtn.addEventListener('click', function() { switchScreen('rules'); });
+    var navBtns = document.querySelectorAll('.nav-btn');
+    for (var i = 0; i < navBtns.length; i++) {
+        navBtns[i].addEventListener('click', function() { var id = this.getAttribute('data-screen'); if (id) switchScreen(id); });
+    }
+    var menuBtns = document.querySelectorAll('.menu-dropdown button[data-screen]');
+    for (var j = 0; j < menuBtns.length; j++) {
+        menuBtns[j].addEventListener('click', function() { var id = this.getAttribute('data-screen'); if (id) { switchScreen(id); document.getElementById('menu-dropdown').classList.remove('active'); } });
+    }
+    var backBtns = document.querySelectorAll('.back-btn');
+    for (var k = 0; k < backBtns.length; k++) {
+        backBtns[k].addEventListener('click', function(ev) { ev.stopPropagation(); switchScreen(null); });
+    }
+}
+
+function loadFromLocalStorage() {
+    var savedRum = parseInt(localStorage.getItem('rum'));
+    var savedSrum = parseFloat(localStorage.getItem('srum'));
+    var savedTon = parseFloat(localStorage.getItem('ton'));
+    var savedUsdt = parseFloat(localStorage.getItem('usdt'));
+    var savedInvest = parseInt(localStorage.getItem('invest'));
+    var savedGames = parseInt(localStorage.getItem('games'));
+    if (!isNaN(savedRum)) rum = savedRum;
+    if (!isNaN(savedSrum)) srum = savedSrum;
+    if (!isNaN(savedTon)) ton = savedTon;
+    if (!isNaN(savedUsdt)) usdt = savedUsdt;
+    if (!isNaN(savedInvest)) invest = savedInvest;
+    if (!isNaN(savedGames) && savedGames >= 0 && savedGames <= maxGames) games = savedGames;
+    var nn = localStorage.getItem('nickname'); if (nn) userNickname = nn;
+    var ns = localStorage.getItem('userStatus'); if (ns) userStatus = ns;
+    var ms = parseInt(localStorage.getItem('miningStage')); if (!isNaN(ms)) miningStage = ms;
+    var fs = parseFloat(localStorage.getItem('frozenStake')); if (!isNaN(fs) && fs >= 0) frozenStake = fs;
+    var sb = localStorage.getItem('activeBoost'); if (sb && sb !== 'null') { try { activeBoost = JSON.parse(sb); } catch(e) {} }
+}
+
+window.addEventListener('load', function() {
+    window.rum = rum;
+    window.srum = srum;
+    window.ton = ton;
+    window.usdt = usdt;
+    window.games = games;
+    window.gameActive = gameActive;
+    window.activeBoost = activeBoost;
+    window.streak = streak;
+    window.duelActive = duelActive;
+    window.userStatus = userStatus;
+    window.userNickname = userNickname;
+    window.miningStage = miningStage;
+    window.miningCurrency = miningCurrency;
+    window.miningThreshold = miningThreshold;
+    window.pendingMining = pendingMining;
+    window.currentBot = currentBot;
+    window.userId = userId;
+    window.spartansEnabled = spartansEnabled;
+    window.frozenStake = frozenStake;
+
+    initApp();
+});
+
+// ================== UI ==================
+function updateUI() {
+    if (!rumBal) return;
+    rumBal.textContent = '💰 RUM: ' + rum;
+    srumBal.textContent = '💎 SRUM: ' + srum.toFixed(2);
+    usdtBalTop.textContent = '💵 USDT: ' + usdt.toFixed(2);
+    tonBalTop.textContent = '⚡ TON: ' + ton.toFixed(2);
+    var tb = document.getElementById('ton-balance'); if (tb) tb.textContent = ton.toFixed(2);
+    var ub = document.getElementById('usdt-balance'); if (ub) ub.textContent = usdt.toFixed(2);
+    if (games > 0 && !gameActive && !duelActive) {
+        if (startBtn) startBtn.style.display = 'inline-block';
+        if (energyDisplay) energyDisplay.textContent = '⚡ ' + games + '/' + maxGames + ' игр';
+    } else {
+        if (startBtn) startBtn.style.display = 'none';
+        if (energyDisplay && !gameActive && !duelActive) {
+            var now = Date.now(), last = window.lastGameTime || 0;
+            var rem = Math.max(0, gameRecoveryTime - (now - last) / 1000);
+            energyDisplay.textContent = '⏳ ' + Math.floor(rem/60) + ':' + String(Math.floor(rem%60)).padStart(2,'0');
+        }
+    }
+    updateBoostDisplay();
+    if (typeof updateProfile === 'function') updateProfile();
+    saveAll();
+    if (typeof saveUserData === 'function' && userId) {
+        saveUserData(userId, { nickname: userNickname, rum: rum, srum: srum, ton: ton, usdt: usdt, invest: invest, status: userStatus, mining_stage: miningStage, frozen_stake: frozenStake, boost: activeBoost ? JSON.stringify(activeBoost) : null, games: games }).catch(function(){});
+    }
+}
+
+function updateBoostDisplay() {
+    if (!boostDisplay) return;
+    if (activeBoost && activeBoost.endTime > Date.now()) {
+        var rem = Math.max(0, Math.ceil((activeBoost.endTime - Date.now()) / 1000));
+        boostDisplay.textContent = '🚀 x' + activeBoost.type + ' ' + Math.floor(rem/3600) + ':' + String(Math.floor((rem%3600)/60)).padStart(2,'0') + ':' + String(Math.floor(rem%60)).padStart(2,'0');
+        boostDisplay.style.display = 'block';
+    } else { boostDisplay.textContent = ''; boostDisplay.style.display = 'none'; if (activeBoost) activeBoost = null; }
+}
+setInterval(updateBoostDisplay, 1000);
+setInterval(updateUI, 5000);
