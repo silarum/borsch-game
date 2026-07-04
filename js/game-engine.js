@@ -7,15 +7,11 @@ function showCoinFountain(count = 15) {
     const potRect = pot.getBoundingClientRect();
     const container = document.getElementById('game-container');
     const containerRect = container.getBoundingClientRect();
-    
-    // Центр кастрюли относительно game-container
     const cx = potRect.left + potRect.width / 2 - containerRect.left;
     const cy = potRect.top - containerRect.top;
-    
     for (let i = 0; i < count; i++) {
         const coin = document.createElement('div');
         coin.className = 'coin-fountain';
-        // Разные монетки для разнообразия
         const coinTypes = ['💰', '🪙', '💎', '✨', '🪙'];
         coin.textContent = coinTypes[Math.floor(Math.random() * coinTypes.length)];
         coin.style.left = (cx + (Math.random() - 0.5) * 120) + 'px';
@@ -35,10 +31,8 @@ function showPoopFountain(count = 8) {
     const potRect = pot.getBoundingClientRect();
     const container = document.getElementById('game-container');
     const containerRect = container.getBoundingClientRect();
-    
     const cx = potRect.left + potRect.width / 2 - containerRect.left;
     const cy = potRect.top + potRect.height / 2 - containerRect.top;
-    
     for (let i = 0; i < count; i++) {
         const poop = document.createElement('div');
         poop.className = 'poop-fountain';
@@ -54,6 +48,26 @@ function showPoopFountain(count = 8) {
     }
 }
 
+// Пути к изображениям криптоовощей
+const goodImages = [
+    'assets/veggies/bitcabbage.png',
+    'assets/veggies/etheronion.png',
+    'assets/veggies/tatercoin.png',
+    'assets/veggies/carrotcash.png',
+    'assets/veggies/pepperpay.png',
+    'assets/veggies/greengas.png',
+    'assets/veggies/beanbit.png',
+    'assets/veggies/garlicgold.png',
+    'assets/veggies/tomotoken.png'
+];
+const badImages = [
+    'assets/veggies/shitcoin.png',
+    'assets/veggies/scamworm.png',
+    'assets/veggies/rugcheese.png',
+    'assets/veggies/deadflower.png',
+    'assets/veggies/fungustoken.png'
+];
+
 function spawnAll() {
     const holes = document.querySelectorAll('.hole');
     if (!holes.length) return;
@@ -61,8 +75,9 @@ function spawnAll() {
     window.currentVeg = {};
     for (let i = 0; i < holes.length; i++) {
         const isBad = Math.random() < 0.25;
-        const pool = isBad ? BAD : GOOD;
-        holes[i].innerHTML = `<span class="veg${isBad ? ' rotten' : ''}">${pool[Math.floor(Math.random() * pool.length)]}</span>`;
+        const pool = isBad ? badImages : goodImages;
+        const imgSrc = pool[Math.floor(Math.random() * pool.length)];
+        holes[i].innerHTML = `<img src="${imgSrc}" class="veg${isBad ? ' rotten' : ''}" style="width:100%;height:100%;object-fit:contain;">`;
         window.currentVeg[i] = { type: isBad ? 'bad' : 'good' };
     }
 }
@@ -84,7 +99,7 @@ function processHit(hole, touch) {
         let gain = 10 * multiplier;
         if (window.activeBoost && window.activeBoost.endTime > Date.now()) gain *= window.activeBoost.type;
         window.rum = (window.rum || 0) + Math.floor(gain);
-        flyVegToPot(hole, hole.querySelector('.veg').textContent);
+        flyVegToPot(hole, hole.querySelector('.veg').src);
         showCoinFountain();
         if (window.streak % 20 === 0) triggerRocket();
     } else {
@@ -112,15 +127,17 @@ function handleTouchStart(e) {
     });
 }
 
-function flyVegToPot(hole, emoji) {
+function flyVegToPot(hole, imgSrc) {
     const pot = document.getElementById('pot');
-    if (!pot || !hole) return;
+    if (!pot || !hole || !imgSrc) return;
     const holeRect = hole.getBoundingClientRect();
     const potRect = pot.getBoundingClientRect();
     const containerRect = document.getElementById('game-container').getBoundingClientRect();
-    const vegEl = document.createElement('div');
+    const vegEl = document.createElement('img');
     vegEl.className = 'flying-veg';
-    vegEl.textContent = emoji;
+    vegEl.src = imgSrc;
+    vegEl.style.width = '40px';
+    vegEl.style.height = '40px';
     vegEl.style.left = (holeRect.left + holeRect.width / 2 - containerRect.left) + 'px';
     vegEl.style.top = (holeRect.top + holeRect.height / 2 - containerRect.top) + 'px';
     vegEl.style.setProperty('--dx', (potRect.left + potRect.width / 2 - containerRect.left - parseFloat(vegEl.style.left)) / 2 + 'px');
