@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.7';
 import { validateTelegramInitData } from '../_shared/telegram-webapp.ts';
 import { getTelegramWebhookSecret } from '../_shared/telegram-webhook.ts';
+import { getSupabaseSecretKey } from '../_shared/supabase-key.ts';
 
 const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://silarum.github.io';
 const botToken = Deno.env.get('TELEGRAM_ADMIN_BOT_TOKEN') || '';
@@ -24,18 +25,6 @@ function json(body: unknown, status = 200): Response {
     return Response.json(body, { status, headers: corsHeaders });
 }
 
-function getSecretKey(): string {
-    const keys = Deno.env.get('SUPABASE_SECRET_KEYS');
-    if (keys) {
-        try {
-            return JSON.parse(keys).default || '';
-        } catch (_) {
-            return '';
-        }
-    }
-    return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-}
-
 function assertObject(value: unknown, label: string): asserts value is Record<string, unknown> {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new Error(`${label} must be an object`);
@@ -54,15 +43,21 @@ Deno.serve(async (request) => {
 
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-        const secretKey = getSecretKey();
-        if (!supabaseUrl || !secretKey || !botToken) {
-            throw new Error('Admin server is not configured');
-        }
-
+        const secretKey = getSupabaseSecretKey();
         const body = await request.json();
         assertObject(body, 'body');
-        const user = await validateTelegramInitData(String(body.initData || ''), botToken, 900);
         const action = String(body.action || 'bootstrap');
+        if (action === 'health') {
+            const services = {
+                database: Boolean(supabaseUrl && secretKey),
+                telegram: Boolean(botToken),
+                adminAllowlist: adminIds.size > 0
+            };
+            return json({ ok: services.database && services.telegram, services }, services.database && services.telegram ? 200 : 503);
+        }
+        if (!supabaseUrl || !secretKey || !botToken) throw new Error('Admin server is not configured');
+
+        const user = await validateTelegramInitData(String(body.initData || ''), botToken, 900);
         if (action === 'whoami') {
             return json({ telegramId: user.id, isAdmin: adminIds.has(user.id) });
         }

@@ -108,6 +108,15 @@ test('Telegram-админка защищена секретом webhook и allow
   assert.doesNotMatch(`${admin}\n${matchmaking}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
 });
 
+test('Edge Functions поддерживают новый словарь секретных ключей Supabase', () => {
+  const helper = read('supabase/functions/_shared/supabase-key.ts');
+  const adminApi = read('supabase/functions/admin-api/index.ts');
+  assert.match(helper, /Object\.values\(parsed\)/);
+  assert.match(helper, /startsWith\('sb_secret_'\)/);
+  assert.match(helper, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(adminApi, /getSupabaseSecretKey/);
+});
+
 test('экономика пяти этапов делит штраф 70/30 и удерживает пятый этап до поражения', () => {
   const require = createRequire(import.meta.url);
   const economy = require('../js/economy.js');
@@ -140,6 +149,7 @@ test('мобильная админ-панель не содержит секр�
   assert.match(adminScript, /update_spartan/);
   assert.match(adminApi, /ADMIN_TELEGRAM_IDS/);
   assert.match(adminApi, /action === 'whoami'/);
+  assert.match(adminApi, /action === 'health'/);
   assert.match(adminApi, /action === 'register_webhook'/);
   assert.match(adminScript, /register-webhook/);
   assert.doesNotMatch(`${adminHtml}\n${adminScript}\n${adminApi}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
