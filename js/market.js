@@ -4,16 +4,15 @@ const defaultShopItems = [
     { id: 1,  name: 'Бустер x2',          icon: '⚡',       price: 1,     currency: 'SRUM',  description: 'Удваивает награду на 24 часа' },
     { id: 2,  name: 'Бустер x3',          icon: '⚡⚡',     price: 2,     currency: 'SRUM',  description: 'Утраивает награду на 24 часа' },
     { id: 3,  name: 'Бустер x5',          icon: '⚡⚡⚡',   price: 3,     currency: 'SRUM',  description: 'Увеличивает награду в 5 раз на 24 часа' },
-    { id: 4,  name: 'Статус Серебро',     icon: '🥈',       price: 100,   currency: 'SRUM',  description: '+1M RUM, вывод от 200 SRUM' },
-    { id: 5,  name: 'Статус Золото',      icon: '🥇',       price: 200,   currency: 'SRUM',  description: '+2M RUM, вывод от 100 SRUM' },
-    { id: 6,  name: 'Статус Платина',     icon: '💠',       price: 300,   currency: 'SRUM',  description: '+3M RUM, вывод от 25 SRUM' },
-    { id: 7,  name: 'Добыть SRUM за TON', icon: '⚡→💎',    price: 1,     currency: 'TON',   description: '1 TON = 2 SRUM (через кошелёк)' },
+    { id: 4,  name: 'Статус Серебро',     icon: '🥈',       price: 100,   currency: 'SRUM',  description: '+1M игровых RUM и статус Серебро' },
+    { id: 5,  name: 'Статус Золото',      icon: '🥇',       price: 200,   currency: 'SRUM',  description: '+2M игровых RUM и статус Золото' },
+    { id: 6,  name: 'Статус Платина',     icon: '💠',       price: 300,   currency: 'SRUM',  description: '+3M игровых RUM и статус Платина' },
+    { id: 7,  name: 'SRUM за TON',        icon: '⚡→💎',    price: 1,     currency: 'TON',   description: 'Временно отключено: требуется проверенный платёжный сервер' },
     { id: 8,  name: 'Добыть SRUM за RUM', icon: '🪙→💎',    price: 10000, currency: 'RUM',   description: '10 000 RUM = 1 SRUM (раз в 24 часа)' },
-    { id: 9,  name: 'Добыть SRUM за Stars', icon: '⭐→💎',   price: 50,    currency: 'STARS', description: '50 Stars = 1 SRUM (оплата картой)' }
+    { id: 9,  name: 'SRUM за Stars',      icon: '⭐→💎',    price: 50,    currency: 'STARS', description: 'Временно отключено: требуется проверенный платёжный сервер' }
 ];
 
-let shopItems = JSON.parse(localStorage.getItem('shopItems')) || defaultShopItems;
-if (!localStorage.getItem('shopItems')) localStorage.setItem('shopItems', JSON.stringify(defaultShopItems));
+const shopItems = defaultShopItems;
 
 function injectShopStyles() {
     if (document.getElementById('shop-custom-styles')) return;
@@ -97,16 +96,10 @@ function renderShop() {
 }
 
 async function purchaseItem(item) {
-    if (item.currency === 'TON') {
-        if (!currentWalletAddress) { alert('Подключите TON кошелёк в разделе 👛 Кошелёк'); return; }
-        const tonNeeded = item.price;
-        if (ton < tonNeeded) { alert(`Недостаточно TON. Нужно ${tonNeeded.toFixed(2)} TON`); return; }
-        if (!confirm(`Добыть ${tonNeeded * 2} SRUM за ${tonNeeded} TON?`)) return;
-        const success = await buySRUMWithTON(item.price);
-        if (success) { ton -= tonNeeded; srum += tonNeeded * 2; updateUI(); saveAll(); }
+    if (item.currency === 'TON' || item.currency === 'STARS') {
+        window.showSafeModeNotice();
         return;
     }
-    if (item.currency === 'STARS') { buyWithStars(item.price); return; }
     if (item.id === 8) {
         const now = Date.now();
         const lastExchange = parseInt(localStorage.getItem('lastRumExchange') || '0');
@@ -138,19 +131,8 @@ function applyItemEffect(item) {
 }
 
 async function buyWithStars(amount) {
-    if (!window.Telegram || !Telegram.WebApp) { alert('Только в Telegram'); return; }
-    Telegram.WebApp.openInvoice({
-        title: 'Добыча SRUM', description: `${amount} Stars → ${amount} SRUM`,
-        payload: JSON.stringify({ type: 'buy_srum', amount }), provider_token: '', currency: 'XTR',
-        prices: [{ label: 'SRUM', amount }]
-    }, async (status) => {
-        if (status === 'paid') {
-            srum += amount; updateUI(); saveAll();
-            if (userId && typeof saveUserData === 'function') { saveUserData(userId, { srum }).catch(console.error); }
-            try { await fetch(`${SUPABASE_URL}/rest/v1/transactions`, { method:'POST', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify({ user_id:userId, type:'buy_srum_stars', amount, currency:'STARS', srum_amount:amount, tx_hash:'stars_'+Date.now(), created_at:new Date().toISOString() }) }); } catch(e) {}
-            alert(`✅ Добыто ${amount} SRUM!`);
-        } else if (status === 'failed') { alert('Не прошло'); }
-    });
+    void amount;
+    window.showSafeModeNotice();
 }
 
 // Запуск при открытии

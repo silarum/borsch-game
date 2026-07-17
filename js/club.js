@@ -16,14 +16,14 @@ const HUNGRY_WOLVES = {
     isFounder: true
 };
 
-// Загружаем клубы
-let clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
+// clubs и myClubId объявлены в main.js и используются всеми экранами.
+clubs = Array.isArray(clubs) ? clubs : window.readLocalArray('clubs');
 if (!clubs.find(c => c.id === 'hw01')) {
     clubs.unshift(HUNGRY_WOLVES);
     localStorage.setItem('clubs', JSON.stringify(clubs));
 }
 
-let myClubId = localStorage.getItem('myClubId') || null;
+myClubId = myClubId || localStorage.getItem('myClubId') || null;
 
 // Рендер клуба
 function renderMyClub() {
@@ -42,17 +42,17 @@ function renderMyClub() {
 
     let html = `
         <div class="club-cloud">
-            <h3>${club.emoji} ${club.name}</h3>
-            <p style="color:#aaa;font-size:0.8rem;">${club.desc || ''}</p>
+            <h3>${window.escapeHtml(club.emoji)} ${window.escapeHtml(club.name)}</h3>
+            <p style="color:#aaa;font-size:0.8rem;">${window.escapeHtml(club.desc || '')}</p>
             <div style="display:flex;gap:15px;margin:10px 0;font-size:0.8rem;">
                 <span>⭐ Рейтинг: <b style="color:#FFD700;">${club.rating || 0}</b></span>
                 <span>👥 Участников: <b>${club.members.length}</b></span>
                 ${club.isFounder ? '<span style="color:#FFD700;">👑 Фаундер</span>' : ''}
-                ${club.licenseFrom ? `<span style="color:#aaa;">📜 Лицензия от ${club.licenseFrom}</span>` : ''}
+                ${club.licenseFrom ? `<span style="color:#aaa;">📜 Лицензия от ${window.escapeHtml(club.licenseFrom)}</span>` : ''}
             </div>
-            <p><b>Глава:</b> ${club.master}</p>
-            <p><b>Офицеры:</b> ${club.officers?.join(', ') || 'нет'}</p>
-            <p><b>Бойцы:</b> ${club.members?.join(', ') || 'нет'}</p>
+            <p><b>Глава:</b> ${window.escapeHtml(club.master)}</p>
+            <p><b>Офицеры:</b> ${(club.officers || []).map(window.escapeHtml).join(', ') || 'нет'}</p>
+            <p><b>Бойцы:</b> ${(club.members || []).map(window.escapeHtml).join(', ') || 'нет'}</p>
             
             <!-- Кнопки управления -->
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0;">
@@ -67,7 +67,7 @@ function renderMyClub() {
                 <div style="background:rgba(255,215,0,0.05);border-radius:10px;padding:10px;margin:10px 0;">
                     <p style="color:#FFD700;font-size:0.8rem;">⚔️ Отправить бойцов на Криптобеспредел</p>
                     <select id="club-fighter-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;margin:5px 0;">
-                        ${club.members.map(m => `<option value="${m}">${m}</option>`).join('')}
+                        ${club.members.map(m => `<option value="${window.escapeHtml(m)}">${window.escapeHtml(m)}</option>`).join('')}
                     </select>
                     <div style="display:flex;gap:5px;">
                         <input type="number" id="club-stake-amount" placeholder="Ставка SRUM" value="1" step="0.1" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;">
@@ -82,7 +82,7 @@ function renderMyClub() {
                 <p style="color:#FFD700;font-size:0.8rem;">💬 Чат клуба</p>
                 ${(club.chat || []).slice(-20).map(msg => `
                     <div style="font-size:0.7rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <b style="color:#FFD700;">${msg.from}:</b> ${msg.text}
+                        <b style="color:#FFD700;">${window.escapeHtml(msg.from)}:</b> ${window.escapeHtml(msg.text)}
                         <span style="color:#666;font-size:0.6rem;">${new Date(msg.time).toLocaleTimeString()}</span>
                     </div>
                 `).join('')}
@@ -107,7 +107,7 @@ function renderMyClub() {
                 <h3>📜 Выдача лицензий</h3>
                 <p style="color:#aaa;font-size:0.7rem;">Как фаундер-клуб, вы можете выдавать лицензии другим клубам</p>
                 <select id="license-club-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;margin:5px 0;">
-                    ${clubs.filter(c => c.id !== 'hw01' && !c.licenseFrom).map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                    ${clubs.filter(c => c.id !== 'hw01' && !c.licenseFrom).map(c => `<option value="${window.escapeHtml(c.id)}">${window.escapeHtml(c.name)}</option>`).join('')}
                 </select>
                 <button class="club-btn" id="issue-license-btn" style="background:#FFD700;color:#000;">📜 Выдать лицензию</button>
                 <p style="color:#aaa;font-size:0.65rem;">Лицензия подтверждает официальный статус клуба</p>
@@ -119,7 +119,7 @@ function renderMyClub() {
     // Обработчики
     document.getElementById('send-chat-btn')?.addEventListener('click', () => {
         const input = document.getElementById('club-chat-input');
-        const text = input.value.trim();
+        const text = input.value.trim().slice(0, 500);
         if (!text) return;
         if (!club.chat) club.chat = [];
         club.chat.push({ from: userNickname, text, time: Date.now() });
@@ -129,7 +129,7 @@ function renderMyClub() {
     });
 
     document.getElementById('invite-club-btn')?.addEventListener('click', () => {
-        const name = prompt('Никнейм бойца:');
+        const name = prompt('Никнейм бойца:')?.trim().slice(0, 40);
         if (!name || name === userNickname) return;
         if (club.members.includes(name)) return alert('Уже в клубе');
         club.members.push(name);
@@ -142,7 +142,7 @@ function renderMyClub() {
         club.members = club.members.filter(m => m !== userNickname);
         if (club.officers) club.officers = club.officers.filter(o => o !== userNickname);
         myClubId = null;
-        localStorage.setItem('myClubId', null);
+        localStorage.removeItem('myClubId');
         localStorage.setItem('clubs', JSON.stringify(clubs));
         renderMyClub();
     });
@@ -164,7 +164,7 @@ function renderMyClub() {
         clubs = clubs.filter(c => c.id !== club.id);
         myClubId = null;
         localStorage.setItem('clubs', JSON.stringify(clubs));
-        localStorage.setItem('myClubId', null);
+        localStorage.removeItem('myClubId');
         renderMyClub();
     });
 
@@ -219,10 +219,10 @@ function renderAllClubs() {
     let html = '<h3>🐺 Все клубы</h3>';
     clubs.forEach(c => {
         html += `<div class="club-cloud">
-            <strong>${c.emoji} ${c.name}</strong> ${c.isFounder ? '👑' : ''}
-            <p style="font-size:0.7rem;">⭐ ${c.rating || 0} | 👥 ${c.members.length} | Глава: ${c.master}</p>
-            ${c.licenseFrom ? `<p style="font-size:0.65rem;color:#aaa;">📜 Лицензия: ${c.licenseFrom}</p>` : ''}
-            ${!myClubId ? `<button class="club-btn" data-join="${c.id}">Вступить</button>` : ''}
+            <strong>${window.escapeHtml(c.emoji)} ${window.escapeHtml(c.name)}</strong> ${c.isFounder ? '👑' : ''}
+            <p style="font-size:0.7rem;">⭐ ${Number(c.rating) || 0} | 👥 ${(c.members || []).length} | Глава: ${window.escapeHtml(c.master)}</p>
+            ${c.licenseFrom ? `<p style="font-size:0.65rem;color:#aaa;">📜 Лицензия: ${window.escapeHtml(c.licenseFrom)}</p>` : ''}
+            ${!myClubId ? `<button class="club-btn" data-join="${window.escapeHtml(c.id)}">Вступить</button>` : ''}
         </div>`;
     });
     container.innerHTML = html;
@@ -253,9 +253,9 @@ function showCreateClub() {
         </div>
     `;
     document.getElementById('club-create-submit').addEventListener('click', () => {
-        const name = document.getElementById('club-name').value.trim();
-        const emoji = document.getElementById('club-emoji').value.trim() || '🐺';
-        const desc = document.getElementById('club-desc').value.trim();
+        const name = document.getElementById('club-name').value.trim().slice(0, 50);
+        const emoji = document.getElementById('club-emoji').value.trim().slice(0, 8) || '🐺';
+        const desc = document.getElementById('club-desc').value.trim().slice(0, 240);
         if (!name || rum < 100) return alert('Недостаточно RUM или пустое название');
         rum -= 100;
         const newClub = {

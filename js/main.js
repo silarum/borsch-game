@@ -7,33 +7,33 @@ var gameActive = false, gameTimer, gameTimeLeft = 60, spawnInterval, currentVeg 
 var activeBoost = null, streak = 0, duelActive = false;
 var userStatus = 'solo', userNickname = 'Майнер';
 var myClubId = localStorage.getItem('myClubId') || null;
-var clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
-var pausedSessions = JSON.parse(localStorage.getItem('pausedSessions') || '[]');
+var clubs = window.readLocalArray('clubs');
+var pausedSessions = window.readLocalArray('pausedSessions');
 var miningStage = 1, miningCurrency = 'SRUM', miningThreshold = 1;
 var pendingMining = null, currentBot = null, bandData = null;
 var frozenStake = 0; // Замороженная ставка в пуле
-var spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
-var officialRumTasks = JSON.parse(localStorage.getItem('officialRumTasks')) || [
+var spartansEnabled = window.readLocalJson('spartansEnabled', true);
+var officialRumTasks = window.readLocalArray('officialRumTasks', null) || [
     { id:1, desc:'Подписаться на канал', reward:50, maxCompletions:100, completionsDone:0, checking:false },
     { id:2, desc:'Сделать репост', reward:100, maxCompletions:100, completionsDone:0, checking:false },
     { id:3, desc:'Пригласить друга', reward:200, maxCompletions:100, completionsDone:0, checking:false },
     { id:4, desc:'Сыграть 5 раундов', reward:300, maxCompletions:100, completionsDone:0, checking:false }
 ];
-var officialSrumTasks = JSON.parse(localStorage.getItem('officialSrumTasks')) || [
+var officialSrumTasks = window.readLocalArray('officialSrumTasks', null) || [
     { id:101, desc:'Подпишись на Twitter', reward:0.1, maxCompletions:100, completionsDone:0, checking:false },
     { id:102, desc:'Поставь лайк проекту', reward:0.15, maxCompletions:100, completionsDone:0, checking:false }
 ];
-var globalUserTasks = JSON.parse(localStorage.getItem('globalUserTasks') || '[]');
-var userTasks = JSON.parse(localStorage.getItem('userTasks') || '[]');
-var referrals = JSON.parse(localStorage.getItem('referrals') || '[]');
+var globalUserTasks = window.readLocalArray('globalUserTasks');
+var userTasks = window.readLocalArray('userTasks');
+var referrals = window.readLocalArray('referrals');
 
-var investProjects = JSON.parse(localStorage.getItem('investProjects')) || [
+var investProjects = window.readLocalArray('investProjects', null) || [
     { id: 1, name: 'iSayMobil — Интерактивная система аудио оповещения населения', icon: '🚗', desc: 'Доставка голосовых сообщений на адрес.', target: 100000, collected: 0, share: 10, endDate: Date.now() + 30 * 86400000 },
     { id: 2, name: 'Голодные Волки — FGSPI', icon: '🐺', desc: 'Спорт-гейм-клуб быстрого питания.', target: 50000, collected: 0, share: 5, endDate: Date.now() + 60 * 86400000 },
     { id: 3, name: 'WMW — Всемирная стена памяти', icon: '🕯️', desc: 'Портал памяти → Царствие небесное → Книга жизни.', target: 25000, collected: 0, share: 3, endDate: Date.now() + 45 * 86400000 }
 ];
-var myInvestments = JSON.parse(localStorage.getItem('myInvestments')) || [];
-var investHistory = JSON.parse(localStorage.getItem('investHistory')) || [];
+var myInvestments = window.readLocalArray('myInvestments');
+var investHistory = window.readLocalArray('investHistory');
 
 function saveAll() {
     localStorage.setItem('rum', rum);
@@ -122,7 +122,6 @@ function switchScreen(screenId) {
         else if (screenId === 'top-tappers') { document.getElementById('top-tappers-screen').classList.add('active'); loadTopPlayers('rum'); }
         else if (screenId === 'top-miners') { document.getElementById('top-miners-screen').classList.add('active'); loadTopPlayers('srum'); }
         else if (screenId === 'invest') { document.getElementById('invest-screen').classList.add('active'); renderInvest(); }
-        else if (screenId === 'admin') { document.getElementById('admin-screen').classList.add('active'); }
         else { var target = document.getElementById(screenId + '-screen'); if (target) target.classList.add('active'); }
     } else {
         showMainElements();
@@ -136,11 +135,13 @@ function loadTopPlayers(type) {
     if (!screen) return;
     var infoCard = screen.querySelector('.info-card');
     if (!infoCard) return;
+    if (!window.APP_CONFIG.cloudSyncEnabled) {
+        infoCard.innerHTML = '<p style="color:#aaa;text-align:center;">Рейтинг появится после запуска защищённого сервера.</p>';
+        return;
+    }
     infoCard.innerHTML = '<p style="text-align:center;color:#FFD700;">⏳ Загрузка...</p>';
-    var order = type === 'rum' ? 'rum.desc' : 'srum.desc';
-    fetch(SUPABASE_URL + '/rest/v1/users?select=nickname,rum,srum&order=' + order + '&limit=20', {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-    }).then(function(res) { return res.json(); }).then(function(players) {
+    gameApi('leaderboard', { type: type }).then(function(players) {
+        players = Array.isArray(players) ? players : [];
         var html = '';
         if (!players.length) { html = '<p style="color:#aaa;">Нет данных</p>'; }
         else {
@@ -152,7 +153,7 @@ function loadTopPlayers(type) {
                 var currency = type === 'rum' ? 'RUM' : 'SRUM';
                 var isMe = p.nickname === userNickname;
                 html += '<div style="background:' + (isMe ? 'rgba(255,215,0,0.15)' : 'rgba(255,255,255,0.05)') + ';padding:10px;margin:5px 0;border-radius:8px;display:flex;justify-content:space-between;' + (isMe ? 'border:1px solid gold;' : '') + '">' +
-                    '<span>' + medal + ' ' + (p.nickname || 'Майнер') + (isMe ? ' 👈' : '') + '</span>' +
+                    '<span>' + medal + ' ' + window.escapeHtml(p.nickname || 'Майнер') + (isMe ? ' 👈' : '') + '</span>' +
                     '<span style="color:#FFD700;font-weight:bold;">' + value + ' ' + currency + '</span></div>';
             }
         }
@@ -173,6 +174,7 @@ function renderInvest() {
 
     for (var j = 0; j < investProjects.length; j++) {
         var project = investProjects[j];
+        var projectId = Number(project.id);
         var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
         var myAmount = myInv ? myInv.amount : 0;
         var progress = Math.min(100, (project.collected / project.target) * 100);
@@ -181,7 +183,7 @@ function renderInvest() {
         var projectedProfit = (project.target * (project.share / 100)) * (investorShare / 100);
         html += '<div class="info-card" style="text-align:left;position:relative;">' +
             (myAmount > 0 ? '<div style="position:absolute;top:0;right:0;background:#FFD700;color:#000;padding:3px 10px;border-radius:0 0 0 10px;font-size:0.65rem;">Ты в деле!</div>' : '') +
-            '<div style="display:flex;gap:10px;"><span style="font-size:2.5rem;">' + project.icon + '</span><div><strong style="color:#FFD700;">' + project.name + '</strong><p style="font-size:0.7rem;color:#ccc;">' + project.desc + '</p></div></div>' +
+            '<div style="display:flex;gap:10px;"><span style="font-size:2.5rem;">' + window.escapeHtml(project.icon) + '</span><div><strong style="color:#FFD700;">' + window.escapeHtml(project.name) + '</strong><p style="font-size:0.7rem;color:#ccc;">' + window.escapeHtml(project.desc) + '</p></div></div>' +
             '<div style="background:rgba(255,255,255,0.05);border-radius:10px;height:14px;margin:10px 0;overflow:hidden;"><div style="background:linear-gradient(90deg,#FFD700,#FFA500,#FF6347);height:100%;width:' + progress + '%;"></div></div>' +
             '<div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#aaa;"><span>' + project.collected.toLocaleString() + ' / ' + project.target.toLocaleString() + ' RUM</span><span>Доля: ' + project.share + '%</span></div>' +
             '<p style="font-size:0.7rem;color:#aaa;">⏳ ' + daysLeft + ' дн.</p>';
@@ -190,8 +192,8 @@ function renderInvest() {
                 '<p style="color:#4CAF50;">✅ Вклад: <b>' + myAmount.toLocaleString() + ' RUM</b> | Доля: <b>' + investorShare.toFixed(2) + '%</b></p>' +
                 '<p style="color:#FFD700;">📈 Прогноз: ~' + projectedProfit.toFixed(0) + ' RUM</p></div>';
         }
-        html += '<div style="display:flex;gap:8px;"><input type="number" id="invest-amount-' + project.id + '" placeholder="Сумма RUM" style="flex:2;padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;"><button id="invest-btn-' + project.id + '" style="flex:1;padding:10px;border:none;border-radius:8px;background:linear-gradient(180deg,#FFD700,#FFA500);color:#000;font-weight:bold;">💰 Вложить</button></div>';
-        if (myAmount > 0) html += '<button id="withdraw-btn-' + project.id + '" style="width:100%;margin-top:8px;padding:8px;border:1px solid #e74c3c;border-radius:8px;background:transparent;color:#e74c3c;">📤 Вывести (штраф 10%)</button>';
+        html += '<div style="display:flex;gap:8px;"><input type="number" id="invest-amount-' + projectId + '" placeholder="Сумма RUM" style="flex:2;padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;"><button id="invest-btn-' + projectId + '" style="flex:1;padding:10px;border:none;border-radius:8px;background:linear-gradient(180deg,#FFD700,#FFA500);color:#000;font-weight:bold;">💰 Вложить</button></div>';
+        if (myAmount > 0) html += '<button id="withdraw-btn-' + projectId + '" style="width:100%;margin-top:8px;padding:8px;border:1px solid #e74c3c;border-radius:8px;background:transparent;color:#e74c3c;">📤 Забрать игровые RUM (штраф 10%)</button>';
         html += '</div>';
     }
     screen.innerHTML = html;
@@ -210,7 +212,6 @@ function renderInvest() {
                 if (myInv) { myInv.amount += amount; } else { myInvestments.push({ projectId: project.id, amount: amount }); }
                 investHistory.push({ projectId: project.id, amount: amount, date: Date.now() });
                 updateUI(); saveAll();
-                if (typeof saveUserData === 'function') saveUserData(userId, { rum: rum, invest: invest }).catch(function(){});
                 renderInvest();
             });
             var wb = document.getElementById('withdraw-btn-' + project.id);
@@ -237,6 +238,11 @@ function initApp() {
     document.getElementById('main-game').style.display = 'block';
     document.getElementById('veggie-view').style.display = 'block';
     if (typeof startVeggieAnimation === 'function') startVeggieAnimation();
+
+    if (!window.APP_CONFIG.cloudSyncEnabled && !localStorage.getItem('demoStarterClaimed')) {
+        srum = Math.max(srum, 1);
+        localStorage.setItem('demoStarterClaimed', 'true');
+    }
 
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
         userId = Telegram.WebApp.initDataUnsafe.user.id;
@@ -268,8 +274,6 @@ function initApp() {
     } else { loadFromLocalStorage(); updateUI(); }
 
     if (games < maxGames && typeof startRecovery === 'function') startRecovery();
-    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, {passive: false});
-
     if (rulesBtn) rulesBtn.addEventListener('click', function() { switchScreen('rules'); });
     var navBtns = document.querySelectorAll('.nav-btn');
     for (var i = 0; i < navBtns.length; i++) {
@@ -294,8 +298,8 @@ function loadFromLocalStorage() {
     var savedGames = parseInt(localStorage.getItem('games'));
     if (!isNaN(savedRum)) rum = savedRum;
     if (!isNaN(savedSrum)) srum = savedSrum;
-    if (!isNaN(savedTon)) ton = savedTon;
-    if (!isNaN(savedUsdt)) usdt = savedUsdt;
+    if (window.APP_CONFIG.financialFeaturesEnabled && !isNaN(savedTon)) ton = savedTon;
+    if (window.APP_CONFIG.financialFeaturesEnabled && !isNaN(savedUsdt)) usdt = savedUsdt;
     if (!isNaN(savedInvest)) invest = savedInvest;
     if (!isNaN(savedGames) && savedGames >= 0 && savedGames <= maxGames) games = savedGames;
     var nn = localStorage.getItem('nickname'); if (nn) userNickname = nn;
@@ -334,8 +338,8 @@ function updateUI() {
     if (!rumBal) return;
     rumBal.textContent = '💰 RUM: ' + rum;
     srumBal.textContent = '💎 SRUM: ' + srum.toFixed(2);
-    usdtBalTop.textContent = '💵 USDT: ' + usdt.toFixed(2);
-    tonBalTop.textContent = '⚡ TON: ' + ton.toFixed(2);
+    usdtBalTop.textContent = window.APP_CONFIG.financialFeaturesEnabled ? '💵 USDT: ' + usdt.toFixed(2) : '💵 USDT: OFF';
+    tonBalTop.textContent = window.APP_CONFIG.financialFeaturesEnabled ? '⚡ TON: ' + ton.toFixed(2) : '⚡ TON: OFF';
     var tb = document.getElementById('ton-balance'); if (tb) tb.textContent = ton.toFixed(2);
     var ub = document.getElementById('usdt-balance'); if (ub) ub.textContent = usdt.toFixed(2);
     if (games > 0 && !gameActive && !duelActive) {

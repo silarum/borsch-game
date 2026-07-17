@@ -1,0 +1,60 @@
+// Единая конфигурация безопасного релизного режима.
+// Реальные денежные функции включаются только после серверной валидации
+// Telegram initData, TON-транзакций и атомарных операций с балансом.
+window.APP_CONFIG = Object.freeze({
+    cloudSyncEnabled: false,
+    financialFeaturesEnabled: false,
+    telegramBonusesEnabled: false,
+    matchmakingEnabled: false,
+    supabaseUrl: 'https://hngfpdsnjgdpazmortix.supabase.co',
+    supabasePublishableKey: 'sb_publishable_JZOPRsRfMx2l6rsc4QfeBg_s5hf6QRg'
+});
+
+window.escapeHtml = function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+};
+
+window.getTelegramInitData = function getTelegramInitData() {
+    return window.Telegram?.WebApp?.initData || '';
+};
+
+window.readLocalJson = function readLocalJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw === null ? fallback : JSON.parse(raw);
+    } catch (_) {
+        localStorage.removeItem(key);
+        return fallback;
+    }
+};
+
+window.readLocalArray = function readLocalArray(key, fallback = []) {
+    const value = window.readLocalJson(key, fallback);
+    return Array.isArray(value) ? value : fallback;
+};
+
+window.showSafeModeNotice = function showSafeModeNotice() {
+    alert('Функция временно отключена: сначала требуется безопасный сервер с проверкой Telegram и блокчейна. Игровой режим продолжает работать.');
+};
+
+document.getElementById('stats-close-btn')?.addEventListener('click', () => {
+    document.getElementById('stats-modal')?.classList.remove('active');
+});
+document.getElementById('view-switch')?.addEventListener('click', () => window.cycleView?.());
+document.getElementById('lang-btn-bottom')?.addEventListener('click', () => {
+    document.getElementById('language-modal')?.classList.remove('hidden');
+});
+document.getElementById('withdrawal-disabled-btn')?.addEventListener('click', () => window.showSafeModeNotice());
+document.getElementById('copy-ref-btn')?.addEventListener('click', () => window.copyRef?.());
+document.getElementById('apply-ref-btn')?.addEventListener('click', () => window.applyRefCode?.());
+document.querySelectorAll('[data-language]').forEach((button) => {
+    button.addEventListener('click', () => window.setLanguage?.(button.dataset.language));
+});
+document.getElementById('language-cancel-btn')?.addEventListener('click', () => {
+    document.getElementById('language-modal')?.classList.add('hidden');
+});

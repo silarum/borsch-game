@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'none'; form-action 'self'">
     <title>Крипто Борщ – Игровой майнинг</title>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
 </head>
 <body>
 <div id="game-container">
@@ -37,13 +40,13 @@
                 <p><b>SRUM:</b> <span id="stats-srum"></span></p>
                 <p><b>USDT:</b> <span id="stats-usdt"></span></p>
                 <p><b>TON:</b> <span id="stats-ton"></span></p>
-                <button onclick="document.getElementById('stats-modal').classList.remove('active')">Закрыть</button>
+                <button id="stats-close-btn">Закрыть</button>
             </div>
         </div>
 
-        <button id="view-switch" onclick="cycleView()">🥬 Овощи</button>
+        <button id="view-switch">🥬 Овощи</button>
         <button id="rules-btn-bottom">📜 Правила</button>
-        <button id="lang-btn-bottom" onclick="document.getElementById('language-modal').classList.remove('hidden')">🌐</button>
+        <button id="lang-btn-bottom">🌐</button>
 
         <div id="matrix-bg"><canvas id="matrixCanvas"></canvas></div>
         <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
@@ -133,7 +136,7 @@
             <p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p>
             <div id="ton-connect-container" style="display:flex;justify-content:center;margin:15px 0;"></div>
             <p style="font-size:0.8rem;color:#aaa;" id="wallet-address"></p>
-            <button class="shop-btn" onclick="requestWithdrawal()" style="margin-top:15px;">💸 Запросить вывод</button>
+            <button class="shop-btn" id="withdrawal-disabled-btn" style="margin-top:15px;">🔒 Вывод временно закрыт</button>
         </div>
     </div>
 
@@ -160,9 +163,9 @@
         <h2>👥 Рефералы</h2>
         <div class="info-card" style="width:100%">
             <input readonly id="ref-link" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;">
-            <button onclick="copyRef()" class="shop-btn">📋 Копировать ссылку</button>
+            <button id="copy-ref-btn" class="shop-btn">📋 Копировать ссылку</button>
             <input placeholder="Введите реферальный код" id="ref-code-input" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;">
-            <button onclick="applyRefCode()" class="shop-btn">🎁 Активировать код</button>
+            <button id="apply-ref-btn" class="shop-btn">🎁 Активировать код</button>
             <div id="referral-list"></div>
         </div>
     </div>
@@ -173,29 +176,23 @@
         <div class="rules-scroll">
             <div class="info-card"><p><strong>🍲 RUM‑майнинг</strong><br>Нажимай на овощи — получай RUM.</p></div>
             <div class="info-card"><p><strong>⛏️ Криптобеспредел</strong><br>Ставка SRUM, дуэль 20 сек.</p></div>
-            <div class="info-card"><p><strong>💎 Статусы и вывод</strong><br>Серебро/Золото/Платина.</p></div>
+            <div class="info-card"><p><strong>🧪 Безопасный режим</strong><br>Баллы являются игровыми. Покупка, обмен и вывод отключены до запуска проверенного backend.</p></div>
         </div>
     </div>
 
     <div class="screen" id="about-screen">
         <button class="back-btn">← Назад</button>
         <h2>📖 О проекте</h2>
-        <div class="rules-scroll"><div class="info-card"><p><strong>Крипто Борщ</strong> – GameFi-экосистема в Telegram.</p></div></div>
-    </div>
-
-    <!-- Админ-панель как полноценный экран -->
-    <div class="screen" id="admin-screen">
-        <button class="back-btn">← Назад</button>
-        <div id="admin-screen-content" style="width:100%; height:100%;"></div>
+        <div class="rules-scroll"><div class="info-card"><p><strong>Крипто Борщ</strong> — игровой прототип Telegram Mini App. Текущий релиз работает без реальных платежей и денежных наград.</p></div></div>
     </div>
 
     <div id="language-modal" class="language-modal hidden">
         <div class="language-box">
             <h3>Выберите язык</h3>
-            <button onclick="setLanguage('ru')">🇷🇺 Русский</button>
-            <button onclick="setLanguage('en')">🇬🇧 English</button>
-            <button onclick="setLanguage('zh')">🇨🇳 中文</button>
-            <button onclick="document.getElementById('language-modal').classList.add('hidden')">Отмена</button>
+            <button data-language="ru">🇷🇺 Русский</button>
+            <button data-language="en">🇬🇧 English</button>
+            <button data-language="zh">🇨🇳 中文</button>
+            <button id="language-cancel-btn">Отмена</button>
         </div>
     </div>
 
@@ -210,6 +207,7 @@
 
 </div>
 
+<script src="js/security.js"></script>
 <script src="js/lang.js"></script>
 <script src="js/api.js"></script>
 <script src="js/bonus.js"></script>
