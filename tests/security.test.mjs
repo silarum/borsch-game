@@ -159,6 +159,7 @@ test('старые финансовые таблицы закрыты от пу�
       new RegExp(`revoke all privileges on table public\\.${table} from public, anon, authenticated`)
     );
   }
+  assert.match(migration, /to_regclass\('public\.users'\)/);
   assert.match(migration, /drop policy if exists "Allow all for anon"/);
   assert.match(migration, /economy_ledger_match_id_idx/);
   assert.match(migration, /match_score_submissions_session_id_idx/);
