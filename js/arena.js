@@ -1,14 +1,5 @@
 // ================== АРЕНА (МАЙНИНГ, БАНДА, ГРУППОВОЙ, КЛУБНЫЙ, ЗАМОРОЗКА) ==================
 
-// --- Пул обычных ботов ---
-const defaultBotPool = [
-    { name: 'ТокенМастер', speed: 1000 },
-    { name: 'Борщехлёб', speed: 850 },
-    { name: 'CryptoWhale', speed: 700 },
-    { name: 'Майнер69', speed: 600 },
-    { name: 'Лампа', speed: 500 }
-];
-
 // --- Ободряющие фразы ---
 const cheerPhrases = [
     "Не расстраивайся, майнер! Следующий блок будет твоим! 💪",
@@ -21,11 +12,17 @@ const cheerPhrases = [
 ];
 
 // ================== ЖЕЛЕЗНАЯ МАТЕМАТИКА ==================
-const PENALTY_RATES = [0.10, 0.20, 0.40, 0.80, 1.00];
-const REWARD_RATES = [0.07, 0.14, 0.28, 0.56, 0.70];
+const PENALTY_RATES = window.BorschEconomy.penaltyRates;
+const REWARD_RATES = PENALTY_RATES.map((rate) => rate * window.BorschEconomy.winnerShare);
 
 function getPenaltyRate(stage) { return PENALTY_RATES[stage - 1] || 0.10; }
 function getRewardRate(stage) { return REWARD_RATES[stage - 1] || 0.07; }
+
+function stageWinMessage() {
+    return miningStage === 5
+        ? '<p style="color:#FFD700;">🔥 Пятый этап: максимальный майнинг продолжается до поражения</p>'
+        : `<p>📈 Этап повышен до ${miningStage}</p>`;
+}
 
 // Обратная совместимость
 function getPenaltyPercent() { return getPenaltyRate(miningStage); }
@@ -33,48 +30,54 @@ function getRewardPercent() { return getRewardRate(miningStage); }
 
 // --- Данные группового майнинга ---
 let groupSession = null;
+let activeServerTrainingMatchId = null;
+let activeServerMiningSessionId = null;
+let activeServerPoolId = null;
+let availableGamePools = [];
+let selectedGamePoolId = null;
 
-// --- Курс TON к USDT (только реальный) ---
-let tonUsdtRate = null;
-
-async function fetchTonRate() {
+async function hydratePoolHeader() {
+    const amount = document.getElementById('active-pool-amount');
+    const players = document.getElementById('active-pool-players');
+    const selectorSlot = document.getElementById('active-pool-selector');
+    if (!amount || !players || !selectorSlot) return;
+    if (!window.APP_CONFIG.matchmakingEnabled) {
+        amount.textContent = '🧪 Демо-пул';
+        players.textContent = 'Серверные суммы появятся после безопасного запуска';
+        return;
+    }
     try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
-        const data = await response.json();
-        if (data?.['the-open-network']?.usd) {
-            tonUsdtRate = data['the-open-network'].usd;
-            console.log('Курс TON/USDT:', tonUsdtRate);
+        availableGamePools = await getGamePools();
+        if (!availableGamePools.length) {
+            amount.textContent = 'Нет активных пулов';
+            players.textContent = 'Администратор должен создать и включить пул';
             return;
         }
-    } catch (e) { console.warn('CoinGecko не ответил.'); }
-    try {
-        const response = await fetch('https://tonapi.io/v2/rates?tokens=ton&currencies=usd');
-        const data = await response.json();
-        if (data?.rates?.TON?.prices?.USD) {
-            tonUsdtRate = data.rates.TON.prices.USD;
-            console.log('Курс TON/USDT:', tonUsdtRate);
-            return;
-        }
-    } catch (e) { console.warn('TON API не ответил.'); }
-    console.error('Курс TON не получен. Награда только в USDT.');
+        if (!availableGamePools.some((pool) => pool.id === selectedGamePoolId)) selectedGamePoolId = availableGamePools[0].id;
+        selectorSlot.innerHTML = `<select id="game-pool-select" aria-label="Игровой пул" style="width:100%;padding:10px;border-radius:12px;background:#111827;color:white;border:1px solid rgba(255,255,255,.15);">${availableGamePools.map((pool) => `<option value="${pool.id}" ${pool.id === selectedGamePoolId ? 'selected' : ''}>${window.escapeHtml(pool.name)}</option>`).join('')}</select>`;
+        const renderPool = () => {
+            const pool = availableGamePools.find((item) => item.id === selectedGamePoolId) || availableGamePools[0];
+            amount.textContent = pool.payout_asset === 'TON'
+                ? `⚡ ${Number(pool.display_ton || 0).toFixed(3)} TON`
+                : `💵 ${Number(pool.display_usdt || 0).toFixed(2)} USDT`;
+            players.textContent = `${Number(pool.players || 0)} игроков · ${Number(pool.spartans || 0)} спартанцев`;
+        };
+        document.getElementById('game-pool-select').addEventListener('change', (event) => {
+            selectedGamePoolId = event.target.value;
+            renderPool();
+        });
+        renderPool();
+    } catch (error) {
+        amount.textContent = 'Пул временно недоступен';
+        players.textContent = error.message;
+    }
 }
-fetchTonRate();
-setInterval(fetchTonRate, 120000);
 
-// --- Начисление награды (50% USDT, 50% TON) ---
-function awardReward(usdtAmount) {
-    if (!tonUsdtRate || tonUsdtRate <= 0) {
-        usdt += usdtAmount;
-        return { currency: 'USDT', amount: usdtAmount };
-    }
-    if (Math.random() < 0.5) {
-        usdt += usdtAmount;
-        return { currency: 'USDT', amount: usdtAmount };
-    } else {
-        const tonAmount = usdtAmount / tonUsdtRate;
-        ton += tonAmount;
-        return { currency: 'TON', amount: tonAmount };
-    }
+// Все награды текущего релиза — локальные игровые очки RUM.
+function awardReward(baseAmount) {
+    const rumAmount = Math.max(1, Math.round(baseAmount * 1000));
+    rum += rumAmount;
+    return { currency: 'RUM', amount: rumAmount };
 }
 
 // Проверка, хватает ли на штраф этапа
@@ -98,74 +101,9 @@ quickDuelCoin.addEventListener('click', () => {
     showMiningModal();
 });
 
-// --- Окно добычи SRUM ---
+// Покупка SRUM появится только после серверной проверки платежей.
 function showBuySRUMModal() {
-    document.querySelectorAll('.quick-duel-modal').forEach(m => m.remove());
-    const modal = document.createElement('div');
-    modal.className = 'quick-duel-modal';
-    modal.innerHTML = `
-        <div class="quick-duel-box" style="border:none;background:transparent;padding:0;">
-            <div class="pool-cloud" style="background:radial-gradient(circle at 20% 20%,#1a3a1a,#0d1f0d);">
-                <h2>⛏️ Добыть SRUM</h2>
-                <p style="color:#ccc;margin-bottom:15px;">Введите сумму и выберите валюту</p>
-                <input type="number" id="buy-srum-amount" placeholder="Сумма SRUM" min="1" step="1" style="width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;font-size:1.2rem;text-align:center;">
-                <div style="display:flex;gap:10px;margin-top:15px;">
-                    <button id="buy-srum-ton-btn" class="buy-srum-btn" disabled style="background:linear-gradient(180deg,#2196F3,#1565C0);">⚡ Добыть за<br><span id="ton-price-preview">0.00</span> TON</button>
-                    <button id="buy-srum-usdt-btn" class="buy-srum-btn" disabled style="background:linear-gradient(180deg,#4CAF50,#2E7D32);">💵 Добыть за<br><span id="usdt-price-preview">0.00</span> USDT</button>
-                </div>
-                <p style="color:#aaa;font-size:0.75rem;margin-top:10px;">Курс: 1 SRUM = 0.5 TON | 1 SRUM = 1 USDT</p>
-                <button id="cancel-buy-srum" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">Отмена</button>
-            </div>
-        </div>
-    `;
-    document.getElementById('game-container').appendChild(modal);
-    if (!document.getElementById('buy-srum-style')) {
-        const style = document.createElement('style'); style.id = 'buy-srum-style';
-        style.textContent = `.buy-srum-btn{flex:1;padding:14px 8px;border:none;border-radius:12px;font-weight:bold;font-size:0.85rem;color:white;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.3);transition:transform 0.1s;line-height:1.3;}.buy-srum-btn:active{transform:scale(0.96);}.buy-srum-btn:disabled{background:#555!important;color:#999;cursor:not-allowed;box-shadow:none;}`;
-        document.head.appendChild(style);
-    }
-    const amountInput = document.getElementById('buy-srum-amount');
-    const tonPrice = document.getElementById('ton-price-preview');
-    const usdtPrice = document.getElementById('usdt-price-preview');
-    const tonBtn = document.getElementById('buy-srum-ton-btn');
-    const usdtBtn = document.getElementById('buy-srum-usdt-btn');
-    const BUY_RATE = { TON: 0.5, USDT: 1 };
-    amountInput.addEventListener('input', () => {
-        const amount = parseFloat(amountInput.value) || 0;
-        const valid = amount > 0;
-        tonPrice.textContent = (amount * BUY_RATE.TON).toFixed(2);
-        usdtPrice.textContent = (amount * BUY_RATE.USDT).toFixed(2);
-        tonBtn.disabled = !valid; usdtBtn.disabled = !valid;
-    });
-    tonBtn.addEventListener('click', async () => {
-        const amount = parseFloat(amountInput.value) || 0;
-        if (amount <= 0) return;
-        const tonNeeded = amount * BUY_RATE.TON;
-        if (!currentWalletAddress) { alert('Подключите TON кошелёк'); return; }
-        if (ton < tonNeeded) { alert(`Недостаточно TON. Нужно ${tonNeeded.toFixed(2)}`); return; }
-        if (!confirm(`Добыть ${amount} SRUM за ${tonNeeded.toFixed(2)} TON?`)) return;
-        ton -= tonNeeded; srum += amount; updateUI(); saveAll();
-        if (typeof saveUserData === 'function' && userId) { saveUserData(userId, { ton, srum }).catch(() => {}); }
-        modal.remove(); alert(`✅ Добыто ${amount} SRUM!`);
-    });
-    usdtBtn.addEventListener('click', async () => {
-        const amount = parseFloat(amountInput.value) || 0;
-        if (amount <= 0) return;
-        const usdtNeeded = amount * BUY_RATE.USDT;
-        if (usdt < usdtNeeded) { alert(`Недостаточно USDT. Нужно ${usdtNeeded.toFixed(2)}`); return; }
-        if (!confirm(`Добыть ${amount} SRUM за ${usdtNeeded.toFixed(2)} USDT?`)) return;
-        usdt -= usdtNeeded; srum += amount; updateUI(); saveAll();
-        if (typeof saveUserData === 'function' && userId) { saveUserData(userId, { usdt, srum }).catch(() => {}); }
-        modal.remove(); alert(`✅ Добыто ${amount} SRUM!`);
-    });
-    document.getElementById('cancel-buy-srum').addEventListener('click', () => { 
-        modal.remove(); 
-        if (pendingMining) { 
-            srum += pendingMining.threshold; 
-            pendingMining = null; 
-            updateUI(); 
-        } 
-    });
+    window.showSafeModeNotice();
 }
 
 // --- Модалка Криптобеспредела ---
@@ -173,14 +111,13 @@ function showMiningModal() {
     document.querySelectorAll('.quick-duel-modal').forEach(m => m.remove());
     const modal = document.createElement('div');
     modal.className = 'quick-duel-modal';
-    const poolAmount = (10000 + Math.random() * 190000).toFixed(0);
-    const activePlayers = Math.floor(10 + Math.random() * 290);
     modal.innerHTML = `
         <div class="quick-duel-box" style="border:none;background:transparent;padding:0;">
             <div class="pool-cloud">
                 <h2>⛏️ Криптобеспредел</h2>
-                <div class="pool-amount">💎 ${poolAmount} USDT</div>
-                <div class="pool-players">🖥️ <span>${activePlayers}</span> майнеров в пуле</div>
+                <div class="pool-amount" id="active-pool-amount">⏳ Загрузка пула</div>
+                <div class="pool-players" id="active-pool-players">Сверяем очередь</div>
+                <div id="active-pool-selector"></div>
                 <div class="pool-stage">Твой этап: <b>${miningStage}</b></div>
                 <div style="display:flex;gap:8px;margin-top:15px;">
                     <button id="mode-solo" class="mining-mode-btn active" style="flex:1;">⚡ Соло</button>
@@ -192,6 +129,7 @@ function showMiningModal() {
         </div>
     `;
     document.getElementById('game-container').appendChild(modal);
+    hydratePoolHeader();
 
     if (!document.getElementById('mining-mode-style')) {
         const style = document.createElement('style'); style.id = 'mining-mode-style';
@@ -219,14 +157,12 @@ function showMiningModal() {
     function renderSoloMode() {
         const container = document.getElementById('mining-mode-content');
         container.innerHTML = `
-            <select id="mining-currency" style="width:100%;padding:12px;margin-top:10px;border-radius:10px;border:none;font-size:1rem;background:rgba(255,255,255,0.15);color:white;">
-                <option value="SRUM" ${miningCurrency==='SRUM'?'selected':''}>SRUM</option>
-                <option value="RUM" ${miningCurrency==='RUM'?'selected':''}>RUM</option>
-            </select>
+            <input type="hidden" id="mining-currency" value="SRUM">
+            <p style="color:#aaa;font-size:0.75rem;">Тренировочный режим · игровые SRUM</p>
             <input type="range" min="0.01" max="5" step="0.01" value="${miningThreshold}" id="threshold-slider" style="width:100%;margin-top:10px;">
             <p style="color:#ccc;margin-top:5px;">Ставка: <strong id="mining-stake">${miningThreshold.toFixed(2)}</strong> <span id="stake-currency">${miningCurrency}</span></p>
             <p style="color:#ff6666;" id="penalty-text">Штраф при поражении: ${(miningThreshold * getPenaltyPercent()).toFixed(4)} SRUM</p>
-            <p style="color:#66ff66;" id="reward-text">Награда при победе: ${(miningThreshold * getRewardPercent()).toFixed(4)} USDT</p>
+            <p style="color:#66ff66;" id="reward-text">Награда при победе: ${Math.max(1, Math.round(miningThreshold * getRewardPercent() * 1000))} RUM</p>
             <button class="btn-mining-big" id="start-solo-mining">🔍 ИСКАТЬ БЛОК</button>
         `;
         const slider = document.getElementById('threshold-slider');
@@ -234,16 +170,16 @@ function showMiningModal() {
             const value = parseFloat(this.value);
             document.getElementById('mining-stake').textContent = value.toFixed(2);
             document.getElementById('penalty-text').textContent = `Штраф при поражении: ${(value * getPenaltyPercent()).toFixed(4)} SRUM`;
-            document.getElementById('reward-text').textContent = `Награда при победе: ${(value * getRewardPercent()).toFixed(4)} USDT`;
+            document.getElementById('reward-text').textContent = `Награда при победе: ${Math.max(1, Math.round(value * getRewardPercent() * 1000))} RUM`;
         });
         document.getElementById('start-solo-mining').addEventListener('click', () => {
             miningCurrency = document.getElementById('mining-currency').value;
             miningThreshold = parseFloat(slider.value);
-            if (miningCurrency === 'SRUM' && srum < miningThreshold) { modal.remove(); showBuySRUMModal(); return; }
-            if (miningCurrency === 'RUM' && rum < miningThreshold) return alert('Недостаточно RUM');
-            // Замораживаем ставку
-            if (miningCurrency === 'SRUM') { srum -= miningThreshold; frozenStake = miningThreshold; }
-            else { rum -= miningThreshold; frozenStake = miningThreshold; }
+            if (srum < miningThreshold) return alert('Недостаточно игровых SRUM');
+            srum -= miningThreshold;
+            frozenStake = miningThreshold;
+            activeServerMiningSessionId = null;
+            activeServerPoolId = selectedGamePoolId;
             pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage };
             updateUI(); modal.remove(); startSearch('mining');
         });
@@ -252,14 +188,14 @@ function showMiningModal() {
     function renderGroupMode() {
         const container = document.getElementById('mining-mode-content');
         if (groupSession && groupSession.fighters.length >= 2) {
-            let fightersHtml = groupSession.fighters.map((f, i) => `<div style="font-size:0.8rem;padding:4px 0;">${i+1}. ${f.name} ${f.ready ? '✅' : '⏳'}</div>`).join('');
+            let fightersHtml = groupSession.fighters.map((f, i) => `<div style="font-size:0.8rem;padding:4px 0;">${i+1}. ${window.escapeHtml(f.name)} ${f.ready ? '✅' : '⏳'}</div>`).join('');
             const allReady = groupSession.fighters.every(f => f.ready);
             container.innerHTML = `
                 <p style="color:#FFD700;margin-top:10px;">👥 Группа (${groupSession.fighters.length}/5)</p>
                 <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:10px;margin:10px 0;max-height:150px;overflow-y:auto;">${fightersHtml}</div>
                 <p style="color:#ccc;font-size:0.8rem;">Режим: ${groupSession.mode === 'boss_pay' ? '💰 Платит создатель' : '💸 Каждый за себя'}</p>
                 <p style="color:#ccc;font-size:0.8rem;">Ставка: ${groupSession.threshold.toFixed(2)} SRUM × ${groupSession.fighters.length} = ${groupSession.totalStake.toFixed(2)} SRUM</p>
-                <p style="color:#66ff66;font-size:0.75rem;">Награда при победе: ${(groupSession.totalStake * getRewardPercent()).toFixed(4)} USDT</p>
+                <p style="color:#66ff66;font-size:0.75rem;">Награда при победе: ${Math.max(1, Math.round(groupSession.totalStake * getRewardPercent() * 1000))} RUM</p>
                 <p style="color:#ff6666;font-size:0.75rem;">Штраф при поражении: ${(groupSession.totalStake * getPenaltyPercent()).toFixed(4)} SRUM</p>
                 ${groupSession.bossId === userId ? '<button class="btn-mining-big" id="start-group-mining" style="margin-top:10px;">⚔️ НАЧАТЬ БОЙ</button>' : 
                   `<button class="btn-mining-big" id="ready-group-btn" style="margin-top:10px;">✅ Готов</button>`}
@@ -275,11 +211,15 @@ function showMiningModal() {
                     if (srum < groupSession.totalStake) { modal.remove(); showBuySRUMModal(); return; }
                     srum -= groupSession.totalStake;
                     frozenStake = groupSession.totalStake;
+                    activeServerMiningSessionId = null;
+                    activeServerPoolId = selectedGamePoolId;
                 } else {
                     const myStake = groupSession.threshold;
                     if (srum < myStake) { modal.remove(); showBuySRUMModal(); return; }
                     srum -= myStake;
                     frozenStake = myStake;
+                    activeServerMiningSessionId = null;
+                    activeServerPoolId = selectedGamePoolId;
                 }
                 pendingMining = { currency: 'SRUM', threshold: groupSession.threshold, stage: miningStage, group: true, groupSession };
                 updateUI(); modal.remove(); startSearch('mining');
@@ -308,16 +248,20 @@ function showMiningModal() {
             document.getElementById('mode-split').addEventListener('click', () => { groupMode = 'split'; document.getElementById('mode-split').classList.add('active'); document.getElementById('mode-boss-pay').classList.remove('active'); });
             document.getElementById('create-group-btn').addEventListener('click', () => {
                 const threshold = parseFloat(slider.value);
+                const trainingNames = ['Борщехлёб', 'ТокенМастер', 'Лампа', 'CryptoWhale'];
                 groupSession = {
                     bossId: userId,
-                    fighters: [{ id: userId, name: userNickname || 'Ты', ready: true }],
+                    fighters: [
+                        { id: userId, name: userNickname || 'Ты', ready: true },
+                        ...trainingNames.map((name, index) => ({ id: `training-${index}`, name, ready: true }))
+                    ],
                     threshold,
                     currency: 'SRUM',
                     mode: groupMode,
-                    totalStake: threshold * 1
+                    totalStake: threshold * 5
                 };
                 renderGroupMode();
-                alert(`Группа создана! Ставка: ${threshold.toFixed(2)} SRUM. Пригласите ещё 4 участников.`);
+                alert(`Тренировочная группа собрана. Ставка: ${threshold.toFixed(2)} SRUM на бойца.`);
             });
         }
     }
@@ -327,7 +271,7 @@ function showMiningModal() {
 function startSearch(mode = 'mining') {
     const overlay = document.createElement('div');
     overlay.className = 'countdown-overlay';
-    overlay.innerHTML = '<div style="font-size:1.8rem;">🔍 Поиск блока...</div>';
+    overlay.innerHTML = `<div style="font-size:1.8rem;">🔍 Поиск ${window.APP_CONFIG.matchmakingEnabled ? 'соперника в пуле' : 'тренировочного соперника'}...</div>`;
     document.getElementById('game-container').appendChild(overlay);
     let cancelled = false;
     const cancelBtn = document.createElement('button');
@@ -342,21 +286,88 @@ function startSearch(mode = 'mining') {
     });
     overlay.appendChild(cancelBtn);
 
-    fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/matchmaking', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, threshold: pendingMining?.threshold || miningThreshold, stage: miningStage, currency: miningCurrency })
-    }).then(res => res.json()).then(data => {
-        if (cancelled) return; overlay.remove();
-        if (data.found) { currentBot = { name: 'Игрок', speed: 800, botIndex: -1, shouldWin: false }; }
-        else { let selectedBot = null; if (spartansEnabled) selectedBot = selectSpartanBot(miningStage); if (selectedBot) { currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin }; } else { let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)]; currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false }; } }
+    setTimeout(async () => {
+        if (cancelled) return;
+        let selectedBot = null;
+        if (window.APP_CONFIG.matchmakingEnabled) {
+            try {
+                const serverMatch = await requestTrainingMatch(
+                    pendingMining?.stage || miningStage,
+                    pendingMining?.threshold || miningThreshold,
+                    activeServerPoolId || selectedGamePoolId,
+                    activeServerMiningSessionId
+                );
+                if (cancelled) return;
+                if (!serverMatch || serverMatch.status !== 'matched' || !serverMatch.opponent) {
+                    if (serverMatch?.session_id) {
+                        closeMiningSession(serverMatch.session_id).catch(() => {});
+                    }
+                    overlay.remove();
+                    srum += frozenStake;
+                    frozenStake = 0;
+                    pendingMining = null;
+                    updateUI();
+                    alert(serverMatch?.status === 'maintenance'
+                        ? 'Проект временно на техобслуживании.'
+                        : 'Соперник пока не найден. Игровая ставка возвращена.');
+                    return;
+                }
+                activeServerTrainingMatchId = serverMatch.match_id;
+                activeServerMiningSessionId = serverMatch.session_id;
+                activeServerPoolId = serverMatch.pool_id || selectedGamePoolId;
+                selectedBot = {
+                    name: serverMatch.opponent.name || serverMatch.opponent.label,
+                    speed: Number(serverMatch.opponent.speed_ms) || 900,
+                    kind: serverMatch.opponent.kind,
+                    botIndex: -1,
+                    shouldWin: false,
+                    poolStatus: serverMatch.opponent.kind === 'spartan' ? 'проверенный участник · Спартанец' : 'живой игрок'
+                };
+            } catch (error) {
+                overlay.remove();
+                srum += frozenStake;
+                frozenStake = 0;
+                pendingMining = null;
+                updateUI();
+                alert(error.message || 'Matchmaking временно недоступен');
+                return;
+            }
+        } else if (spartansEnabled) {
+            selectedBot = selectSpartanBot(miningStage);
+        }
+        overlay.remove();
+        if (selectedBot) {
+            currentBot = {
+                name: selectedBot.name,
+                speed: selectedBot.speed,
+                botIndex: selectedBot.botIndex,
+                shouldWin: selectedBot.shouldWin,
+                kind: selectedBot.kind || 'spartan',
+                poolStatus: selectedBot.poolStatus || 'локальный резерв 300 спартанцев'
+            };
+        } else {
+            srum += frozenStake;
+            frozenStake = 0;
+            pendingMining = null;
+            updateUI();
+            alert('Спартанцы отключены. Соперник не найден, игровая ставка возвращена.');
+            return;
+        }
         const readyDiv = document.createElement('div'); readyDiv.className = 'countdown-overlay';
-        readyDiv.innerHTML = `<div style="text-align:center;"><p>Соперник: <b>${currentBot.name}</b></p><p>Ставка: ${(pendingMining?.threshold || miningThreshold).toFixed(2)} ${miningCurrency}</p><button id="mining-ready-btn" class="start-btn" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button><button id="cancel-ready-btn" style="margin-top:10px;padding:10px 20px;font-size:1rem;background:#B22222;color:white;border:none;border-radius:10px;cursor:pointer;">✖ Отмена</button></div>`;
+        readyDiv.innerHTML = `<div style="text-align:center;"><p>${window.APP_CONFIG.matchmakingEnabled ? 'Соперник' : 'Тренировочный соперник'}: <b>${escapeHtml(currentBot.name)}</b></p><p style="color:#aaa;font-size:0.75rem;">${escapeHtml(currentBot.poolStatus)}</p><p>Игровая ставка: ${(pendingMining?.threshold || miningThreshold).toFixed(2)} SRUM</p><button id="mining-ready-btn" class="start-btn" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button><button id="cancel-ready-btn" style="margin-top:10px;padding:10px 20px;font-size:1rem;background:#B22222;color:white;border:none;border-radius:10px;cursor:pointer;">✖ Отмена</button></div>`;
         document.getElementById('game-container').appendChild(readyDiv);
-        document.getElementById('cancel-ready-btn').addEventListener('click', () => { 
+        document.getElementById('cancel-ready-btn').addEventListener('click', async () => {
+            cancelled = true;
+            const matchId = activeServerTrainingMatchId;
+            activeServerTrainingMatchId = null;
+            if (matchId && window.APP_CONFIG.matchmakingEnabled) {
+                await cancelGameMatch(matchId).catch((error) => console.warn('Отмена матча:', error.message));
+                activeServerMiningSessionId = null;
+                activeServerPoolId = null;
+            }
             readyDiv.remove(); 
             srum += frozenStake; frozenStake = 0;
             pendingMining = null; updateUI();
-            setTimeout(() => startSearch(mode), 500); 
         });
         document.getElementById('mining-ready-btn').addEventListener('click', () => { 
             document.getElementById('mining-ready-btn').disabled = true; 
@@ -372,54 +383,88 @@ function startSearch(mode = 'mining') {
                 }, 1000); 
             }, 1500); 
         });
-    }).catch(() => { 
-        overlay.remove(); 
-        srum += frozenStake; frozenStake = 0;
-        pendingMining = null; updateUI();
-        let b = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)]; 
-        currentBot = { name: b.name, speed: b.speed, botIndex: -1, shouldWin: false }; 
-    });
+    }, 700);
 }
 
 // --- Запуск дуэли ---
 function startDuel() { 
     duelActive = true; gameActive = false; clearInterval(gameTimer); clearInterval(spawnInterval); 
-    board.removeEventListener('touchstart', handleTouchStart); board.removeEventListener('touchmove', preventDefaultMove); 
+    board.removeEventListener('touchstart', handleTouchStart); board.removeEventListener('click', handleBoardClick);
     duelPlayerScore = 0; duelOpponentScore = 0; duelTimeLeft = 20; duelScoreboard.classList.remove('hidden'); 
     updateDuelScore(); spawnAll(); 
     let duelSpawnInterval = setInterval(() => { if (duelActive) spawnAll(); }, 1500); 
-    let duelBotInterval = setInterval(() => { if (duelActive) { duelOpponentScore++; updateDuelScore(); } }, currentBot.speed); 
+    let duelBotInterval = currentBot.kind === 'human' ? null : setInterval(() => { if (duelActive) { duelOpponentScore++; updateDuelScore(); } }, currentBot.speed);
     let duelTimerInterval = setInterval(() => { if (!duelActive) return; duelTimeLeft--; duelTimerEl.textContent = duelTimeLeft; if (duelTimeLeft <= 0) endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval); }, 1000); 
     board.addEventListener('touchstart', duelTouchHandler, {passive: false}); 
-    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false}); 
+    board.addEventListener('touchmove', preventDefaultMove, {passive: false});
+    board.addEventListener('click', duelClickHandler);
+}
+
+function processDuelHole(hole) {
+    if (!duelActive || !hole) return;
+    const num = [...holes].indexOf(hole);
+    if (num === -1 || !currentVeg[num]) return;
+    if (currentVeg[num].type === 'good') {
+        duelPlayerScore++;
+        const image = hole.querySelector('.veg');
+        if (image) flyVegToPot(hole, image.src);
+    } else {
+        duelPlayerScore = Math.max(0, duelPlayerScore - 2);
+    }
+    delete currentVeg[num];
+    hole.innerHTML = '';
+    updateDuelScore();
 }
 
 function duelTouchHandler(e) { 
-    e.preventDefault(); if (!duelActive) return; 
-    [...e.changedTouches].forEach(touch => { 
-        const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole'); 
-        if (hole) { 
-            const num = [...holes].indexOf(hole); 
-            if (num !== -1 && currentVeg[num]) { 
-                if (currentVeg[num].type === 'good') { duelPlayerScore++; flyVegToPot(hole, hole.querySelector('.veg').textContent); } 
-                else { duelPlayerScore = Math.max(0, duelPlayerScore - 2); } 
-                delete currentVeg[num]; hole.innerHTML = ''; updateDuelScore(); 
-            } 
-        } else { duelPlayerScore = Math.max(0, duelPlayerScore - 2); updateDuelScore(); } 
-    }); 
+    e.preventDefault();
+    if (!duelActive) return;
+    [...e.changedTouches].forEach(touch => {
+        const hole = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.hole');
+        if (hole) processDuelHole(hole);
+    });
 }
 
-function updateDuelScore() { duelPlayerScoreEl.textContent = duelPlayerScore; duelOpponentScoreEl.textContent = duelOpponentScore; }
+function duelClickHandler(e) {
+    if (!duelActive) return;
+    processDuelHole(e.target.closest('.hole'));
+}
+
+function updateDuelScore() {
+    duelPlayerScoreEl.textContent = duelPlayerScore;
+    duelOpponentScoreEl.textContent = currentBot?.kind === 'human' ? '…' : duelOpponentScore;
+}
+
+async function awaitServerSettlement(matchId, playerScore) {
+    let settlement = await resolveTrainingMatch(matchId, Math.min(60, Math.max(0, playerScore)));
+    for (let attempt = 0; attempt < 30 && ['active', 'waiting_for_opponent'].includes(settlement?.status); attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        settlement = await getMatchResult(matchId);
+    }
+    return settlement;
+}
+
+function applyServerBalances(balances) {
+    if (!balances) return;
+    srum = Number(balances.srum_available || 0);
+    usdt = Number(balances.usdt || 0);
+    ton = Number(balances.ton || 0);
+    rum = Number(balances.rumir || 0);
+}
 
 // --- Завершение дуэли (ЖЕЛЕЗНАЯ МАТЕМАТИКА) ---
 async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     duelActive = false; clearInterval(duelTimerInterval); clearInterval(duelSpawnInterval); clearInterval(duelBotInterval);
-    board.removeEventListener('touchstart', duelTouchHandler); board.removeEventListener('touchmove', preventDefaultMove);
+    board.removeEventListener('touchstart', duelTouchHandler); board.removeEventListener('click', duelClickHandler);
     board.addEventListener('touchstart', handleTouchStart, {passive: false}); 
-    board.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+    board.addEventListener('touchmove', preventDefaultMove, {passive: false});
+    board.addEventListener('click', handleBoardClick);
     holes.forEach(h => h.innerHTML = ''); currentVeg = {}; duelScoreboard.classList.add('hidden');
     
-    const win = duelPlayerScore > duelOpponentScore;
+    // В локальном резерве действует заданная последовательность спартанца:
+    // после поражения на этапе N он гарантированно выигрывает на N+1,
+    // а на пятом этапе выигрывает всегда.
+    let win = currentBot?.shouldWin ? false : duelPlayerScore > duelOpponentScore;
     let resultDiv = document.createElement('div'); resultDiv.className = 'result-overlay';
 
     const threshold = pendingMining?.threshold || miningThreshold;
@@ -431,33 +476,78 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     let rewardUSDT = threshold * rewardRate;
     const stake = frozenStake || threshold;
 
-    // Обновляем спартанца
-    if (currentBot && currentBot.botIndex !== undefined && currentBot.botIndex >= 0) {
+    let serverSettlement = null;
+    if (activeServerTrainingMatchId) {
+        const matchId = activeServerTrainingMatchId;
+        activeServerTrainingMatchId = null;
+        try {
+            serverSettlement = await awaitServerSettlement(matchId, duelPlayerScore);
+        } catch (error) {
+            console.warn('Не удалось получить расчёт матча:', error.message);
+            serverSettlement = { status: 'pending' };
+        }
+    }
+
+    if (serverSettlement) {
+        if (serverSettlement.status === 'resolved') {
+            win = Boolean(serverSettlement.player_won);
+            miningStage = Number(serverSettlement.next_stage || 1);
+            frozenStake = Number(serverSettlement.remaining_stake_srum || 0);
+            applyServerBalances(serverSettlement.player_balances);
+            if (win) {
+                showCoinFountain(30);
+                resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2>
+                    <p>🏆 Начислено: +${Number(serverSettlement.player_payout_amount || 0).toFixed(4)} ${window.escapeHtml(serverSettlement.payout_asset || 'USDT')}</p>
+                    ${stageWinMessage()}
+                    <button id="continue-mining">Продолжить</button>
+                    <button id="pause-mining">⏸️ Пауза</button>`;
+            } else {
+                showPoopFountain(20);
+                resultDiv.innerHTML = `<h2>💨 Блок упущен</h2>
+                    <p>Штраф: ${Number(serverSettlement.penalty_srum || 0).toFixed(4)} SRUM</p>
+                    <p>🔒 Остаток взноса: ${frozenStake.toFixed(4)} SRUM</p>
+                    <p>📉 Этап сброшен до 1</p>
+                    <button id="continue-mining">Продолжить</button>
+                    <button id="pause-mining">⏸️ Пауза</button>`;
+            }
+        } else if (serverSettlement.status === 'draw') {
+            miningStage = Number(serverSettlement.stage || currentStage);
+            frozenStake = Number(serverSettlement.remaining_stake_srum || stake);
+            applyServerBalances(serverSettlement.player_balances);
+            resultDiv.innerHTML = `<h2>🤝 Ничья</h2>
+                <p>Взнос остаётся в сессии без штрафа.</p>
+                <button id="continue-mining">Повторить</button>
+                <button id="pause-mining">⏸️ Пауза</button>`;
+        } else {
+            resultDiv.innerHTML = `<h2>⏳ Результат обрабатывается</h2>
+                <p>Сервер сохранил матч. Баланс не изменяется в браузере до окончательного расчёта.</p>
+                <button id="pause-mining">Закрыть</button>`;
+        }
+    // Обновляем только локального демо-спартанца.
+    } else if (currentBot && currentBot.botIndex !== undefined && currentBot.botIndex >= 0) {
         updateSpartanBot(currentBot.botIndex, !win, currentStage, penaltySRUM, rewardUSDT);
     }
 
-    if (pendingMining?.group) {
+    if (!serverSettlement && pendingMining?.group) {
         const gs = pendingMining.groupSession;
         const fightersCount = gs.fighters.length;
         const totalStake = gs.totalStake || (threshold * fightersCount);
         
         if (gs.mode === 'boss_pay') {
             if (win) {
-                srum += totalStake;
                 frozenStake = totalStake;
                 const totalRewardUSDT = totalStake * rewardRate;
                 const award = awardReward(totalRewardUSDT);
                 if (miningStage < 5) miningStage++;
                 resultDiv.innerHTML = `<h2>⛏️ Группа победила!</h2>
                     <p>🏆 Награда: +${award.amount.toFixed(4)} ${award.currency}</p>
-                    <p>📈 Этап повышен до ${miningStage}</p>
-                    <p>Бойцы: ${gs.fighters.map(f=>f.name).join(', ')}</p>
+                    ${stageWinMessage()}
+                    <p>Бойцы: ${gs.fighters.map(f => window.escapeHtml(f.name)).join(', ')}</p>
                     <button id="continue-mining">Продолжить</button>
                     <button id="pause-mining">⏸️ Пауза</button>`;
             } else {
                 const refund = totalStake - (totalStake * penaltyRate);
-                srum += refund;
-                frozenStake = 0;
+                frozenStake = Math.max(0, refund);
                 miningStage = 1;
                 resultDiv.innerHTML = `<h2>💨 Группа проиграла</h2>
                     <p>↩️ Возврат: ${refund.toFixed(4)} SRUM</p>
@@ -467,20 +557,18 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
             }
         } else {
             if (win) {
-                srum += threshold;
                 frozenStake = threshold;
                 const myRewardUSDT = (totalStake * rewardRate) / fightersCount;
                 const award = awardReward(myRewardUSDT);
                 if (miningStage < 5) miningStage++;
                 resultDiv.innerHTML = `<h2>⛏️ Ты победил в группе!</h2>
                     <p>🏆 Награда: +${award.amount.toFixed(4)} ${award.currency}</p>
-                    <p>📈 Этап повышен до ${miningStage}</p>
+                    ${stageWinMessage()}
                     <button id="continue-mining">Продолжить</button>
                     <button id="pause-mining">⏸️ Пауза</button>`;
             } else {
                 const refund = threshold - penaltySRUM;
-                srum += refund;
-                frozenStake = 0;
+                frozenStake = Math.max(0, refund);
                 miningStage = 1;
                 resultDiv.innerHTML = `<h2>💨 Поражение</h2>
                     <p>↩️ Возврат: ${refund.toFixed(4)} SRUM</p>
@@ -490,22 +578,20 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
             }
         }
         groupSession = null;
-    } else {
+    } else if (!serverSettlement) {
         if (win) {
-            srum += stake;
             frozenStake = stake;
             showCoinFountain(30);
             const award = awardReward(rewardUSDT);
             if (miningStage < 5) miningStage++;
             resultDiv.innerHTML = `<h2>⛏️ Блок добыт!</h2>
                 <p>🏆 Награда: +${award.amount.toFixed(4)} ${award.currency}</p>
-                <p>📈 Этап повышен до ${miningStage}</p>
+                ${stageWinMessage()}
                 <button id="continue-mining">Продолжить</button>
                 <button id="pause-mining">⏸️ Пауза</button>`;
         } else {
             showPoopFountain(20);
             const refund = stake - penaltySRUM;
-            srum += Math.max(0, refund);
             frozenStake = Math.max(0, refund);
             miningStage = 1;
             let phrase = cheerPhrases[Math.floor(Math.random() * cheerPhrases.length)];
@@ -539,6 +625,10 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     document.getElementById('pause-mining')?.addEventListener('click', () => { 
         if (pausedSessions.length >= 7) return alert('Лимит пауз (7)'); 
         pausedSessions.push({ currency: 'SRUM', threshold: frozenStake, stage: miningStage, frozenStake: frozenStake }); 
+        pausedSessions[pausedSessions.length - 1].serverSessionId = activeServerMiningSessionId;
+        pausedSessions[pausedSessions.length - 1].serverPoolId = activeServerPoolId;
+        activeServerMiningSessionId = null;
+        activeServerPoolId = null;
         frozenStake = 0;
         updateUI(); resultDiv.remove(); renderPausedSessions(); 
     });
@@ -562,6 +652,8 @@ function renderPausedSessions() {
         let session = pausedSessions[idx]; 
         if (!session) return; 
         frozenStake = session.frozenStake || session.threshold;
+        activeServerMiningSessionId = session.serverSessionId || null;
+        activeServerPoolId = session.serverPoolId || null;
         miningCurrency = 'SRUM'; 
         miningThreshold = session.threshold; 
         miningStage = session.stage; 
@@ -574,7 +666,10 @@ function renderPausedSessions() {
     document.querySelectorAll('.cancel-session').forEach(b => b.addEventListener('click', (e) => { 
         let idx = e.target.dataset.idx; 
         const session = pausedSessions[idx];
-        if (session) { srum += session.frozenStake || session.threshold; }
+        if (session) {
+            srum += session.frozenStake || session.threshold;
+            if (session.serverSessionId) closeMiningSession(session.serverSessionId).catch(() => {});
+        }
         pausedSessions.splice(idx, 1); 
         updateUI(); renderPausedSessions(); 
     })); 
@@ -597,9 +692,10 @@ function renderArena() {
         const penalty = (miningThreshold * getPenaltyPercent()).toFixed(4); 
         const reward = (miningThreshold * getRewardPercent()).toFixed(4);
         html = `<h2>⛏️ Личный майнинг</h2>
-            <p>Ставка: <b>${miningThreshold.toFixed(2)} SRUM</b> | Этап: <b>${miningStage}</b></p>
+            <p>Взнос: <b>${miningThreshold.toFixed(2)} SRUM</b> | Этап: <b>${miningStage}</b></p>
             <p>Штраф при поражении: ${penalty} SRUM</p>
-            <p>Награда при победе: ${reward} USDT</p>
+            <p>Победителю: ${reward} SRUM-экв. · казне: ${(Number(penalty) - Number(reward)).toFixed(4)} SRUM</p>
+            ${miningStage === 5 ? '<p style="color:#FFD700;">🔥 Пятый этап повторяется до поражения</p>' : ''}
             ${frozenStake > 0 ? `<p style="color:#FFD700;">🔒 Заморожено: ${frozenStake.toFixed(4)} SRUM</p>` : ''}
             <input type="range" min="0.01" max="5" step="0.01" value="${miningThreshold}" id="threshold-slider-arena" style="width:90%;">
             <p>Ставка: <strong id="arena-stake">${miningThreshold.toFixed(2)}</strong> SRUM</p>
@@ -620,6 +716,8 @@ function renderArena() {
             if (srum < miningThreshold) { showBuySRUMModal(); return; } 
             srum -= miningThreshold; 
             frozenStake = miningThreshold;
+            activeServerMiningSessionId = null;
+            activeServerPoolId = selectedGamePoolId;
             miningCurrency = 'SRUM'; 
             pendingMining = { currency: miningCurrency, threshold: miningThreshold, stage: miningStage }; 
             document.querySelector('#arena-screen').classList.remove('active'); 
@@ -638,18 +736,17 @@ function showTournamentModal() {
     document.querySelectorAll('.quick-duel-modal').forEach(m => m.remove()); 
     const tourModal = document.createElement('div'); 
     tourModal.className = 'quick-duel-modal'; 
-    const poolAmount = (5000 + Math.random() * 45000).toFixed(0); 
-    const activePlayers = Math.floor(5 + Math.random() * 95); 
+    const activePlayers = Math.floor(5 + Math.random() * 25);
     tourModal.innerHTML = `<div class="quick-duel-box" style="border:none;background:transparent;padding:0;">
         <div class="pool-cloud" style="background:radial-gradient(circle at 20% 20%,#8b0000,#4a0000);">
             <h2>🔒 Выжить в тюрьме</h2>
-            <div class="pool-amount">💎 ${poolAmount} USDT</div>
-            <div class="pool-players">🖥️ <span>${activePlayers}</span> майнеров</div>
+            <div class="pool-amount">🧪 Тренировочный турнир</div>
+            <div class="pool-players">🤖 <span>${activePlayers}</span> тренировочных ботов</div>
             <div class="pool-stage">Твой этап: <b>${getTournamentStageName(miningStage)}</b></div>
             <input type="range" min="0.01" max="5" step="0.01" value="${miningThreshold}" id="tournament-threshold-slider" style="width:100%;margin-top:10px;">
             <p style="color:#ccc;">Ставка: <strong id="tournament-stake">${miningThreshold.toFixed(2)}</strong> SRUM</p>
             <p style="color:#ff6666;">Штраф: ${(miningThreshold*getPenaltyPercent()).toFixed(4)} SRUM</p>
-            <p style="color:#66ff66;">Награда: ${(miningThreshold*getRewardPercent()).toFixed(4)} USDT</p>
+            <p style="color:#66ff66;">Награда: ${Math.max(1, Math.round(miningThreshold*getRewardPercent()*1000))} RUM</p>
             <button class="btn-mining-big" id="start-tournament-search">🔍 НАЧАТЬ</button>
             <button id="cancel-tournament" style="background:none;color:white;border:1px solid white;border-radius:10px;padding:10px;margin-top:10px;width:100%;">✖ Отмена</button>
         </div></div>`; 
@@ -665,6 +762,8 @@ function showTournamentModal() {
         if (srum < miningThreshold) { tourModal.remove(); showBuySRUMModal(); return; } 
         srum -= miningThreshold; 
         frozenStake = miningThreshold;
+        activeServerMiningSessionId = null;
+        activeServerPoolId = selectedGamePoolId;
         pendingMining = { currency: 'SRUM', threshold: miningThreshold, stage: miningStage }; 
         updateUI(); tourModal.remove(); startSearch('tournament'); 
     }); 
@@ -679,7 +778,7 @@ function renderBandTab() {
             <div class="info-card">
                 <p>Собери банду из 5 бойцов!</p>
                 <p>💰 Взнос: ${miningThreshold.toFixed(2)} SRUM × 5 = ${(miningThreshold*5).toFixed(2)} SRUM</p>
-                <p>🏆 Приз: ${(miningThreshold*5*getRewardPercent()).toFixed(4)} USDT</p>
+                <p>🏆 Приз: ${Math.max(1, Math.round(miningThreshold*5*getRewardPercent()*1000))} RUM</p>
             </div>
             <button class="shop-btn" id="create-band-btn">🐺 Создать банду</button>
             <button class="shop-btn" id="invite-band-btn" style="background:linear-gradient(180deg,#8e44ad,#6c3483);">👥 Пригласить</button>
@@ -687,15 +786,15 @@ function renderBandTab() {
     } else { 
         let f = ''; 
         bandData.fighters.forEach((ff, i) => { 
-            f += `<div style="background:rgba(255,255,255,0.05);padding:8px;margin:4px 0;border-radius:6px;">${i===0?'👑':'⚔️'} ${ff}</div>`; 
+            f += `<div style="background:rgba(255,255,255,0.05);padding:8px;margin:4px 0;border-radius:6px;">${i===0?'👑':'⚔️'} ${window.escapeHtml(ff)}</div>`;
         }); 
         const totalStake = bandData.threshold * bandData.fighters.length;
         const totalReward = totalStake * getRewardPercent();
         const totalPenalty = totalStake * getPenaltyPercent();
         return `<div style="text-align:center;">
-            <h2>🐺 ${bandData.name}</h2>
+            <h2>🐺 ${window.escapeHtml(bandData.name)}</h2>
             <p>Ставка: <b>${bandData.threshold.toFixed(2)} SRUM</b> × ${bandData.fighters.length} = ${totalStake.toFixed(2)} SRUM</p>
-            <p style="color:#66ff66;">Награда при победе: ${totalReward.toFixed(4)} USDT</p>
+            <p style="color:#66ff66;">Награда при победе: ${Math.max(1, Math.round(totalReward*1000))} RUM</p>
             <p style="color:#ff6666;">Штраф при поражении: ${totalPenalty.toFixed(4)} SRUM</p>
             <div style="max-height:200px;overflow-y:auto;margin:10px 0;">${f}</div>
             <button class="shop-btn" id="start-band-match" ${bandData.fighters.length<5?'disabled':''}>⚔️ В бой!</button>
@@ -709,7 +808,7 @@ function renderBandTab() {
 arenaContent.addEventListener('click', function(e) { 
     const t = e.target; 
     if (t.id === 'create-band-btn') { 
-        const n = prompt('Название:'); 
+        const n = prompt('Название:')?.trim().slice(0, 50);
         if (!n) return; 
         bandData = { name: n, threshold: miningThreshold, fighters: [userNickname || 'Ты'], boss: userId }; 
         alert(`Банда "${n}" создана!`); 
@@ -717,24 +816,12 @@ arenaContent.addEventListener('click', function(e) {
     } 
     if (t.id === 'invite-band-btn') { 
         if (!bandData) return; 
-        const c = prompt('1.Ник\n2.Клуб\n3.Рефералы'); 
-        if (!c) return; 
-        if (c === '2') { 
-            if (!myClubId) return alert('Не в клубе'); 
-            const cl = clubs.find(x => x.id == myClubId); 
-            const m = cl?.members?.filter(x => x !== userNickname && !bandData.fighters.includes(x)) || []; 
-            if (!m.length) return alert('Некого'); 
-            const n = prompt(`Кого?\n${m.join(',')}`); 
-            if (n && m.includes(n)) { bandData.fighters.push(n); renderArena(); } 
-        } else if (c === '3') { 
-            const r = referrals.filter(x => !bandData.fighters.includes(x.code)); 
-            if (!r.length) return alert('Некого'); 
-            const n = prompt(`Кого?\n${r.map(x => x.code).join(',')}`); 
-            if (n && r.find(x => x.code === n)) { bandData.fighters.push(n); renderArena(); } 
-        } else { 
-            if (bandData.fighters.includes(c)) return alert('Уже в банде'); 
-            bandData.fighters.push(c); renderArena(); 
-        } 
+        if (bandData.fighters.length >= 5) return alert('В банде уже 5 бойцов');
+        const nickname = prompt('Введите ник тренировочного бойца:')?.trim().slice(0, 40);
+        if (!nickname) return;
+        if (bandData.fighters.includes(nickname)) return alert('Уже в банде');
+        bandData.fighters.push(nickname);
+        renderArena();
     } 
     if (t.id === 'start-band-match') { 
         if (!bandData || bandData.fighters.length < 5) return alert('Нужно 5'); 
@@ -750,23 +837,23 @@ arenaContent.addEventListener('click', function(e) {
         document.getElementById('game-container').appendChild(o); 
         setTimeout(() => { 
             o.remove(); 
-            const win = Math.random() > 0.4; 
+            const win = Math.random() >= 0.5;
             const rd = document.createElement('div'); 
             rd.className = 'result-overlay'; 
             if (win) { 
                 srum += totalStake;
-                frozenStake = totalStake;
+                frozenStake = 0;
                 const rwUSDT = totalStake * getRewardPercent(); 
                 const award = awardReward(rwUSDT); 
                 if (miningStage < 5) miningStage++;
                 rd.innerHTML = `<h2>🏆 Победа!</h2>
                     <p>🏆 Награда: +${award.amount.toFixed(4)} ${award.currency}</p>
-                    <p>📈 Этап повышен до ${miningStage}</p>
+                    ${stageWinMessage()}
                     <button id="cb">ОК</button>`; 
             } else { 
                 const refund = totalStake - (totalStake * getPenaltyPercent()); 
                 srum += Math.max(0, refund);
-                frozenStake = Math.max(0, refund);
+                frozenStake = 0;
                 miningStage = 1;
                 rd.innerHTML = `<h2>💔 Поражение</h2>
                     <p>↩️ Возврат остатка: ${Math.max(0, refund).toFixed(4)} SRUM</p>

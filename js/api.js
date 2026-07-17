@@ -1,76 +1,100 @@
-// ================== ОБЛАЧНОЕ ХРАНЕНИЕ SUPABASE ==================
-const SUPABASE_URL = 'https://hngfpdsnjgdpazmortix.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_JZOPRsRfMx2l6rsc4QfeBg_s5hf6QRg';
+// Серверный шлюз. Прямые записи из браузера в таблицы Supabase запрещены.
+const SUPABASE_URL = window.APP_CONFIG.supabaseUrl;
+const SUPABASE_ANON_KEY = window.APP_CONFIG.supabasePublishableKey;
 
-async function supabaseRequest(method, table, body = null, params = '') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}${params}`;
-    const headers = {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-    };
-    const options = { method, headers };
-    if (body) options.body = JSON.stringify(body);
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        console.error('Supabase error:', response.status, await response.text());
-    }
-    return response;
+async function gameApi(action, payload = {}) {
+    if (!window.APP_CONFIG.cloudSyncEnabled) return null;
+
+    const initData = window.getTelegramInitData();
+    if (!initData) throw new Error('Telegram initData отсутствует');
+
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/game-api`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ action, payload, initData })
+    });
+
+    if (!response.ok) throw new Error(`Game API: ${response.status}`);
+    return response.json();
 }
 
-async function loadUserData(userId) {
-    if (!userId) {
-        console.warn('loadUserData: userId не указан');
-        return null;
+async function loadUserData() {
+    if (!window.APP_CONFIG.cloudSyncEnabled) return null;
+    const result = await gameApi('load_player');
+    if (Array.isArray(result?.tasks)) {
+        const normalized = result.tasks.map((task) => ({
+            id: task.id,
+            desc: task.title,
+            link: task.task_url,
+            currency: task.reward_currency === 'SRUM' ? 'SRUM' : 'RUM',
+            reward: Number(task.reward_amount || 0),
+            maxCompletions: Number(task.completion_limit || 0),
+            completionsDone: Number(task.completions || 0),
+            checking: false
+        }));
+        officialRumTasks = normalized.filter((task) => task.currency === 'RUM');
+        officialSrumTasks = normalized.filter((task) => task.currency === 'SRUM');
     }
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
-        });
-        if (response.ok) {
-            const users = await response.json();
-            if (users.length > 0) {
-                return users[0];
-            }
-        }
-        // Новый игрок — приветственный бонус 1 SRUM + флаги
-        const newUser = {
-            id: userId,
-            nickname: 'Майнер',
-            rum: 0,
-            srum: 1,
-            ton: 0,
-            usdt: 0,
-            invest: 0,
-            status: 'solo',
-            mining_stage: 1,
-            games: 3,
-            bonus_claimed: false,
-            channel_bonus: false,
-            group_bonus: false,
-            created_at: new Date().toISOString()
-        };
-        await supabaseRequest('POST', 'users', newUser);
-        return newUser;
-    } catch (e) {
-        console.error('Ошибка загрузки из Supabase:', e);
-        return null;
+    if (result?.player?.server_session_id && typeof activeServerMiningSessionId !== 'undefined') {
+        activeServerMiningSessionId = result.player.server_session_id;
     }
+    return result?.player || null;
 }
 
-async function saveUserData(userId, data) {
-    if (!userId) {
-        console.warn('saveUserData: userId не указан');
-        return;
-    }
-    try {
-        const body = { ...data, updated_at: new Date().toISOString() };
-        await supabaseRequest('PATCH', `users?id=eq.${userId}`, body);
-    } catch (e) {
-        console.error('Ошибка сохранения в Supabase:', e);
-    }
+async function saveUserData(_userId, data) {
+    if (!window.APP_CONFIG.cloudSyncEnabled) return false;
+    await gameApi('save_profile', {
+        nickname: data.nickname,
+        status: data.status
+    });
+    return true;
+}
+
+async function matchmakingApi(action, payload = {}) {
+    if (!window.APP_CONFIG.matchmakingEnabled) return null;
+    const initData = window.getTelegramInitData();
+    if (!initData) throw new Error('Matchmaking доступен только внутри Telegram');
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/matchmaking`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ action, initData, ...payload })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Matchmaking: ${response.status}`);
+    return result;
+}
+
+async function requestTrainingMatch(stage, stake, poolId = null, sessionId = null) {
+    return matchmakingApi('join', { stage, stake, poolId, sessionId });
+}
+
+async function resolveTrainingMatch(matchId, playerScore) {
+    if (!matchId) return null;
+    return matchmakingApi('resolve', { matchId, playerScore });
+}
+
+async function getMatchResult(matchId) {
+    if (!matchId) return null;
+    return matchmakingApi('result', { matchId });
+}
+
+async function cancelGameMatch(matchId) {
+    if (!matchId) return null;
+    return matchmakingApi('cancel', { matchId });
+}
+
+async function closeMiningSession(sessionId) {
+    if (!sessionId) return null;
+    return matchmakingApi('close', { sessionId });
+}
+
+async function getGamePools() {
+    const result = await matchmakingApi('pools');
+    return Array.isArray(result?.pools) ? result.pools : [];
 }

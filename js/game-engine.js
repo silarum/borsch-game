@@ -21,7 +21,7 @@ function showCoinFountain(count) {
         coin.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
         coin.style.animationDelay = (Math.random() * 0.3) + 's';
         container.appendChild(coin);
-        coin.addEventListener('animationend', function() { coin.remove(); });
+        coin.addEventListener('animationend', function(event) { event.currentTarget.remove(); });
     }
 }
 
@@ -46,28 +46,28 @@ function showPoopFountain(count) {
         poop.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
         poop.style.animationDelay = (Math.random() * 0.2) + 's';
         container.appendChild(poop);
-        poop.addEventListener('animationend', function() { poop.remove(); });
+        poop.addEventListener('animationend', function(event) { event.currentTarget.remove(); });
     }
 }
 
 // Пути к изображениям криптоовощей
 var goodImages = [
-    'assets/veggies/bitcabbage.png',
-    'assets/veggies/etheronion.png',
-    'assets/veggies/tatercoin.png',
-    'assets/veggies/carrotcash.png',
-    'assets/veggies/pepperpay.png',
-    'assets/veggies/greengas.png',
-    'assets/veggies/beanbit.png',
-    'assets/veggies/garlicgold.png',
-    'assets/veggies/tomotoken.png'
+    'assets/veggies/bitcabbage.webp',
+    'assets/veggies/etheronion.webp',
+    'assets/veggies/tatercoin.webp',
+    'assets/veggies/carrotcash.webp',
+    'assets/veggies/pepperpay.webp',
+    'assets/veggies/greengas.webp',
+    'assets/veggies/beanbit.webp',
+    'assets/veggies/garlicgold.webp',
+    'assets/veggies/tomotoken.webp'
 ];
 var badImages = [
-    'assets/veggies/shitcoin.png',
-    'assets/veggies/scamworm.png',
-    'assets/veggies/rugcheese.png',
-    'assets/veggies/deadflower.png',
-    'assets/veggies/fungustoken.png'
+    'assets/veggies/shitcoin.webp',
+    'assets/veggies/scamworm.webp',
+    'assets/veggies/rugcheese.webp',
+    'assets/veggies/deadflower.webp',
+    'assets/veggies/fungustoken.webp'
 ];
 
 // Заполнение лунок овощами
@@ -137,6 +137,16 @@ function handleTouchStart(e) {
             if (typeof updateUI === 'function') updateUI();
         }
     }
+}
+
+function handleBoardClick(e) {
+    if (!window.gameActive) return;
+    var hole = e.target.closest('.hole');
+    if (hole) processHit(hole, e);
+}
+
+function preventDefaultMove(e) {
+    e.preventDefault();
 }
 
 // Анимация полёта овоща в кастрюлю
@@ -231,24 +241,6 @@ function endGame() {
     window.currentVeg = {};
     window.games = Math.max(0, (window.games || 0) - 1);
     window.lastGameTime = Date.now();
-
-    try {
-        fetch('https://hngfpdsnjgdpazmortix.supabase.co/functions/v1/update-balance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: window.userId,
-                type: 'rum_mining',
-                data: {
-                    rum_earned: (window.rum || 0) - (window._rumBeforeGame || 0),
-                    games_used: window.games,
-                    streak: window.streak
-                }
-            })
-        }).then(function(res) { return res.json(); }).then(function(data) {
-            if (data && data.rum !== undefined) window.rum = data.rum;
-        }).catch(function(e) { console.error(e); });
-    } catch(e) {}
 
     if (typeof updateUI === 'function') updateUI();
     if ((window.games || 0) < 3) startRecovery();
@@ -408,6 +400,7 @@ window.addEventListener('load', function() {
     if (startBtn) startBtn.addEventListener('click', startGame);
     if (board) {
         board.addEventListener('touchstart', handleTouchStart, {passive: false});
-        board.addEventListener('touchmove', function(e) { e.preventDefault(); }, {passive: false});
+        board.addEventListener('touchmove', preventDefaultMove, {passive: false});
+        board.addEventListener('click', handleBoardClick);
     }
 });

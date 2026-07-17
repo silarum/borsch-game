@@ -1,9 +1,6 @@
-// ================== АРМИЯ БОТОВ "300 СПАРТАНЦЕВ" ==================
-// Боты с балансами и логикой чередования побед/поражений по этапам.
-// Включение/выключение через админ-панель (переменная spartansEnabled).
-
-// Генерация 300 имён (используем список из 50 имён + добавляем номера)
-const baseNames = [
+// Локальный резерв 300 спартанцев для безопасной демо-версии.
+// После включения защищённого matchmaking решение принимает сервер и Telegram-админка.
+const spartanBaseNames = [
     'Леонид', 'Ксеркс', 'Ахиллес', 'Гектор', 'Одиссей', 'Аякс', 'Патрокл', 'Диомед',
     'Агамемнон', 'Менелай', 'Нестор', 'Идоменей', 'Тевкр', 'Эант', 'Филоктет',
     'Протесилай', 'Евриал', 'Сфенел', 'Полит', 'Антилох', 'Фоант', 'Леит',
@@ -11,116 +8,83 @@ const baseNames = [
     'Евмен', 'Еврипил', 'Калхант', 'Махаон', 'Подалирий', 'Неоптолем',
     'Феникс', 'Автомедон', 'Алким', 'Бафикл', 'Еврибат', 'Стентор',
     'Талфибий', 'Евримедон', 'Антифат', 'Кикн', 'Гипполох', 'Акамант',
-    'Долон', 'Реc', 'Сарпедон', 'Главк'
+    'Долон', 'Рес', 'Сарпедон', 'Главк'
 ];
 
-// Создаём 300 ботов
 function generateSpartans() {
-    let bots = [];
-    for (let i = 0; i < 300; i++) {
-        let baseName = baseNames[i % baseNames.length];
-        let suffix = Math.floor(i / baseNames.length) + 1;
-        let name = suffix > 1 ? `${baseName}_${suffix}` : baseName;
-        bots.push({
-            name: name,
-            lastLostStage: null,          // этап, на котором бот проиграл (null – готов проигрывать)
-            balance: 400 + Math.floor(Math.random() * 2601) // 400-3000 SRUM
-        });
-    }
-    return bots;
+    return Array.from({ length: 300 }, (_, index) => {
+        const squad = Math.floor(index / spartanBaseNames.length) + 1;
+        const baseName = spartanBaseNames[index % spartanBaseNames.length];
+        return {
+            id: index + 1,
+            name: squad === 1 ? baseName : `${baseName}_${squad}`,
+            lastLostStage: null,
+            balance: 30 + ((index + 1) * 7919) % 271,
+            rumirBalance: ((index + 1) * 3571) % 25001,
+            energy: 55 + ((index + 1) * 13) % 46,
+            state: 'mining',
+            matchesPlayed: 0
+        };
+    });
 }
 
-// Загружаем или создаём ботов
-let spartanBots = JSON.parse(localStorage.getItem('spartanBots'));
-if (!spartanBots || spartanBots.length < 300) {
+let spartanBots = window.readLocalArray('spartanBots');
+const SPARTAN_DATA_VERSION = 2;
+if (spartanBots.length !== 300 || Number(localStorage.getItem('spartanDataVersion')) !== SPARTAN_DATA_VERSION) {
     spartanBots = generateSpartans();
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
+    localStorage.setItem('spartanDataVersion', String(SPARTAN_DATA_VERSION));
 }
 
-// Глобальная переменная включения (будет объявлена в main.js, но здесь тоже нужна для работы функций)
-// Она уже есть в main.js, но если bots.js подключён до main.js, то её может не быть. Проверим:
-if (typeof spartansEnabled === 'undefined') {
-    var spartansEnabled = JSON.parse(localStorage.getItem('spartansEnabled') || 'true');
-}
-
-/**
- * Выбор подходящего бота для игрока с учётом этапа игрока.
- * @param {number} playerStage - этап игрока (1-5)
- * @returns {object|null} { name, speed, botIndex } или null, если нет подходящих
- */
 function selectSpartanBot(playerStage) {
     if (!spartansEnabled) return null;
-
+    const stage = Math.max(1, Math.min(5, Number(playerStage) || 1));
     let botIndex = -1;
 
-    if (playerStage === 5) {
-        // Ищем бота, который должен выиграть на 5-м этапе (lastLostStage === 4)
-        botIndex = spartanBots.findIndex(bot => bot.lastLostStage === 4);
+    if (stage === 5) {
+        botIndex = spartanBots.findIndex((bot) => bot.lastLostStage === 4);
     } else {
-        // Сначала ищем бота, готового проиграть (lastLostStage === null)
-        botIndex = spartanBots.findIndex(bot => bot.lastLostStage === null);
-        // Если нет – ищем того, кто должен выиграть именно на этом этапе
+        botIndex = spartanBots.findIndex((bot) => bot.lastLostStage === null);
         if (botIndex === -1) {
-            botIndex = spartanBots.findIndex(bot => bot.lastLostStage !== null && bot.lastLostStage + 1 === playerStage);
+            botIndex = spartanBots.findIndex((bot) => bot.lastLostStage + 1 === stage);
         }
     }
-
-    if (botIndex === -1) {
-        // Если совсем никого нет – берём первого попавшегося (на всякий случай)
-        botIndex = 0;
-    }
+    if (botIndex === -1) botIndex = 0;
 
     const bot = spartanBots[botIndex];
+    bot.rumirBalance = (Number(bot.rumirBalance) || 0) + Math.max(1, Math.round((Number(bot.energy) || 50) / 10));
+    bot.energy = Math.max(0, (Number(bot.energy) || 50) - 2);
+    bot.state = 'queued';
+    localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
+    const shouldWin = stage === 5 || (bot.lastLostStage !== null && bot.lastLostStage + 1 === stage);
+    const speed = shouldWin
+        ? 500 + Math.floor(Math.random() * 200)
+        : 1200 + Math.floor(Math.random() * 300);
 
-    // Определяем, как бот должен сыграть и его скорость
-    let shouldWin = (playerStage === 5) || (bot.lastLostStage !== null && bot.lastLostStage + 1 === playerStage);
-    let speed;
-    if (shouldWin) {
-        speed = 500 + Math.floor(Math.random() * 200); // быстрый (должен победить)
-    } else {
-        speed = 1200 + Math.floor(Math.random() * 300); // медленный (должен проиграть)
-    }
-
-    return {
-        name: bot.name,
-        speed: speed,
-        botIndex: botIndex,
-        shouldWin: shouldWin
-    };
+    return { name: bot.name, speed, botIndex, shouldWin, training: true };
 }
 
-/**
- * Обновить состояние бота после завершения дуэли.
- * @param {number} botIndex - индекс бота в массиве spartanBots
- * @param {boolean} botWon - победил ли бот
- * @param {number} stage - этап, на котором прошла дуэль
- * @param {number} penalty - сумма штрафа (если бот проиграл)
- * @param {number} reward - сумма награды (если бот выиграл, в USDT? Но баланс бота в SRUM, награда в USDT. Для простоты будем менять баланс SRUM только при проигрыше/выигрыше SRUM? Награда в USDT не влияет на баланс SRUM бота. Бот может получать USDT? Не будем усложнять, просто при проигрыше снимаем штраф в SRUM с баланса бота, при выигрыше добавляем награду в SRUM (конвертируем USDT->SRUM 1:1).)
- */
 function updateSpartanBot(botIndex, botWon, stage, penalty, reward) {
-    if (botIndex === undefined || botIndex < 0 || botIndex >= spartanBots.length) return;
+    if (!Number.isInteger(botIndex) || botIndex < 0 || botIndex >= spartanBots.length) return;
     const bot = spartanBots[botIndex];
-
     if (botWon) {
-        bot.lastLostStage = null; // после победы сбрасываем
-        bot.balance += reward;    // награда в USDT, но для фейка пусть будет SRUM
+        bot.lastLostStage = null;
+        bot.balance += Math.max(0, Number(reward) || 0);
     } else {
-        bot.lastLostStage = stage; // запоминаем этап проигрыша
-        bot.balance = Math.max(0, bot.balance - penalty);
+        bot.lastLostStage = Math.max(1, Math.min(5, Number(stage) || 1));
+        bot.balance = Math.max(0, bot.balance - Math.max(0, Number(penalty) || 0));
     }
+    bot.state = bot.energy > 10 ? 'mining' : 'cooldown';
+    bot.matchesPlayed = (Number(bot.matchesPlayed) || 0) + 1;
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
 }
 
-// Сброс всех ботов в начальное состояние
 function resetSpartans() {
     spartanBots = generateSpartans();
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
-    alert('300 спартанцев сброшены до начального состояния.');
 }
 
-// Переключение армии
 function toggleSpartans() {
     spartansEnabled = !spartansEnabled;
     localStorage.setItem('spartansEnabled', JSON.stringify(spartansEnabled));
-    alert(`Армия 300 спартанцев ${spartansEnabled ? 'включена' : 'отключена'}`);
 }
