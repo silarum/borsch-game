@@ -743,6 +743,7 @@ declare
     account public.game_accounts%rowtype;
     own_session public.mining_sessions%rowtype;
     opponent_session public.mining_sessions%rowtype;
+    opponent_session_id uuid;
     opponent_queue_id bigint;
     own_queue_id bigint;
     match_id uuid;
@@ -795,7 +796,7 @@ begin
     values (p_pool_id, own_session.id, 'human', own_session.stage)
     returning id into own_queue_id;
 
-    select queue.id, session into opponent_queue_id, opponent_session
+    select queue.id, queue.session_id into opponent_queue_id, opponent_session_id
       from public.pool_queue as queue
       join public.mining_sessions as session on session.id = queue.session_id
      where queue.pool_id = p_pool_id and queue.status = 'waiting'
@@ -803,6 +804,11 @@ begin
      order by case when session.participant_kind = 'human' then 0 else 1 end, queue.joined_at
      for update of queue skip locked
      limit 1;
+
+    if opponent_session_id is not null then
+        select * into opponent_session from public.mining_sessions
+         where id = opponent_session_id for update;
+    end if;
 
     if opponent_session.id is null then
         return jsonb_build_object('status', 'waiting', 'session_id', own_session.id, 'stage', own_session.stage);

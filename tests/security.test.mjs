@@ -90,6 +90,8 @@ test('сервер содержит ровно 300 полноценных упр
   assert.match(economyMigration, /own_session\.stage = 5 or last_lost_stage = own_session\.stage - 1/);
   assert.match(economyMigration, /when coalesce\(bot_must_win, false\) then 61/);
   assert.match(economyMigration, /bot_cycle_reset_after_win/);
+  assert.match(economyMigration, /queue\.session_id into opponent_queue_id, opponent_session_id/);
+  assert.doesNotMatch(economyMigration, /session into opponent_queue_id, opponent_session/);
   assert.match(bots, /const shouldWin = stage === 5/);
 });
 
@@ -145,4 +147,20 @@ test('старые финансовые Edge Functions безопасно заб
     assert.match(source, /feature_disabled/);
     assert.match(source, /status:\s*410/);
   }
+});
+
+test('старые финансовые таблицы закрыты от публичных ролей', () => {
+  const migration = read(
+    'supabase/migrations/20260717161444_lock_down_legacy_finance_tables.sql'
+  );
+  for (const table of ['users', 'transactions', 'withdrawal_requests', 'tournaments']) {
+    assert.match(
+      migration,
+      new RegExp(`revoke all privileges on table public\\.${table} from public, anon, authenticated`)
+    );
+  }
+  assert.match(migration, /drop policy if exists "Allow all for anon"/);
+  assert.match(migration, /economy_ledger_match_id_idx/);
+  assert.match(migration, /match_score_submissions_session_id_idx/);
+  assert.doesNotMatch(migration, /drop table/i);
 });
