@@ -35,3 +35,29 @@ async function saveUserData(_userId, data) {
     });
     return true;
 }
+
+async function matchmakingApi(action, payload = {}) {
+    if (!window.APP_CONFIG.matchmakingEnabled) return null;
+    const initData = window.getTelegramInitData();
+    if (!initData) throw new Error('Matchmaking доступен только внутри Telegram');
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/matchmaking`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ action, initData, ...payload })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Matchmaking: ${response.status}`);
+    return result;
+}
+
+async function requestTrainingMatch(stage, stake) {
+    return matchmakingApi('join', { stage, stake });
+}
+
+async function resolveTrainingMatch(matchId, playerWon) {
+    if (!matchId) return null;
+    return matchmakingApi('resolve', { matchId, playerWon });
+}

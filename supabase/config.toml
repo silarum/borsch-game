@@ -1,0 +1,14 @@
+[functions.matchmaking]
+verify_jwt = false
+
+[functions.telegram-admin]
+verify_jwt = false
+
+[functions.buy-srum]
+verify_jwt = true
+
+[functions.process-withdrawal]
+verify_jwt = true
+
+[functions.update-balance]
+verify_jwt = true

@@ -1,14 +1,5 @@
 // ================== АРЕНА (МАЙНИНГ, БАНДА, ГРУППОВОЙ, КЛУБНЫЙ, ЗАМОРОЗКА) ==================
 
-// --- Пул обычных ботов ---
-const defaultBotPool = [
-    { name: 'ТокенМастер', speed: 1000 },
-    { name: 'Борщехлёб', speed: 850 },
-    { name: 'CryptoWhale', speed: 700 },
-    { name: 'Майнер69', speed: 600 },
-    { name: 'Лампа', speed: 500 }
-];
-
 // --- Ободряющие фразы ---
 const cheerPhrases = [
     "Не расстраивайся, майнер! Следующий блок будет твоим! 💪",
@@ -33,6 +24,7 @@ function getRewardPercent() { return getRewardRate(miningStage); }
 
 // --- Данные группового майнинга ---
 let groupSession = null;
+let activeServerTrainingMatchId = null;
 
 // Все награды текущего релиза — локальные игровые очки RUM.
 function awardReward(baseAmount) {
@@ -240,22 +232,70 @@ function startSearch(mode = 'mining') {
     });
     overlay.appendChild(cancelBtn);
 
-    setTimeout(() => {
+    setTimeout(async () => {
         if (cancelled) return;
-        overlay.remove();
         let selectedBot = null;
-        if (spartansEnabled) selectedBot = selectSpartanBot(miningStage);
+        if (window.APP_CONFIG.matchmakingEnabled) {
+            try {
+                const serverMatch = await requestTrainingMatch(
+                    pendingMining?.stage || miningStage,
+                    pendingMining?.threshold || miningThreshold
+                );
+                if (cancelled) return;
+                if (!serverMatch || serverMatch.status !== 'matched' || !serverMatch.bot) {
+                    overlay.remove();
+                    srum += frozenStake;
+                    frozenStake = 0;
+                    pendingMining = null;
+                    updateUI();
+                    alert(serverMatch?.status === 'maintenance'
+                        ? 'Проект временно на техобслуживании.'
+                        : 'Соперник пока не найден. Игровая ставка возвращена.');
+                    return;
+                }
+                activeServerTrainingMatchId = serverMatch.matchId;
+                selectedBot = {
+                    name: serverMatch.bot.name,
+                    speed: serverMatch.bot.speed,
+                    botIndex: -1,
+                    shouldWin: serverMatch.bot.behavior === 'aggressive',
+                    poolStatus: `${serverMatch.realPlayers} реальных · ${serverMatch.botsInPool} спартанцев`
+                };
+            } catch (error) {
+                overlay.remove();
+                srum += frozenStake;
+                frozenStake = 0;
+                pendingMining = null;
+                updateUI();
+                alert(error.message || 'Matchmaking временно недоступен');
+                return;
+            }
+        } else if (spartansEnabled) {
+            selectedBot = selectSpartanBot(miningStage);
+        }
+        overlay.remove();
         if (selectedBot) {
-            currentBot = { name: selectedBot.name, speed: selectedBot.speed, botIndex: selectedBot.botIndex, shouldWin: selectedBot.shouldWin };
+            currentBot = {
+                name: selectedBot.name,
+                speed: selectedBot.speed,
+                botIndex: selectedBot.botIndex,
+                shouldWin: selectedBot.shouldWin,
+                poolStatus: selectedBot.poolStatus || 'локальный резерв 300 спартанцев'
+            };
         } else {
-            const bot = defaultBotPool[Math.floor(Math.random() * defaultBotPool.length)];
-            currentBot = { name: bot.name, speed: bot.speed, botIndex: -1, shouldWin: false };
+            srum += frozenStake;
+            frozenStake = 0;
+            pendingMining = null;
+            updateUI();
+            alert('Спартанцы отключены. Соперник не найден, игровая ставка возвращена.');
+            return;
         }
         const readyDiv = document.createElement('div'); readyDiv.className = 'countdown-overlay';
-        readyDiv.innerHTML = `<div style="text-align:center;"><p>Тренировочный соперник: <b>${escapeHtml(currentBot.name)}</b></p><p>Игровая ставка: ${(pendingMining?.threshold || miningThreshold).toFixed(2)} SRUM</p><button id="mining-ready-btn" class="start-btn" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button><button id="cancel-ready-btn" style="margin-top:10px;padding:10px 20px;font-size:1rem;background:#B22222;color:white;border:none;border-radius:10px;cursor:pointer;">✖ Отмена</button></div>`;
+        readyDiv.innerHTML = `<div style="text-align:center;"><p>Тренировочный соперник: <b>${escapeHtml(currentBot.name)}</b></p><p style="color:#aaa;font-size:0.75rem;">${escapeHtml(currentBot.poolStatus)}</p><p>Игровая ставка: ${(pendingMining?.threshold || miningThreshold).toFixed(2)} SRUM</p><button id="mining-ready-btn" class="start-btn" style="font-size:1.5rem;padding:15px 35px;">⛏️ Готов</button><button id="cancel-ready-btn" style="margin-top:10px;padding:10px 20px;font-size:1rem;background:#B22222;color:white;border:none;border-radius:10px;cursor:pointer;">✖ Отмена</button></div>`;
         document.getElementById('game-container').appendChild(readyDiv);
         document.getElementById('cancel-ready-btn').addEventListener('click', () => { 
             cancelled = true;
+            activeServerTrainingMatchId = null;
             readyDiv.remove(); 
             srum += frozenStake; frozenStake = 0;
             pendingMining = null; updateUI();
@@ -347,6 +387,12 @@ async function endDuel(duelTimerInterval, duelSpawnInterval, duelBotInterval) {
     // Обновляем спартанца
     if (currentBot && currentBot.botIndex !== undefined && currentBot.botIndex >= 0) {
         updateSpartanBot(currentBot.botIndex, !win, currentStage, penaltySRUM, rewardUSDT);
+    }
+    if (activeServerTrainingMatchId) {
+        resolveTrainingMatch(activeServerTrainingMatchId, win).catch((error) => {
+            console.warn('Не удалось сохранить тренировочный матч:', error.message);
+        });
+        activeServerTrainingMatchId = null;
     }
 
     if (pendingMining?.group) {

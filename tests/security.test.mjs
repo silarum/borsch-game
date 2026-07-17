@@ -69,3 +69,34 @@ test('публикуемые изображения оптимизированы
     assert.ok(statSync(image).size < 700_000, `${image} больше 700 КБ`);
   }
 });
+
+test('сервер содержит ровно 300 управляемых тренировочных спартанцев', () => {
+  const migration = read('supabase/migrations/202607170001_secure_spartans_and_admin.sql');
+  const bots = read('js/bots.js');
+  assert.match(migration, /generate_series\(1, 300\)/);
+  assert.match(migration, /bots_enabled/);
+  assert.match(migration, /auto_fill_enabled/);
+  assert.match(migration, /activation_threshold/);
+  assert.match(migration, /target_pool_size/);
+  assert.match(migration, /enable row level security/);
+  assert.match(bots, /length:\s*300/);
+  assert.match(bots, /lastLostStage/);
+});
+
+test('Telegram-админка защищена секретом webhook и allowlist', () => {
+  const admin = read('supabase/functions/telegram-admin/index.ts');
+  const matchmaking = read('supabase/functions/matchmaking/index.ts');
+  assert.match(admin, /X-Telegram-Bot-Api-Secret-Token/);
+  assert.match(admin, /ADMIN_TELEGRAM_IDS/);
+  assert.match(admin, /admin_update_game_settings/);
+  assert.match(matchmaking, /validateTelegramInitData/);
+  assert.doesNotMatch(`${admin}\n${matchmaking}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
+});
+
+test('старые финансовые Edge Functions безопасно заблокированы', () => {
+  for (const name of ['buy-srum', 'process-withdrawal', 'update-balance']) {
+    const source = read(`supabase/functions/${name}/index.ts`);
+    assert.match(source, /feature_disabled/);
+    assert.match(source, /status:\s*410/);
+  }
+});
