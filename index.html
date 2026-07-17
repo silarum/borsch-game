@@ -15,6 +15,10 @@
 
     <!-- Главный экран -->
     <div id="main-game" style="display:block;">
+        <div class="game-brand" aria-label="Крипто Борщ">
+            <span class="game-brand-icon">🥘</span>
+            <span><small>GAMEFI · TON</small><b>Крипто Борщ</b></span>
+        </div>
         <div class="user-profile" id="user-profile">
             <div class="user-avatar" id="user-avatar">😎</div>
             <div class="user-info">
@@ -36,7 +40,7 @@
             <div class="stats-box">
                 <h3>📊 Статистика майнера</h3>
                 <p><b>Ник:</b> <span id="stats-nickname"></span></p>
-                <p><b>RUM:</b> <span id="stats-rum"></span></p>
+                <p><b>RUMIR:</b> <span id="stats-rum"></span></p>
                 <p><b>SRUM:</b> <span id="stats-srum"></span></p>
                 <p><b>USDT:</b> <span id="stats-usdt"></span></p>
                 <p><b>TON:</b> <span id="stats-ton"></span></p>
@@ -75,7 +79,7 @@
 
         <div class="top-panel">
             <div class="balances-right">
-                <div id="rum-balance">💰 RUM: 0</div>
+                <div id="rum-balance">💰 RUMIR: 0</div>
                 <div id="srum-balance">💎 SRUM: 0.00</div>
                 <div id="usdt-balance-top">💵 USDT: 0.00</div>
                 <div id="ton-balance-top">⚡ TON: 0.00</div>
@@ -208,6 +212,7 @@
 </div>
 
 <script src="js/security.js"></script>
+<script src="js/economy.js"></script>
 <script src="js/lang.js"></script>
 <script src="js/api.js"></script>
 <script src="js/bonus.js"></script>

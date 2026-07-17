@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org; style-src 'self'; connect-src https://hngfpdsnjgdpazmortix.supabase.co; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="theme-color" content="#0b0f19">
+    <title>Крипто Борщ — управление</title>
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
+    <script src="config.js" defer></script>
+    <script src="admin.js" defer></script>
+</head>
+<body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-mark" aria-hidden="true">🥘</div>
+            <div class="brand-copy">
+                <p class="eyebrow">CONTROL CENTER</p>
+                <h1>Крипто Борщ</h1>
+            </div>
+            <div class="connection" id="connection" title="Состояние подключения">
+                <span class="connection-dot"></span>
+                <span id="connection-label">Подключение</span>
+            </div>
+        </header>
+
+        <nav class="tabbar" aria-label="Разделы админ-панели">
+            <button class="tab active" data-tab="overview"><span>◉</span> Обзор</button>
+            <button class="tab" data-tab="pools"><span>⬡</span> Пулы</button>
+            <button class="tab" data-tab="spartans"><span>ϟ</span> Спартанцы</button>
+            <button class="tab" data-tab="players"><span>♙</span> Игроки</button>
+            <button class="tab" data-tab="tasks"><span>✓</span> Задания</button>
+            <button class="tab" data-tab="settings"><span>⚙</span> Проект</button>
+        </nav>
+
+        <main id="view" class="view" aria-live="polite"></main>
+
+        <footer class="footerbar">
+            <p id="updated-at">Данные ещё не загружены</p>
+            <button id="refresh-btn" class="icon-button" type="button" aria-label="Обновить">↻</button>
+        </footer>
+    </div>
+
+    <div id="loading" class="loading active" role="status">
+        <div class="loader-pot">🥘</div>
+        <p>Загружаю управление проектом…</p>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+</body>
+</html>

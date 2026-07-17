@@ -1,7 +1,16 @@
 [functions.matchmaking]
 verify_jwt = false
 
+[functions.game-api]
+verify_jwt = false
+
 [functions.telegram-admin]
+verify_jwt = false
+
+[functions.admin-api]
+verify_jwt = false
+
+[functions.spartan-worker]
 verify_jwt = false
 
 [functions.buy-srum]

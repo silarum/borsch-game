@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
+import { createRequire } from 'node:module';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), 'utf8');
@@ -70,8 +71,9 @@ test('публикуемые изображения оптимизированы
   }
 });
 
-test('сервер содержит ровно 300 управляемых тренировочных спартанцев', () => {
+test('сервер содержит ровно 300 полноценных управляемых спартанцев', () => {
   const migration = read('supabase/migrations/202607170001_secure_spartans_and_admin.sql');
+  const economyMigration = read('supabase/migrations/20260717093135_spartan_economy_admin.sql');
   const bots = read('js/bots.js');
   assert.match(migration, /generate_series\(1, 300\)/);
   assert.match(migration, /bots_enabled/);
@@ -81,6 +83,14 @@ test('сервер содержит ровно 300 управляемых тре
   assert.match(migration, /enable row level security/);
   assert.match(bots, /length:\s*300/);
   assert.match(bots, /lastLostStage/);
+  assert.match(economyMigration, /30 \+ \(\(id::integer \* 7919\) % 271\)/);
+  assert.match(economyMigration, /rumir_balance/);
+  assert.match(economyMigration, /run_spartan_tick/);
+  assert.match(economyMigration, /state in \('idle', 'mining', 'queued', 'matched', 'cooldown', 'disabled'\)/);
+  assert.match(economyMigration, /own_session\.stage = 5 or last_lost_stage = own_session\.stage - 1/);
+  assert.match(economyMigration, /when coalesce\(bot_must_win, false\) then 61/);
+  assert.match(economyMigration, /bot_cycle_reset_after_win/);
+  assert.match(bots, /const shouldWin = stage === 5/);
 });
 
 test('Telegram-админка защищена секретом webhook и allowlist', () => {
@@ -88,9 +98,45 @@ test('Telegram-админка защищена секретом webhook и allow
   const matchmaking = read('supabase/functions/matchmaking/index.ts');
   assert.match(admin, /X-Telegram-Bot-Api-Secret-Token/);
   assert.match(admin, /ADMIN_TELEGRAM_IDS/);
-  assert.match(admin, /admin_update_game_settings/);
+  assert.match(admin, /admin_patch_game_settings/);
+  assert.match(admin, /TELEGRAM_ADMIN_BOT_TOKEN/);
   assert.match(matchmaking, /validateTelegramInitData/);
+  assert.match(matchmaking, /TELEGRAM_GAME_BOT_TOKEN/);
   assert.doesNotMatch(`${admin}\n${matchmaking}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
+});
+
+test('экономика пяти этапов делит штраф 70/30 и удерживает пятый этап до поражения', () => {
+  const require = createRequire(import.meta.url);
+  const economy = require('../js/economy.js');
+  assert.deepEqual(economy.calculateLoss(10, 1), {
+    stage: 1,
+    penalty: 1,
+    winnerPayout: 0.7,
+    treasury: 0.3,
+    remainingStake: 9
+  });
+  assert.deepEqual(economy.calculateLoss(10, 5), {
+    stage: 5,
+    penalty: 10,
+    winnerPayout: 7,
+    treasury: 3,
+    remainingStake: 0
+  });
+  assert.equal(economy.nextStage(5, true), 5);
+  assert.equal(economy.nextStage(5, false), 1);
+});
+
+test('мобильная админ-панель не содержит секретов и управляет пулами, заданиями и спартанцами', () => {
+  const adminHtml = read('admin/index.html');
+  const adminScript = read('admin/admin.js');
+  const adminApi = read('supabase/functions/admin-api/index.ts');
+  assert.doesNotThrow(() => new Function(adminScript));
+  assert.match(adminHtml, /viewport-fit=cover/);
+  assert.match(adminScript, /save_pool/);
+  assert.match(adminScript, /save_task/);
+  assert.match(adminScript, /update_spartan/);
+  assert.match(adminApi, /ADMIN_TELEGRAM_IDS/);
+  assert.doesNotMatch(`${adminHtml}\n${adminScript}\n${adminApi}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
 });
 
 test('старые финансовые Edge Functions безопасно заблокированы', () => {

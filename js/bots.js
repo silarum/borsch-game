@@ -19,16 +19,21 @@ function generateSpartans() {
             id: index + 1,
             name: squad === 1 ? baseName : `${baseName}_${squad}`,
             lastLostStage: null,
-            balance: 400 + ((index + 1) * 7919) % 2601,
+            balance: 30 + ((index + 1) * 7919) % 271,
+            rumirBalance: ((index + 1) * 3571) % 25001,
+            energy: 55 + ((index + 1) * 13) % 46,
+            state: 'mining',
             matchesPlayed: 0
         };
     });
 }
 
 let spartanBots = window.readLocalArray('spartanBots');
-if (spartanBots.length !== 300) {
+const SPARTAN_DATA_VERSION = 2;
+if (spartanBots.length !== 300 || Number(localStorage.getItem('spartanDataVersion')) !== SPARTAN_DATA_VERSION) {
     spartanBots = generateSpartans();
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
+    localStorage.setItem('spartanDataVersion', String(SPARTAN_DATA_VERSION));
 }
 
 function selectSpartanBot(playerStage) {
@@ -47,6 +52,10 @@ function selectSpartanBot(playerStage) {
     if (botIndex === -1) botIndex = 0;
 
     const bot = spartanBots[botIndex];
+    bot.rumirBalance = (Number(bot.rumirBalance) || 0) + Math.max(1, Math.round((Number(bot.energy) || 50) / 10));
+    bot.energy = Math.max(0, (Number(bot.energy) || 50) - 2);
+    bot.state = 'queued';
+    localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
     const shouldWin = stage === 5 || (bot.lastLostStage !== null && bot.lastLostStage + 1 === stage);
     const speed = shouldWin
         ? 500 + Math.floor(Math.random() * 200)
@@ -65,6 +74,7 @@ function updateSpartanBot(botIndex, botWon, stage, penalty, reward) {
         bot.lastLostStage = Math.max(1, Math.min(5, Number(stage) || 1));
         bot.balance = Math.max(0, bot.balance - Math.max(0, Number(penalty) || 0));
     }
+    bot.state = bot.energy > 10 ? 'mining' : 'cooldown';
     bot.matchesPlayed = (Number(bot.matchesPlayed) || 0) + 1;
     localStorage.setItem('spartanBots', JSON.stringify(spartanBots));
 }

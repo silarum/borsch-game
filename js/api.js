@@ -24,6 +24,23 @@ async function gameApi(action, payload = {}) {
 async function loadUserData() {
     if (!window.APP_CONFIG.cloudSyncEnabled) return null;
     const result = await gameApi('load_player');
+    if (Array.isArray(result?.tasks)) {
+        const normalized = result.tasks.map((task) => ({
+            id: task.id,
+            desc: task.title,
+            link: task.task_url,
+            currency: task.reward_currency === 'SRUM' ? 'SRUM' : 'RUM',
+            reward: Number(task.reward_amount || 0),
+            maxCompletions: Number(task.completion_limit || 0),
+            completionsDone: Number(task.completions || 0),
+            checking: false
+        }));
+        officialRumTasks = normalized.filter((task) => task.currency === 'RUM');
+        officialSrumTasks = normalized.filter((task) => task.currency === 'SRUM');
+    }
+    if (result?.player?.server_session_id && typeof activeServerMiningSessionId !== 'undefined') {
+        activeServerMiningSessionId = result.player.server_session_id;
+    }
     return result?.player || null;
 }
 
@@ -53,11 +70,31 @@ async function matchmakingApi(action, payload = {}) {
     return result;
 }
 
-async function requestTrainingMatch(stage, stake) {
-    return matchmakingApi('join', { stage, stake });
+async function requestTrainingMatch(stage, stake, poolId = null, sessionId = null) {
+    return matchmakingApi('join', { stage, stake, poolId, sessionId });
 }
 
-async function resolveTrainingMatch(matchId, playerWon) {
+async function resolveTrainingMatch(matchId, playerScore) {
     if (!matchId) return null;
-    return matchmakingApi('resolve', { matchId, playerWon });
+    return matchmakingApi('resolve', { matchId, playerScore });
+}
+
+async function getMatchResult(matchId) {
+    if (!matchId) return null;
+    return matchmakingApi('result', { matchId });
+}
+
+async function cancelGameMatch(matchId) {
+    if (!matchId) return null;
+    return matchmakingApi('cancel', { matchId });
+}
+
+async function closeMiningSession(sessionId) {
+    if (!sessionId) return null;
+    return matchmakingApi('close', { sessionId });
+}
+
+async function getGamePools() {
+    const result = await matchmakingApi('pools');
+    return Array.isArray(result?.pools) ? result.pools : [];
 }

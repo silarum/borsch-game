@@ -336,7 +336,7 @@ window.addEventListener('load', function() {
 // ================== UI ==================
 function updateUI() {
     if (!rumBal) return;
-    rumBal.textContent = '💰 RUM: ' + rum;
+    rumBal.textContent = '💰 RUMIR: ' + rum;
     srumBal.textContent = '💎 SRUM: ' + srum.toFixed(2);
     usdtBalTop.textContent = window.APP_CONFIG.financialFeaturesEnabled ? '💵 USDT: ' + usdt.toFixed(2) : '💵 USDT: OFF';
     tonBalTop.textContent = window.APP_CONFIG.financialFeaturesEnabled ? '⚡ TON: ' + ton.toFixed(2) : '⚡ TON: OFF';

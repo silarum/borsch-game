@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.110.7';
+import { getSupabaseSecretKey } from '../_shared/supabase-key.ts';
 
 type Settings = {
     id: boolean;
@@ -7,6 +8,9 @@ type Settings = {
     activation_threshold: number;
     target_pool_size: number;
     maintenance_mode: boolean;
+    spartan_mining_enabled: boolean;
+    max_spartans_per_pool: number;
+    spartan_tick_seconds: number;
     updated_at: string;
     updated_by_telegram_id: number | null;
 };
@@ -21,9 +25,10 @@ type TelegramUpdate = {
     };
 };
 
-const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN') || '';
+const botToken = Deno.env.get('TELEGRAM_ADMIN_BOT_TOKEN') || '';
 const webhookSecret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || '';
 const gameUrl = Deno.env.get('GAME_URL') || 'https://silarum.github.io/borsch-game/';
+const adminUrl = Deno.env.get('ADMIN_APP_URL') || `${gameUrl.replace(/\/?$/, '/')}admin/`;
 const adminIds = new Set(
     (Deno.env.get('ADMIN_TELEGRAM_IDS') || '')
         .split(',')
@@ -52,16 +57,10 @@ async function updateSettings(
     action: string,
     patch: Partial<Settings>
 ): Promise<Settings> {
-    const payload: Record<string, unknown> = {
+    const { data, error } = await supabase.rpc('admin_patch_game_settings', {
         p_admin_telegram_id: adminId,
-        p_action: action
-    };
-    if (patch.bots_enabled !== undefined) payload.p_bots_enabled = patch.bots_enabled;
-    if (patch.auto_fill_enabled !== undefined) payload.p_auto_fill_enabled = patch.auto_fill_enabled;
-    if (patch.activation_threshold !== undefined) payload.p_activation_threshold = patch.activation_threshold;
-    if (patch.target_pool_size !== undefined) payload.p_target_pool_size = patch.target_pool_size;
-    if (patch.maintenance_mode !== undefined) payload.p_maintenance_mode = patch.maintenance_mode;
-    const { data, error } = await supabase.rpc('admin_update_game_settings', payload);
+        p_patch: patch
+    });
     if (error) throw error;
     return data as Settings;
 }
@@ -69,10 +68,10 @@ async function updateSettings(
 async function statusText(supabase: SupabaseClient, settings?: Settings): Promise<string> {
     const current = settings || await getSettings(supabase);
     const onlineSince = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-    const [playersResult, botsResult] = await Promise.all([
+    const [playersResult, botsResult, treasuryResult] = await Promise.all([
         supabase.from('player_presence').select('*', { count: 'exact', head: true }).gt('last_seen_at', onlineSince),
-        supabase.from('training_matches').select('*', { count: 'exact', head: true })
-            .eq('status', 'active').gt('expires_at', new Date().toISOString())
+        supabase.from('spartan_bots').select('*', { count: 'exact', head: true }).in('state', ['queued', 'matched']),
+        supabase.from('project_treasury').select('srum_balance').eq('id', true).single()
     ]);
     if (playersResult.error) throw playersResult.error;
     if (botsResult.error) throw botsResult.error;
@@ -84,15 +83,18 @@ async function statusText(supabase: SupabaseClient, settings?: Settings): Promis
         `Порог включения: меньше ${current.activation_threshold} реальных игроков`,
         `Целевой размер пула: ${current.target_pool_size}`,
         `Сейчас онлайн: ${playersResult.count || 0} реальных / ${botsResult.count || 0} ботов`,
+        `Майнинг RUMIR: ${current.spartan_mining_enabled ? '✅ включён' : '⛔ выключен'}`,
+        `Казна: ${Number(treasuryResult.data?.srum_balance || 0).toFixed(2)} SRUM`,
         `Техработы: ${current.maintenance_mode ? '⛔ включены' : '✅ выключены'}`,
         '',
-        'Боты используются только в явно обозначенных тренировочных матчах.'
+        'Правило расчёта: 70% штрафа победителю, 30% в казну.'
     ].join('\n');
 }
 
 function adminKeyboard(settings: Settings) {
     return {
         inline_keyboard: [
+            [{ text: '📱 Открыть полную админ-панель', web_app: { url: adminUrl } }],
             [{
                 text: settings.bots_enabled ? '⛔ Выключить спартанцев' : '✅ Включить спартанцев',
                 callback_data: 'toggle:bots'
@@ -130,6 +132,13 @@ async function sendPlayerWelcome(chatId: number): Promise<void> {
     });
 }
 
+async function sendAccessInfo(chatId: number, senderId: number): Promise<void> {
+    await telegram('sendMessage', {
+        chat_id: chatId,
+        text: `Этот бот предназначен для управления проектом. Ваш Telegram ID: ${senderId}. Добавьте его в секрет ADMIN_TELEGRAM_IDS, чтобы выдать доступ.`
+    });
+}
+
 async function handleText(
     text: string,
     chatId: number,
@@ -157,8 +166,8 @@ async function handleText(
     const thresholdMatch = normalized.match(/^\/threshold\s+(\d+)$/);
     if (thresholdMatch) {
         const value = Number(thresholdMatch[1]);
-        if (value < 0 || value > 10000) {
-            await telegram('sendMessage', { chat_id: chatId, text: 'Порог должен быть от 0 до 10 000.' });
+        if (value < 0 || value > 300) {
+            await telegram('sendMessage', { chat_id: chatId, text: 'Порог должен быть от 0 до 300.' });
             return;
         }
         const settings = await updateSettings(supabase, adminId, 'set_activation_threshold', {
@@ -197,7 +206,7 @@ async function handleText(
 
 Deno.serve(async (request) => {
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-    if (!botToken || !webhookSecret || adminIds.size === 0) {
+    if (!botToken || !webhookSecret) {
         console.error('telegram-admin: required secrets are missing');
         return new Response('Server is not configured', { status: 503 });
     }
@@ -207,7 +216,7 @@ Deno.serve(async (request) => {
 
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-        const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+        const serviceRoleKey = getSupabaseSecretKey();
         if (!supabaseUrl || !serviceRoleKey) throw new Error('Supabase is not configured');
         const supabase = createClient(supabaseUrl, serviceRoleKey, {
             auth: { persistSession: false, autoRefreshToken: false }
@@ -220,7 +229,9 @@ Deno.serve(async (request) => {
         if (!chatId || !senderId) return new Response('OK');
 
         if (!adminIds.has(senderId)) {
-            if (message?.text?.startsWith('/start')) await sendPlayerWelcome(chatId);
+            if (message?.text?.startsWith('/start') || message?.text?.startsWith('/id')) {
+                await sendAccessInfo(chatId, senderId);
+            }
             if (callback) await telegram('answerCallbackQuery', { callback_query_id: callback.id, text: 'Нет доступа' });
             return new Response('OK');
         }
