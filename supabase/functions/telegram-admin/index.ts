@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.110.7';
 import { getSupabaseSecretKey } from '../_shared/supabase-key.ts';
+import { getTelegramWebhookSecret } from '../_shared/telegram-webhook.ts';
 
 type Settings = {
     id: boolean;
@@ -26,7 +27,7 @@ type TelegramUpdate = {
 };
 
 const botToken = Deno.env.get('TELEGRAM_ADMIN_BOT_TOKEN') || '';
-const webhookSecret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || '';
+const configuredWebhookSecret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || '';
 const gameUrl = Deno.env.get('GAME_URL') || 'https://silarum.github.io/borsch-game/';
 const adminUrl = Deno.env.get('ADMIN_APP_URL') || `${gameUrl.replace(/\/?$/, '/')}admin/`;
 const adminIds = new Set(
@@ -206,10 +207,11 @@ async function handleText(
 
 Deno.serve(async (request) => {
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-    if (!botToken || !webhookSecret) {
+    if (!botToken) {
         console.error('telegram-admin: required secrets are missing');
         return new Response('Server is not configured', { status: 503 });
     }
+    const webhookSecret = await getTelegramWebhookSecret(botToken, configuredWebhookSecret);
     if (request.headers.get('X-Telegram-Bot-Api-Secret-Token') !== webhookSecret) {
         return new Response('Unauthorized', { status: 401 });
     }

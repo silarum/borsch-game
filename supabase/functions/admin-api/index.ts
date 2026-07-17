@@ -1,8 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.7';
 import { validateTelegramInitData } from '../_shared/telegram-webapp.ts';
+import { getTelegramWebhookSecret } from '../_shared/telegram-webhook.ts';
 
 const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://silarum.github.io';
 const botToken = Deno.env.get('TELEGRAM_ADMIN_BOT_TOKEN') || '';
+const configuredWebhookSecret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') || '';
 const adminIds = new Set(
     (Deno.env.get('ADMIN_TELEGRAM_IDS') || '')
         .split(',')
@@ -53,21 +55,46 @@ Deno.serve(async (request) => {
     try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
         const secretKey = getSecretKey();
-        if (!supabaseUrl || !secretKey || !botToken || adminIds.size === 0) {
+        if (!supabaseUrl || !secretKey || !botToken) {
             throw new Error('Admin server is not configured');
         }
 
         const body = await request.json();
         assertObject(body, 'body');
         const user = await validateTelegramInitData(String(body.initData || ''), botToken, 900);
-        if (!adminIds.has(user.id)) return json({ error: 'Access denied' }, 403);
+        const action = String(body.action || 'bootstrap');
+        if (action === 'whoami') {
+            return json({ telegramId: user.id, isAdmin: adminIds.has(user.id) });
+        }
+        if (!adminIds.has(user.id)) {
+            return json({
+                error: `Доступ не настроен. Ваш Telegram ID: ${user.id}`,
+                telegramId: user.id
+            }, 403);
+        }
 
         const supabase = createClient(supabaseUrl, secretKey, {
             auth: { persistSession: false, autoRefreshToken: false }
         });
-        const action = String(body.action || 'bootstrap');
         const payload = body.payload || {};
         assertObject(payload, 'payload');
+
+        if (action === 'register_webhook') {
+            const secretToken = await getTelegramWebhookSecret(botToken, configuredWebhookSecret);
+            const response = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: `${supabaseUrl}/functions/v1/telegram-admin`,
+                    secret_token: secretToken,
+                    allowed_updates: ['message', 'callback_query'],
+                    drop_pending_updates: false
+                })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || !result.ok) throw new Error('Telegram webhook setup failed');
+            return json({ webhook: true });
+        }
 
         if (action === 'bootstrap') {
             const [settings, treasury, pools, poolTotals, tasks, spartans, players, sessions, activity, audit] = await Promise.all([

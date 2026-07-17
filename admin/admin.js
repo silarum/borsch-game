@@ -243,6 +243,9 @@
             <section class="card"><div class="card-head"><div><h3>Неизменяемая экономика</h3><p>Эти правила закреплены в серверном расчёте и не меняются из браузера.</p></div></div>
                 <div class="card-row"><span>Победителю</span><b>70% штрафа</b></div><div class="card-row"><span>Казне проекта</span><b>30% штрафа</b></div><div class="card-row"><span>Пятый этап майнера</span><b>повторяется до поражения</b></div><div class="card-row"><span>Пятый этап спартанца</span><b>обязательная победа и сброс цикла</b></div>
             </section>
+            <section class="card"><div class="card-head"><div><h3>Telegram-команды</h3><p>Привяжите команды и кнопки управления к админ-боту без передачи токена в браузер.</p></div></div>
+                <button class="button" id="register-webhook" type="button">Подключить админ-бота</button>
+            </section>
             <section class="card"><div class="card-head"><div><h3>Журнал управления</h3><p>Последние изменения с Telegram ID администратора.</p></div></div>${(state.data.audit || []).map((item) => `<div class="card-row"><span>${esc(item.action)}</span><small>#${Number(item.telegram_admin_id)} · ${dateTime(item.created_at)}</small></div>`).join('') || '<div class="empty">Изменений пока нет</div>'}</section>`;
     }
 
@@ -335,6 +338,7 @@
             mutate('update_player_status', { playerId: Number(target.dataset.id), suspended, reason }, suspended ? 'Игрок заблокирован' : 'Игрок разблокирован');
         }
         if (target.id === 'run-worker') mutate('run_spartans', {}, 'Спартанцы сделали ход');
+        if (target.id === 'register-webhook') mutate('register_webhook', {}, 'Админ-бот подключён');
     });
 
     view.addEventListener('input', (event) => {

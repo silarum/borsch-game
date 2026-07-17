@@ -102,6 +102,7 @@ test('Telegram-админка защищена секретом webhook и allow
   assert.match(admin, /ADMIN_TELEGRAM_IDS/);
   assert.match(admin, /admin_patch_game_settings/);
   assert.match(admin, /TELEGRAM_ADMIN_BOT_TOKEN/);
+  assert.match(admin, /getTelegramWebhookSecret/);
   assert.match(matchmaking, /validateTelegramInitData/);
   assert.match(matchmaking, /TELEGRAM_GAME_BOT_TOKEN/);
   assert.doesNotMatch(`${admin}\n${matchmaking}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
@@ -138,6 +139,9 @@ test('мобильная админ-панель не содержит секр�
   assert.match(adminScript, /save_task/);
   assert.match(adminScript, /update_spartan/);
   assert.match(adminApi, /ADMIN_TELEGRAM_IDS/);
+  assert.match(adminApi, /action === 'whoami'/);
+  assert.match(adminApi, /action === 'register_webhook'/);
+  assert.match(adminScript, /register-webhook/);
   assert.doesNotMatch(`${adminHtml}\n${adminScript}\n${adminApi}`, /\b\d{7,12}:[A-Za-z0-9_-]{30,}\b/);
 });
 
