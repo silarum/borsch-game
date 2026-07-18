@@ -71,6 +71,34 @@ test('публикуемые изображения оптимизированы
   }
 });
 
+test('Крипто Беспредел подключается после создания DOM и не останавливает арену', () => {
+  const arena = read('js/arena.js');
+  assert.match(arena, /function bindQuickDuelButton\(\)/);
+  assert.match(arena, /document\.getElementById\('quick-duel-coin'\)/);
+  assert.doesNotMatch(arena, /\nquickDuelCoin\.addEventListener/);
+});
+
+test('Голодные волки содержат бой, выбор персонажей и рейтинговые лестницы', () => {
+  const fight = read('js/fight.js');
+  assert.match(html, /id="fight-screen"/);
+  assert.match(html, /src="js\/fight\.js"/);
+  assert.match(fight, /RUMIR Alpha/);
+  assert.match(fight, /Luna Hash/);
+  assert.match(fight, /data-fight-action="punch"/);
+  assert.match(fight, /data-fight-action="block"/);
+  assert.match(fight, /CLUB_LADDER/);
+  assert.match(read('js/arena.js'), /start-tournament-borsch/);
+  assert.match(read('js/arena.js'), /start-tournament-fight/);
+});
+
+test('инвестиции принимают SILARUM без фиксированного порога по курсу 1 к 10000 RUMIR', () => {
+  const main = read('js/main.js');
+  assert.match(main, /var SILARUM_TO_RUMIR = 10000/);
+  assert.match(main, /min="0\.0001"/);
+  assert.match(main, /порога входа нет/);
+  assert.match(main, /srum -= amount/);
+});
+
 test('сервер содержит ровно 300 полноценных управляемых спартанцев', () => {
   const migration = read('supabase/migrations/202607170001_secure_spartans_and_admin.sql');
   const economyMigration = read('supabase/migrations/20260717093135_spartan_economy_admin.sql');

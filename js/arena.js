@@ -96,10 +96,19 @@ function getMaxAvailableStage(stake) {
 }
 
 // --- Быстрая дуэль ---
-quickDuelCoin.addEventListener('click', () => {
-    if (duelActive || gameActive || pendingMining) return;
-    showMiningModal();
-});
+// arena.js загружается до initApp(), поэтому глобальная ссылка quickDuelCoin в этот
+// момент ещё не заполнена. Подключаем кнопку напрямую к уже существующему DOM.
+function bindQuickDuelButton() {
+    const trigger = document.getElementById('quick-duel-coin');
+    if (!trigger || trigger.dataset.arenaBound === 'true') return;
+    trigger.dataset.arenaBound = 'true';
+    trigger.addEventListener('click', () => {
+        if (duelActive || gameActive || pendingMining) return;
+        showMiningModal();
+    });
+}
+
+bindQuickDuelButton();
 
 // Покупка SRUM появится только после серверной проверки платежей.
 function showBuySRUMModal() {
@@ -703,7 +712,12 @@ function renderArena() {
     } else if (currentArenaTab === 'band') { 
         html = renderBandTab(); 
     } else if (currentArenaTab === 'tournaments') { 
-        html = `<h2>🔒 Выжить в тюрьме</h2><p>Особый турнир с высокими ставками.</p><button class="shop-btn" id="start-tournament-btn">🔍 Начать турнир</button>`; 
+        html = `<div class="tournament-heading"><small>ЕДИНАЯ ЛИГА CRYPTO BORSCH</small><h2>🏆 Выбери дисциплину</h2><p>Один рейтинг. Два способа доказать силу.</p></div>
+            <div class="tournament-methods">
+                <article class="tournament-card borsch"><div class="method-icon">🥘</div><small>СКОРОСТЬ · РЕАКЦИЯ</small><h3>Сварить Крипто Борщ</h3><p>20 секунд. Забрасывай крипто‑овощи в котёл и намайни больше RUMIR соперника.</p><button id="start-tournament-borsch">Варить борщ</button></article>
+                <article class="tournament-card wolves"><div class="method-icon">🐺</div><small>СИЛА · ТАКТИКА</small><h3>Волчья сотня</h3><p>Выбери бойца, используй удары, блок и специальный приём.</p><button id="start-tournament-fight">Выбрать бойца</button></article>
+            </div>
+            <button class="ranking-wide" id="open-wolf-rankings">↗ Рейтинг клубов и бойцов</button>`;
     } 
     arenaContent.innerHTML = html; 
     if (currentArenaTab === 'mining') { 
@@ -726,7 +740,9 @@ function renderArena() {
         }); 
     } 
     if (currentArenaTab === 'tournaments') { 
-        document.getElementById('start-tournament-btn')?.addEventListener('click', () => showTournamentModal()); 
+        document.getElementById('start-tournament-borsch')?.addEventListener('click', () => showTournamentModal());
+        document.getElementById('start-tournament-fight')?.addEventListener('click', () => window.openWolfFight('tournament'));
+        document.getElementById('open-wolf-rankings')?.addEventListener('click', () => window.openWolfRankings());
     } 
     renderPausedSessions(); 
 }
@@ -739,8 +755,8 @@ function showTournamentModal() {
     const activePlayers = Math.floor(5 + Math.random() * 25);
     tourModal.innerHTML = `<div class="quick-duel-box" style="border:none;background:transparent;padding:0;">
         <div class="pool-cloud" style="background:radial-gradient(circle at 20% 20%,#8b0000,#4a0000);">
-            <h2>🔒 Выжить в тюрьме</h2>
-            <div class="pool-amount">🧪 Тренировочный турнир</div>
+            <h2>🥘 Турнир Крипто Борща</h2>
+            <div class="pool-amount">🧪 Тренировочная лига</div>
             <div class="pool-players">🤖 <span>${activePlayers}</span> тренировочных ботов</div>
             <div class="pool-stage">Твой этап: <b>${getTournamentStageName(miningStage)}</b></div>
             <input type="range" min="0.01" max="5" step="0.01" value="${miningThreshold}" id="tournament-threshold-slider" style="width:100%;margin-top:10px;">

@@ -27,13 +27,22 @@ var globalUserTasks = window.readLocalArray('globalUserTasks');
 var userTasks = window.readLocalArray('userTasks');
 var referrals = window.readLocalArray('referrals');
 
+var SILARUM_TO_RUMIR = 10000;
 var investProjects = window.readLocalArray('investProjects', null) || [
-    { id: 1, name: 'iSayMobil — Интерактивная система аудио оповещения населения', icon: '🚗', desc: 'Доставка голосовых сообщений на адрес.', target: 100000, collected: 0, share: 10, endDate: Date.now() + 30 * 86400000 },
-    { id: 2, name: 'Голодные Волки — FGSPI', icon: '🐺', desc: 'Спорт-гейм-клуб быстрого питания.', target: 50000, collected: 0, share: 5, endDate: Date.now() + 60 * 86400000 },
-    { id: 3, name: 'WMW — Всемирная стена памяти', icon: '🕯️', desc: 'Портал памяти → Царствие небесное → Книга жизни.', target: 25000, collected: 0, share: 3, endDate: Date.now() + 45 * 86400000 }
+    { id: 1, name: 'iSayMobil', icon: '🚗', desc: 'Интерактивная система аудиооповещения.', collectedSrum: 0, share: 10 },
+    { id: 2, name: 'Голодные Волки — FGSPI', icon: '🐺', desc: 'Игровой и спортивный клуб «Волчья сотня».', collectedSrum: 0, share: 5 },
+    { id: 3, name: 'WMW — Всемирная стена памяти', icon: '🕯️', desc: 'Портал памяти и цифровая Книга жизни.', collectedSrum: 0, share: 3 }
 ];
 var myInvestments = window.readLocalArray('myInvestments');
 var investHistory = window.readLocalArray('investHistory');
+
+// Миграция старых тестовых вкладов RUM в новую модель SILARUM.
+investProjects.forEach(function(project) {
+    if (!Number.isFinite(Number(project.collectedSrum))) project.collectedSrum = Number(project.collected || 0) / SILARUM_TO_RUMIR;
+});
+myInvestments.forEach(function(item) {
+    if (!Number.isFinite(Number(item.srumAmount))) item.srumAmount = Number(item.amount || 0) / SILARUM_TO_RUMIR;
+});
 
 function saveAll() {
     localStorage.setItem('rum', rum);
@@ -109,6 +118,7 @@ function showMainElements() {
 
 // ================== НАВИГАЦИЯ ==================
 function switchScreen(screenId) {
+    if (screenId !== 'fight' && typeof window.stopWolfFight === 'function') window.stopWolfFight();
     var screens = document.querySelectorAll('.screen');
     for (var i = 0; i < screens.length; i++) { screens[i].classList.remove('active'); }
     if (screenId) {
@@ -119,6 +129,7 @@ function switchScreen(screenId) {
         else if (screenId === 'referral') { document.getElementById('referral-screen').classList.add('active'); if (typeof renderReferralList === 'function') renderReferralList(); }
         else if (screenId === 'shop') { document.getElementById('shop-screen').classList.add('active'); if (typeof renderShop === 'function') renderShop(); }
         else if (screenId === 'wallet') { document.getElementById('wallet-screen').classList.add('active'); if (typeof renderWallet === 'function') renderWallet(); }
+        else if (screenId === 'fight') { document.getElementById('fight-screen').classList.add('active'); if (typeof renderFightScreen === 'function') renderFightScreen(); }
         else if (screenId === 'top-tappers') { document.getElementById('top-tappers-screen').classList.add('active'); loadTopPlayers('rum'); }
         else if (screenId === 'top-miners') { document.getElementById('top-miners-screen').classList.add('active'); loadTopPlayers('srum'); }
         else if (screenId === 'invest') { document.getElementById('invest-screen').classList.add('active'); renderInvest(); }
@@ -165,52 +176,47 @@ function loadTopPlayers(type) {
 function renderInvest() {
     var screen = document.getElementById('invest-screen');
     if (!screen) return;
-    var totalInvested = myInvestments.reduce(function(sum, inv) { return sum + inv.amount; }, 0);
-    var html = '<h2>📈 Инвестиции</h2><p style="color:#aaa;font-size:0.8rem;">Вкладывай RUM в проекты</p>' +
-        '<div style="background:linear-gradient(145deg,#1a1a2e,#252545);border:2px solid #FFD700;border-radius:15px;padding:15px;margin-bottom:15px;text-align:center;">' +
-        '<p style="color:#FFD700;font-size:1.2rem;">💰 Твой портфель</p>' +
-        '<p style="font-size:2rem;font-weight:bold;color:white;">' + totalInvested.toLocaleString() + ' RUM</p>' +
-        '<p style="color:#aaa;font-size:0.7rem;">' + myInvestments.length + ' проектов</p></div>';
+    var totalInvested = myInvestments.reduce(function(sum, inv) { return sum + Number(inv.srumAmount || 0); }, 0);
+    var html = '<button class="back-btn" id="invest-back-btn">← Назад</button>' +
+        '<div class="invest-hero"><span class="invest-hero-icon">◈</span><div><small>ОТКРЫТОЕ УЧАСТИЕ</small><h2>Инвестиции</h2><p>Любая сумма без минимального порога</p></div></div>' +
+        '<div class="conversion-card"><span>Фиксированный игровой курс</span><strong>1 SILARUM = 10 000 RUMIR</strong><small>Тестовые игровые активы · реальные платежи отключены</small></div>' +
+        '<div class="portfolio-card"><span>Твой портфель</span><strong>' + totalInvested.toFixed(4) + ' SILARUM</strong><small>Эквивалент ' + Math.round(totalInvested * SILARUM_TO_RUMIR).toLocaleString() + ' RUMIR · ' + myInvestments.length + ' проектов</small></div>';
 
     for (var j = 0; j < investProjects.length; j++) {
         var project = investProjects[j];
         var projectId = Number(project.id);
         var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
-        var myAmount = myInv ? myInv.amount : 0;
-        var progress = Math.min(100, (project.collected / project.target) * 100);
-        var daysLeft = Math.max(0, Math.ceil((project.endDate - Date.now()) / 86400000));
-        var investorShare = project.target > 0 ? (myAmount / project.target) * 100 : 0;
-        var projectedProfit = (project.target * (project.share / 100)) * (investorShare / 100);
-        html += '<div class="info-card" style="text-align:left;position:relative;">' +
-            (myAmount > 0 ? '<div style="position:absolute;top:0;right:0;background:#FFD700;color:#000;padding:3px 10px;border-radius:0 0 0 10px;font-size:0.65rem;">Ты в деле!</div>' : '') +
-            '<div style="display:flex;gap:10px;"><span style="font-size:2.5rem;">' + window.escapeHtml(project.icon) + '</span><div><strong style="color:#FFD700;">' + window.escapeHtml(project.name) + '</strong><p style="font-size:0.7rem;color:#ccc;">' + window.escapeHtml(project.desc) + '</p></div></div>' +
-            '<div style="background:rgba(255,255,255,0.05);border-radius:10px;height:14px;margin:10px 0;overflow:hidden;"><div style="background:linear-gradient(90deg,#FFD700,#FFA500,#FF6347);height:100%;width:' + progress + '%;"></div></div>' +
-            '<div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#aaa;"><span>' + project.collected.toLocaleString() + ' / ' + project.target.toLocaleString() + ' RUM</span><span>Доля: ' + project.share + '%</span></div>' +
-            '<p style="font-size:0.7rem;color:#aaa;">⏳ ' + daysLeft + ' дн.</p>';
+        var myAmount = myInv ? Number(myInv.srumAmount || 0) : 0;
+        var collected = Number(project.collectedSrum || 0);
+        var investorShare = collected > 0 ? (myAmount / collected) * 100 : 0;
+        html += '<div class="info-card invest-project-card">' +
+            (myAmount > 0 ? '<div class="invest-badge">Ты участвуешь</div>' : '') +
+            '<div class="invest-project-head"><span>' + window.escapeHtml(project.icon) + '</span><div><strong>' + window.escapeHtml(project.name) + '</strong><p>' + window.escapeHtml(project.desc) + '</p></div></div>' +
+            '<div class="invest-metrics"><span>Собрано<strong>' + collected.toFixed(4) + ' SILARUM</strong></span><span>RUMIR‑экв.<strong>' + Math.round(collected * SILARUM_TO_RUMIR).toLocaleString() + '</strong></span></div>' +
+            '<p class="open-round">● Раунд открыт · порога входа нет</p>';
         if (myAmount > 0) {
-            html += '<div style="background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);border-radius:10px;padding:10px;margin:10px 0;">' +
-                '<p style="color:#4CAF50;">✅ Вклад: <b>' + myAmount.toLocaleString() + ' RUM</b> | Доля: <b>' + investorShare.toFixed(2) + '%</b></p>' +
-                '<p style="color:#FFD700;">📈 Прогноз: ~' + projectedProfit.toFixed(0) + ' RUM</p></div>';
+            html += '<div class="my-investment"><span>Твой вклад <b>' + myAmount.toFixed(4) + ' SILARUM</b></span><span>Доля тестового пула <b>' + investorShare.toFixed(2) + '%</b></span></div>';
         }
-        html += '<div style="display:flex;gap:8px;"><input type="number" id="invest-amount-' + projectId + '" placeholder="Сумма RUM" style="flex:2;padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.3);background:rgba(0,0,0,0.5);color:white;"><button id="invest-btn-' + projectId + '" style="flex:1;padding:10px;border:none;border-radius:8px;background:linear-gradient(180deg,#FFD700,#FFA500);color:#000;font-weight:bold;">💰 Вложить</button></div>';
-        if (myAmount > 0) html += '<button id="withdraw-btn-' + projectId + '" style="width:100%;margin-top:8px;padding:8px;border:1px solid #e74c3c;border-radius:8px;background:transparent;color:#e74c3c;">📤 Забрать игровые RUM (штраф 10%)</button>';
+        html += '<div class="invest-action"><input type="number" min="0.0001" step="0.0001" max="' + srum + '" id="invest-amount-' + projectId + '" placeholder="Любая сумма SILARUM"><button id="invest-btn-' + projectId + '">Вложить</button></div>';
+        if (myAmount > 0) html += '<button class="withdraw-invest" id="withdraw-btn-' + projectId + '">Забрать игровые SILARUM (штраф 10%)</button>';
         html += '</div>';
     }
     screen.innerHTML = html;
+    document.getElementById('invest-back-btn').addEventListener('click', function() { switchScreen(null); });
 
     for (var k = 0; k < investProjects.length; k++) {
         (function(project) {
             var btn = document.getElementById('invest-btn-' + project.id);
             if (btn) btn.addEventListener('click', function() {
                 var input = document.getElementById('invest-amount-' + project.id);
-                var amount = parseInt(input.value) || 0;
+                var amount = Number(input.value) || 0;
                 if (amount <= 0) return alert('Введите сумму');
-                if (amount > rum) return alert('Недостаточно RUM');
-                if (!confirm('Вложить ' + amount.toLocaleString() + ' RUM?')) return;
-                rum -= amount; invest += amount; project.collected += amount;
+                if (amount > srum) return alert('Недостаточно SILARUM');
+                if (!confirm('Вложить ' + amount.toFixed(4) + ' SILARUM?')) return;
+                srum -= amount; invest += amount * SILARUM_TO_RUMIR; project.collectedSrum += amount;
                 var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
-                if (myInv) { myInv.amount += amount; } else { myInvestments.push({ projectId: project.id, amount: amount }); }
-                investHistory.push({ projectId: project.id, amount: amount, date: Date.now() });
+                if (myInv) { myInv.srumAmount += amount; } else { myInvestments.push({ projectId: project.id, srumAmount: amount }); }
+                investHistory.push({ projectId: project.id, srumAmount: amount, rumirEquivalent: amount * SILARUM_TO_RUMIR, date: Date.now() });
                 updateUI(); saveAll();
                 renderInvest();
             });
@@ -218,10 +224,10 @@ function renderInvest() {
             if (wb) wb.addEventListener('click', function() {
                 var myInv = myInvestments.find(function(i) { return i.projectId === project.id; });
                 if (!myInv) return;
-                var penalty = Math.floor(myInv.amount * 0.1);
-                var ret = myInv.amount - penalty;
-                if (!confirm('Вывести ' + myInv.amount.toLocaleString() + ' RUM? Штраф ' + penalty.toLocaleString() + ', к получению ' + ret.toLocaleString())) return;
-                rum += ret; project.collected = Math.max(0, project.collected - myInv.amount);
+                var penalty = myInv.srumAmount * 0.1;
+                var ret = myInv.srumAmount - penalty;
+                if (!confirm('Вывести ' + myInv.srumAmount.toFixed(4) + ' SILARUM? К возврату ' + ret.toFixed(4))) return;
+                srum += ret; project.collectedSrum = Math.max(0, project.collectedSrum - myInv.srumAmount);
                 myInvestments = myInvestments.filter(function(i) { return i.projectId !== project.id; });
                 updateUI(); saveAll(); renderInvest();
             });
@@ -239,9 +245,10 @@ function initApp() {
     document.getElementById('veggie-view').style.display = 'block';
     if (typeof startVeggieAnimation === 'function') startVeggieAnimation();
 
-    if (!window.APP_CONFIG.cloudSyncEnabled && !localStorage.getItem('demoStarterClaimed')) {
-        srum = Math.max(srum, 1);
-        localStorage.setItem('demoStarterClaimed', 'true');
+    if (!window.APP_CONFIG.cloudSyncEnabled && localStorage.getItem('demoStarterVersion') !== '2') {
+        srum = Math.max(srum, 30);
+        localStorage.setItem('srum', srum);
+        localStorage.setItem('demoStarterVersion', '2');
     }
 
     if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
@@ -277,7 +284,12 @@ function initApp() {
     if (rulesBtn) rulesBtn.addEventListener('click', function() { switchScreen('rules'); });
     var navBtns = document.querySelectorAll('.nav-btn');
     for (var i = 0; i < navBtns.length; i++) {
-        navBtns[i].addEventListener('click', function() { var id = this.getAttribute('data-screen'); if (id) switchScreen(id); });
+        navBtns[i].addEventListener('click', function() {
+            var id = this.getAttribute('data-screen');
+            for (var n = 0; n < navBtns.length; n++) navBtns[n].classList.remove('active');
+            this.classList.add('active');
+            if (id) switchScreen(id);
+        });
     }
     var menuBtns = document.querySelectorAll('.menu-dropdown button[data-screen]');
     for (var j = 0; j < menuBtns.length; j++) {
