@@ -135,7 +135,7 @@
                 <div class="field"><label>Базовый USDT</label><input type="number" min="0" step="0.01" name="base_usdt" value="${Number(pool.base_usdt || 0)}"></div>
                 <div class="field"><label>Базовый TON</label><input type="number" min="0" step="0.001" name="base_ton" value="${Number(pool.base_ton || 0)}"></div>
                 <div class="field"><label>Вход по умолчанию, SRUM</label><input type="number" min="0.01" step="0.01" name="entry_srum_default" value="${Number(pool.entry_srum_default || 1)}"></div>
-                <div class="field"><label>Выплата</label><select name="payout_asset"><option ${pool.payout_asset !== 'TON' ? 'selected' : ''}>USDT</option><option ${pool.payout_asset === 'TON' ? 'selected' : ''}>TON</option></select></div>
+                <div class="field"><label>Игровая выплата</label><input name="payout_asset" value="SILARUM" readonly></div>
                 <div class="field"><label>Минимальный вход</label><input type="number" min="0.01" step="0.01" name="entry_srum_min" value="${Number(pool.entry_srum_min || .01)}"></div>
                 <div class="field"><label>Максимальный вход</label><input type="number" min="0.01" step="0.01" name="entry_srum_max" value="${Number(pool.entry_srum_max || 300)}"></div>
                 <div class="field"><label>Спартанцы при игроках меньше</label><input type="number" min="0" max="300" name="activation_threshold" value="${Number(pool.activation_threshold ?? 2)}"></div>
@@ -208,6 +208,117 @@
         view.innerHTML = `<div class="section-heading"><div><h2>Задания</h2><p>Создание, бюджет и лимиты выполнения.</p></div><button class="button small" id="new-task">+ Создать</button></div><div id="task-form-slot"></div><section class="task-list">${cards || '<div class="empty">Заданий пока нет</div>'}</section>`;
     }
 
+    function fightStatus(value) {
+        return ({
+            pending: 'НА ПРОВЕРКЕ', verified: 'ПРОВЕРЕН', suspended: 'ПРИОСТАНОВЛЕН', rejected: 'ОТКЛОНЁН',
+            pending_review: 'НА ПРОВЕРКЕ', registration: 'РЕГИСТРАЦИЯ', live: 'ИДЁТ', finished: 'ЗАВЕРШЁН'
+        })[value] || String(value || '—').toUpperCase();
+    }
+
+    function renderFightNetwork() {
+        const clubs = state.data.fightClubs || [];
+        const tournaments = state.data.fightTournaments || [];
+        const challenges = state.data.fightChallenges || [];
+        const exchanges = state.data.exchangeRequests || [];
+        const submittedMatches = state.data.submittedMatches || [];
+        const contributionCampaigns = state.data.contributionCampaigns || [];
+        const contributions = state.data.clubContributions || [];
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const monthlyContributions = contributions.filter((item) => String(item.created_at || '').slice(0, 7) === currentMonth);
+        const monthlySupport = monthlyContributions.reduce((sum, item) => sum + Number(item.amount_silarum || 0), 0);
+        const pendingClubs = clubs.filter((item) => item.status === 'pending').length;
+        const pendingTournaments = tournaments.filter((item) => item.approval_status === 'pending').length;
+        const pendingExchanges = exchanges.filter((item) => item.status === 'pending_review').length;
+        view.innerHTML = `
+            <div class="section-heading"><div><h2>Сеть «Голодные волки»</h2><p>Заведения, территориальные лиги, турниры и призовой контроль.</p></div><button class="button small" id="new-global-tournament">+ Мировой турнир</button></div>
+            <section class="metric-grid">
+                <article class="metric purple"><span class="metric-label">Клубы</span><b class="metric-value">${clubs.length}</b><span class="metric-note">${pendingClubs} ждут проверки</span></article>
+                <article class="metric gold"><span class="metric-label">Турниры</span><b class="metric-value">${tournaments.length}</b><span class="metric-note">${pendingTournaments} требуют решения</span></article>
+                <article class="metric green"><span class="metric-label">Результаты</span><b class="metric-value">${submittedMatches.length}</b><span class="metric-note">ждут судью</span></article>
+                <article class="metric blue"><span class="metric-label">Обмен</span><b class="metric-value">${pendingExchanges}</b><span class="metric-note">заявок на проверке</span></article>
+                <article class="metric purple"><span class="metric-label">Поддержка клубов</span><b class="metric-value">${number(monthlySupport, 2)}</b><span class="metric-note">SILARUM за текущий месяц</span></article>
+            </section>
+            <div id="global-tournament-slot"></div>
+            <section class="card safety-banner"><div><small>ЗАЩИЩЁННЫЙ ОБМЕН</small><h3>Автоматическая отправка TON/USDT отключена</h3><p>Одобрение только разрешает ручную обработку. Отметить заявку исполненной можно после фактической отправки и указания хеша транзакции.</p></div><span>LOCKED</span></section>
+            <section class="review-section"><div class="section-heading"><div><h2>Заявки клубов</h2><p>Проверьте связь заявителя с реальным заведением.</p></div></div>
+                ${clubs.map(clubReviewCard).join('') || '<div class="empty">Заявок пока нет. После применения миграции они появятся здесь.</div>'}
+            </section>
+            <section class="review-section"><div class="section-heading"><div><h2>Добровольная поддержка</h2><p>Кампании создают клубы, списание происходит только по действию бойца.</p></div></div>
+                ${contributionCampaigns.filter((item) => String(item.month_start || '').slice(0, 7) === currentMonth).map(contributionCampaignCard).join('') || '<div class="empty">В этом месяце клубы ещё не открывали сбор</div>'}
+            </section>
+            <section class="review-section"><div class="section-heading"><div><h2>Турниры и призы</h2><p>Мировые события и ценные награды требуют решения проекта.</p></div></div>
+                ${tournaments.map(tournamentReviewCard).join('') || '<div class="empty">Турниров пока нет</div>'}
+            </section>
+            <section class="review-section"><div class="section-heading"><div><h2>Заявленные результаты</h2><p>Клиент сообщает результат, но только судья изменяет сетку и выдаёт приз.</p></div></div>
+                ${submittedMatches.map(matchReviewCard).join('') || '<div class="empty">Спорных или неподтверждённых результатов нет</div>'}
+            </section>
+            <section class="review-section"><div class="section-heading"><div><h2>Межклубные поединки</h2><p>Подтвердите победителя после проверки протокола боя.</p></div></div>
+                ${challenges.map(challengeReviewCard).join('') || '<div class="empty">Вызовов клубов пока нет</div>'}
+            </section>
+            <section class="review-section"><div class="section-heading"><div><h2>Обмен SILARUM</h2><p>Курс, комиссия, газ, адрес и хеш транзакции фиксируются в заявке.</p></div></div>
+                ${exchanges.map(exchangeReviewCard).join('') || '<div class="empty">Заявок на обмен пока нет</div>'}
+            </section>`;
+    }
+
+    function clubReviewCard(club) {
+        const canReview = club.status === 'pending';
+        const clubTreasury = (state.data.clubTreasuries || []).find((item) => item.club_id === club.id) || {};
+        return `<article class="card review-card"><div class="card-head"><div><h3>🐺 ${esc(club.name)}</h3><p>${esc(club.venue_name)} · ${esc(club.city)}${club.district ? ' · ' + esc(club.district) : ''}</p></div><span class="pill ${club.status === 'verified' ? '' : 'off'}">${fightStatus(club.status)}</span></div>
+            <div class="review-facts"><span><small>ТИП</small>${esc(club.venue_type)}</span><span><small>ВЛАДЕЛЕЦ</small>${esc(club.owner_nickname)}</span><span><small>РЕЙТИНГ</small>${Number(club.rating || 1200)}</span><span><small>КАЗНА</small>${number(clubTreasury.silarum_available, 2)} SILARUM</span></div>
+            <p>${esc(club.description || 'Описание не указано')}</p><small class="review-address">📍 ${esc(club.address || 'Адрес не указан')}</small>
+            <div class="button-row">${canReview ? `<button class="button approve-club" data-id="${club.id}">Одобрить</button><button class="button danger reject-club" data-id="${club.id}">Отклонить</button>` : `<button class="button secondary suspend-club" data-id="${club.id}" data-status="${club.status}">${club.status === 'suspended' ? 'Вернуть на проверку' : 'Приостановить'}</button>${club.status === 'verified' ? `<button class="button small toggle-club-exchange" data-id="${club.id}" data-enabled="${Boolean(clubTreasury.exchange_enabled)}">${clubTreasury.exchange_enabled ? 'Запретить обмен' : 'Разрешить заявки'}</button>` : ''}`}</div></article>`;
+    }
+
+    function clubName(clubId) {
+        return (state.data.fightClubs || []).find((item) => item.id === clubId)?.name || `Клуб ${clubId}`;
+    }
+
+    function contributionCampaignCard(campaign) {
+        const entries = (state.data.clubContributions || []).filter((item) => item.campaign_id === campaign.id).slice(0, 10);
+        return `<article class="card review-card"><div class="card-head"><div><h3>💚 ${esc(clubName(campaign.club_id))}</h3><p>${esc(campaign.message || 'Добровольная поддержка клуба')}</p></div><span class="pill ${campaign.enabled ? '' : 'off'}">${campaign.enabled ? 'АКТИВНА' : 'ПАУЗА'}</span></div>
+            <div class="review-facts"><span><small>СОБРАНО</small>${number(campaign.total_silarum, 2)} SILARUM</span><span><small>УЧАСТНИКИ</small>${Number(campaign.contributor_count || 0)}</span><span><small>РЕКОМЕНДАЦИЯ</small>${number(campaign.suggested_silarum, 2)} SILARUM</span></div>
+            ${entries.map((item) => `<div class="card-row"><span>${item.publish_on_wall ? '💚' : '🔒'} ${esc(item.nickname)}</span><b>${number(item.amount_silarum, 2)} SILARUM</b></div>`).join('') || '<div class="empty">Поступлений пока нет</div>'}</article>`;
+    }
+
+    function matchReviewCard(match) {
+        const tournament = (state.data.fightTournaments || []).find((item) => item.id === match.tournament_id);
+        return `<article class="card review-card"><div class="card-head"><div><h3>⚔ ${esc(tournament?.title || 'Турнирный бой')}</h3><p>Раунд ${Number(match.round_number)} · бой ${Number(match.match_number)}</p></div><span class="pill off">ЗАЯВЛЕН</span></div><div class="review-facts"><span><small>БОЕЦ 1</small>#${Number(match.player_one_telegram_id)}</span><span><small>БОЕЦ 2</small>#${Number(match.player_two_telegram_id)}</span></div><div class="button-row"><button class="button verify-match" data-id="${match.id}" data-winner="${Number(match.player_one_telegram_id)}">Победил #${Number(match.player_one_telegram_id)}</button><button class="button secondary verify-match" data-id="${match.id}" data-winner="${Number(match.player_two_telegram_id)}">Победил #${Number(match.player_two_telegram_id)}</button></div></article>`;
+    }
+
+    function challengeReviewCard(challenge) {
+        const verifiable = ['accepted', 'live'].includes(challenge.status);
+        return `<article class="card review-card"><div class="card-head"><div><h3>🐺 ${esc(challenge.title)}</h3><p>${esc(clubName(challenge.challenger_club_id))} против ${esc(clubName(challenge.defender_club_id))} · ${dateTime(challenge.proposed_starts_at)}</p></div><span class="pill ${challenge.status === 'finished' ? '' : 'off'}">${fightStatus(challenge.status)}</span></div><div class="review-facts"><span><small>ФОРМАТ</small>${esc(challenge.format)}</span><span><small>РЕЙТИНГ</small>+${Number(challenge.rating_points)}</span><span><small>ПОБЕДИТЕЛЬ</small>${challenge.winner_club_id ? esc(clubName(challenge.winner_club_id)) : '—'}</span></div>${verifiable ? `<div class="button-row"><button class="button verify-challenge" data-id="${challenge.id}" data-winner="${challenge.challenger_club_id}">${esc(clubName(challenge.challenger_club_id))}</button><button class="button secondary verify-challenge" data-id="${challenge.id}" data-winner="${challenge.defender_club_id}">${esc(clubName(challenge.defender_club_id))}</button></div>` : ''}</article>`;
+    }
+
+    function exchangeReviewCard(request) {
+        const pending = request.status === 'pending_review';
+        const approved = request.status === 'approved' || request.status === 'processing';
+        const source = request.source_type === 'club' ? clubName(request.source_club_id) : `Игрок #${Number(request.requester_telegram_user_id)}`;
+        return `<article class="card review-card"><div class="card-head"><div><h3>⇄ ${number(request.amount_silarum, 2)} SILARUM → ${esc(request.target_asset)}</h3><p>${esc(source)} · ${dateTime(request.created_at)}</p></div><span class="pill ${request.status === 'sent' ? '' : 'off'}">${esc(request.status)}</span></div><div class="review-facts"><span><small>К ПОЛУЧЕНИЮ</small>${number(request.net_target_amount, request.target_asset === 'TON' ? 6 : 2)} ${esc(request.target_asset)}</span><span><small>КОМИССИЯ</small>${number(request.service_commission_silarum, 2)} SILARUM</span><span><small>ГАЗ</small>${number(request.estimated_gas_target, 6)} ${esc(request.target_asset)}</span></div><p class="mono-address">${esc(request.destination_address)}</p>${pending ? `<div class="button-row"><button class="button approve-exchange" data-id="${request.id}">Разрешить обработку</button><button class="button danger reject-exchange" data-id="${request.id}">Отклонить и вернуть</button></div>` : approved ? `<button class="button complete-exchange" data-id="${request.id}">Отметить отправленной по хешу</button>` : request.tx_hash ? `<p class="mono-address">TX: ${esc(request.tx_hash)}</p>` : ''}</article>`;
+    }
+
+    function tournamentReviewCard(tournament) {
+        const pending = tournament.approval_status === 'pending';
+        return `<article class="card review-card"><div class="card-head"><div><h3>🏆 ${esc(tournament.title)}</h3><p>${esc(tournament.league_tier)} · ${esc(tournament.discipline)} · ${dateTime(tournament.starts_at)}</p></div><span class="pill ${tournament.approval_status === 'approved' ? '' : 'off'}">${fightStatus(tournament.status)}</span></div>
+            <div class="review-facts"><span><small>ПРИЗ</small>${esc(tournament.prize_title || '—')}</span><span><small>ФОНД</small>${number(tournament.prize_fund_amount, 2)} ${esc(tournament.prize_currency)}</span><span><small>УЧАСТНИКИ</small>${Number(tournament.max_participants)}</span></div>
+            <p>${esc(tournament.rules_text || 'Условия не указаны')}</p>
+            ${pending ? `<div class="button-row"><button class="button approve-tournament" data-id="${tournament.id}">Одобрить публикацию</button><button class="button danger reject-tournament" data-id="${tournament.id}">Отклонить</button></div>` : ''}</article>`;
+    }
+
+    function globalTournamentForm() {
+        const registration = new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 16);
+        const start = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 16);
+        return `<form id="global-tournament-form" class="card"><div class="card-head"><div><h3>Мировой турнир</h3><p>Главная админка задаёт условия и публикует событие. Выплата фонда остаётся ручной.</p></div></div>
+            <div class="form-grid"><div class="field wide"><label>Название</label><input required maxlength="120" name="title"></div><div class="field wide"><label>Описание</label><textarea maxlength="2000" name="description"></textarea></div>
+            <div class="field"><label>Дисциплина</label><select name="discipline"><option value="fight">Бойцы</option><option value="borsch">Крипто Борщ</option><option value="mixed">Обе</option></select></div><div class="field"><label>Формат</label><select name="format"><option value="knockout">На выбывание</option><option value="round_robin">Каждый с каждым</option><option value="groups_knockout">Группы + плей-офф</option></select></div>
+            <div class="field"><label>Конец регистрации</label><input required type="datetime-local" name="registration_ends_at" value="${registration}"></div><div class="field"><label>Начало</label><input required type="datetime-local" name="starts_at" value="${start}"></div>
+            <div class="field"><label>Участников</label><input type="number" min="2" max="100000" name="max_participants" value="128"></div><div class="field"><label>Минимальный рейтинг</label><input type="number" min="0" name="min_rating" value="1500"></div>
+            <div class="field"><label>Тип приза</label><select name="prize_type"><option value="physical">Ценный подарок</option><option value="food">Еда / купон</option><option value="digital">Цифровой приз</option><option value="silarum">Фонд SILARUM</option><option value="mixed">Смешанный</option></select></div><div class="field"><label>Расчётная единица</label><input name="prize_currency" value="SILARUM" readonly></div>
+            <div class="field wide"><label>Название приза</label><input required maxlength="200" name="prize_title"></div><div class="field"><label>Стоимость / фонд, SILARUM</label><input type="number" min="0.0001" step="0.01" name="prize_fund_amount" value="1000"></div><div class="field"><label>Минимальный возраст</label><input type="number" min="0" max="99" name="min_age" value="18"></div>
+            <div class="field wide"><label>Условия участия</label><textarea required maxlength="5000" name="rules_text"></textarea></div></div>
+            <div class="button-row"><button class="button" type="submit">Создать и открыть регистрацию</button><button class="button secondary" type="button" id="cancel-global-tournament">Отмена</button></div></form>`;
+    }
+
     function taskForm(task = {}) {
         return `<form id="task-form" class="card">
             <div class="card-head"><div><h3>${task.id ? 'Настройка задания' : 'Новое задание'}</h3><p>Ссылка должна начинаться с https://</p></div></div>
@@ -258,6 +369,7 @@
         if (state.tab === 'pools') renderPools();
         if (state.tab === 'spartans') renderSpartans();
         if (state.tab === 'players') renderPlayers();
+        if (state.tab === 'fight-network') renderFightNetwork();
         if (state.tab === 'tasks') renderTasks();
         if (state.tab === 'settings') renderSettings();
     }
@@ -339,6 +451,22 @@
         }
         if (target.id === 'run-worker') mutate('run_spartans', {}, 'Спартанцы сделали ход');
         if (target.id === 'register-webhook') mutate('register_webhook', {}, 'Админ-бот подключён');
+        if (target.id === 'new-global-tournament') document.getElementById('global-tournament-slot').innerHTML = globalTournamentForm();
+        if (target.id === 'cancel-global-tournament') document.getElementById('global-tournament-slot').innerHTML = '';
+        if (target.classList.contains('approve-club')) mutate('review_fight_club', { clubId: target.dataset.id, status: 'verified' }, 'Клуб одобрен');
+        if (target.classList.contains('reject-club')) mutate('review_fight_club', { clubId: target.dataset.id, status: 'rejected' }, 'Клуб отклонён');
+        if (target.classList.contains('suspend-club')) mutate('review_fight_club', { clubId: target.dataset.id, status: target.dataset.status === 'suspended' ? 'pending' : 'suspended' }, 'Статус клуба изменён');
+        if (target.classList.contains('approve-tournament')) mutate('review_fight_tournament', { tournamentId: target.dataset.id, approvalStatus: 'approved' }, 'Турнир опубликован');
+        if (target.classList.contains('reject-tournament')) mutate('review_fight_tournament', { tournamentId: target.dataset.id, approvalStatus: 'rejected' }, 'Турнир отклонён');
+        if (target.classList.contains('verify-match') && confirm('Подтвердить победителя и изменить турнирную сетку?')) mutate('verify_tournament_match_result', { matchId: target.dataset.id, winnerTelegramUserId: Number(target.dataset.winner) }, 'Результат боя подтверждён');
+        if (target.classList.contains('verify-challenge') && confirm('Подтвердить победителя межклубного боя и изменить рейтинг?')) mutate('verify_club_challenge', { challengeId: target.dataset.id, winnerClubId: target.dataset.winner }, 'Рейтинг клубов обновлён');
+        if (target.classList.contains('toggle-club-exchange')) mutate('set_club_exchange_enabled', { clubId: target.dataset.id, enabled: target.dataset.enabled !== 'true' }, 'Доступ клуба к заявкам изменён');
+        if (target.classList.contains('approve-exchange')) mutate('review_silarum_exchange', { requestId: target.dataset.id, approved: true }, 'Заявка разрешена к ручной обработке');
+        if (target.classList.contains('reject-exchange')) mutate('review_silarum_exchange', { requestId: target.dataset.id, approved: false }, 'Заявка отклонена, SILARUM возвращены');
+        if (target.classList.contains('complete-exchange')) {
+            const txHash = prompt('Введите хеш уже выполненной транзакции TON/USDT:') || '';
+            if (txHash.trim().length >= 10) mutate('complete_silarum_exchange', { requestId: target.dataset.id, txHash: txHash.trim() }, 'Транзакция зафиксирована');
+        }
     });
 
     view.addEventListener('input', (event) => {
@@ -396,6 +524,15 @@
                 spartan_tick_seconds: Number(form.elements.spartan_tick_seconds.value)
             };
             mutate('update_settings', { patch }, 'Настройки проекта сохранены');
+        }
+        if (form.id === 'global-tournament-form') {
+            mutate('save_global_tournament', { tournament: {
+                ...values,
+                max_participants: Number(values.max_participants), min_rating: Number(values.min_rating),
+                prize_fund_amount: Number(values.prize_fund_amount), min_age: Number(values.min_age),
+                registration_ends_at: new Date(values.registration_ends_at).toISOString(),
+                starts_at: new Date(values.starts_at).toISOString()
+            } }, 'Мировой турнир создан');
         }
     });
 

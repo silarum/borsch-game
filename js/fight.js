@@ -23,6 +23,7 @@
     let fightTimer = null;
     let enemyTimer = null;
     let pendingMode = 'training';
+    let fightContext = null;
     let stats = window.readLocalJson('wolfFightStats', {
         rating: 1200,
         clubRating: 1680,
@@ -288,16 +289,39 @@
             stats.clubRating = Math.max(100, stats.clubRating - 3);
         }
         saveStats();
+        const tournamentOutcome = pendingMode === 'tournament' && window.ClubLeaguePlatform
+            ? window.ClubLeaguePlatform.recordFightResult(won, fightContext)
+            : null;
         if (typeof window.updateUI === 'function') window.updateUI();
         if (typeof window.saveAll === 'function') window.saveAll();
+        let outcomeMessage = won
+            ? 'Рейтинг растёт. Начислено ' + (pendingMode === 'tournament' ? '1 000' : '250') + ' тестовых RUMIR.'
+            : 'Стая становится сильнее после каждого боя.';
+        let repeatLabel = 'РЕВАНШ';
+        if (tournamentOutcome?.status === 'checked_in') {
+            outcomeMessage = `Раунд выигран: ${Number(tournamentOutcome.roundWins)}/2. Ещё одна победа откроет приз.`;
+            repeatLabel = 'СЛЕДУЮЩИЙ РАУНД';
+        }
+        if (tournamentOutcome?.status === 'winner') {
+            outcomeMessage = `Ты выиграл турнир. Награда «${window.escapeHtml(tournamentOutcome.prize || 'приз клуба')}» оформлена в кабинете клуба.`;
+            repeatLabel = 'ТУРНИР ЗАВЕРШЁН';
+        }
+        if (tournamentOutcome?.status === 'eliminated') {
+            outcomeMessage = 'Ты выбыл из этого турнира. Тренируй бойца и возвращайся в следующий сезон.';
+            repeatLabel = 'ВЫБРАТЬ БОЙЦА';
+        }
+        if (tournamentOutcome?.status === 'submitted') {
+            outcomeMessage = 'Результат отправлен судье клуба. Рейтинг и приз изменятся только после подтверждения матча.';
+            repeatLabel = 'ЖДАТЬ РЕШЕНИЯ';
+        }
         const root = document.getElementById('fight-content');
         root.innerHTML = `<section class="fight-result ${won ? 'win' : 'lose'}">
             <small>${pendingMode === 'tournament' ? 'ТУРНИР ВОЛЧЬЕЙ СОТНИ' : 'РЕЙТИНГОВЫЙ БОЙ'}</small>
             <div class="result-emblem">${won ? '🏆' : '🐺'}</div>
             <h1>${won ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}</h1>
-            <p>${won ? 'Рейтинг растёт. Начислено ' + (pendingMode === 'tournament' ? '1 000' : '250') + ' тестовых RUMIR.' : 'Стая становится сильнее после каждого боя.'}</p>
+            <p>${outcomeMessage}</p>
             <div class="rating-change"><span>Твой рейтинг</span><strong>${stats.rating}</strong></div>
-            <button class="fight-start" data-fight-action="start">РЕВАНШ</button>
+            <button class="fight-start" data-fight-action="${tournamentOutcome && ['winner', 'eliminated', 'submitted'].includes(tournamentOutcome.status) ? 'roster' : 'start'}">${repeatLabel}</button>
             <button class="fight-ranking-link" data-fight-action="roster">Выбрать другого бойца</button>
         </section>`;
         bindRoot(root);
@@ -315,14 +339,16 @@
         battle = null;
     }
 
-    function openWolfFight(mode) {
+    function openWolfFight(mode, context) {
         pendingMode = mode || 'training';
+        fightContext = context || null;
         activeTab = 'fighters';
         if (typeof window.switchScreen === 'function') window.switchScreen('fight');
     }
 
     function openWolfRankings() {
         pendingMode = 'training';
+        fightContext = null;
         activeTab = 'ladder';
         if (typeof window.switchScreen === 'function') window.switchScreen('fight');
     }

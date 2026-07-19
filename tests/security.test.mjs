@@ -91,12 +91,138 @@ test('Голодные волки содержат бой, выбор персо
   assert.match(read('js/arena.js'), /start-tournament-fight/);
 });
 
+test('сеть Голодных волков связывает клубы, квалификацию, бой и призовой ваучер', () => {
+  const clubs = read('js/club-leagues.js');
+  const fight = read('js/fight.js');
+  assert.match(html, /id="mining-club-screen"/);
+  assert.match(html, /id="club-owner-screen"/);
+  assert.match(html, /src="js\/club-leagues\.js"/);
+  assert.match(clubs, /Районная лига/);
+  assert.match(clubs, /Городская лига/);
+  assert.match(clubs, /Мировая лига/);
+  assert.match(clubs, /function createClub/);
+  assert.match(clubs, /function createTournament/);
+  assert.match(clubs, /function hasQualification/);
+  assert.match(clubs, /function recordFightResult/);
+  assert.match(clubs, /registration\.roundWins >= 2/);
+  assert.match(clubs, /fightRewardVouchers/);
+  assert.match(fight, /ClubLeaguePlatform\.recordFightResult/);
+  assert.match(fight, /function openWolfFight\(mode, context\)/);
+});
+
+test('серверная сеть клубов закрыта RLS и не разрешает автоматическую финансовую выплату', () => {
+  const migration = read('supabase/migrations/20260718223000_fight_clubs_leagues_tournaments.sql');
+  const gameApi = read('supabase/functions/game-api/index.ts');
+  const adminApi = read('supabase/functions/admin-api/index.ts');
+  for (const table of ['fight_clubs', 'fight_club_members', 'fight_leagues', 'fight_tournaments', 'fight_tournament_registrations', 'fight_tournament_matches', 'club_reward_vouchers']) {
+    assert.match(migration, new RegExp(`create table if not exists public\\.${table}`));
+    assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`));
+    assert.match(migration, new RegExp(`revoke all on table public\\.${table} from public, anon, authenticated`));
+  }
+  assert.match(migration, /financial_payout_enabled = false or \(approval_status = 'approved' and is_test_mode = false\)/);
+  assert.match(gameApi, /action === 'create_fight_club'/);
+  assert.match(gameApi, /action === 'join_fight_club'/);
+  assert.match(gameApi, /server_join_fight_club/);
+  assert.match(gameApi, /action === 'save_club_tournament'/);
+  assert.match(gameApi, /action === 'register_fight_tournament'/);
+  assert.match(gameApi, /action === 'start_club_tournament'/);
+  assert.match(gameApi, /Qualifying tournament is required/);
+  assert.match(migration, /create or replace function public\.server_join_fight_club/);
+  assert.match(migration, /owner_cannot_leave_club/);
+  assert.match(adminApi, /action === 'review_fight_club'/);
+  assert.match(adminApi, /action === 'review_fight_tournament'/);
+  assert.match(adminApi, /action === 'save_global_tournament'/);
+  assert.match(adminApi, /financial_payout_enabled: false/);
+});
+
 test('инвестиции принимают SILARUM без фиксированного порога по курсу 1 к 10000 RUMIR', () => {
   const main = read('js/main.js');
   assert.match(main, /var SILARUM_TO_RUMIR = 10000/);
   assert.match(main, /min="0\.0001"/);
   assert.match(main, /порога входа нет/);
   assert.match(main, /srum -= amount/);
+});
+
+test('призы, пулы и обмен используют единую SILARUM-экономику с резервированием', () => {
+  const migration = read('supabase/migrations/20260718223000_fight_clubs_leagues_tournaments.sql');
+  const gameApi = read('supabase/functions/game-api/index.ts');
+  const adminApi = read('supabase/functions/admin-api/index.ts');
+  assert.match(migration, /check \(payout_asset = 'SILARUM'\)/);
+  assert.match(migration, /prize_currency text not null default 'SILARUM' check \(prize_currency = 'SILARUM'\)/);
+  assert.match(migration, /create table if not exists public\.silarum_exchange_requests/);
+  assert.match(migration, /server_lock_player_exchange/);
+  assert.match(migration, /server_review_silarum_exchange/);
+  assert.match(migration, /server_complete_silarum_exchange/);
+  assert.match(gameApi, /action === 'request_player_exchange'/);
+  assert.match(gameApi, /SILARUM_EXCHANGE_COMMISSION_BPS/);
+  assert.match(gameApi, /estimated_gas_target/);
+  assert.match(adminApi, /action === 'review_silarum_exchange'/);
+  assert.match(adminApi, /action === 'complete_silarum_exchange'/);
+});
+
+test('клубные права, майнинг по согласию и афиши проверяются сервером', () => {
+  const clubs = read('js/club-leagues.js');
+  const gameApi = read('supabase/functions/game-api/index.ts');
+  const posterUpload = read('supabase/functions/club-poster-upload/index.ts');
+  const migration = read('supabase/migrations/20260718223000_fight_clubs_leagues_tournaments.sql');
+  assert.match(clubs, /function ownerWall/);
+  assert.match(clubs, /function ownerTeam/);
+  assert.match(clubs, /function ownerTreasury/);
+  assert.match(clubs, /rewardToClubPercent/);
+  assert.match(clubs, /fighterConsentStatus/);
+  assert.match(gameApi, /action === 'update_club_member_permissions'/);
+  assert.match(gameApi, /action === 'create_club_mining_order'/);
+  assert.match(gameApi, /action === 'respond_club_mining_order'/);
+  assert.match(migration, /fighter_consent_status text not null default 'pending'/);
+  assert.match(migration, /server_accept_club_mining_order/);
+  assert.match(posterUpload, /image\/jpeg/);
+  assert.match(posterUpload, /manage_news/);
+  assert.doesNotMatch(posterUpload, /TELEGRAM_ADMIN_BOT_TOKEN/);
+});
+
+test('иерархия клуба ограничивает отдельные разделы, а ежемесячная поддержка остаётся добровольной', () => {
+  const clubs = read('js/club-leagues.js');
+  const gameApi = read('supabase/functions/game-api/index.ts');
+  const adminApi = read('supabase/functions/admin-api/index.ts');
+  const admin = read('admin/admin.js');
+  const migration = read('supabase/migrations/20260718223000_fight_clubs_leagues_tournaments.sql');
+  for (const table of ['fight_club_contribution_campaigns', 'fight_club_contributions']) {
+    assert.match(migration, new RegExp(`create table if not exists public\\.${table}`));
+    assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`));
+    assert.match(migration, new RegExp(`revoke all on table public\\.${table} from public, anon, authenticated`));
+  }
+  assert.match(migration, /'section_manager'/);
+  assert.match(migration, /create or replace function public\.server_contribute_club_monthly/);
+  assert.match(migration, /active_club_membership_required/);
+  assert.match(migration, /p_request_id uuid/);
+  assert.match(migration, /idempotent_replay/);
+  assert.match(migration, /jsonb_build_object\('campaign_id', campaign_row\.id, 'voluntary', true\)/);
+  assert.match(migration, /if p_publish_on_wall then/);
+  assert.doesNotMatch(migration, /cron[^\n]*contribut|automatic[^\n]*contribut/i);
+  assert.match(gameApi, /action === 'save_club_contribution_campaign'/);
+  assert.match(gameApi, /action === 'contribute_club_monthly'/);
+  assert.match(gameApi, /p_request_id: requestId/);
+  assert.match(gameApi, /const canManageSection/);
+  assert.match(gameApi, /memberPermissions/);
+  assert.match(clubs, /Руководитель направления/);
+  assert.match(clubs, /function canClub\(permission\)/);
+  assert.match(clubs, /club-monthly-contribution-form/);
+  assert.match(clubs, /Разрешаю опубликовать благодарность/);
+  assert.match(clubs, /Взнос не обязателен/);
+  assert.match(adminApi, /fight_club_contribution_campaigns/);
+  assert.match(admin, /Добровольная поддержка/);
+});
+
+test('турнирные и межклубные результаты подтверждает серверный судья', () => {
+  const migration = read('supabase/migrations/20260718223000_fight_clubs_leagues_tournaments.sql');
+  const adminApi = read('supabase/functions/admin-api/index.ts');
+  assert.match(migration, /server_submit_tournament_result/);
+  assert.match(migration, /server_verify_tournament_result/);
+  assert.match(migration, /referee_access_required/);
+  assert.match(migration, /server_verify_club_challenge/);
+  assert.match(migration, /tournament_prize_budget_missing/);
+  assert.match(adminApi, /action === 'verify_tournament_match_result'/);
+  assert.match(adminApi, /action === 'verify_club_challenge'/);
 });
 
 test('сервер содержит ровно 300 полноценных управляемых спартанцев', () => {
@@ -166,7 +292,7 @@ test('экономика пяти этапов делит штраф 70/30 и у
   assert.equal(economy.nextStage(5, false), 1);
 });
 
-test('мобильная админ-панель не содержит секретов и управляет пулами, заданиями и спартанцами', () => {
+test('мобильная админ-панель не содержит секретов и управляет пулами, клубами, заданиями и спартанцами', () => {
   const adminHtml = read('admin/index.html');
   const adminScript = read('admin/admin.js');
   const adminApi = read('supabase/functions/admin-api/index.ts');
@@ -175,6 +301,9 @@ test('мобильная админ-панель не содержит секр�
   assert.match(adminScript, /save_pool/);
   assert.match(adminScript, /save_task/);
   assert.match(adminScript, /update_spartan/);
+  assert.match(adminScript, /renderFightNetwork/);
+  assert.match(adminScript, /review_fight_club/);
+  assert.match(adminScript, /save_global_tournament/);
   assert.match(adminApi, /ADMIN_TELEGRAM_IDS/);
   assert.match(adminApi, /action === 'whoami'/);
   assert.match(adminApi, /action === 'health'/);

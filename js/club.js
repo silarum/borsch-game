@@ -279,6 +279,15 @@ function showCreateClub() {
     });
 }
 
-document.getElementById('club-my-btn').addEventListener('click', renderMyClub);
-document.getElementById('club-all-btn').addEventListener('click', renderAllClubs);
-document.getElementById('club-create-btn').addEventListener('click', showCreateClub);
+document.getElementById('club-my-btn')?.addEventListener('click', () => {
+    if (window.ClubLeaguePlatform) window.ClubLeaguePlatform.renderHub('my');
+    else renderMyClub();
+});
+document.getElementById('club-all-btn')?.addEventListener('click', () => {
+    if (window.ClubLeaguePlatform) window.ClubLeaguePlatform.renderHub('leagues');
+    else renderAllClubs();
+});
+document.getElementById('club-create-btn')?.addEventListener('click', () => {
+    if (window.ClubLeaguePlatform) window.ClubLeaguePlatform.renderHub('create');
+    else showCreateClub();
+});

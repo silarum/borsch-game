@@ -17,8 +17,27 @@ async function gameApi(action, payload = {}) {
         body: JSON.stringify({ action, payload, initData })
     });
 
-    if (!response.ok) throw new Error(`Game API: ${response.status}`);
-    return response.json();
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Game API: ${response.status}`);
+    return result;
+}
+
+async function uploadClubPoster(clubId, file) {
+    if (!window.APP_CONFIG.cloudSyncEnabled) return { publicUrl: URL.createObjectURL(file), localOnly: true };
+    const initData = window.getTelegramInitData();
+    if (!initData) throw new Error('Загрузка доступна только внутри Telegram');
+    const form = new FormData();
+    form.append('clubId', clubId);
+    form.append('initData', initData);
+    form.append('poster', file);
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/club-poster-upload`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY },
+        body: form
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Poster upload: ${response.status}`);
+    return result;
 }
 
 async function loadUserData() {

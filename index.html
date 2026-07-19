@@ -107,13 +107,20 @@
 
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button>
-        <h2>🐺 Бойцовский клуб</h2>
-        <div style="display:flex;gap:8px;margin:10px 0">
-            <button id="club-my-btn" class="club-btn">Мой клуб</button>
-            <button id="club-all-btn" class="club-btn">Все клубы</button>
-            <button id="club-create-btn" class="club-btn">Создать</button>
+        <div class="club-network-title"><small>REAL VENUES · COMMUNITY LEAGUES</small><h2>🐺 Сеть бойцовских клубов</h2></div>
+        <div class="club-hub-tabs">
+            <button id="club-all-btn" class="club-hub-tab active">Лиги</button>
+            <button id="club-news-btn" class="club-hub-tab">Новости</button>
+            <button id="club-tournaments-btn" class="club-hub-tab">Турниры</button>
+            <button id="club-my-btn" class="club-hub-tab">Мой клуб</button>
+            <button id="club-create-btn" class="club-hub-tab">Открыть</button>
         </div>
-        <div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div>
+        <div id="club-content" class="club-hub-content"></div>
+    </div>
+
+    <div class="screen club-owner-screen" id="club-owner-screen">
+        <button class="back-btn" data-back-screen="mining-club">← К клубам</button>
+        <div id="club-owner-content" class="club-owner-content"></div>
     </div>
 
     <div class="screen fight-screen" id="fight-screen">
@@ -237,6 +244,7 @@
 <script src="js/market.js"></script>
 <script src="js/tasks.js"></script>
 <script src="js/club.js"></script>
+<script src="js/club-leagues.js"></script>
 <script src="js/bots.js"></script>
 <script src="js/fight.js"></script>
 <script src="js/arena.js"></script>

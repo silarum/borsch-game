@@ -35,6 +35,8 @@ var investProjects = window.readLocalArray('investProjects', null) || [
 ];
 var myInvestments = window.readLocalArray('myInvestments');
 var investHistory = window.readLocalArray('investHistory');
+var playerExchangeRequests = [];
+var playerExchangeHubLoaded = false;
 
 // Миграция старых тестовых вкладов RUM в новую модель SILARUM.
 investProjects.forEach(function(project) {
@@ -180,7 +182,9 @@ function renderInvest() {
     var html = '<button class="back-btn" id="invest-back-btn">← Назад</button>' +
         '<div class="invest-hero"><span class="invest-hero-icon">◈</span><div><small>ОТКРЫТОЕ УЧАСТИЕ</small><h2>Инвестиции</h2><p>Любая сумма без минимального порога</p></div></div>' +
         '<div class="conversion-card"><span>Фиксированный игровой курс</span><strong>1 SILARUM = 10 000 RUMIR</strong><small>Тестовые игровые активы · реальные платежи отключены</small></div>' +
-        '<div class="portfolio-card"><span>Твой портфель</span><strong>' + totalInvested.toFixed(4) + ' SILARUM</strong><small>Эквивалент ' + Math.round(totalInvested * SILARUM_TO_RUMIR).toLocaleString() + ' RUMIR · ' + myInvestments.length + ' проектов</small></div>';
+        '<div class="portfolio-card"><span>Твой портфель</span><strong>' + totalInvested.toFixed(4) + ' SILARUM</strong><small>Эквивалент ' + Math.round(totalInvested * SILARUM_TO_RUMIR).toLocaleString() + ' RUMIR · ' + myInvestments.length + ' проектов</small></div>' +
+        '<section class="player-exchange-card"><div><small>ЗАЩИЩЁННЫЙ ОБМЕН</small><h3>SILARUM → TON / USDT</h3><p>Сервер покажет курс, вычтет комиссию проекта и сетевой газ. SILARUM резервируются до решения.</p></div><div class="exchange-inputs"><input id="player-exchange-amount" type="number" min="0.01" step="0.01" placeholder="SILARUM"><select id="player-exchange-asset"><option value="TON">TON</option><option value="USDT">USDT</option></select></div><input id="player-exchange-address" minlength="20" maxlength="200" placeholder="Адрес TON-кошелька"><button id="player-exchange-submit" ' + (window.APP_CONFIG.cloudSyncEnabled ? '' : 'disabled') + '>Запросить расчёт</button><small>Автоматическая отправка отключена. Заявку проверяет администратор, а завершённая выплата содержит хеш транзакции.</small></section>' +
+        '<div class="player-exchange-list">' + playerExchangeRequests.map(function(request) { return '<article><b>' + Number(request.amount_silarum).toFixed(2) + ' SILARUM → ' + window.escapeHtml(request.target_asset) + '</b><span>К получению ' + Number(request.net_target_amount || 0) + ' · комиссия ' + Number(request.service_commission_silarum || 0) + ' · газ ' + Number(request.estimated_gas_target || 0) + '</span><i>' + window.escapeHtml(request.status) + '</i>' + (request.status === 'pending_review' ? '<button data-cancel-player-exchange="' + request.id + '">Отменить и вернуть SILARUM</button>' : '') + '</article>'; }).join('') + '</div>';
 
     for (var j = 0; j < investProjects.length; j++) {
         var project = investProjects[j];
@@ -203,6 +207,46 @@ function renderInvest() {
     }
     screen.innerHTML = html;
     document.getElementById('invest-back-btn').addEventListener('click', function() { switchScreen(null); });
+    var exchangeButton = document.getElementById('player-exchange-submit');
+    if (exchangeButton) exchangeButton.addEventListener('click', function() {
+        var amount = Number(document.getElementById('player-exchange-amount').value || 0);
+        var targetAsset = document.getElementById('player-exchange-asset').value;
+        var destinationAddress = document.getElementById('player-exchange-address').value.trim();
+        if (amount <= 0 || amount > srum) return alert('Проверь сумму SILARUM');
+        if (destinationAddress.length < 20) return alert('Проверь адрес кошелька');
+        exchangeButton.disabled = true;
+        gameApi('request_player_exchange', { amountSilarum: amount, targetAsset: targetAsset, destinationAddress: destinationAddress }).then(function(result) {
+            if (result && result.balances) {
+                srum = Number(result.balances.srum_available || srum);
+                window.srum = srum;
+            }
+            playerExchangeHubLoaded = false;
+            updateUI(); saveAll();
+            alert('Расчёт создан: к получению ' + Number(result.exchange.net_target_amount) + ' ' + result.exchange.target_asset + '. SILARUM зарезервированы до проверки.');
+            renderInvest();
+        }).catch(function(error) {
+            exchangeButton.disabled = false;
+            alert('Заявка не создана: ' + error.message);
+        });
+    });
+    screen.querySelectorAll('[data-cancel-player-exchange]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            if (!confirm('Отменить заявку и вернуть зарезервированные SILARUM?')) return;
+            gameApi('cancel_player_exchange', { requestId: button.dataset.cancelPlayerExchange }).then(function() {
+                var cancelled = playerExchangeRequests.find(function(item) { return item.id === button.dataset.cancelPlayerExchange; });
+                if (cancelled) { srum += Number(cancelled.amount_silarum || 0); window.srum = srum; updateUI(); saveAll(); }
+                playerExchangeHubLoaded = false;
+                renderInvest();
+            }).catch(function(error) { alert(error.message); });
+        });
+    });
+    if (window.APP_CONFIG.cloudSyncEnabled && !playerExchangeHubLoaded) {
+        playerExchangeHubLoaded = true;
+        gameApi('player_exchange_hub').then(function(result) {
+            playerExchangeRequests = Array.isArray(result.requests) ? result.requests : [];
+            renderInvest();
+        }).catch(function() { playerExchangeHubLoaded = false; });
+    }
 
     for (var k = 0; k < investProjects.length; k++) {
         (function(project) {
@@ -297,7 +341,10 @@ function initApp() {
     }
     var backBtns = document.querySelectorAll('.back-btn');
     for (var k = 0; k < backBtns.length; k++) {
-        backBtns[k].addEventListener('click', function(ev) { ev.stopPropagation(); switchScreen(null); });
+        backBtns[k].addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            switchScreen(this.getAttribute('data-back-screen') || null);
+        });
     }
 }
 
@@ -348,6 +395,11 @@ window.addEventListener('load', function() {
 // ================== UI ==================
 function updateUI() {
     if (!rumBal) return;
+    window.rum = rum;
+    window.srum = srum;
+    window.ton = ton;
+    window.usdt = usdt;
+    window.games = games;
     rumBal.textContent = '💰 RUMIR: ' + rum;
     srumBal.textContent = '💎 SRUM: ' + srum.toFixed(2);
     usdtBalTop.textContent = window.APP_CONFIG.financialFeaturesEnabled ? '💵 USDT: ' + usdt.toFixed(2) : '💵 USDT: OFF';
