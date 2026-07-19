@@ -81,7 +81,7 @@ test('Крипто Беспредел подключается после соз
 test('Голодные волки содержат девять бойцов, полноценное управление и рейтинговые лестницы', () => {
   const fight = read('js/fight.js');
   assert.match(html, /id="fight-screen"/);
-  assert.match(html, /src="js\/fight\.js"/);
+  assert.match(html, /src="js\/fight\.js(?:\?[^\"]*)?"/);
   assert.match(fight, /RUMIR Alpha/);
   assert.match(fight, /Luna Hash/);
   assert.equal([...fight.matchAll(/id: '[^']+', name:/g)].length, 9);
@@ -103,6 +103,8 @@ test('боевые спрайты оптимизированы, а овощи п
     assert.ok(existsSync(new URL(`assets/fight/fighters/${id}.webp`, root)), `нет спрайта ${id}`);
   }
   assert.match(fight, /POSE_POSITION/);
+  assert.match(fight, /class="fighter-sprite-image"/);
+  assert.match(fight, /prepareFighterImages/);
   assert.match(fight, /spawnImpact/);
   assert.match(engine, /function getVeggieCutout/);
   assert.match(engine, /function pulsePot/);

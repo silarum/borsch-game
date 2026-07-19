@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'none'; form-action 'self'">
     <title>Крипто Борщ – Игровой майнинг</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/game-v2.css">
+    <link rel="stylesheet" href="css/game-v2.css?v=20260719c">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
 </head>
@@ -133,12 +133,12 @@
         <button class="back-btn">← Назад</button>
         <h2>📋 Задания</h2>
         <p class="screen-intro">Выполняй миссии Крипто Борща, создавай задания для сообщества и следи за полученными игровыми наградами.</p>
-        <div style="display:flex;gap:8px;margin:15px 0">
+        <div class="tasks-view-tabs">
             <button id="tasks-available-btn" class="sub-tab active">Доступные</button>
             <button id="tasks-create-btn" class="sub-tab">Создать</button>
             <button id="tasks-my-btn" class="sub-tab">Мои</button>
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div class="tasks-category-tabs">
             <button class="sub-tab active" data-tab="borsch">Крипто Борщ</button>
             <button class="sub-tab" data-tab="private_rum">Частные (RUM)</button>
             <button class="sub-tab" data-tab="private_srum">Частные (SRUM)</button>
@@ -261,7 +261,7 @@
 <script src="js/club.js"></script>
 <script src="js/club-leagues.js"></script>
 <script src="js/bots.js"></script>
-<script src="js/fight.js"></script>
+<script src="js/fight.js?v=20260719c"></script>
 <script src="js/arena.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/referrals.js"></script>
