@@ -47,9 +47,11 @@ function renderShop() {
     
     const backBtn = screen.querySelector('.back-btn');
     const title = screen.querySelector('h2');
+    const intro = screen.querySelector('.screen-intro');
     screen.innerHTML = '';
     if (backBtn) screen.appendChild(backBtn);
     if (title) screen.appendChild(title);
+    if (intro) screen.appendChild(intro);
 
     const inner = document.createElement('div');
     inner.className = 'shop-inner';
