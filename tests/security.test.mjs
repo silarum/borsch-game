@@ -85,9 +85,13 @@ test('Голодные волки содержат девять бойцов, п
   assert.match(fight, /RUMIR Alpha/);
   assert.match(fight, /Luna Hash/);
   assert.equal([...fight.matchAll(/id: '[^']+', name:/g)].length, 9);
-  for (const action of ['punch', 'kick', 'heavy', 'block', 'dodge', 'special']) {
+  for (const action of ['punch', 'kick', 'heavy', 'uppercut', 'throw', 'block', 'dodge', 'special']) {
     assert.match(fight, new RegExp(`${action}: \\{`));
   }
+  assert.equal([...fight.matchAll(/passive: '[^']+'/g)].length, 9);
+  assert.match(fight, /function playFightSound/);
+  assert.match(fight, /SpeechSynthesisUtterance\('Fight!'\)/);
+  assert.match(fight, /data-fight-action="sound"/);
   assert.match(fight, /stamina/);
   assert.match(fight, /combo/);
   assert.match(fight, /stunnedUntil/);
@@ -102,6 +106,8 @@ test('боевые спрайты оптимизированы, а овощи п
   for (const id of ['alpha', 'luna', 'fenrir', 'she-wolf', 'khan', 'veles', 'mara', 'satoshi', 'borz']) {
     assert.ok(existsSync(new URL(`assets/fight/fighters/${id}.webp`, root)), `нет спрайта ${id}`);
   }
+  assert.ok(existsSync(new URL('assets/fight/hungry-wolves-poster-v4.webp', root)), 'нет новой афиши Голодных волков');
+  assert.match(read('css/game-v2.css'), /hungry-wolves-poster-v4\.webp/);
   assert.match(fight, /POSE_POSITION/);
   assert.match(fight, /class="fighter-sprite-image"/);
   assert.match(fight, /prepareFighterImages/);

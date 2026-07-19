@@ -3,21 +3,23 @@
     'use strict';
 
     const FIGHTERS = [
-        { id: 'alpha', name: 'RUMIR Alpha', title: 'Первый волк', role: 'Универсал', archetype: 'balanced', sprite: 'assets/fight/fighters/alpha.webp', color: '#4ee8ff', hp: 116, attack: 79, speed: 74, guard: 76, special: 'Разряд Румира', bio: 'Сбалансированный лидер стаи. Быстро собирает комбо и прощает ошибки в защите.' },
-        { id: 'luna', name: 'Luna Hash', title: 'Лунный импульс', role: 'Скорость', archetype: 'rushdown', sprite: 'assets/fight/fighters/luna.webp', color: '#b65cff', hp: 98, attack: 73, speed: 96, guard: 62, special: 'Лунный хеш', bio: 'Молниеносная кикбоксёрша. Давит сериями и быстрее всех восстанавливает выносливость.' },
-        { id: 'fenrir', name: 'Fenrir Block', title: 'Золотая крепость', role: 'Тяжеловес', archetype: 'tank', sprite: 'assets/fight/fighters/fenrir.webp', color: '#ffbd45', hp: 138, attack: 91, speed: 51, guard: 92, special: 'Разлом Фенрира', bio: 'Тяжёлый боец ближней дистанции. Медленный, но его броня и силовые удары меняют ход раунда.' },
-        { id: 'she-wolf', name: 'She-Wolf TON', title: 'Кольцо прилива', role: 'Контратака', archetype: 'counter', sprite: 'assets/fight/fighters/she-wolf.webp', color: '#27d7ff', hp: 106, attack: 77, speed: 86, guard: 84, special: 'TON-цунами', bio: 'Мастер уклонений и ответных атак. Получает больше энергии за точный блок.' },
-        { id: 'khan', name: 'Khan Byte', title: 'Оранжевый клинок', role: 'Самбист', archetype: 'pressure', sprite: 'assets/fight/fighters/khan.webp', color: '#ff8b32', hp: 120, attack: 85, speed: 70, guard: 78, special: 'Укус байта', bio: 'Силовой самбист с опасным прессингом. Тяжёлый удар чаще оглушает соперника.' },
-        { id: 'veles', name: 'Neon Veles', title: 'Ветер сети', role: 'Капоэйра', archetype: 'trickster', sprite: 'assets/fight/fighters/veles.webp', color: '#3fe9e1', hp: 101, attack: 74, speed: 93, guard: 66, special: 'Вихрь Велеса', bio: 'Непредсказуемый мастер движения. Его кики точнее, а уклонение длится дольше.' },
-        { id: 'mara', name: 'Mara Chain', title: 'Алая цепь', role: 'Муай-тай', archetype: 'striker', sprite: 'assets/fight/fighters/mara.webp', color: '#ff4d38', hp: 110, attack: 88, speed: 80, guard: 68, special: 'Цепь Мары', bio: 'Жёсткий ударник. Серии быстро разгоняют урон, но требуют контроля выносливости.' },
-        { id: 'satoshi', name: 'Satoshi Ryū', title: 'Красный дракон', role: 'Карате', archetype: 'technical', sprite: 'assets/fight/fighters/satoshi.webp', color: '#ff395d', hp: 108, attack: 82, speed: 84, guard: 81, special: 'Дракон консенсуса', bio: 'Точный технарь. Хорошо наказывает промахи и дольше сохраняет серию комбо.' },
-        { id: 'borz', name: 'Borz Frost', title: 'Ледяной захват', role: 'Борец', archetype: 'grappler', sprite: 'assets/fight/fighters/borz.webp', color: '#79cfff', hp: 130, attack: 87, speed: 61, guard: 88, special: 'Морозный волк', bio: 'Выносливый борец с мощной защитой. Его блок расходует меньше энергии.' }
+        { id: 'alpha', name: 'RUMIR Alpha', title: 'Первый волк', role: 'Универсал', archetype: 'balanced', sprite: 'assets/fight/fighters/alpha.webp', color: '#4ee8ff', hp: 116, attack: 79, speed: 74, guard: 76, special: 'Разряд Румира', passive: 'Вожак: каждая серия быстрее заряжает волчью энергию.', bio: 'Сбалансированный лидер стаи. Быстро собирает комбо и прощает ошибки в защите.' },
+        { id: 'luna', name: 'Luna Hash', title: 'Лунный импульс', role: 'Скорость', archetype: 'rushdown', sprite: 'assets/fight/fighters/luna.webp', color: '#b65cff', hp: 98, attack: 73, speed: 96, guard: 62, special: 'Лунный хеш', passive: 'Турбо-хеш: выносливость восстанавливается на 22% быстрее.', bio: 'Молниеносная кикбоксёрша. Давит сериями и быстрее всех восстанавливает выносливость.' },
+        { id: 'fenrir', name: 'Fenrir Block', title: 'Золотая крепость', role: 'Тяжеловес', archetype: 'tank', sprite: 'assets/fight/fighters/fenrir.webp', color: '#ffbd45', hp: 138, attack: 91, speed: 51, guard: 92, special: 'Разлом Фенрира', passive: 'Броня блока: получает на 10% меньше прямого урона.', bio: 'Тяжёлый боец ближней дистанции. Медленный, но его броня и силовые удары меняют ход раунда.' },
+        { id: 'she-wolf', name: 'She-Wolf TON', title: 'Кольцо прилива', role: 'Контратака', archetype: 'counter', sprite: 'assets/fight/fighters/she-wolf.webp', color: '#27d7ff', hp: 106, attack: 77, speed: 86, guard: 84, special: 'TON-цунами', passive: 'Ответ волчицы: точный блок даёт усиленный заряд энергии.', bio: 'Мастер уклонений и ответных атак. Получает больше энергии за точный блок.' },
+        { id: 'khan', name: 'Khan Byte', title: 'Оранжевый клинок', role: 'Самбист', archetype: 'pressure', sprite: 'assets/fight/fighters/khan.webp', color: '#ff8b32', hp: 120, attack: 85, speed: 70, guard: 78, special: 'Укус байта', passive: 'Жёсткий прессинг: силовые атаки чаще оглушают.', bio: 'Силовой самбист с опасным прессингом. Тяжёлый удар чаще оглушает соперника.' },
+        { id: 'veles', name: 'Neon Veles', title: 'Ветер сети', role: 'Капоэйра', archetype: 'trickster', sprite: 'assets/fight/fighters/veles.webp', color: '#3fe9e1', hp: 101, attack: 74, speed: 93, guard: 66, special: 'Вихрь Велеса', passive: 'Неоновый след: кики точнее, окно уклонения дольше.', bio: 'Непредсказуемый мастер движения. Его кики точнее, а уклонение длится дольше.' },
+        { id: 'mara', name: 'Mara Chain', title: 'Алая цепь', role: 'Муай-тай', archetype: 'striker', sprite: 'assets/fight/fighters/mara.webp', color: '#ff4d38', hp: 110, attack: 88, speed: 80, guard: 68, special: 'Цепь Мары', passive: 'Алая серия: каждый следующий удар комбо заметно сильнее.', bio: 'Жёсткий ударник. Серии быстро разгоняют урон, но требуют контроля выносливости.' },
+        { id: 'satoshi', name: 'Satoshi Ryū', title: 'Красный дракон', role: 'Карате', archetype: 'technical', sprite: 'assets/fight/fighters/satoshi.webp', color: '#ff395d', hp: 108, attack: 82, speed: 84, guard: 81, special: 'Дракон консенсуса', passive: 'Точный расчёт: атаки точнее, окно продолжения серии шире.', bio: 'Точный технарь. Хорошо наказывает промахи и дольше сохраняет серию комбо.' },
+        { id: 'borz', name: 'Borz Frost', title: 'Ледяной захват', role: 'Борец', archetype: 'grappler', sprite: 'assets/fight/fighters/borz.webp', color: '#79cfff', hp: 130, attack: 87, speed: 61, guard: 88, special: 'Морозный волк', passive: 'Ледяной захват: бросок мощнее, а блок требует меньше сил.', bio: 'Выносливый борец с мощной защитой. Его блок расходует меньше энергии.' }
     ];
 
     const ACTIONS = {
         punch: { label: 'ДЖЕБ', hint: 'быстро', pose: 'punch', cost: 7, power: 0.78, accuracy: 0.95, meter: 11, cooldown: 300 },
         kick: { label: 'КИК', hint: 'дальше', pose: 'kick', cost: 13, power: 1.08, accuracy: 0.86, meter: 16, cooldown: 470 },
         heavy: { label: 'СИЛОВОЙ', hint: 'оглушает', pose: 'punch', cost: 20, power: 1.48, accuracy: 0.72, meter: 23, cooldown: 680, stun: 0.24 },
+        uppercut: { label: 'АППЕРКОТ', hint: 'ломает блок', pose: 'punch', cost: 17, power: 1.28, accuracy: 0.8, meter: 20, cooldown: 620, stun: 0.2, guardBreak: 0.45 },
+        throw: { label: 'БРОСОК', hint: 'без блока', pose: 'special', cost: 22, power: 1.55, accuracy: 0.72, meter: 24, cooldown: 820, unblockable: true },
         block: { label: 'БЛОК', hint: 'контр', pose: 'idle', cost: 5, cooldown: 360 },
         dodge: { label: 'УКЛОН', hint: 'манёвр', pose: 'kick', cost: 16, cooldown: 620 },
         special: { label: 'СУПЕР', hint: '100%', pose: 'special', cost: 24, power: 2.35, accuracy: 1, meter: 0, cooldown: 1050, stun: 0.5 }
@@ -31,7 +33,7 @@
         { name: 'Crypto Kitchen', badge: '🥘', rating: 1390, district: 'Запад' }
     ];
 
-    const FIGHT_ART_VERSION = '20260719c';
+    const FIGHT_ART_VERSION = '20260719d';
     const POSE_POSITION = {
         idle: { x: '0%', y: '0%' },
         punch: { x: '-100%', y: '0%' },
@@ -45,6 +47,9 @@
     let pendingMode = 'training';
     let fightContext = null;
     let scheduled = [];
+    let audioContext = null;
+    let audioMuted = localStorage.getItem('wolfFightMuted') === 'true';
+    let keyboardBound = false;
     let stats = window.readLocalJson('wolfFightStats', { rating: 1200, clubRating: 1680, wins: 0, losses: 0, streak: 0, bestCombo: 0 });
 
     function fighterById(id) {
@@ -96,6 +101,7 @@
             <section class="fight-hero-v2">
                 <div class="fight-brand-copy"><small>WOLF HUNDRED · SEASON 01</small><h1>Голодные волки</h1><p>Аркадные бои клубов: выбирай стиль, читай соперника и забирай раунд серией точных решений.</p></div>
                 <div class="fight-rating"><span>РЕЙТИНГ</span><strong>${Number(stats.rating)}</strong><small>${Number(stats.wins)} побед · серия ${Number(stats.streak)}</small></div>
+                ${soundButton('fight-sound-toggle')}
             </section>
             <div class="fight-tabs" role="tablist" aria-label="Разделы бойцовского клуба">
                 <button data-fight-tab="fighters" class="${activeTab === 'fighters' ? 'active' : ''}">9 бойцов</button>
@@ -119,7 +125,7 @@
         return `<div class="fighter-roster-v2">${cards}</div>
             <section class="selected-fighter-v2" style="--fighter-color:${selected.color}">
                 <div class="selected-art">${spriteMarkup(selected, 'showcase-sprite', 'idle')}<span>${selected.title}</span></div>
-                <div class="selected-fighter-copy"><small>${selected.role.toUpperCase()}</small><h2>${selected.name}</h2><p>${selected.bio}</p><b>Суперприём: ${selected.special}</b></div>
+                <div class="selected-fighter-copy"><small>${selected.role.toUpperCase()}</small><h2>${selected.name}</h2><p>${selected.bio}</p><b>Суперприём: ${selected.special}</b><em>${selected.passive}</em></div>
                 <div class="fighter-stats">
                     ${statBar('ЖИЗНЬ', selected.hp, 140)}${statBar('АТАКА', selected.attack, 100)}${statBar('СКОРОСТЬ', selected.speed, 100)}${statBar('ЗАЩИТА', selected.guard, 100)}
                 </div>
@@ -137,13 +143,15 @@
             ['J', 'Джеб', 'Быстрый и точный. Начинает комбо и почти не тратит выносливость.'],
             ['K', 'Кик', 'Держит дистанцию и даёт больше энергии суперприёма.'],
             ['H', 'Силовой', 'Медленный рискованный удар: высокий урон и шанс оглушения.'],
+            ['U', 'Апперкот', 'Пробивает защиту: блок снижает урон заметно слабее.'],
+            ['G', 'Бросок', 'Рискованный захват, который полностью игнорирует обычный блок.'],
             ['B', 'Блок', 'Снижает входящий урон. Точный блок наполняет шкалу энергии.'],
             ['D', 'Уклон', 'Полностью избегает удара в коротком окне и открывает контратаку.'],
             ['S', 'Супер', 'Доступен при 100% энергии. У каждого бойца свой эффект и анимация.']
         ];
         return `<section class="fight-manual"><div class="manual-head"><small>ПРАВИЛА АРЕНЫ</small><h2>Побеждает не тот, кто быстрее нажимает</h2><p>Следи за выносливостью, чередуй атаки и не раскрывайся после силового удара.</p></div>
             <div class="move-grid">${moves.map(function (move) { return `<article><span>${move[0]}</span><div><b>${move[1]}</b><p>${move[2]}</p></div></article>`; }).join('')}</div>
-            <div class="combo-guide"><span>01</span><b>ДЖЕБ</b><i>→</i><span>02</span><b>КИК</b><i>→</i><span>03</span><b>СИЛОВОЙ</b><small>Базовая серия: третий удар получает бонус комбо.</small></div>
+            <div class="combo-guide"><span>01</span><b>ДЖЕБ</b><i>→</i><span>02</span><b>КИК</b><i>→</i><span>03</span><b>АППЕРКОТ</b><small>Базовая серия: апперкот завершает связку и пробивает защиту.</small></div>
             <button class="fight-start" data-fight-action="start">ПОПРОБОВАТЬ В БОЮ</button>
         </section>`;
     }
@@ -171,6 +179,11 @@
         }).join('');
     }
 
+    function soundButton(className) {
+        const label = audioMuted ? 'Включить звук боя' : 'Выключить звук боя';
+        return `<button class="${className || 'fight-sound-toggle'} ${audioMuted ? 'muted' : ''}" data-fight-action="sound" aria-label="${label}" aria-pressed="${audioMuted}"><span>${audioMuted ? '🔇' : '🔊'}</span><small>${audioMuted ? 'ЗВУК ВЫКЛ' : 'ЗВУК ВКЛ'}</small></button>`;
+    }
+
     function bindRoot(root) {
         prepareFighterImages(root);
         if (root.dataset.fightBound === 'true') return;
@@ -192,10 +205,22 @@
             }
             const action = event.target.closest('[data-fight-action]');
             if (!action) return;
-            if (action.dataset.fightAction === 'start') startFight();
+            if (action.dataset.fightAction === 'sound') toggleFightAudio();
+            else if (action.dataset.fightAction === 'start') startFight();
             else if (action.dataset.fightAction === 'roster') renderFightScreen();
             else if (battle) playerAction(action.dataset.fightAction);
         });
+        if (!keyboardBound) {
+            keyboardBound = true;
+            window.addEventListener('keydown', function (event) {
+                if (!battle || !document.getElementById('fight-screen')?.classList.contains('active')) return;
+                const action = { j: 'punch', k: 'kick', h: 'heavy', u: 'uppercut', g: 'throw', b: 'block', d: 'dodge', s: 'special' }[event.key.toLowerCase()];
+                if (action) {
+                    event.preventDefault();
+                    playerAction(action);
+                }
+            });
+        }
     }
 
     function combatant(fighter) {
@@ -204,14 +229,16 @@
 
     function startFight() {
         stopTimers();
+        ensureFightAudio();
+        playFightSound('start');
         const player = fighterById(selectedId);
         const opponents = FIGHTERS.filter(function (fighter) { return fighter.id !== selectedId; });
         const enemy = opponents[Math.floor(Math.random() * opponents.length)];
         battle = { player: combatant(player), enemy: combatant(enemy), seconds: 60, finished: false, ready: false, startedAt: 0, endsAt: 0, nextEnemyAt: 0 };
         renderBattle();
-        schedule(function () { announce('3'); }, 100);
-        schedule(function () { announce('2'); }, 550);
-        schedule(function () { announce('1'); }, 1000);
+        schedule(function () { announce('3'); playFightSound('countdown'); }, 100);
+        schedule(function () { announce('2'); playFightSound('countdown'); }, 550);
+        schedule(function () { announce('1'); playFightSound('countdown-high'); }, 1000);
         schedule(function () {
             if (!battle) return;
             battle.ready = true;
@@ -219,6 +246,8 @@
             battle.endsAt = Date.now() + 60000;
             battle.nextEnemyAt = Date.now() + 900;
             announce('FIGHT!');
+            playFightSound('fight');
+            speakFight();
             syncBattle();
         }, 1450);
         fightTimer = setInterval(tickBattle, 100);
@@ -237,6 +266,7 @@
             </div>
             <div class="fight-announcer-v2 hide" id="fight-announcer" aria-live="polite">FIGHT!</div>
             <div class="combo-callout" id="combo-callout"></div>
+            ${soundButton('fight-battle-sound')}
             <div class="combatants-v2">
                 <div class="combatant-v2 player" id="player-combatant">${spriteMarkup(player, 'battle-sprite', 'idle')}<span class="fighter-shadow"></span></div>
                 <div class="combatant-v2 enemy" id="enemy-combatant">${spriteMarkup(enemy, 'battle-sprite', 'idle')}<span class="fighter-shadow"></span></div>
@@ -252,11 +282,13 @@
                 ${controlButton('punch', 'J', 'Джеб', 'быстро')}
                 ${controlButton('kick', 'K', 'Кик', 'дистанция')}
                 ${controlButton('heavy', 'H', 'Силовой', 'урон')}
+                ${controlButton('uppercut', 'U', 'Апперкот', 'ломает блок')}
+                ${controlButton('throw', 'G', 'Бросок', 'захват')}
                 ${controlButton('block', 'B', 'Блок', 'защита')}
                 ${controlButton('dodge', 'D', 'Уклон', 'манёвр')}
                 ${controlButton('special', 'S', player.special, 'нужно 100%', true)}
             </div>
-            <p class="fight-help"><b id="battle-tip">Комбинируй джеб, кик и силовой.</b><span>Энергия растёт за попадания и точную защиту.</span></p>
+            <p class="fight-help"><b id="battle-tip">Комбинируй джеб, кик и апперкот.</b><span>${player.passive}</span></p>
         </section>`;
         bindRoot(root);
         syncBattle();
@@ -310,26 +342,30 @@
         if (type === 'block') {
             actor.blockingUntil = now + (actor.archetype === 'counter' ? 900 : 720);
             setPose(side, 'idle', 'blocking', 520);
+            playFightSound('guard');
             if (side === 'player') setTip('Блок активен: поймай удар и ответь.');
             return true;
         }
         if (type === 'dodge') {
             actor.dodgeUntil = now + (actor.archetype === 'trickster' ? 780 : 610);
             setPose(side, 'kick', 'dodging', 540);
+            playFightSound('dodge');
             return true;
         }
         if (type === 'special') actor.meter = 0;
         setPose(side, action.pose, 'acting action-' + type, action.cooldown);
+        playFightSound(type + '-swing');
         haptic(type === 'special' ? 'heavy' : 'light');
         schedule(function () {
             if (!battle || battle.finished) return;
             resolveAttack(side, opponentSide, type, actor, target, action);
-        }, type === 'heavy' ? 260 : (type === 'special' ? 300 : 150));
+        }, type === 'heavy' || type === 'uppercut' ? 260 : (type === 'throw' ? 330 : (type === 'special' ? 300 : 150)));
         return true;
     }
 
     function adjustedCost(fighter, type, cost) {
         if (fighter.archetype === 'grappler' && type === 'block') return Math.max(2, cost - 3);
+        if (fighter.archetype === 'grappler' && type === 'throw') return Math.max(8, cost - 5);
         if (fighter.archetype === 'rushdown' && type === 'punch') return Math.max(2, cost - 2);
         return cost;
     }
@@ -340,37 +376,45 @@
             defender.meter = Math.min(100, defender.meter + 16);
             attacker.combo = 0;
             showMiss(defenderSide, 'УКЛОН');
+            playFightSound('dodge-success');
             if (defenderSide === 'player') setTip('Отличный уклон! Сейчас время для контратаки.');
             return;
         }
         let accuracy = action.accuracy + (attacker.speed - defender.speed) / 500;
         if (attacker.archetype === 'trickster' && type === 'kick') accuracy += 0.08;
+        if (attacker.archetype === 'technical') accuracy += 0.04;
         if (Math.random() > Math.min(1, accuracy)) {
             attacker.combo = 0;
             showMiss(defenderSide, 'ПРОМАХ');
+            playFightSound('miss');
             return;
         }
-        const wasBlocking = now < defender.blockingUntil;
+        const wasBlocking = now < defender.blockingUntil && !action.unblockable;
         const chainWindow = attacker.archetype === 'technical' ? 1750 : 1350;
         attacker.combo = now - attacker.lastHitAt <= chainWindow ? attacker.combo + 1 : 1;
         attacker.lastHitAt = now;
-        const comboBonus = 1 + Math.min(0.32, Math.max(0, attacker.combo - 1) * 0.07);
+        const comboStep = attacker.archetype === 'striker' ? 0.1 : 0.07;
+        const comboBonus = 1 + Math.min(attacker.archetype === 'striker' ? 0.45 : 0.32, Math.max(0, attacker.combo - 1) * comboStep);
         let damage = Math.max(2, Math.round(attacker.attack * action.power * (0.075 + Math.random() * 0.026) * comboBonus));
+        if (attacker.archetype === 'grappler' && type === 'throw') damage = Math.round(damage * 1.18);
         if (wasBlocking) {
             const reduction = 0.5 + defender.guard / 250;
-            damage = Math.max(1, Math.round(damage * (1 - Math.min(0.8, reduction))));
+            const guardCap = action.guardBreak || 0.8;
+            damage = Math.max(1, Math.round(damage * (1 - Math.min(guardCap, reduction))));
             defender.blockingUntil = 0;
             defender.meter = Math.min(100, defender.meter + (defender.archetype === 'counter' ? 24 : 14));
             showMiss(defenderSide, 'БЛОК');
         }
+        if (defender.archetype === 'tank') damage = Math.max(1, Math.round(damage * 0.9));
         defender.currentHp = Math.max(0, defender.currentHp - damage);
         attacker.meter = Math.min(100, attacker.meter + (action.meter || 0) + Math.min(10, attacker.combo * 2));
+        if (attacker.archetype === 'balanced' && attacker.combo >= 2) attacker.meter = Math.min(100, attacker.meter + 4);
+        hitReaction(defenderSide, damage, type, wasBlocking);
         if (!wasBlocking && action.stun && Math.random() < action.stun + (attacker.archetype === 'pressure' ? 0.08 : 0)) {
             defender.stunnedUntil = now + (type === 'special' ? 950 : 620);
             setPose(defenderSide, 'idle', 'stunned', 600);
             announce('ОГЛУШЕНИЕ');
-        } else {
-            hitReaction(defenderSide, damage, type);
+            playFightSound('stun');
         }
         stats.bestCombo = Math.max(Number(stats.bestCombo || 0), attackerSide === 'player' ? attacker.combo : 0);
         if (attackerSide === 'player' && attacker.combo >= 2) showCombo(attacker.combo);
@@ -389,7 +433,8 @@
         else if (enemy.stamina < 20) action = 'block';
         else {
             const roll = Math.random();
-            action = roll < 0.18 ? 'block' : roll < 0.30 ? 'dodge' : roll < 0.53 ? 'punch' : roll < 0.79 ? 'kick' : 'heavy';
+            action = roll < 0.14 ? 'block' : roll < 0.24 ? 'dodge' : roll < 0.45 ? 'punch' : roll < 0.65 ? 'kick' : roll < 0.78 ? 'uppercut' : roll < 0.9 ? 'heavy' : 'throw';
+            if (enemy.archetype === 'grappler' && enemy.stamina >= ACTIONS.throw.cost && Math.random() < 0.28) action = 'throw';
         }
         performAction('enemy', action);
         const tempo = 1120 - enemy.speed * 4.2 + Math.random() * 330;
@@ -409,7 +454,7 @@
         }, duration || 380);
     }
 
-    function hitReaction(side, damage, type) {
+    function hitReaction(side, damage, type, wasBlocking) {
         const node = document.getElementById(side + '-combatant');
         const arena = document.getElementById('wolf-arena');
         if (node) {
@@ -422,6 +467,7 @@
             arena.classList.add(type === 'special' ? 'camera-special' : 'camera-hit');
         }
         spawnImpact(side, damage, type);
+        playFightSound(wasBlocking ? 'block' : type + '-hit');
         haptic(type === 'special' || type === 'heavy' ? 'heavy' : 'medium');
     }
 
@@ -493,6 +539,7 @@
         if (!battle || battle.finished) return;
         battle.finished = true;
         stopTimers(false);
+        playFightSound(won ? 'victory' : 'defeat');
         if (won) {
             stats.wins += 1;
             stats.streak += 1;
@@ -554,6 +601,129 @@
     function stopWolfFight() {
         stopTimers();
         battle = null;
+    }
+
+    function toggleFightAudio() {
+        audioMuted = !audioMuted;
+        localStorage.setItem('wolfFightMuted', String(audioMuted));
+        if (!audioMuted) {
+            ensureFightAudio();
+            playFightSound('select');
+        }
+        document.querySelectorAll('[data-fight-action="sound"]').forEach(function (button) {
+            button.classList.toggle('muted', audioMuted);
+            button.setAttribute('aria-pressed', String(audioMuted));
+            button.setAttribute('aria-label', audioMuted ? 'Включить звук боя' : 'Выключить звук боя');
+            const icon = button.querySelector('span');
+            const label = button.querySelector('small');
+            if (icon) icon.textContent = audioMuted ? '🔇' : '🔊';
+            if (label) label.textContent = audioMuted ? 'ЗВУК ВЫКЛ' : 'ЗВУК ВКЛ';
+        });
+    }
+
+    function ensureFightAudio() {
+        if (audioMuted) return null;
+        try {
+            const AudioEngine = window.AudioContext || window.webkitAudioContext;
+            if (!AudioEngine) return null;
+            if (!audioContext) audioContext = new AudioEngine();
+            if (audioContext.state === 'suspended') audioContext.resume();
+            return audioContext;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function tone(startFrequency, endFrequency, duration, volume, wave, delay) {
+        const context = ensureFightAudio();
+        if (!context) return;
+        const start = context.currentTime + (delay || 0);
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = wave || 'sine';
+        oscillator.frequency.setValueAtTime(Math.max(20, startFrequency), start);
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(20, endFrequency || startFrequency), start + duration);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume || 0.04), start + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        oscillator.connect(gain).connect(context.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.02);
+    }
+
+    function noise(duration, volume, delay) {
+        const context = ensureFightAudio();
+        if (!context) return;
+        const length = Math.max(1, Math.floor(context.sampleRate * duration));
+        const buffer = context.createBuffer(1, length, context.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * (1 - index / length);
+        const source = context.createBufferSource();
+        const gain = context.createGain();
+        const filter = context.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 1150;
+        gain.gain.value = volume || 0.025;
+        source.buffer = buffer;
+        source.connect(filter).connect(gain).connect(context.destination);
+        source.start(context.currentTime + (delay || 0));
+    }
+
+    function playFightSound(name) {
+        if (audioMuted) return;
+        if (name === 'select') tone(520, 720, 0.08, 0.035, 'sine');
+        else if (name === 'start') tone(80, 140, 0.32, 0.07, 'sawtooth');
+        else if (name === 'countdown') tone(210, 175, 0.13, 0.055, 'square');
+        else if (name === 'countdown-high') tone(320, 250, 0.16, 0.06, 'square');
+        else if (name === 'fight') {
+            tone(105, 240, 0.42, 0.09, 'sawtooth');
+            tone(210, 640, 0.36, 0.045, 'square', 0.05);
+            noise(0.22, 0.045, 0.04);
+        } else if (name === 'guard') tone(560, 380, 0.09, 0.03, 'triangle');
+        else if (name === 'block') {
+            tone(920, 410, 0.13, 0.055, 'square');
+            noise(0.08, 0.025);
+        } else if (name === 'dodge' || name === 'dodge-success' || name === 'miss') {
+            tone(name === 'miss' ? 430 : 780, 190, 0.12, 0.025, 'sine');
+        } else if (name.endsWith('-swing')) {
+            const swing = {
+                'punch-swing': [330, 130, 0.08, 0.024], 'kick-swing': [240, 72, 0.13, 0.032],
+                'heavy-swing': [155, 52, 0.18, 0.047], 'uppercut-swing': [190, 360, 0.16, 0.038],
+                'throw-swing': [115, 42, 0.22, 0.05], 'special-swing': [420, 68, 0.28, 0.055]
+            }[name] || [280, 105, 0.1, 0.026];
+            tone(swing[0], swing[1], swing[2], swing[3], 'sawtooth');
+            noise(swing[2] * 0.72, swing[3] * 0.52);
+        } else if (name.endsWith('-hit')) {
+            const impact = {
+                'punch-hit': [185, 76, 0.1, 0.052], 'kick-hit': [132, 48, 0.15, 0.068],
+                'heavy-hit': [88, 34, 0.23, 0.095], 'uppercut-hit': [210, 82, 0.19, 0.082],
+                'throw-hit': [72, 28, 0.28, 0.1], 'special-hit': [340, 44, 0.34, 0.11]
+            }[name] || [165, 70, 0.11, 0.055];
+            tone(impact[0], impact[1], impact[2], impact[3], 'square');
+            noise(impact[2] * 0.85, impact[3] * 0.62);
+        } else if (name === 'stun') {
+            tone(880, 1180, 0.22, 0.038, 'triangle');
+            tone(760, 1020, 0.2, 0.026, 'triangle', 0.07);
+        } else if (name === 'victory') {
+            tone(330, 440, 0.22, 0.055, 'triangle');
+            tone(440, 660, 0.34, 0.06, 'triangle', 0.2);
+            tone(660, 990, 0.48, 0.055, 'triangle', 0.48);
+        } else if (name === 'defeat') {
+            tone(220, 110, 0.75, 0.065, 'sawtooth');
+        }
+    }
+
+    function speakFight() {
+        if (audioMuted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+        try {
+            window.speechSynthesis.cancel();
+            const voice = new window.SpeechSynthesisUtterance('Fight!');
+            voice.lang = 'en-US';
+            voice.rate = 1.25;
+            voice.pitch = 0.65;
+            voice.volume = 0.85;
+            window.speechSynthesis.speak(voice);
+        } catch (_) { /* Voice announcement is optional in embedded browsers. */ }
     }
 
     function haptic(type) {

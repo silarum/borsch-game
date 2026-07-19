@@ -605,3 +605,194 @@ input, select, textarea {
     #main-game .row { gap: 5px !important; }
     #main-game .hole { width: 33px !important; height: 33px !important; }
 }
+
+/* ---------- V4: чистая композиция кухни ---------- */
+#main-game .user-profile {
+    top: calc(8px + env(safe-area-inset-top)) !important;
+    right: 8px !important;
+    left: auto !important;
+    width: min(174px, 54vw) !important;
+    max-width: min(174px, 54vw) !important;
+    min-height: 53px;
+    padding: 6px 7px !important;
+    border-color: rgba(255, 218, 128, .2);
+    border-radius: 17px;
+    background: linear-gradient(145deg, rgba(18, 23, 37, .9), rgba(8, 12, 22, .82));
+}
+#main-game .user-avatar {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255, 211, 110, .32);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(255, 205, 91, .24), rgba(255, 80, 117, .15));
+}
+#main-game .user-info { flex: 1 1 auto; display: grid; min-width: 0; line-height: 1.05; }
+#main-game #user-nickname { color: #fff; font-size: .64rem; font-weight: 900; }
+#main-game #user-status { margin-top: 2px; color: #8d98ad; font-size: .44rem; }
+#main-game .profile-gamefi {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 5px;
+    align-items: baseline;
+    margin-top: 5px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    overflow: hidden;
+    white-space: nowrap;
+}
+#main-game .profile-gamefi b { color: #ffd36c; font-size: .35rem; letter-spacing: .07em; }
+#main-game .profile-gamefi span { overflow: hidden; color: #dce4f2; font-size: .39rem; font-weight: 800; text-overflow: ellipsis; }
+#main-game .user-menu-btn { flex-basis: 22px; align-self: flex-start; width: 22px; height: 24px; }
+#main-game .top-panel {
+    top: calc(70px + env(safe-area-inset-top)) !important;
+    right: 8px !important;
+}
+#main-game .balances-right {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(174px, 54vw);
+    gap: 4px !important;
+}
+#main-game .balances-right div {
+    padding: 5px 6px !important;
+    border-color: rgba(118, 227, 255, .14);
+    border-radius: 9px !important;
+    background: rgba(8, 13, 25, .84) !important;
+    font-size: clamp(.43rem, 1.85vw, .51rem) !important;
+}
+#main-game #rules-btn-bottom,
+#main-game #lang-btn-bottom {
+    top: calc(8px + env(safe-area-inset-top)) !important;
+    min-height: 34px;
+}
+#main-game #rules-btn-bottom { left: 8px !important; }
+#main-game #lang-btn-bottom { left: 91px !important; }
+#main-game .quick-duel-coin {
+    top: calc(53px + env(safe-area-inset-top)) !important;
+    right: auto !important;
+    left: 8px !important;
+    width: 64px !important;
+    height: 64px !important;
+}
+#main-game .crypto-veg-legend {
+    top: calc(126px + env(safe-area-inset-top)) !important;
+    height: 30px;
+}
+#main-game .start-btn-container { top: 28% !important; }
+#main-game .kitchen-area {
+    top: 35% !important;
+    height: 22% !important;
+    min-height: 118px;
+}
+#main-game .kitchen-area .stove { top: 0 !important; left: 19% !important; right: 19% !important; height: 100% !important; }
+#main-game .board {
+    bottom: calc(83px + env(safe-area-inset-bottom)) !important;
+    left: 6px !important;
+    right: 6px !important;
+    gap: 7px !important;
+    padding: 12px 10px 16px !important;
+    border-radius: 0 !important;
+    clip-path: polygon(13% 0, 87% 0, 100% 100%, 0 100%) !important;
+    background:
+        linear-gradient(90deg, transparent 0 12%, rgba(255, 203, 118, .11) 12% 12.4%, transparent 12.4% 87.6%, rgba(255, 203, 118, .11) 87.6% 88%, transparent 88%),
+        radial-gradient(circle at 50% 0, rgba(255, 177, 76, .18), transparent 48%),
+        linear-gradient(165deg, rgba(82, 45, 34, .96), rgba(12, 13, 24, .98)) !important;
+    box-shadow: 0 24px 55px rgba(0, 0, 0, .54), inset 0 1px rgba(255, 232, 172, .2) !important;
+}
+#main-game .row { gap: clamp(7px, 2.3vw, 11px) !important; }
+#main-game .hole {
+    width: clamp(40px, 13.5vw, 56px) !important;
+    height: clamp(40px, 13.5vw, 56px) !important;
+    border-width: 2px;
+    box-shadow: inset 0 9px 14px rgba(0, 0, 0, .82), 0 1px rgba(255, 220, 147, .18);
+}
+
+/* ---------- V4: афиша и бойцовская механика ---------- */
+.fight-hero-v2 {
+    display: block;
+    min-height: 218px;
+    padding: 108px 16px 16px;
+    border-color: rgba(255, 198, 91, .3);
+    background:
+        linear-gradient(180deg, rgba(5, 8, 16, .04) 16%, rgba(5, 8, 16, .34) 50%, rgba(5, 8, 16, .96) 100%),
+        url('../assets/fight/hungry-wolves-poster-v4.webp') center 35% / cover;
+    box-shadow: 0 23px 58px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .03);
+}
+.fight-hero-v2::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4, 7, 15, .42), transparent 55%); pointer-events: none; }
+.fight-hero-v2::after { background: radial-gradient(circle at 50% 5%, rgba(255, 190, 77, .22), transparent 42%); }
+.fight-brand-copy { max-width: 73%; }
+.fight-brand-copy h1 { color: #fff; text-shadow: 0 3px 18px #000; }
+.fight-brand-copy p { color: #c3cada; text-shadow: 0 2px 8px #000; }
+.fight-rating { position: absolute; top: 11px; right: 11px; min-width: 76px; }
+.fight-sound-toggle,
+.fight-battle-sound {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 9px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 12px;
+    background: rgba(5, 9, 18, .76);
+    color: #fff;
+    backdrop-filter: blur(12px);
+}
+.fight-sound-toggle { position: absolute; top: 11px; left: 11px; z-index: 4; }
+.fight-sound-toggle span,
+.fight-battle-sound span { font-size: .78rem; }
+.fight-sound-toggle small,
+.fight-battle-sound small { color: #7de8d2; font-size: .39rem; font-weight: 1000; }
+.fight-sound-toggle.muted small,
+.fight-battle-sound.muted small { color: #8b95a8; }
+.selected-fighter-copy em { display: block; margin-top: 7px; padding: 6px 7px; border-left: 2px solid var(--fighter-color); background: rgba(255, 255, 255, .035); color: #aeb9cb; font-size: .49rem; font-style: normal; line-height: 1.35; }
+.wolf-arena-v2 { border-color: rgba(255, 205, 103, .22); background: linear-gradient(180deg, rgba(4, 6, 14, .02), rgba(4, 6, 14, .62)), url('../assets/fight/wolf-arena.webp') center / cover; }
+.wolf-arena-v2::before { content: ''; position: absolute; inset: 50% 6% 4%; z-index: 3; border: 1px solid rgba(113, 225, 255, .12); border-radius: 50%; background: radial-gradient(ellipse, rgba(106, 73, 255, .16), transparent 67%); transform: perspective(210px) rotateX(58deg); }
+.fight-battle-sound { position: absolute; right: 9px; bottom: 9px; z-index: 31; padding: 6px 8px; }
+.combatant-v2 { width: 65%; min-width: 198px; max-width: 292px; }
+.combatant-v2.player { left: -8%; }
+.combatant-v2.enemy { right: -8%; }
+.battle-sprite { filter: contrast(1.06) saturate(1.2) drop-shadow(0 14px 9px rgba(0, 0, 0, .82)) drop-shadow(0 0 9px color-mix(in srgb, var(--fighter-color) 30%, transparent)); }
+.combatant-v2.player.action-uppercut { animation: playerUppercut .62s cubic-bezier(.2, .85, .25, 1); }
+.combatant-v2.enemy.action-uppercut { animation: enemyUppercut .62s cubic-bezier(.2, .85, .25, 1); }
+.combatant-v2.player.action-throw { animation: playerThrow .8s cubic-bezier(.2, .7, .2, 1); z-index: 8; }
+.combatant-v2.enemy.action-throw { animation: enemyThrow .8s cubic-bezier(.2, .7, .2, 1); z-index: 8; }
+.fight-impact.uppercut { background: radial-gradient(circle, #fff 0 4%, #75efff 8%, rgba(65, 127, 255, .84) 25%, transparent 66%); }
+.fight-impact.throw { width: 96px; height: 96px; background: radial-gradient(circle, #fff 0 4%, #ffdc74 9%, rgba(255, 93, 56, .84) 28%, transparent 68%); }
+.fight-controls-v2 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.fight-control { display: flex; min-height: 62px; flex-direction: column; justify-content: center; gap: 2px; padding: 5px 3px; text-align: center; }
+.fight-control > span { display: grid; width: 30px; height: 25px; flex: 0 0 25px; border-radius: 8px; font-size: .61rem; }
+.fight-control b { width: 100%; align-self: auto; font-size: .48rem; }
+.fight-control small { width: 100%; align-self: auto; font-size: .34rem; }
+
+@keyframes playerUppercut { 28% { transform: translateX(-8px) rotate(-5deg); } 64% { transform: translate(62px, -24px) rotate(5deg) scale(1.07); } }
+@keyframes enemyUppercut { 28% { transform: scaleX(-1) translateX(-8px) rotate(-5deg); } 64% { transform: scaleX(-1) translate(62px, -24px) rotate(5deg) scale(1.07); } }
+@keyframes playerThrow { 28% { transform: translateX(58px) scale(1.05); } 62% { transform: translate(72px, 7px) rotate(9deg) scale(1.08); } }
+@keyframes enemyThrow { 28% { transform: scaleX(-1) translateX(58px) scale(1.05); } 62% { transform: scaleX(-1) translate(72px, 7px) rotate(9deg) scale(1.08); } }
+
+@media (max-height: 700px) {
+    #main-game .crypto-veg-legend { top: calc(124px + env(safe-area-inset-top)) !important; }
+    #main-game #rules-btn-bottom,
+    #main-game #lang-btn-bottom { top: calc(8px + env(safe-area-inset-top)) !important; }
+    #main-game .quick-duel-coin { top: calc(52px + env(safe-area-inset-top)) !important; }
+    #main-game .start-btn-container { top: 28% !important; }
+    #main-game .kitchen-area { top: 35% !important; height: 21% !important; }
+    #main-game .board { bottom: calc(82px + env(safe-area-inset-bottom)) !important; padding: 8px 8px 10px !important; gap: 5px !important; }
+    #main-game .row { gap: 6px !important; }
+    #main-game .hole { width: 38px !important; height: 38px !important; }
+    .wolf-arena-v2 { height: clamp(325px, 75vw, 390px); }
+}
+
+@media (max-width: 340px) {
+    #main-game .user-profile,
+    #main-game .balances-right { width: 170px !important; max-width: 170px !important; }
+    #main-game .profile-gamefi span { display: none; }
+    #main-game .start-btn-container { top: 31.5% !important; }
+    #main-game .kitchen-area { top: 36.5% !important; }
+    #main-game .hole { width: 38px !important; height: 38px !important; }
+    .fight-hero-v2 { min-height: 202px; padding: 98px 13px 14px; }
+    .fight-brand-copy { max-width: 76%; }
+    .fight-rating { min-width: 67px; padding: 8px 4px; }
+    .fight-controls-v2 { gap: 4px; }
+    .fight-control { min-height: 58px; }
+    .fight-control b { font-size: .43rem; }
+    .fight-control small { display: block; font-size: .31rem; }
+}
