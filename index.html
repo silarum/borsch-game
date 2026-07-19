@@ -7,6 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; object-src 'none'; base-uri 'none'; form-action 'self'">
     <title>Крипто Борщ – Игровой майнинг</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/game-v2.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js"></script>
 </head>
@@ -131,6 +132,7 @@
     <div class="screen" id="tasks-screen">
         <button class="back-btn">← Назад</button>
         <h2>📋 Задания</h2>
+        <p class="screen-intro">Выполняй миссии Крипто Борща, создавай задания для сообщества и следи за полученными игровыми наградами.</p>
         <div style="display:flex;gap:8px;margin:15px 0">
             <button id="tasks-available-btn" class="sub-tab active">Доступные</button>
             <button id="tasks-create-btn" class="sub-tab">Создать</button>
@@ -148,12 +150,14 @@
     <div class="screen" id="invest-screen">
         <button class="back-btn">← Назад</button>
         <h2>📈 Инвестиции</h2>
+        <p class="screen-intro">Поддерживай игровые проекты без минимального порога. Расчётная единица раздела: 1 SILARUM = 10 000 RUMIR.</p>
         <div id="invest-content" style="width:100%;"></div>
     </div>
 
     <div class="screen" id="wallet-screen">
         <button class="back-btn">← Назад</button>
         <h2>👛 Кошелёк</h2>
+        <p class="screen-intro">Единый обзор игровых активов и подключения TON. Реальный вывод остаётся закрытым до отдельного финансового аудита.</p>
         <div class="info-card" id="wallet-card">
             <p>TON: <span id="ton-balance">0</span> | USDT: <span id="usdt-balance">0</span></p>
             <div id="ton-connect-container" style="display:flex;justify-content:center;margin:15px 0;"></div>
@@ -165,24 +169,28 @@
     <div class="screen" id="shop-screen">
         <button class="back-btn">← Назад</button>
         <h2>🛍️ Магазин</h2>
+        <p class="screen-intro">Бустеры, статусы и игровые улучшения. Перед подтверждением всегда показывается стоимость и тип актива.</p>
         <div class="shop-grid" id="shop-grid"></div>
     </div>
 
     <div class="screen" id="top-tappers-screen">
         <button class="back-btn">← Назад</button>
         <h2>🏆 Топ игроков</h2>
+        <p class="screen-intro">Сезонная таблица мастеров Крипто Борща по добытым RUMIR.</p>
         <div class="info-card"><p>Скоро...</p></div>
     </div>
 
     <div class="screen" id="top-miners-screen">
         <button class="back-btn">← Назад</button>
         <h2>⛏️ Топ майнеров</h2>
+        <p class="screen-intro">Рейтинг активных майнеров и участников игровых пулов.</p>
         <div class="info-card"><p>Скоро...</p></div>
     </div>
 
     <div class="screen" id="referral-screen">
         <button class="back-btn">← Назад</button>
         <h2>👥 Рефералы</h2>
+        <p class="screen-intro">Приглашай участников в свою стаю и отслеживай активированные приглашения.</p>
         <div class="info-card" style="width:100%">
             <input readonly id="ref-link" style="width:100%;padding:10px;background:#333;color:white;border:none;border-radius:5px;margin-bottom:10px;">
             <button id="copy-ref-btn" class="shop-btn">📋 Копировать ссылку</button>
@@ -195,6 +203,7 @@
     <div class="screen" id="rules-screen">
         <button class="back-btn">← Назад</button>
         <h2>📜 Правила игры</h2>
+        <p class="screen-intro">Коротко о кухне, майнинге, клубах, турнирах и безопасном режиме расчётов.</p>
         <div class="rules-scroll">
             <div class="info-card"><p><strong>🍲 RUMIR‑майнинг</strong><br>Нажимай на крипто‑овощи: овощ летит в котёл, из котла вылетают монеты RUMIR.</p></div>
             <div class="info-card"><p><strong>⛏️ Крипто Беспредел</strong><br>Внеси игровые SILARUM и сыграй 20‑секундную дуэль.</p></div>
@@ -208,7 +217,13 @@
     <div class="screen" id="about-screen">
         <button class="back-btn">← Назад</button>
         <h2>📖 О проекте</h2>
-        <div class="rules-scroll"><div class="info-card"><p><strong>Крипто Борщ</strong> — игровой прототип Telegram Mini App. Текущий релиз работает без реальных платежей и денежных наград.</p></div></div>
+        <p class="screen-intro">Игровая вселенная, где крипто-овощи, командный майнинг и бойцовские клубы объединяют сообщество.</p>
+        <div class="rules-scroll">
+            <div class="info-card"><p><strong>🥘 Крипто Борщ</strong><br>Аркадная кухня: лови полезные крипто-овощи, отправляй их в кастрюлю и собирай монеты проекта RUMIR.</p></div>
+            <div class="info-card"><p><strong>⚔ Голодные волки</strong><br>Девять бойцов с разными стилями, рейтинговые поединки и турниры клубов от районной до мировой лиги.</p></div>
+            <div class="info-card"><p><strong>🐺 Живые клубы</strong><br>Заведения могут открывать собственные арены, публиковать афиши, создавать призы и формировать команды.</p></div>
+            <div class="info-card"><p><strong>🛡 Безопасный запуск</strong><br>Текущий релиз использует игровые баллы. Автоматические выплаты TON/USDT не включены.</p></div>
+        </div>
     </div>
 
     <div id="language-modal" class="language-modal hidden">

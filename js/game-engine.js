@@ -123,8 +123,14 @@ function processHit(hole, touch) {
         if (window.activeBoost && window.activeBoost.endTime > Date.now()) gain *= window.activeBoost.type;
         window.rum = (window.rum || 0) + Math.floor(gain);
         var img = hole.querySelector('.veg');
-        if (img) flyVegToPot(hole, img.src);
-        showCoinFountain();
+        if (img) {
+            flyVegToPot(hole, img, function() {
+                pulsePot();
+                showCoinFountain();
+            });
+        } else {
+            showCoinFountain();
+        }
         if (window.streak % 20 === 0) triggerRocket();
     } else {
         window.rum = Math.max(0, (window.rum || 0) - 20);
@@ -166,18 +172,61 @@ function preventDefaultMove(e) {
     e.preventDefault();
 }
 
-// Анимация полёта овоща в кастрюлю
-function flyVegToPot(hole, imgSrc) {
+var veggieCutoutCache = {};
+
+// Убирает белую подложку исходного рисунка, чтобы в кастрюлю летел сам овощ.
+function getVeggieCutout(img) {
+    if (!img || !img.src) return '';
+    if (veggieCutoutCache[img.src]) return veggieCutoutCache[img.src];
+    try {
+        if (!img.complete || !img.naturalWidth) return img.src;
+        var size = 160;
+        var canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        var context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) return img.src;
+        context.drawImage(img, 0, 0, size, size);
+        var frame = context.getImageData(0, 0, size, size);
+        var pixels = frame.data;
+        for (var i = 0; i < pixels.length; i += 4) {
+            var red = pixels[i], green = pixels[i + 1], blue = pixels[i + 2];
+            var min = Math.min(red, green, blue);
+            var max = Math.max(red, green, blue);
+            var neutral = max - min < 34;
+            if (neutral && min > 242) pixels[i + 3] = 0;
+            else if (neutral && min > 208) pixels[i + 3] = Math.round(pixels[i + 3] * (242 - min) / 34);
+        }
+        context.putImageData(frame, 0, 0);
+        veggieCutoutCache[img.src] = canvas.toDataURL('image/webp', 0.9);
+        return veggieCutoutCache[img.src];
+    } catch (_) {
+        return img.src;
+    }
+}
+
+function pulsePot() {
     var pot = document.getElementById('pot');
-    if (!pot || !hole || !imgSrc) return;
+    if (!pot) return;
+    pot.classList.remove('ingredient-hit');
+    void pot.offsetWidth;
+    pot.classList.add('ingredient-hit');
+    setTimeout(function() { pot.classList.remove('ingredient-hit'); }, 420);
+}
+
+// Анимация полёта овоща в кастрюлю по дуге с наградой после приземления.
+function flyVegToPot(hole, img, onLanded) {
+    var pot = document.getElementById('pot');
+    if (!pot || !hole || !img) {
+        if (typeof onLanded === 'function') onLanded();
+        return;
+    }
     var holeRect = hole.getBoundingClientRect();
     var potRect = pot.getBoundingClientRect();
     var containerRect = document.getElementById('game-container').getBoundingClientRect();
     var vegEl = document.createElement('img');
     vegEl.className = 'flying-veg';
-    vegEl.src = imgSrc;
-    vegEl.style.width = '40px';
-    vegEl.style.height = '40px';
+    vegEl.src = getVeggieCutout(img);
     vegEl.style.position = 'absolute';
     vegEl.style.left = (holeRect.left + holeRect.width / 2 - containerRect.left) + 'px';
     vegEl.style.top = (holeRect.top + holeRect.height / 2 - containerRect.top) + 'px';
@@ -188,7 +237,10 @@ function flyVegToPot(hole, imgSrc) {
     vegEl.style.zIndex = '20';
     vegEl.style.pointerEvents = 'none';
     document.getElementById('game-container').appendChild(vegEl);
-    vegEl.addEventListener('animationend', function() { vegEl.remove(); });
+    vegEl.addEventListener('animationend', function() {
+        vegEl.remove();
+        if (typeof onLanded === 'function') onLanded();
+    }, { once: true });
 }
 
 // Ракета при большой серии

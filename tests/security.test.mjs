@@ -78,17 +78,36 @@ test('Крипто Беспредел подключается после соз
   assert.doesNotMatch(arena, /\nquickDuelCoin\.addEventListener/);
 });
 
-test('Голодные волки содержат бой, выбор персонажей и рейтинговые лестницы', () => {
+test('Голодные волки содержат девять бойцов, полноценное управление и рейтинговые лестницы', () => {
   const fight = read('js/fight.js');
   assert.match(html, /id="fight-screen"/);
   assert.match(html, /src="js\/fight\.js"/);
   assert.match(fight, /RUMIR Alpha/);
   assert.match(fight, /Luna Hash/);
-  assert.match(fight, /data-fight-action="punch"/);
-  assert.match(fight, /data-fight-action="block"/);
+  assert.equal([...fight.matchAll(/id: '[^']+', name:/g)].length, 9);
+  for (const action of ['punch', 'kick', 'heavy', 'block', 'dodge', 'special']) {
+    assert.match(fight, new RegExp(`${action}: \\{`));
+  }
+  assert.match(fight, /stamina/);
+  assert.match(fight, /combo/);
+  assert.match(fight, /stunnedUntil/);
   assert.match(fight, /CLUB_LADDER/);
   assert.match(read('js/arena.js'), /start-tournament-borsch/);
   assert.match(read('js/arena.js'), /start-tournament-fight/);
+});
+
+test('боевые спрайты оптимизированы, а овощи приземляются в кастрюлю до награды', () => {
+  const fight = read('js/fight.js');
+  const engine = read('js/game-engine.js');
+  for (const id of ['alpha', 'luna', 'fenrir', 'she-wolf', 'khan', 'veles', 'mara', 'satoshi', 'borz']) {
+    assert.ok(existsSync(new URL(`assets/fight/fighters/${id}.webp`, root)), `нет спрайта ${id}`);
+  }
+  assert.match(fight, /POSE_POSITION/);
+  assert.match(fight, /spawnImpact/);
+  assert.match(engine, /function getVeggieCutout/);
+  assert.match(engine, /function pulsePot/);
+  assert.match(engine, /flyVegToPot\(hole, img, function\(\)/);
+  assert.doesNotMatch(engine, /if \(img\) flyVegToPot\(hole, img\.src\);\s*showCoinFountain/);
 });
 
 test('сеть Голодных волков связывает клубы, квалификацию, бой и призовой ваучер', () => {
