@@ -31,7 +31,13 @@
         { name: 'Crypto Kitchen', badge: '🥘', rating: 1390, district: 'Запад' }
     ];
 
-    const POSE_POSITION = { idle: '0% 0%', punch: '100% 0%', kick: '0% 100%', special: '100% 100%' };
+    const FIGHT_ART_VERSION = '20260719c';
+    const POSE_POSITION = {
+        idle: { x: '0%', y: '0%' },
+        punch: { x: '-100%', y: '0%' },
+        kick: { x: '0%', y: '-100%' },
+        special: { x: '-100%', y: '-100%' }
+    };
     let selectedId = localStorage.getItem('wolfSelectedFighter') || 'alpha';
     let activeTab = 'fighters';
     let battle = null;
@@ -51,7 +57,33 @@
     }
 
     function spriteMarkup(fighter, className, pose) {
-        return `<span class="fighter-sprite ${className || ''}" style="--fighter-art:url('${fighter.sprite}');--fighter-color:${fighter.color};--pose:${POSE_POSITION[pose || 'idle']}" role="img" aria-label="${fighter.name}"></span>`;
+        const frame = POSE_POSITION[pose || 'idle'] || POSE_POSITION.idle;
+        return `<span class="fighter-sprite ${className || ''}" style="--fighter-color:${fighter.color};--frame-x:${frame.x};--frame-y:${frame.y}" role="img" aria-label="${fighter.name}">
+            <span class="fighter-fallback" aria-hidden="true">🐺</span>
+            <img class="fighter-sprite-image" src="${fighter.sprite}?v=${FIGHT_ART_VERSION}" alt="" draggable="false" decoding="async">
+        </span>`;
+    }
+
+    function prepareFighterImages(root) {
+        root.querySelectorAll('.fighter-sprite-image').forEach(function (image) {
+            const frame = image.closest('.fighter-sprite');
+            if (!frame || image.dataset.fighterPrepared === 'true') return;
+            image.dataset.fighterPrepared = 'true';
+            const sync = function () {
+                frame.classList.toggle('art-ready', image.complete && image.naturalWidth > 0);
+                frame.classList.toggle('art-missing', image.complete && !image.naturalWidth);
+            };
+            image.addEventListener('load', sync, { once: true });
+            image.addEventListener('error', sync, { once: true });
+            if (image.complete) sync();
+        });
+    }
+
+    function setSpritePose(sprite, pose) {
+        if (!sprite) return;
+        const frame = POSE_POSITION[pose] || POSE_POSITION.idle;
+        sprite.style.setProperty('--frame-x', frame.x);
+        sprite.style.setProperty('--frame-y', frame.y);
     }
 
     function renderFightScreen() {
@@ -140,6 +172,7 @@
     }
 
     function bindRoot(root) {
+        prepareFighterImages(root);
         if (root.dataset.fightBound === 'true') return;
         root.dataset.fightBound = 'true';
         root.addEventListener('click', function (event) {
@@ -367,12 +400,12 @@
         const node = document.getElementById(side + '-combatant');
         if (!node) return;
         const sprite = node.querySelector('.fighter-sprite');
-        if (sprite) sprite.style.setProperty('--pose', POSE_POSITION[pose] || POSE_POSITION.idle);
+        setSpritePose(sprite, pose);
         node.className = 'combatant-v2 ' + side + (extraClass ? ' ' + extraClass : '');
         schedule(function () {
             if (!battle || !node.isConnected) return;
             node.className = 'combatant-v2 ' + side;
-            if (sprite) sprite.style.setProperty('--pose', POSE_POSITION.idle);
+            setSpritePose(sprite, 'idle');
         }, duration || 380);
     }
 
