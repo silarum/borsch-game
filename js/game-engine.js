@@ -13,8 +13,8 @@ function showCoinFountain(count) {
     for (var i = 0; i < count; i++) {
         var coin = document.createElement('div');
         coin.className = 'coin-fountain';
-        var coinTypes = ['💰', '🪙', '💎', '✨', '🪙'];
-        coin.textContent = coinTypes[Math.floor(Math.random() * coinTypes.length)];
+        coin.classList.add('rumir-coin');
+        coin.textContent = Math.random() < 0.18 ? '✦' : 'R';
         coin.style.left = (cx + (Math.random() - 0.5) * 120) + 'px';
         coin.style.top = cy + 'px';
         coin.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
@@ -62,6 +62,17 @@ var goodImages = [
     'assets/veggies/garlicgold.webp',
     'assets/veggies/tomotoken.webp'
 ];
+var cryptoVeggies = [
+    { symbol: 'BTC', name: 'BitCabbage', image: 'assets/veggies/bitcabbage.webp' },
+    { symbol: 'ETH', name: 'EtherOnion', image: 'assets/veggies/etheronion.webp' },
+    { symbol: 'TON', name: 'TaterTON', image: 'assets/veggies/tatercoin.webp' },
+    { symbol: 'BCH', name: 'CarrotCash', image: 'assets/veggies/carrotcash.webp' },
+    { symbol: 'XRP', name: 'PepperPay', image: 'assets/veggies/pepperpay.webp' },
+    { symbol: 'GAS', name: 'GreenGas', image: 'assets/veggies/greengas.webp' },
+    { symbol: 'BNB', name: 'BeanBNB', image: 'assets/veggies/beanbit.webp' },
+    { symbol: 'LTC', name: 'GarlicLite', image: 'assets/veggies/garlicgold.webp' },
+    { symbol: 'SOL', name: 'SolaTomato', image: 'assets/veggies/tomotoken.webp' }
+];
 var badImages = [
     'assets/veggies/shitcoin.webp',
     'assets/veggies/scamworm.webp',
@@ -80,10 +91,16 @@ function spawnAll() {
     window.currentVeg = {};
     for (var i = 0; i < holes.length; i++) {
         var isBad = Math.random() < 0.25;
-        var pool = isBad ? badImages : goodImages;
-        var imgSrc = pool[Math.floor(Math.random() * pool.length)];
-        holes[i].innerHTML = '<img src="' + imgSrc + '" class="veg' + (isBad ? ' rotten' : '') + '" style="width:100%;height:100%;object-fit:contain;">';
-        window.currentVeg[i] = { type: isBad ? 'bad' : 'good' };
+        var item;
+        if (isBad) {
+            var badSrc = badImages[Math.floor(Math.random() * badImages.length)];
+            item = { symbol: 'SCAM', name: 'Ловушка', image: badSrc };
+        } else {
+            item = cryptoVeggies[Math.floor(Math.random() * cryptoVeggies.length)];
+        }
+        holes[i].innerHTML = '<img src="' + item.image + '" alt="' + item.symbol + '" class="veg' + (isBad ? ' rotten' : '') + '"><span class="veg-symbol">' + item.symbol + '</span>';
+        holes[i].setAttribute('aria-label', item.name);
+        window.currentVeg[i] = { type: isBad ? 'bad' : 'good', symbol: item.symbol, name: item.name, image: item.image };
     }
 }
 

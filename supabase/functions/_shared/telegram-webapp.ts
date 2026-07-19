@@ -1,9 +1,11 @@
 const encoder = new TextEncoder();
 
 async function hmacSha256(keyBytes: Uint8Array, value: string): Promise<Uint8Array> {
+    const keyData = new Uint8Array(keyBytes.byteLength);
+    keyData.set(keyBytes);
     const key = await crypto.subtle.importKey(
         'raw',
-        keyBytes,
+        keyData,
         { name: 'HMAC', hash: 'SHA-256' },
         false,
         ['sign']

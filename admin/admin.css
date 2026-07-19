@@ -227,6 +227,18 @@ button { color: inherit; }
 .energy::-moz-progress-bar { background:linear-gradient(90deg,var(--orange),var(--green)); }
 
 .empty { padding: 30px 18px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); }
+.review-section { display: grid; gap: 10px; }
+.review-card { display: grid; gap: 12px; }
+.review-card > p { margin: 0; color: #c7ccda; font-size: 12px; line-height: 1.5; }
+.review-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.review-facts span { min-width: 0; padding: 9px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.16); color: #e5e9f2; font-size: 10px; text-overflow: ellipsis; }
+.review-facts small { display: block; margin-bottom: 4px; color: var(--muted); font-size: 8px; }
+.review-address { color: var(--muted); font-size: 10px; }
+.safety-banner { display: flex; align-items: center; justify-content: space-between; gap: 15px; border-color: rgba(255,204,102,.22); background: linear-gradient(145deg,rgba(255,204,102,.09),rgba(155,123,255,.08)); }
+.safety-banner small { color: var(--gold); font-weight: 900; letter-spacing: .12em; }
+.safety-banner h3 { margin: 5px 0; }
+.safety-banner p { max-width: 570px; margin: 0; }
+.safety-banner > span { padding: 8px 10px; border: 1px solid rgba(255,107,125,.25); border-radius: 999px; color: var(--red); font-size: 9px; font-weight: 900; }
 .error-box { padding: 24px; text-align: center; border: 1px solid rgba(255,107,125,.25); border-radius: var(--radius); background: rgba(255,107,125,.07); }
 .error-box h2 { margin: 0 0 8px; }
 .error-box p { color: #ffc5ce; }

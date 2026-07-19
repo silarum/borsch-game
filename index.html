@@ -29,6 +29,7 @@
         </div>
 
         <div class="menu-dropdown" id="menu-dropdown">
+            <button data-screen="tasks">📋 Задания</button>
             <button data-screen="about">📖 О проекте</button>
             <button data-screen="top-tappers">🏆 Топ игроков</button>
             <button data-screen="top-miners">⛏️ Топ майнеров</button>
@@ -48,7 +49,7 @@
             </div>
         </div>
 
-        <button id="view-switch">🥬 Овощи</button>
+        <button id="view-switch">🪙 Крипто‑овощи</button>
         <button id="rules-btn-bottom">📜 Правила</button>
         <button id="lang-btn-bottom">🌐</button>
 
@@ -56,8 +57,13 @@
         <div id="smile-view"><canvas id="smileCanvas"></canvas></div>
         <div id="veggie-view"><canvas id="veggieCanvas"></canvas></div>
 
+        <div class="crypto-kitchen-art" aria-hidden="true"></div>
         <div class="glass-wall"></div><div class="window-sill"></div><div class="flower-pot"></div><div class="purple-bg"></div>
         <div class="kitchen-area"><div class="table"></div><div class="stove"><div class="pot" id="pot"><div class="steam"><div class="steam-particle"></div><div class="steam-particle"></div><div class="steam-particle"></div></div><div class="energy-display" id="energy-display"></div><div class="boost-display" id="boost-display"></div></div></div></div>
+
+        <div class="crypto-veg-legend" id="crypto-veg-legend" aria-label="Крипто-овощи">
+            <span><b>ETH</b> лук</span><span><b>TON</b> картофель</span><span><b>SOL</b> томат</span><span><b>XRP</b> перец</span>
+        </div>
 
         <div class="start-btn-container" id="start-btn-container">
             <button class="start-btn" id="start-btn">🥘 НАЧАТЬ</button>
@@ -69,7 +75,7 @@
             <div class="row"><div class="hole" data-hole="7"></div><div class="hole" data-hole="8"></div><div class="hole" data-hole="9"></div><div class="hole" data-hole="10"></div><div class="hole" data-hole="11"></div></div>
         </div>
 
-        <div class="quick-duel-coin" id="quick-duel-coin">💰</div>
+        <button class="quick-duel-coin" id="quick-duel-coin" aria-label="Открыть Крипто Беспредел"><span>⚔</span><small>БЕСПРЕДЕЛ</small></button>
 
         <div class="duel-scoreboard hidden" id="duel-scoreboard">
             <span>⚡ Ты: <span id="duelPlayerScore">0</span></span>
@@ -101,13 +107,25 @@
 
     <div class="screen" id="mining-club-screen">
         <button class="back-btn">← Назад</button>
-        <h2>🐺 Бойцовский клуб</h2>
-        <div style="display:flex;gap:8px;margin:10px 0">
-            <button id="club-my-btn" class="club-btn">Мой клуб</button>
-            <button id="club-all-btn" class="club-btn">Все клубы</button>
-            <button id="club-create-btn" class="club-btn">Создать</button>
+        <div class="club-network-title"><small>REAL VENUES · COMMUNITY LEAGUES</small><h2>🐺 Сеть бойцовских клубов</h2></div>
+        <div class="club-hub-tabs">
+            <button id="club-all-btn" class="club-hub-tab active">Лиги</button>
+            <button id="club-news-btn" class="club-hub-tab">Новости</button>
+            <button id="club-tournaments-btn" class="club-hub-tab">Турниры</button>
+            <button id="club-my-btn" class="club-hub-tab">Мой клуб</button>
+            <button id="club-create-btn" class="club-hub-tab">Открыть</button>
         </div>
-        <div id="club-content" style="width:100%;max-height:60%;overflow-y:auto"></div>
+        <div id="club-content" class="club-hub-content"></div>
+    </div>
+
+    <div class="screen club-owner-screen" id="club-owner-screen">
+        <button class="back-btn" data-back-screen="mining-club">← К клубам</button>
+        <div id="club-owner-content" class="club-owner-content"></div>
+    </div>
+
+    <div class="screen fight-screen" id="fight-screen">
+        <button class="back-btn">← Назад</button>
+        <div id="fight-content" class="fight-content"></div>
     </div>
 
     <div class="screen" id="tasks-screen">
@@ -178,8 +196,11 @@
         <button class="back-btn">← Назад</button>
         <h2>📜 Правила игры</h2>
         <div class="rules-scroll">
-            <div class="info-card"><p><strong>🍲 RUM‑майнинг</strong><br>Нажимай на овощи — получай RUM.</p></div>
-            <div class="info-card"><p><strong>⛏️ Криптобеспредел</strong><br>Ставка SRUM, дуэль 20 сек.</p></div>
+            <div class="info-card"><p><strong>🍲 RUMIR‑майнинг</strong><br>Нажимай на крипто‑овощи: овощ летит в котёл, из котла вылетают монеты RUMIR.</p></div>
+            <div class="info-card"><p><strong>⛏️ Крипто Беспредел</strong><br>Внеси игровые SILARUM и сыграй 20‑секундную дуэль.</p></div>
+            <div class="info-card"><p><strong>🐺 Голодные волки</strong><br>Выбирай бойца «Волчьей сотни», сражайся и поднимай рейтинг клуба.</p></div>
+            <div class="info-card"><p><strong>🏆 Турнир</strong><br>Выбери дисциплину: варить Крипто Борщ или драться бойцами.</p></div>
+            <div class="info-card"><p><strong>◈ Инвестиции</strong><br>Порогов нет. Игровой курс: 1 SILARUM = 10 000 RUMIR.</p></div>
             <div class="info-card"><p><strong>🧪 Безопасный режим</strong><br>Баллы являются игровыми. Покупка, обмен и вывод отключены до запуска проверенного backend.</p></div>
         </div>
     </div>
@@ -201,12 +222,12 @@
     </div>
 
     <!-- Нижняя панель (скрыта на всех экранах) -->
-    <div class="bottom-panel" id="bottom-panel">
-        <button class="nav-btn" data-screen="arena">🏟️ Арена</button>
-        <button class="nav-btn" data-screen="mining-club">🐺 Клуб</button>
-        <button class="nav-btn" data-screen="tasks">📋 Задания</button>
-        <button class="nav-btn" data-screen="wallet">👛 Кошелёк</button>
-        <button class="nav-btn" data-screen="shop">🛍️ Магазин</button>
+    <div class="bottom-panel offset-dock" id="bottom-panel">
+        <button class="nav-btn" data-screen="arena"><span class="nav-icon">🏟</span><span>Арена</span></button>
+        <button class="nav-btn" data-screen="mining-club"><span class="nav-icon">🐺</span><span>Клуб</span></button>
+        <button class="nav-btn nav-primary" data-screen="fight"><span class="nav-icon">⚔</span><span>Бой</span></button>
+        <button class="nav-btn" data-screen="wallet"><span class="nav-icon">◈</span><span>Кошелёк</span></button>
+        <button class="nav-btn" data-screen="shop"><span class="nav-icon">✦</span><span>Магазин</span></button>
     </div>
 
 </div>
@@ -223,7 +244,9 @@
 <script src="js/market.js"></script>
 <script src="js/tasks.js"></script>
 <script src="js/club.js"></script>
+<script src="js/club-leagues.js"></script>
 <script src="js/bots.js"></script>
+<script src="js/fight.js"></script>
 <script src="js/arena.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/referrals.js"></script>

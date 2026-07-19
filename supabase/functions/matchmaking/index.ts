@@ -74,7 +74,7 @@ Deno.serve(async (request) => {
             if (!/^[0-9a-f-]{36}$/i.test(matchId)) return json({ error: 'Invalid match id' }, 400);
             const score = Number(body.playerScore);
             if (!Number.isInteger(score) || score < 0 || score > 60) return json({ error: 'Invalid score' }, 400);
-            const { data, error } = await supabase.rpc('resolve_game_pool_match', {
+            const { data, error } = await supabase.rpc('resolve_game_pool_match_silarum', {
                 p_match_id: matchId,
                 p_player_telegram_id: user.id,
                 p_player_score: score
