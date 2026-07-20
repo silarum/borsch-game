@@ -1,0 +1,21 @@
+/* Crypto Borsch Home V4 — approved premium mobile composition */
+:root {
+  --home-gold: #ffc85a;
+  --home-gold-soft: rgba(255, 200, 90, .34);
+  --home-panel: rgba(6, 8, 20, .82);
+  --home-panel-strong: rgba(5, 7, 17, .94);
+  --home-line: rgba(255, 205, 104, .34);
+  --home-text: #f8f7fb;
+  --home-muted: #9ca5ba;
+}
+
+#main-game {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #050711;
+  isolation: isolate;
+}
+
+#main-game::after {
+  content: ""
