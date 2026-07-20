@@ -4,6 +4,11 @@
     stylesheet.rel = 'stylesheet';
     stylesheet.href = 'css/premium-v5.css?v=20260720a';
     document.head.appendChild(stylesheet);
+
+    const premiumScript = document.createElement('script');
+    premiumScript.src = 'js/premium-v6.js?v=20260720a';
+    premiumScript.defer = true;
+    document.head.appendChild(premiumScript);
 })();
 
 // Единая конфигурация безопасного релизного режима.
