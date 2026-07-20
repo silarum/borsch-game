@@ -1,3 +1,11 @@
+// Подключаем единый премиальный визуальный слой до запуска приложения.
+(() => {
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = 'css/premium-v5.css?v=20260720a';
+    document.head.appendChild(stylesheet);
+})();
+
 // Единая конфигурация безопасного релизного режима.
 // Реальные денежные функции включаются только после серверной валидации
 // Telegram initData, TON-транзакций и атомарных операций с балансом.
