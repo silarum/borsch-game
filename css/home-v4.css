@@ -1,21 +1,490 @@
-/* Crypto Borsch Home V4 — approved premium mobile composition */
+/* Crypto Borsch Home V4 — premium mobile composition */
 :root {
   --home-gold: #ffc85a;
-  --home-gold-soft: rgba(255, 200, 90, .34);
-  --home-panel: rgba(6, 8, 20, .82);
-  --home-panel-strong: rgba(5, 7, 17, .94);
-  --home-line: rgba(255, 205, 104, .34);
-  --home-text: #f8f7fb;
-  --home-muted: #9ca5ba;
+  --home-gold-light: #ffe7a4;
+  --home-orange: #ff7a36;
+  --home-red: #ff3e62;
+  --home-violet: #6f4cff;
+  --home-panel: rgba(7, 9, 22, .78);
+  --home-panel-strong: rgba(5, 7, 18, .94);
+  --home-line: rgba(255, 207, 105, .28);
+  --home-text: #f9f7fb;
+  --home-muted: #9aa4b9;
+}
+
+#game-container {
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 560px !important;
+  max-width: 480px !important;
+  background: #050711 !important;
 }
 
 #main-game {
+  position: absolute !important;
+  inset: 0 !important;
+  min-height: 100% !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 120, 52, .11), transparent 31%),
+    radial-gradient(circle at 8% 55%, rgba(85, 50, 255, .15), transparent 34%),
+    linear-gradient(180deg, #080b1a 0%, #080613 50%, #05050d 100%) !important;
+}
+
+#main-game::before {
+  content: "";
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  background: #050711;
-  isolation: isolate;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(4, 7, 20, .48) 0%, rgba(4, 7, 20, .08) 22%, transparent 49%, rgba(4, 5, 13, .22) 72%, rgba(3, 4, 10, .78) 100%),
+    radial-gradient(ellipse at 50% 47%, transparent 0 32%, rgba(3, 4, 12, .28) 71%, rgba(3, 4, 12, .66) 100%);
 }
 
 #main-game::after {
-  content: ""
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 30px 30px;
+  mask-image: linear-gradient(180deg, #000, transparent 48%);
+}
+
+#main-game .crypto-kitchen-art {
+  inset: 0 !important;
+  z-index: 1 !important;
+  background-position: center top !important;
+  background-size: cover !important;
+  filter: saturate(1.15) contrast(1.06) brightness(.86) !important;
+}
+
+/* Telegram already shows the project name; do not repeat it in the playfield. */
+#main-game .game-brand { display: none !important; }
+
+/* Player card */
+#main-game .user-profile {
+  top: calc(10px + env(safe-area-inset-top)) !important;
+  left: 10px !important;
+  right: auto !important;
+  width: min(158px, 43vw) !important;
+  max-width: min(158px, 43vw) !important;
+  min-height: 52px !important;
+  gap: 8px !important;
+  padding: 7px 8px !important;
+  border: 1px solid rgba(255, 210, 118, .22) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(18, 20, 39, .86), rgba(6, 8, 20, .76)) !important;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, .36), inset 0 1px rgba(255,255,255,.07) !important;
+  backdrop-filter: blur(18px) !important;
+  z-index: 56 !important;
+}
+
+#main-game .user-avatar {
+  flex: 0 0 36px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid rgba(255, 238, 181, .52) !important;
+  background: radial-gradient(circle at 35% 28%, #fff3ae, #ffb438 46%, #b35a22) !important;
+  box-shadow: 0 0 20px rgba(255, 174, 59, .32) !important;
+  font-size: 1.18rem !important;
+}
+
+#main-game .user-info { min-width: 0 !important; line-height: 1.12 !important; }
+#main-game #user-nickname {
+  overflow: hidden;
+  color: var(--home-text);
+  font-size: .7rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#main-game #user-status {
+  overflow: hidden;
+  margin-top: 2px;
+  color: #79e3cf;
+  font-size: .5rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#main-game .user-info::after {
+  content: "GAMEFI · TON";
+  display: block;
+  margin-top: 3px;
+  color: var(--home-gold);
+  font-size: .39rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+#main-game .user-menu-btn {
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  border-radius: 9px !important;
+  background: rgba(255,255,255,.045) !important;
+  color: #dfe5f4 !important;
+  font-size: .95rem !important;
+}
+
+/* Compact 2 x 2 balances */
+#main-game .top-panel {
+  top: calc(10px + env(safe-area-inset-top)) !important;
+  right: 10px !important;
+  left: auto !important;
+  z-index: 55 !important;
+}
+#main-game .balances-right {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(69px, 1fr)) !important;
+  gap: 5px !important;
+  width: min(166px, 46vw) !important;
+}
+#main-game .balances-right div {
+  min-width: 0 !important;
+  min-height: 24px !important;
+  overflow: hidden !important;
+  padding: 5px 6px !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-radius: 9px !important;
+  background: linear-gradient(145deg, rgba(19, 23, 43, .84), rgba(6, 9, 21, .84)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 7px 18px rgba(0,0,0,.24) !important;
+  color: #eef2fb !important;
+  font-size: clamp(.42rem, 1.65vw, .49rem) !important;
+  line-height: 1.15 !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  backdrop-filter: blur(14px) !important;
+}
+#main-game #rum-balance { color: #ffd56a !important; }
+#main-game #srum-balance { color: #d9dfff !important; }
+#main-game #usdt-balance-top { color: #71e4b0 !important; }
+#main-game #ton-balance-top { color: #78c8ff !important; }
+
+/* Ingredient legend */
+#main-game .crypto-veg-legend {
+  top: calc(73px + env(safe-area-inset-top)) !important;
+  left: 10px !important;
+  right: 10px !important;
+  z-index: 50 !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+  height: 30px !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+#main-game .crypto-veg-legend span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  padding: 7px 4px !important;
+  border: 1px solid rgba(149, 171, 255, .14) !important;
+  border-radius: 10px !important;
+  background: rgba(7, 10, 24, .72) !important;
+  color: #aab4c9 !important;
+  font-size: clamp(.38rem, 1.55vw, .46rem) !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  backdrop-filter: blur(14px) !important;
+}
+#main-game .crypto-veg-legend b { color: #74e9ff !important; }
+
+/* Secondary actions stay available without dominating the scene. */
+#main-game #view-switch { display: none !important; }
+#main-game #rules-btn-bottom,
+#main-game #lang-btn-bottom {
+  top: calc(109px + env(safe-area-inset-top)) !important;
+  bottom: auto !important;
+  z-index: 49 !important;
+  min-height: 30px !important;
+  padding: 6px 9px !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 10px !important;
+  background: rgba(7, 10, 23, .72) !important;
+  color: #bdc5d6 !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.2) !important;
+  font-size: .52rem !important;
+  backdrop-filter: blur(14px) !important;
+}
+#main-game #rules-btn-bottom { left: 10px !important; right: auto !important; }
+#main-game #lang-btn-bottom { left: 82px !important; right: auto !important; width: 32px !important; padding-inline: 0 !important; }
+
+#main-game .quick-duel-coin {
+  top: calc(107px + env(safe-area-inset-top)) !important;
+  right: 10px !important;
+  width: 54px !important;
+  height: 54px !important;
+  z-index: 50 !important;
+  gap: 1px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 218, 119, .48) !important;
+  border-radius: 17px !important;
+  background: linear-gradient(145deg, #ffd25d, #ff813d 62%, #ef3f68) !important;
+  color: #1a0b10 !important;
+  box-shadow: 0 12px 28px rgba(255, 89, 57, .27), inset 0 1px rgba(255,255,255,.5) !important;
+  animation: homeDuelFloat 3s ease-in-out infinite !important;
+}
+#main-game .quick-duel-coin span { font-size: 1.18rem !important; }
+#main-game .quick-duel-coin small { font-size: .34rem !important; letter-spacing: .03em !important; }
+@keyframes homeDuelFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* Main action and cauldron */
+#main-game .start-btn-container {
+  top: 27.5% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 42 !important;
+}
+#main-game .start-btn {
+  min-width: 152px !important;
+  min-height: 48px !important;
+  padding: 12px 24px !important;
+  border: 1px solid rgba(255,255,255,.24) !important;
+  border-radius: 17px !important;
+  background: linear-gradient(135deg, #ff823f, #ff3d62 54%, #8d45ff) !important;
+  color: #fff !important;
+  box-shadow: 0 0 28px rgba(255, 71, 92, .32), 0 13px 30px rgba(0,0,0,.4), inset 0 1px rgba(255,255,255,.25) !important;
+  font-size: .92rem !important;
+  letter-spacing: .04em !important;
+  white-space: nowrap !important;
+  animation: homeStartPulse 2.3s ease-in-out infinite !important;
+}
+@keyframes homeStartPulse { 50% { transform: translateY(-1px) scale(1.025); filter: brightness(1.08); } }
+
+#main-game .kitchen-area {
+  top: 34% !important;
+  bottom: auto !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 28% !important;
+  min-height: 158px !important;
+  z-index: 14 !important;
+  pointer-events: none !important;
+}
+#main-game .kitchen-area .table { display: none !important; }
+#main-game .kitchen-area .stove {
+  top: 0 !important;
+  left: 20% !important;
+  right: 20% !important;
+  height: 100% !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#main-game .kitchen-area .pot {
+  top: 0 !important;
+  left: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: translateX(-50%) !important;
+}
+#main-game .kitchen-area .pot::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 5% !important;
+  left: 6% !important;
+  right: 6% !important;
+  height: 23% !important;
+  border: 2px solid rgba(255, 220, 118, .56) !important;
+  border-radius: 50% !important;
+  background: radial-gradient(ellipse, rgba(255, 178, 54, .21), rgba(255, 77, 56, .08) 56%, transparent 72%) !important;
+  box-shadow: 0 0 32px rgba(255, 142, 45, .25), inset 0 0 20px rgba(255, 218, 103, .14) !important;
+}
+#main-game .kitchen-area .pot::after { display: none !important; }
+#main-game .kitchen-area .steam { top: -2px !important; height: 34px !important; opacity: .72 !important; }
+#main-game .kitchen-area .energy-display {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 4% !important;
+  min-width: 132px !important;
+  max-width: 88% !important;
+  padding: 6px 10px !important;
+  transform: translateX(-50%) !important;
+  border: 1px solid rgba(255, 205, 94, .28) !important;
+  border-radius: 999px !important;
+  background: rgba(5, 8, 20, .76) !important;
+  color: #ffde76 !important;
+  box-shadow: 0 0 22px rgba(255, 156, 42, .2) !important;
+  font-size: .6rem !important;
+  text-align: center !important;
+  backdrop-filter: blur(12px) !important;
+}
+#main-game .kitchen-area .boost-display {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: -11% !important;
+  transform: translateX(-50%) !important;
+  font-size: .5rem !important;
+}
+
+/* Real triangular 3-4-5 board */
+#main-game .board {
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+  width: min(94%, 430px) !important;
+  gap: 7px !important;
+  padding: 13px 12px 15px !important;
+  transform: translateX(-50%) !important;
+  border: 1px solid rgba(255, 205, 96, .3) !important;
+  border-radius: 0 !important;
+  clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%) !important;
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 151, 51, .18), transparent 43%),
+    linear-gradient(165deg, rgba(78, 43, 31, .82), rgba(10, 10, 22, .91)) !important;
+  box-shadow: 0 24px 54px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.1) !important;
+  backdrop-filter: blur(10px) !important;
+  z-index: 34 !important;
+}
+#main-game .board .row {
+  display: flex !important;
+  justify-content: center !important;
+  gap: clamp(7px, 2.2vw, 10px) !important;
+  padding: 0 !important;
+}
+#main-game .board .row:nth-child(1) { transform: translateY(0) !important; }
+#main-game .board .row:nth-child(2) { transform: translateY(0) !important; }
+#main-game .board .row:nth-child(3) { transform: translateY(0) !important; }
+#main-game .hole {
+  width: clamp(45px, 13vw, 55px) !important;
+  height: clamp(45px, 13vw, 55px) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 206, 111, .27) !important;
+  background: radial-gradient(circle at 50% 41%, #060714 0 38%, #17101d 68%, #623a25 100%) !important;
+  box-shadow: inset 0 9px 17px rgba(0,0,0,.88), 0 0 15px rgba(111, 76, 255, .08) !important;
+}
+#main-game .hole::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  border-radius: 50%;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+#main-game .hole .veg {
+  width: 112% !important;
+  height: 112% !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,.72)) !important;
+}
+
+/* Lower navigation: five equal targets, restrained centre emphasis. */
+#main-game + .screen ~ .bottom-panel,
+#game-container > .bottom-panel.offset-dock {
+  left: 9px !important;
+  right: 9px !important;
+  bottom: max(7px, env(safe-area-inset-bottom)) !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  align-items: center !important;
+  height: 64px !important;
+  padding: 5px 6px !important;
+  overflow: visible !important;
+  border: 1px solid rgba(151, 172, 255, .15) !important;
+  border-radius: 21px !important;
+  background: linear-gradient(180deg, rgba(17, 22, 43, .91), rgba(5, 8, 18, .97)) !important;
+  box-shadow: 0 19px 45px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.07) !important;
+  backdrop-filter: blur(22px) !important;
+  z-index: 210 !important;
+}
+#game-container > .bottom-panel.offset-dock::before { display: none !important; }
+#game-container > .bottom-panel.offset-dock .nav-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 53px !important;
+  min-height: 53px !important;
+  margin: 0 !important;
+  padding: 5px 2px 4px !important;
+  gap: 2px !important;
+  transform: none !important;
+  border: 1px solid transparent !important;
+  border-radius: 14px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #8e98ae !important;
+  font-size: clamp(.42rem, 1.7vw, .5rem) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+#game-container > .bottom-panel.offset-dock .nav-icon {
+  display: grid !important;
+  place-items: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 10px !important;
+  background: rgba(255,255,255,.045) !important;
+  font-size: .96rem !important;
+}
+#game-container > .bottom-panel.offset-dock .nav-primary {
+  height: 58px !important;
+  min-height: 58px !important;
+  transform: translateY(-4px) !important;
+  color: #fff !important;
+}
+#game-container > .bottom-panel.offset-dock .nav-primary .nav-icon {
+  width: 38px !important;
+  height: 38px !important;
+  border: 1px solid rgba(255,255,255,.3) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, #ffd25b, #ff713a 58%, #ef3d83) !important;
+  color: #1a0a10 !important;
+  box-shadow: 0 8px 21px rgba(255, 75, 66, .28) !important;
+  font-size: 1.1rem !important;
+}
+#game-container > .bottom-panel.offset-dock .nav-primary > span:last-child {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+#main-game .menu-dropdown {
+  top: calc(70px + env(safe-area-inset-top)) !important;
+  left: 10px !important;
+  right: 10px !important;
+  z-index: 300 !important;
+}
+
+@media (max-width: 390px) {
+  #main-game .user-profile { width: 140px !important; max-width: 140px !important; }
+  #main-game .balances-right { width: 152px !important; grid-template-columns: repeat(2, minmax(64px, 1fr)) !important; }
+  #main-game .board { padding-inline: 9px !important; }
+  #main-game .hole { width: clamp(43px, 12.7vw, 50px) !important; height: clamp(43px, 12.7vw, 50px) !important; }
+}
+
+@media (max-width: 350px) {
+  #main-game .user-profile { width: 132px !important; max-width: 132px !important; gap: 5px !important; }
+  #main-game .user-avatar { flex-basis: 32px !important; width: 32px !important; height: 32px !important; }
+  #main-game .balances-right { width: 142px !important; }
+  #main-game .balances-right div { padding-inline: 3px !important; font-size: .39rem !important; }
+  #main-game .crypto-veg-legend span { padding-inline: 2px !important; font-size: .36rem !important; }
+  #main-game .board { bottom: calc(78px + env(safe-area-inset-bottom)) !important; gap: 5px !important; padding: 10px 7px 12px !important; }
+  #main-game .board .row { gap: 6px !important; }
+  #main-game .hole { width: 40px !important; height: 40px !important; }
+}
+
+@media (max-height: 700px) {
+  #main-game .start-btn-container { top: 28% !important; }
+  #main-game .kitchen-area { top: 35% !important; height: 25% !important; min-height: 138px !important; }
+  #main-game .board { bottom: calc(76px + env(safe-area-inset-bottom)) !important; padding-top: 9px !important; padding-bottom: 10px !important; }
+  #main-game .hole { width: clamp(39px, 11.8vw, 46px) !important; height: clamp(39px, 11.8vw, 46px) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main-game .quick-duel-coin,
+  #main-game .start-btn { animation: none !important; }
+}
