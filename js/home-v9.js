@@ -2,6 +2,14 @@
 (() => {
   'use strict';
 
+  if (!document.querySelector('link[data-home-v9-mobile]')) {
+    const mobileCss = document.createElement('link');
+    mobileCss.rel = 'stylesheet';
+    mobileCss.href = 'css/home-v9-mobile-fix.css?v=20260721a';
+    mobileCss.dataset.homeV9Mobile = 'true';
+    document.head.appendChild(mobileCss);
+  }
+
   const main = document.getElementById('main-game');
   if (!main || main.dataset.homeV9Ready === 'true') return;
   main.dataset.homeV9Ready = 'true';
