@@ -1,0 +1,480 @@
+/* Crypto Bespredel V7 — premium discipline selection, concealed block reveal and retro-console combat polish. */
+:root {
+  --v7-gold: #ffd76b;
+  --v7-orange: #ff7b38;
+  --v7-red: #ff3f58;
+  --v7-cyan: #4de8ff;
+  --v7-violet: #8e5bff;
+  --v7-ink: #050714;
+  --v7-panel: rgba(8, 10, 27, .94);
+}
+
+.brawl-v7-modal {
+  z-index: 260 !important;
+  padding: max(14px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 117, 44, .18), transparent 34%),
+    radial-gradient(circle at 18% 65%, rgba(78, 232, 255, .12), transparent 35%),
+    rgba(2, 3, 11, .92) !important;
+  backdrop-filter: blur(16px);
+}
+
+.brawl-v7-box {
+  position: relative;
+  width: min(100%, 440px) !important;
+  margin: auto;
+  padding: 20px 14px 16px !important;
+  border: 1px solid rgba(255, 215, 107, .34) !important;
+  border-radius: 26px !important;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.06), transparent 24%),
+    linear-gradient(180deg, rgba(13, 16, 42, .98), rgba(5, 7, 20, .98)) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.68), inset 0 1px rgba(255,255,255,.08), 0 0 42px rgba(255, 92, 46, .12);
+}
+
+.brawl-v7-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(#000, transparent 75%);
+}
+
+.brawl-v7-close {
+  position: absolute;
+  z-index: 4;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  color: #fff;
+  background: rgba(255,255,255,.06);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.brawl-v7-head {
+  position: relative;
+  z-index: 2;
+  padding: 4px 44px 13px 2px;
+  text-align: left;
+}
+
+.brawl-v7-head small {
+  display: block;
+  color: var(--v7-cyan);
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.brawl-v7-head h2 {
+  margin: 5px 0 6px;
+  color: #fff4db;
+  font-size: clamp(1.55rem, 7vw, 2.05rem);
+  line-height: .96;
+  text-transform: uppercase;
+  text-shadow: 0 0 24px rgba(255, 118, 52, .28);
+}
+
+.brawl-v7-head p {
+  margin: 0;
+  color: #aeb8d2;
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.brawl-discipline-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.brawl-discipline-card {
+  position: relative;
+  min-height: 214px;
+  padding: 14px 12px 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 21px;
+  overflow: hidden;
+  text-align: left;
+  color: white;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 14px 32px rgba(0,0,0,.24);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.brawl-discipline-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -35% 20%;
+  height: 120px;
+  border-radius: 50%;
+  filter: blur(24px);
+  opacity: .28;
+}
+
+.brawl-discipline-card.borsch::after { background: var(--v7-orange); }
+.brawl-discipline-card.fight::after { background: var(--v7-cyan); }
+.brawl-discipline-card:active { transform: scale(.98); }
+.brawl-discipline-card.borsch { border-color: rgba(255, 139, 55, .35); }
+.brawl-discipline-card.fight { border-color: rgba(77, 232, 255, .35); }
+.brawl-discipline-card:hover { border-color: var(--v7-gold); box-shadow: 0 18px 42px rgba(0,0,0,.35), 0 0 24px rgba(255,215,107,.1); }
+
+.brawl-card-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.08);
+  box-shadow: inset 0 1px rgba(255,255,255,.12), 0 10px 28px rgba(0,0,0,.28);
+  font-size: 2rem;
+}
+
+.brawl-discipline-card small {
+  display: block;
+  color: #93a2c2;
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.brawl-discipline-card b {
+  display: block;
+  margin-top: 5px;
+  color: #fff6df;
+  font-size: .98rem;
+  line-height: 1.05;
+}
+
+.brawl-discipline-card p {
+  min-height: 48px;
+  margin: 8px 0 10px;
+  color: #aab3ca;
+  font-size: .67rem;
+  line-height: 1.35;
+}
+
+.brawl-discipline-card i {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 9px;
+  border-radius: 9px;
+  color: #07101b;
+  background: var(--v7-gold);
+  font-size: .55rem;
+  font-style: normal;
+  font-weight: 1000;
+  letter-spacing: .06em;
+}
+
+.super-block-note,
+.super-block-inline {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 11px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 215, 107, .28);
+  border-radius: 17px;
+  color: #f8eac5;
+  background: linear-gradient(90deg, rgba(255, 188, 68, .12), rgba(255, 61, 89, .07));
+  box-shadow: inset 0 1px rgba(255,255,255,.05);
+}
+
+.super-block-note > span {
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #111;
+  background: linear-gradient(145deg, #fff2a6, #ff9b30);
+  box-shadow: 0 0 24px rgba(255, 181, 48, .35);
+  font-size: 1.15rem;
+}
+
+.super-block-note b { display: block; color: var(--v7-gold); font-size: .7rem; letter-spacing: .1em; }
+.super-block-note p { margin: 2px 0 0; color: #b8bfd0; font-size: .64rem; line-height: 1.35; }
+.super-block-note strong { color: #fff; }
+.super-block-inline { justify-content: center; color: var(--v7-gold); font-size: .66rem; font-weight: 900; text-align: center; }
+
+.brawl-fight-entry {
+  position: relative;
+  z-index: 2;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(77,232,255,.22);
+  border-radius: 18px;
+  background: rgba(4, 8, 22, .75);
+}
+
+.brawl-selected-fighter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.brawl-selected-fighter > span {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: radial-gradient(circle at 30% 25%, #6ff, #16539b 62%, #08142d);
+  box-shadow: 0 0 24px rgba(77,232,255,.2);
+  font-size: 1.6rem;
+}
+
+.brawl-selected-fighter small { display: block; color: var(--v7-cyan); font-size: .52rem; letter-spacing: .1em; }
+.brawl-selected-fighter b { display: block; margin-top: 2px; color: #fff; font-size: .9rem; }
+.brawl-selected-fighter p { margin: 1px 0 0; color: #aab4cb; font-size: .62rem; }
+
+.brawl-payout-selector {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 14px;
+  background: rgba(255,255,255,.035);
+}
+
+.brawl-payout-selector > span { color: #aab4cc; font-size: .63rem; font-weight: 800; }
+.brawl-payout-selector button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  color: #aab4cc;
+  background: rgba(255,255,255,.04);
+  font-size: .64rem;
+  font-weight: 900;
+}
+.brawl-payout-selector button.active {
+  color: #08111d;
+  border-color: transparent;
+  background: linear-gradient(145deg, #fff3a9, #ffad3e);
+  box-shadow: 0 0 18px rgba(255,196,74,.22);
+}
+
+.brawl-stake-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: #c7cee0;
+  font-size: .68rem;
+}
+.brawl-stake-label strong { color: var(--v7-gold); }
+#brawl-fight-stake { width: 100%; accent-color: #ff9b38; }
+.brawl-hidden-reward { margin: 8px 0; color: #8995b1; font-size: .62rem; text-align: center; }
+.brawl-fight-start {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 15px;
+  color: #14070a;
+  background: linear-gradient(145deg, #ffdc75, #ff7a3a 56%, #ff3e5d);
+  box-shadow: 0 8px 0 #8b2431, 0 16px 32px rgba(255,62,93,.2);
+  font-size: .78rem;
+  font-weight: 1000;
+  letter-spacing: .08em;
+}
+.brawl-fight-start:active { transform: translateY(5px); box-shadow: 0 3px 0 #8b2431; }
+
+.found-block-reveal {
+  position: relative;
+  width: min(290px, 84vw);
+  min-height: 210px;
+  margin: 14px auto 18px;
+  display: grid;
+  place-items: center;
+  perspective: 900px;
+}
+
+.found-block-reveal::before,
+.found-block-reveal::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 30px;
+  background: conic-gradient(from 0deg, transparent, rgba(77,232,255,.42), transparent 34%, rgba(255,109,44,.45), transparent 70%);
+  filter: blur(18px);
+  animation: blockAura 2.8s linear infinite;
+}
+.found-block-reveal::after { inset: 20%; animation-direction: reverse; opacity: .6; }
+
+.block-core {
+  position: relative;
+  z-index: 2;
+  width: 166px;
+  height: 166px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(126,238,255,.75);
+  border-radius: 28px;
+  color: #f5fbff;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.12), transparent 25%),
+    radial-gradient(circle at 50% 18%, rgba(77,232,255,.25), transparent 42%),
+    linear-gradient(145deg, #0a1c36, #06101e 58%, #030711);
+  box-shadow: inset 0 0 34px rgba(70,215,255,.15), 0 0 42px rgba(70,215,255,.24), 0 24px 50px rgba(0,0,0,.42);
+  transform: rotateX(12deg) rotateY(-8deg) scale(.55);
+  opacity: 0;
+  animation: blockReveal .92s cubic-bezier(.16,.88,.18,1.22) forwards;
+}
+.block-core::before,
+.block-core::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+}
+.block-core::after { inset: 20px; border-style: dashed; opacity: .45; }
+.block-rune { color: var(--v7-cyan); font-size: 1.55rem; text-shadow: 0 0 18px currentColor; }
+.block-core small { margin-top: 6px; color: #8defff; font-size: .56rem; font-weight: 1000; letter-spacing: .12em; }
+.block-core strong { margin-top: 5px; color: #fff8d0; font-size: 1.52rem; line-height: 1; text-shadow: 0 0 20px rgba(255,218,90,.36); }
+.block-core b { margin-top: 3px; color: var(--v7-gold); font-size: .86rem; letter-spacing: .1em; }
+.block-core i { margin-top: 9px; color: #8d9ab6; font-size: .5rem; font-style: normal; }
+
+.found-block-reveal.super .block-core {
+  width: 184px;
+  height: 184px;
+  border-color: #ffe874;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.2), transparent 24%),
+    radial-gradient(circle at 50% 16%, rgba(255,233,112,.38), transparent 46%),
+    linear-gradient(145deg, #4a1a42, #13102e 55%, #070713);
+  box-shadow: inset 0 0 44px rgba(255,207,72,.18), 0 0 64px rgba(255,207,72,.34), 0 26px 60px rgba(0,0,0,.5);
+}
+.found-block-reveal.super .block-rune,
+.found-block-reveal.super .block-core small { color: #ffe874; }
+
+.reward-flight {
+  position: fixed;
+  z-index: 9999;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  pointer-events: none;
+  font-size: 1.6rem;
+  background: radial-gradient(circle at 35% 25%, #fff, #ffd66c 42%, #ff8a2d 72%, #6d2318);
+  box-shadow: 0 0 30px rgba(255,202,75,.72), 0 10px 24px rgba(0,0,0,.35);
+  animation: rewardFlight 1.1s cubic-bezier(.22,.72,.18,1) forwards;
+}
+.reward-flight.ton { background: radial-gradient(circle at 35% 25%, #fff, #66eeff 42%, #178cff 72%, #082d79); box-shadow: 0 0 30px rgba(77,232,255,.72); }
+.balance-received { animation: balanceReceived .9s ease !important; }
+
+.wolf-arena-v2 {
+  image-rendering: auto;
+  border: 2px solid rgba(255,215,107,.38) !important;
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.75), inset 0 -44px 80px rgba(0,0,0,.34), 0 24px 60px rgba(0,0,0,.42), 0 0 32px rgba(255,74,50,.08) !important;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255,140,54,.24), transparent 34%),
+    linear-gradient(180deg, #162544 0 46%, #090a14 46% 100%) !important;
+}
+.wolf-arena-v2::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  pointer-events: none;
+  opacity: .16;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,.13) 0 1px, transparent 1px 4px);
+  mix-blend-mode: overlay;
+}
+.arena-crowd { opacity: .52 !important; filter: saturate(1.25) contrast(1.1); }
+.battle-floor {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(180deg, #222939, #090b13) !important;
+  background-size: 24px 24px, 24px 24px, auto !important;
+  transform: perspective(220px) rotateX(50deg) scale(1.35) !important;
+  transform-origin: center bottom;
+}
+.fighter-sprite-image { filter: drop-shadow(0 14px 10px rgba(0,0,0,.54)) saturate(1.18) contrast(1.08) !important; }
+.combatant-v2.player .fighter-sprite { transform: scale(1.12) !important; }
+.combatant-v2.enemy .fighter-sprite { transform: scaleX(-1) scale(1.12) !important; }
+.combatant-v2.acting.action-special .fighter-sprite { filter: drop-shadow(0 0 22px var(--fighter-color)) brightness(1.22) !important; }
+.fight-impact.special { filter: drop-shadow(0 0 20px #ffe56e); }
+.fight-control {
+  border-width: 2px !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.09), 0 5px 0 rgba(0,0,0,.52), 0 10px 20px rgba(0,0,0,.2) !important;
+  touch-action: manipulation;
+}
+.fight-control:active { transform: translateY(4px) scale(.98) !important; box-shadow: inset 0 1px rgba(255,255,255,.06), 0 1px 0 rgba(0,0,0,.65) !important; }
+.fight-control.special.ready { animation: specialReady 1s ease-in-out infinite alternate; }
+.fight-announcer-v2 {
+  color: #ffe56e !important;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  letter-spacing: .08em;
+  -webkit-text-stroke: 1px #6d120e;
+  text-shadow: 3px 3px 0 #420b10, 0 0 24px rgba(255,74,50,.8) !important;
+}
+
+@keyframes blockReveal {
+  0% { opacity: 0; transform: rotateX(42deg) rotateY(-38deg) scale(.28); filter: brightness(2.6) blur(4px); }
+  58% { opacity: 1; transform: rotateX(-5deg) rotateY(5deg) scale(1.08); filter: brightness(1.35) blur(0); }
+  100% { opacity: 1; transform: rotateX(0) rotateY(0) scale(1); filter: brightness(1); }
+}
+@keyframes blockAura { to { transform: rotate(360deg); } }
+@keyframes rewardFlight {
+  0% { transform: translate3d(0,0,0) scale(.5) rotate(0); opacity: 0; }
+  18% { transform: translate3d(0,-18px,0) scale(1.15) rotate(35deg); opacity: 1; }
+  100% { transform: translate3d(var(--flight-x), var(--flight-y), 0) scale(.28) rotate(720deg); opacity: 0; }
+}
+@keyframes balanceReceived {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.16); color: #fff3a7; box-shadow: 0 0 28px rgba(255,214,88,.7); }
+}
+@keyframes specialReady {
+  from { box-shadow: 0 5px 0 rgba(0,0,0,.52), 0 0 12px rgba(255,224,80,.28) !important; }
+  to { box-shadow: 0 5px 0 rgba(0,0,0,.52), 0 0 30px rgba(255,224,80,.82) !important; }
+}
+
+@media (max-width: 360px) {
+  .brawl-v7-box { padding-inline: 10px !important; }
+  .brawl-discipline-grid { gap: 7px; }
+  .brawl-discipline-card { min-height: 205px; padding-inline: 9px; }
+  .brawl-discipline-card b { font-size: .85rem; }
+  .brawl-discipline-card p { font-size: .61rem; }
+  .block-core { width: 150px; height: 150px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block-core,
+  .found-block-reveal::before,
+  .found-block-reveal::after,
+  .reward-flight,
+  .balance-received,
+  .fight-control.special.ready { animation: none !important; }
+  .block-core { opacity: 1; transform: none; }
+}
