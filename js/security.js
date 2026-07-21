@@ -1,17 +1,3 @@
-// Home V10 загружается синхронно до основной игровой логики.
-(() => {
-    const homeStylesheet = document.createElement('link');
-    homeStylesheet.rel = 'stylesheet';
-    homeStylesheet.href = 'css/home-v10.css?v=20260721d';
-    homeStylesheet.dataset.homeV10 = 'true';
-    document.head.appendChild(homeStylesheet);
-
-    document.write(
-        '<script src="js/home-v10-assets.js?v=20260721d"></' + 'script>' +
-        '<script src="js/home-v10.js?v=20260721d"></' + 'script>'
-    );
-})();
-
 // Подключаем единый премиальный визуальный слой до запуска приложения.
 (() => {
     const stylesheet = document.createElement('link');
@@ -26,7 +12,7 @@
 })();
 
 // V7 запускается после загрузки основной логики арены и файтинга.
-// Цельный Home V8 отключён: главный экран собирается только из компонентов V10.
+// Home V8/V9/V10 временно отключены: основная версия возвращена к стабильному экрану.
 window.addEventListener('load', () => {
     if (!document.querySelector('link[data-premium-v7]')) {
         const stylesheet = document.createElement('link');
@@ -43,9 +29,6 @@ window.addEventListener('load', () => {
     }
 });
 
-// Единая конфигурация безопасного релизного режима.
-// Реальные денежные функции включаются только после серверной валидации
-// Telegram initData, TON-транзакций и атомарных операций с балансом.
 window.APP_CONFIG = Object.freeze({
     cloudSyncEnabled: false,
     financialFeaturesEnabled: false,
