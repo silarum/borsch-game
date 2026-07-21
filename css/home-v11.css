@@ -1,0 +1,200 @@
+/* Home V11 — exact approved art rendered as independent components. */
+:root { --v11-gold:#f7b83b; --v11-dark:#020713; }
+html, body { background:#020713 !important; }
+body #game-container {
+  width:100% !important; max-width:none !important; min-height:100dvh !important;
+  overflow-x:hidden !important; overflow-y:auto !important; background:#020713 !important;
+}
+body #main-game.home-v11 {
+  position:relative !important; display:block !important; width:100% !important;
+  height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important;
+  overflow:visible !important; background:#020713 !important;
+}
+body.home-v11-main { background:#020713 !important; }
+
+.v11-stage {
+  position:relative; width:min(100vw,941px); aspect-ratio:941/1518;
+  margin:0 auto; overflow:hidden; isolation:isolate; color:#fff;
+  font-family:Inter,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 50% 52%,rgba(129,60,3,.18),transparent 32%),
+    radial-gradient(circle at 50% 8%,rgba(15,48,92,.28),transparent 35%),
+    linear-gradient(180deg,#07111f 0%,#020713 42%,#01040d 100%);
+}
+.v11-stage[hidden] { display:none !important; }
+.v11-stage::after {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:40;
+  box-shadow:inset 0 0 32px rgba(0,0,0,.42);
+}
+
+.v11-sprite { position:absolute; overflow:hidden; z-index:2; pointer-events:none; }
+.v11-sprite > img {
+  position:absolute; display:block; max-width:none !important; height:auto !important;
+  user-select:none; -webkit-user-drag:none; pointer-events:none;
+}
+.v11-kitchen { z-index:1; }
+.v11-board { z-index:3; }
+.v11-nav { z-index:4; }
+.v11-profile, .v11-rumir, .v11-srum, .v11-usdt, .v11-ton, .v11-legend, .v11-rules, .v11-language, .v11-duel { z-index:5; }
+
+/* Live profile values cover only the printed placeholder text. */
+.v11-live-profile {
+  position:absolute !important; left:1.4878% !important; top:.527% !important;
+  width:46.546% !important; height:15.547% !important; z-index:12 !important;
+  display:block !important; margin:0 !important; padding:0 !important;
+  border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
+}
+.v11-live-profile .user-avatar {
+  position:absolute !important; left:5.5% !important; top:17% !important; width:26% !important; aspect-ratio:1 !important;
+  opacity:0 !important; border:0 !important; padding:0 !important; z-index:8 !important; cursor:pointer;
+}
+.v11-profile-mask {
+  position:absolute; left:34%; top:14%; width:41%; height:53%; z-index:2;
+  border-radius:8px; background:linear-gradient(90deg,#08111e 0%,#08111e 82%,rgba(8,17,30,.94) 100%);
+  box-shadow:0 0 12px #08111e;
+}
+.v11-profile-copy {
+  position:absolute; left:36.5%; top:14%; width:38%; height:51%; z-index:3;
+  display:flex; flex-direction:column; justify-content:center; gap:3%; text-shadow:0 2px 5px #000;
+}
+.v11-profile-copy strong { font-size:clamp(15px,4.1vw,38px); line-height:1.05; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.v11-profile-copy span { color:#20e2d2; font-size:clamp(9px,2.25vw,21px); font-weight:900; }
+.v11-profile-copy small { color:#ffbd2f; font-size:clamp(8px,2.05vw,19px); font-weight:900; letter-spacing:.035em; }
+.v11-live-profile .user-menu-btn {
+  position:absolute !important; right:7% !important; top:25% !important; width:16% !important; height:38% !important;
+  opacity:0 !important; z-index:9 !important; margin:0 !important; padding:0 !important; cursor:pointer;
+}
+.v11-level {
+  position:absolute; left:7.7%; bottom:3.7%; width:11%; aspect-ratio:1; z-index:6;
+  display:flex; align-items:center; justify-content:center; color:#fff; font-size:clamp(9px,2.4vw,22px); text-shadow:0 2px 4px #000;
+}
+.v11-progress {
+  position:absolute; left:25%; right:6%; bottom:8%; height:8.2%; z-index:6;
+  display:flex; align-items:center;
+}
+.v11-progress > i {
+  position:absolute; left:0; top:24%; height:52%; max-width:58%; border-radius:999px;
+  background:linear-gradient(90deg,#ff9c0b,#ffd247); box-shadow:0 0 8px rgba(255,170,25,.45);
+}
+.v11-progress > span {
+  position:absolute; right:0; padding-left:.5em; background:#08111e;
+  color:#eef4fb; font-size:clamp(7px,1.7vw,16px); font-weight:900; text-shadow:0 1px 3px #000;
+}
+
+/* Live balances. */
+.v11-live-balance {
+  position:absolute !important; z-index:12 !important; display:flex !important; align-items:center !important;
+  margin:0 !important; padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important;
+}
+.v11-live-balance.rumir { left:49.0967% !important; top:.527% !important; width:23.592% !important; height:7.510% !important; }
+.v11-live-balance.srum { left:73.0085% !important; top:.527% !important; width:25.186% !important; height:7.510% !important; }
+.v11-live-balance.usdt { left:49.0967% !important; top:8.432% !important; width:23.592% !important; height:7.642% !important; }
+.v11-live-balance.ton { left:73.0085% !important; top:8.432% !important; width:25.186% !important; height:7.642% !important; }
+.v11-live-balance > i {
+  position:absolute; left:31%; right:3%; top:18%; bottom:18%; z-index:1;
+  border-radius:10px; background:linear-gradient(90deg,#08111e 0%,#08111e 88%,rgba(8,17,30,.95)); box-shadow:0 0 10px #08111e;
+}
+.v11-live-balance > span {
+  position:relative; z-index:2; margin-left:36%; white-space:nowrap;
+  font-size:clamp(8px,2.05vw,19px); font-weight:900; letter-spacing:.01em; text-shadow:0 2px 4px #000;
+}
+.v11-live-balance.rumir span { color:#ffc431; }
+.v11-live-balance.srum span { color:#70d8ff; }
+.v11-live-balance.usdt span { color:#32e7a0; }
+.v11-live-balance.ton span { color:#6bd1ff; }
+
+/* Transparent functional zones over their individual art components. */
+#rules-btn-bottom.v11-hit, #lang-btn-bottom.v11-hit, #quick-duel-coin.v11-hit {
+  position:absolute !important; z-index:16 !important; display:block !important; opacity:0 !important;
+  margin:0 !important; padding:0 !important; border:0 !important; background:transparent !important; cursor:pointer;
+}
+#rules-btn-bottom.v11-hit { left:1.4878% !important; top:22.530% !important; width:19.554% !important; height:5.468% !important; }
+#lang-btn-bottom.v11-hit { left:1.4878% !important; top:27.931% !important; width:19.554% !important; height:5.534% !important; }
+#quick-duel-coin.v11-hit { left:79.490% !important; top:22.134% !important; width:18.704% !important; height:11.594% !important; }
+#view-switch { display:none !important; }
+
+.v11-pot-target {
+  position:absolute !important; left:22% !important; top:49.4% !important; width:56% !important; height:18.5% !important;
+  z-index:8 !important; margin:0 !important; padding:0 !important; border:0 !important; background:transparent !important; box-shadow:none !important;
+}
+.v11-pot-target .steam, .v11-pot-target .energy-display, .v11-pot-target .boost-display { display:none !important; }
+.v11-timer {
+  position:absolute; left:38.79%; top:57.44%; width:21.47%; height:4.55%; z-index:14;
+  display:flex; align-items:center; justify-content:center; gap:7%; color:#ffc44b;
+  border-radius:999px; background:#08111e; box-shadow:0 0 7px #08111e;
+  font-size:clamp(13px,3.1vw,29px); font-weight:900; text-shadow:0 2px 4px #000; pointer-events:none;
+}
+#start-btn-container.v11-start {
+  position:absolute !important; left:38.79% !important; top:57.44% !important; width:21.47% !important; height:4.55% !important;
+  z-index:17 !important; margin:0 !important; padding:0 !important;
+}
+#start-btn-container.v11-start #start-btn {
+  position:absolute !important; inset:0 !important; width:100% !important; height:100% !important;
+  opacity:0 !important; margin:0 !important; padding:0 !important; cursor:pointer;
+}
+
+/* Exact 3-4-5 board hit geometry. */
+#board.v11-board {
+  position:absolute !important; left:1.4878% !important; top:66.403% !important; width:97.025% !important; height:21.410% !important;
+  z-index:14 !important; display:block !important; margin:0 !important; padding:0 !important;
+  border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; clip-path:none !important;
+}
+#board.v11-board .row { position:absolute !important; inset:0 !important; display:block !important; margin:0 !important; padding:0 !important; }
+#board.v11-board .hole {
+  position:absolute !important; width:10.6% !important; aspect-ratio:1 !important; height:auto !important;
+  margin:0 !important; padding:0 !important; border:0 !important; border-radius:50% !important;
+  background:transparent !important; box-shadow:none !important; overflow:visible !important; cursor:pointer;
+}
+#board.v11-board .hole[data-hole="0"]{left:31.0%;top:7.0%}
+#board.v11-board .hole[data-hole="1"]{left:44.7%;top:7.0%}
+#board.v11-board .hole[data-hole="2"]{left:58.4%;top:7.0%}
+#board.v11-board .hole[data-hole="3"]{left:20.1%;top:35.0%}
+#board.v11-board .hole[data-hole="4"]{left:35.8%;top:35.0%}
+#board.v11-board .hole[data-hole="5"]{left:51.5%;top:35.0%}
+#board.v11-board .hole[data-hole="6"]{left:67.2%;top:35.0%}
+#board.v11-board .hole[data-hole="7"]{left:10.2%;top:66.0%}
+#board.v11-board .hole[data-hole="8"]{left:28.0%;top:66.0%}
+#board.v11-board .hole[data-hole="9"]{left:45.8%;top:66.0%}
+#board.v11-board .hole[data-hole="10"]{left:63.6%;top:66.0%}
+#board.v11-board .hole[data-hole="11"]{left:81.4%;top:66.0%}
+#board.v11-board .hole .veg {
+  position:absolute !important; left:50% !important; top:50% !important; width:150% !important; height:150% !important;
+  transform:translate(-50%,-58%) !important; object-fit:contain !important; border-radius:50% !important;
+  filter:drop-shadow(0 0 9px rgba(255,183,38,.85)); z-index:3 !important;
+}
+#board.v11-board .hole .veg-symbol {
+  position:absolute !important; left:50% !important; bottom:-16% !important; transform:translateX(-50%) !important;
+  z-index:4 !important; padding:.15em .55em !important; border-radius:999px !important;
+  color:#72dcff !important; background:#07111e !important; border:1px solid #2f91b7 !important;
+  font-size:clamp(7px,1.6vw,14px) !important; white-space:nowrap;
+}
+
+/* Bottom navigation uses the approved art; buttons are separate live controls. */
+#bottom-panel.v11-bottom {
+  position:absolute !important; left:1.4878% !important; top:87.220% !important; width:97.025% !important; height:12.451% !important;
+  z-index:18 !important; display:block !important; margin:0 !important; padding:0 !important;
+  border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
+}
+#bottom-panel.v11-bottom .nav-btn {
+  position:absolute !important; top:0 !important; height:100% !important; width:18.5% !important;
+  display:block !important; opacity:0 !important; margin:0 !important; padding:0 !important; border:0 !important; cursor:pointer;
+}
+#bottom-panel.v11-bottom .nav-btn:nth-child(1){left:0}
+#bottom-panel.v11-bottom .nav-btn:nth-child(2){left:20%}
+#bottom-panel.v11-bottom .nav-btn:nth-child(3){left:40%;width:20% !important}
+#bottom-panel.v11-bottom .nav-btn:nth-child(4){left:61%}
+#bottom-panel.v11-bottom .nav-btn:nth-child(5){left:81.5%}
+
+.v11-hidden-canvas { position:absolute !important; width:1px !important; height:1px !important; overflow:hidden !important; opacity:0 !important; pointer-events:none !important; }
+.v11-hidden-canvas canvas { width:1px !important; height:1px !important; }
+
+/* Menus and dialogs must remain above the stage. */
+body #main-game.home-v11 > .menu-dropdown,
+body #main-game.home-v11 > .stats-modal { z-index:1000 !important; }
+
+@media (max-width:430px) {
+  .v11-stage { width:100vw; }
+  .v11-profile-copy strong { font-size:clamp(13px,4.1vw,20px); }
+  .v11-live-balance > span { font-size:clamp(7px,2.05vw,10px); }
+  .v11-timer { font-size:clamp(12px,3.1vw,16px); }
+}
