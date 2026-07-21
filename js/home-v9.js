@@ -69,10 +69,11 @@
 
   if (topPanel) topPanel.remove();
 
+  // Canvas nodes remain in DOM because the game engine queries them during startup.
+  // CSS hides them completely in V9, preventing duplicate backgrounds without breaking initApp().
   const obsoleteSelectors = [
-    '#matrix-bg', '#smile-view', '#veggie-view', '.crypto-kitchen-art',
-    '.glass-wall', '.window-sill', '.flower-pot', '.purple-bg',
-    '.kitchen-area', '.game-brand', '#view-switch'
+    '.crypto-kitchen-art', '.glass-wall', '.window-sill', '.flower-pot',
+    '.purple-bg', '.kitchen-area', '.game-brand', '#view-switch'
   ];
   obsoleteSelectors.forEach((selector) => {
     main.querySelectorAll(selector).forEach((node) => {
@@ -117,7 +118,7 @@
   screens.forEach((screen) => observer.observe(screen, { attributes: true, attributeFilter: ['class'] }));
 
   window.addEventListener('load', () => {
-    // V9 uses its own static atmospheric layer; old canvas backgrounds must not run behind it.
+    // V9 uses its own atmospheric layer; old animated canvases remain hidden and are stopped.
     setTimeout(() => {
       if (window.veggieInterval) { clearInterval(window.veggieInterval); window.veggieInterval = null; }
       if (window.smileInterval) { clearInterval(window.smileInterval); window.smileInterval = null; }
