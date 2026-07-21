@@ -140,6 +140,13 @@
     stage.hidden = hasActiveScreen;
   };
 
+  document.getElementById('lang-btn-bottom')?.addEventListener('click', () => {
+    document.getElementById('language-modal')?.classList.remove('hidden');
+  });
+  document.getElementById('stats-close-btn')?.addEventListener('click', () => {
+    document.getElementById('stats-modal')?.classList.remove('active');
+  });
+
   const observer = new MutationObserver(sync);
   document.querySelectorAll('.screen').forEach((screen) => observer.observe(screen, { attributes:true, attributeFilter:['class'] }));
   window.addEventListener('load', () => {
