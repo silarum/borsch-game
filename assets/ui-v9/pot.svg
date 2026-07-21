@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" role="img" aria-label="Котёл RUMIR">
+<defs>
+ <radialGradient id="glow"><stop stop-color="#ffd44f" stop-opacity=".95"/><stop offset=".45" stop-color="#ff8a00" stop-opacity=".35"/><stop offset="1" stop-color="#ff5a00" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#5c321d"/><stop offset=".28" stop-color="#1b1012"/><stop offset=".62" stop-color="#3b1d16"/><stop offset="1" stop-color="#10090c"/></linearGradient>
+ <linearGradient id="gold"><stop stop-color="#fff1a0"/><stop offset=".25" stop-color="#ffbd28"/><stop offset=".55" stop-color="#8f4b06"/><stop offset=".78" stop-color="#ffd76a"/><stop offset="1" stop-color="#6b3303"/></linearGradient>
+ <filter id="shine"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<ellipse cx="380" cy="105" rx="270" ry="95" fill="url(#glow)" filter="url(#shine)"/>
+<path d="M125 118c18-52 492-52 510 0l-34 191c-11 66-83 98-221 98s-210-32-221-98z" fill="url(#metal)" stroke="url(#gold)" stroke-width="12"/>
+<ellipse cx="380" cy="120" rx="263" ry="61" fill="#08070a" stroke="url(#gold)" stroke-width="15"/>
+<ellipse cx="380" cy="118" rx="224" ry="38" fill="#ff9c17" opacity=".35" filter="url(#shine)"/>
+<path d="M129 171c-58-28-99 8-87 55 9 37 49 54 103 37" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"/>
+<path d="M631 171c58-28 99 8 87 55-9 37-49 54-103 37" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"/>
+<circle cx="380" cy="306" r="70" fill="#161016" stroke="url(#gold)" stroke-width="10"/>
+<circle cx="380" cy="306" r="54" fill="#2c1711" stroke="#7e480d" stroke-width="3"/>
+<text x="380" y="335" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="88" fill="url(#gold)">R</text>
+<path d="M202 351c85 40 271 40 356 0" fill="none" stroke="#8e4e12" stroke-width="4" opacity=".7"/>
+</svg>
