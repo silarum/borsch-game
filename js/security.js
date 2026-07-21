@@ -2,13 +2,13 @@
 (() => {
     const homeStylesheet = document.createElement('link');
     homeStylesheet.rel = 'stylesheet';
-    homeStylesheet.href = 'css/home-v10.css?v=20260721c';
+    homeStylesheet.href = 'css/home-v10.css?v=20260721d';
     homeStylesheet.dataset.homeV10 = 'true';
     document.head.appendChild(homeStylesheet);
 
     document.write(
-        '<script src="js/home-v10-assets.js?v=20260721c"></' + 'script>' +
-        '<script src="js/home-v10.js?v=20260721c"></' + 'script>'
+        '<script src="js/home-v10-assets.js?v=20260721d"></' + 'script>' +
+        '<script src="js/home-v10.js?v=20260721d"></' + 'script>'
     );
 })();
 
