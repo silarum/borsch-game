@@ -1,4 +1,20 @@
-// Подключаем единый премиальный визуальный слой до запуска приложения.
+// Home V11: approved artwork is loaded once and cropped into independent live components.
+(() => {
+    const homeStylesheet = document.createElement('link');
+    homeStylesheet.rel = 'stylesheet';
+    homeStylesheet.href = 'css/home-v11.css?v=20260721a';
+    homeStylesheet.dataset.homeV11 = 'true';
+    document.head.appendChild(homeStylesheet);
+
+    document.write(
+        '<script src="js/home-v8-art-live-1.js?v=20260721a"></' + 'script>' +
+        '<script src="js/home-v8-art-live-2.js?v=20260721a"></' + 'script>' +
+        '<script src="js/home-v8-art-live-3.js?v=20260721a"></' + 'script>' +
+        '<script src="js/home-v11.js?v=20260721a"></' + 'script>'
+    );
+})();
+
+// Подключаем единый премиальный визуальный слой для остальных экранов.
 (() => {
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
@@ -12,7 +28,6 @@
 })();
 
 // V7 запускается после загрузки основной логики арены и файтинга.
-// Home V8/V9/V10 временно отключены: основная версия возвращена к стабильному экрану.
 window.addEventListener('load', () => {
     if (!document.querySelector('link[data-premium-v7]')) {
         const stylesheet = document.createElement('link');
