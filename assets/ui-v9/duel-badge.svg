@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 300" role="img" aria-label="Крипто Беспредел">
+<defs>
+ <linearGradient id="fire" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff8b18"/><stop offset=".45" stop-color="#ba2909"/><stop offset="1" stop-color="#461005"/></linearGradient>
+ <linearGradient id="gold"><stop stop-color="#fff2a0"/><stop offset=".28" stop-color="#ffbd32"/><stop offset=".62" stop-color="#7a3a05"/><stop offset="1" stop-color="#f3a314"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<path d="M38 17h174l25 31v204l-25 31H38L13 252V48z" fill="url(#fire)" stroke="url(#gold)" stroke-width="11" filter="url(#glow)"/>
+<path d="M52 36h146l18 22v184l-18 22H52l-18-22V58z" fill="none" stroke="#ffcb55" stroke-opacity=".55" stroke-width="3"/>
+<g stroke="#ffd866" stroke-width="11" stroke-linecap="round"><path d="M82 87l86 82"/><path d="M168 87l-86 82"/></g>
+<g fill="#ffd866"><path d="M66 70l30 4-18 23z"/><path d="M184 70l-30 4 18 23z"/></g>
+<text x="125" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="900" fill="#ffe27a">БЕСПРЕДЕЛ</text>
+</svg>
