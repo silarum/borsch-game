@@ -1,3 +1,17 @@
+// Home V10 загружается синхронно до основной игровой логики.
+(() => {
+    const homeStylesheet = document.createElement('link');
+    homeStylesheet.rel = 'stylesheet';
+    homeStylesheet.href = 'css/home-v10.css?v=20260721c';
+    homeStylesheet.dataset.homeV10 = 'true';
+    document.head.appendChild(homeStylesheet);
+
+    document.write(
+        '<script src="js/home-v10-assets.js?v=20260721c"></' + 'script>' +
+        '<script src="js/home-v10.js?v=20260721c"></' + 'script>'
+    );
+})();
+
 // Подключаем единый премиальный визуальный слой до запуска приложения.
 (() => {
     const stylesheet = document.createElement('link');
@@ -12,7 +26,7 @@
 })();
 
 // V7 запускается после загрузки основной логики арены и файтинга.
-// Home V8 временно отключён: цельный фон конфликтовал с живыми элементами интерфейса.
+// Цельный Home V8 отключён: главный экран собирается только из компонентов V10.
 window.addEventListener('load', () => {
     if (!document.querySelector('link[data-premium-v7]')) {
         const stylesheet = document.createElement('link');
