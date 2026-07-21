@@ -11,7 +11,22 @@
     document.head.appendChild(premiumScript);
 })();
 
-// V7 запускается после загрузки основной логики арены и файтинга.
+function loadScriptsInOrder(sources) {
+    return sources.reduce((chain, source) => chain.then(() => new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${source}"]`)) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = source;
+        script.async = false;
+        script.addEventListener('load', resolve, { once: true });
+        script.addEventListener('error', () => reject(new Error(`Не удалось загрузить ${source}`)), { once: true });
+        document.body.appendChild(script);
+    })), Promise.resolve());
+}
+
+// V7 и утверждённый живой Home V8 запускаются после основной логики игры.
 window.addEventListener('load', () => {
     if (!document.querySelector('link[data-premium-v7]')) {
         const stylesheet = document.createElement('link');
@@ -26,6 +41,21 @@ window.addEventListener('load', () => {
         script.dataset.premiumV7 = 'true';
         document.body.appendChild(script);
     }
+
+    if (!document.querySelector('link[data-home-v8]')) {
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = 'css/home-v8.css?v=20260721b';
+        stylesheet.dataset.homeV8 = 'true';
+        document.head.appendChild(stylesheet);
+    }
+
+    loadScriptsInOrder([
+        'js/home-v8-art-live-1.js?v=20260721b',
+        'js/home-v8-art-live-2.js?v=20260721b',
+        'js/home-v8-art-live-3.js?v=20260721b',
+        'js/home-v8.js?v=20260721b'
+    ]).catch((error) => console.error('Home V8:', error));
 });
 
 // Единая конфигурация безопасного релизного режима.
