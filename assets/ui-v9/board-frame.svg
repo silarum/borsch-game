@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="Игровая доска">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#2b1a19"/><stop offset=".55" stop-color="#171019"/><stop offset="1" stop-color="#08080d"/></linearGradient>
+ <linearGradient id="gold"><stop stop-color="#fff0a8"/><stop offset=".2" stop-color="#ffbf32"/><stop offset=".48" stop-color="#7e3e06"/><stop offset=".72" stop-color="#e89a18"/><stop offset="1" stop-color="#3b2107"/></linearGradient>
+ <pattern id="mesh" width="36" height="36" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0h36v36H0z" fill="none" stroke="#8a5418" stroke-opacity=".14" stroke-width="2"/></pattern>
+ <filter id="g"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<path d="M106 28h688L872 486H28z" fill="url(#bg)" stroke="url(#gold)" stroke-width="14"/>
+<path d="M122 55h656l67 404H55z" fill="url(#mesh)" stroke="#5b3108" stroke-width="3"/>
+<path d="M106 28h688L872 486H28z" fill="none" stroke="#ffb729" stroke-opacity=".5" stroke-width="4" filter="url(#g)"/>
+<g fill="#6d2aff" stroke="#ffcf54" stroke-width="4"><circle cx="63" cy="452" r="13"/><circle cx="837" cy="452" r="13"/></g>
+<g fill="#e9a72b"><circle cx="450" cy="486" r="5"/><path d="M450 470l13 13-13 13-13-13z" fill="none" stroke="#e9a72b" stroke-width="3"/></g>
+</svg>
