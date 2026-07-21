@@ -9,7 +9,22 @@
 
   const ART_W = 941;
   const ART_H = 1518;
-  const artUrl = `data:image/webp;base64,${ART}`;
+
+  function createArtBlobUrl(base64) {
+    try {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      return URL.createObjectURL(new Blob([bytes], { type: 'image/webp' }));
+    } catch (error) {
+      console.error('Home V11 artwork decode failed', error);
+      return '';
+    }
+  }
+
+  const artUrl = createArtBlobUrl(ART);
+  if (!artUrl) return;
+  window.addEventListener('beforeunload', () => URL.revokeObjectURL(artUrl), { once: true });
 
   const crops = {
     profile: [14, 8, 438, 236],
