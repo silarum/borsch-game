@@ -11,6 +11,23 @@
     document.head.appendChild(premiumScript);
 })();
 
+// V7 запускается после загрузки основной логики арены и файтинга.
+window.addEventListener('load', () => {
+    if (!document.querySelector('link[data-premium-v7]')) {
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = 'css/premium-v7.css?v=20260721a';
+        stylesheet.dataset.premiumV7 = 'true';
+        document.head.appendChild(stylesheet);
+    }
+    if (!document.querySelector('script[data-premium-v7]')) {
+        const script = document.createElement('script');
+        script.src = 'js/premium-v7.js?v=20260721a';
+        script.dataset.premiumV7 = 'true';
+        document.body.appendChild(script);
+    }
+});
+
 // Единая конфигурация безопасного релизного режима.
 // Реальные денежные функции включаются только после серверной валидации
 // Telegram initData, TON-транзакций и атомарных операций с балансом.
