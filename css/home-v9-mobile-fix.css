@@ -1,0 +1,18 @@
+/* Final mobile geometry tuning for the 3/4/5 triangular board. */
+#main-game.home-v9 .board .row:nth-child(1) { width: 48% !important; }
+#main-game.home-v9 .board .row:nth-child(2) { width: 70% !important; }
+#main-game.home-v9 .board .row:nth-child(3) { width: 88% !important; }
+#main-game.home-v9 .hole {
+  width: clamp(42px, 12vw, 76px) !important;
+  height: clamp(42px, 12vw, 76px) !important;
+}
+@media (max-width: 430px) {
+  #main-game.home-v9 .board .row { gap: 7px !important; }
+  #main-game.home-v9 .board .row:nth-child(1) { width: 50% !important; }
+  #main-game.home-v9 .board .row:nth-child(2) { width: 72% !important; }
+  #main-game.home-v9 .board .row:nth-child(3) { width: 91% !important; }
+  #main-game.home-v9 .hole {
+    width: clamp(39px, 11.8vw, 58px) !important;
+    height: clamp(39px, 11.8vw, 58px) !important;
+  }
+}
