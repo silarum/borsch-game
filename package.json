@@ -5,7 +5,8 @@
   "description": "Безопасная демо-версия Telegram-игры Крипто Борщ",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "npm test"
+    "balance": "node scripts/simulate-fighter-balance.mjs",
+    "check": "npm test && npm run balance"
   },
   "engines": {
     "node": ">=20"

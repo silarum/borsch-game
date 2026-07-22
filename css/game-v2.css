@@ -66,12 +66,6 @@ input, select, textarea {
 }
 .sub-tab.active { border-color: rgba(111, 232, 207, .28) !important; background: rgba(71, 212, 181, .12) !important; color: #73ead2 !important; }
 #tasks-screen > div[style] { width: 100%; margin: 0 !important; overflow-x: auto; }
-.tasks-view-tabs,
-.tasks-category-tabs { display: grid; width: 100%; gap: 7px; }
-.tasks-view-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.tasks-category-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.tasks-view-tabs .sub-tab,
-.tasks-category-tabs .sub-tab { width: 100%; min-width: 0; white-space: normal; line-height: 1.2; }
 #tasks-content { display: grid; gap: 9px; max-height: none !important; overflow: visible !important; }
 .task-item { display: grid !important; gap: 9px; padding: 13px !important; }
 .task-item button, #referral-screen button { min-height: 40px; border-radius: 11px !important; }
@@ -179,7 +173,7 @@ input, select, textarea {
 .fighter-card-copy { position: absolute; left: 8px; right: 7px; bottom: 8px; z-index: 3; display: flex; flex-direction: column; }
 .fighter-card-copy b { overflow: hidden; font-size: .57rem; text-overflow: ellipsis; white-space: nowrap; }
 .fighter-card-copy small { margin-top: 2px; color: #8d98ac; font-size: .43rem; }
-.fighter-sprite { display: block; background-image: var(--fighter-art); background-position: var(--pose, 0% 0%); background-repeat: no-repeat; background-size: 200% 200%; }
+.fighter-sprite { display: block; background-image: var(--fighter-art); background-position: var(--pose, 0% 0%); background-repeat: no-repeat; background-size: var(--fighter-bg-size, 200% 200%); }
 .card-sprite { position: absolute; top: 4%; left: -13%; width: 126%; aspect-ratio: 1; filter: drop-shadow(0 10px 10px rgba(0, 0, 0, .62)); transition: transform .22s, filter .22s; }
 .fighter-card-v2:active .card-sprite, .fighter-card-v2.selected .card-sprite { transform: translateY(-2px) scale(1.04); filter: drop-shadow(0 12px 12px rgba(0, 0, 0, .7)) saturate(1.12); }
 
@@ -306,6 +300,112 @@ input, select, textarea {
 .result-stats small { color: #788397; font-size: .4rem; }.result-stats b { margin-top: 3px; font-size: .7rem; }
 .fight-result-v2 .fight-start, .fight-result-v2 .fight-ranking-link { position: relative; z-index: 4; }
 
+.fighter-school { display: block; margin: 0 0 5px; color: var(--fighter-color) !important; font-size: .5rem !important; }
+.fighter-move-list { grid-column: 1 / 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.fighter-move-list span, .fighter-move-list strong { padding: 6px 4px; border: 1px solid color-mix(in srgb, var(--fighter-color) 24%, transparent); border-radius: 9px; background: rgba(255, 255, 255, .035); color: #aeb8ca; font-size: .42rem; text-align: center; }
+.fighter-move-list strong { grid-column: 1 / 4; color: var(--fighter-color); letter-spacing: .04em; text-transform: uppercase; }
+
+/* ---------- Голодные волки V3: аркадная консоль ---------- */
+.wolf-arena-v2 { height: clamp(370px, 92vw, 470px); border-radius: 19px; border-color: rgba(116, 224, 255, .3); background-position: center; }
+.wolf-arena-v2::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(1, 4, 12, .12) 0, transparent 35%, rgba(3, 5, 13, .34) 72%, rgba(3, 5, 12, .86)); pointer-events: none; }
+.fight-hud-v2 { top: 8px; left: 8px; right: 8px; grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr); }
+.health-block-v2 > i { height: 13px; border-width: 2px; background: rgba(5, 7, 13, .94); }
+.health-block-v2 b { font-size: .53rem; letter-spacing: .02em; }
+.round-wins { display: flex; gap: 4px; min-height: 6px; }
+.health-block-v2.enemy .round-wins { justify-content: flex-end; }
+.round-wins em { width: 16px; height: 4px; border-radius: 99px; background: rgba(255, 255, 255, .19); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+.round-wins em.won { background: #fff36a; box-shadow: 0 0 9px rgba(255, 227, 74, .85); }
+.round-clock { position: relative; padding: 3px 2px 2px; background: rgba(3, 6, 13, .9); box-shadow: 0 5px 15px rgba(0, 0, 0, .38); }
+.round-clock b { line-height: 1; }
+#fight-audio { position: absolute; top: 100%; left: 50%; width: 29px; height: 25px; padding: 0; border: 1px solid rgba(255, 255, 255, .16); border-radius: 0 0 9px 9px; background: rgba(3, 6, 13, .84); color: #fff; font-size: .65rem; transform: translateX(-50%); }
+.combatants-v2 { inset: 53px 0 4px; z-index: 5; }
+.combatant-v2, .combatant-v2.player, .combatant-v2.enemy {
+    right: auto;
+    bottom: 0;
+    left: 50%;
+    width: 57%;
+    aspect-ratio: 1;
+    transform: translate3d(-50%, var(--fighter-y, 0px), 0);
+    transform-origin: 50% 90%;
+    transition: left .055s linear;
+}
+.fighter-body { position: absolute; inset: 0; transform-origin: 50% 85%; will-change: transform, filter; }
+.combatant-v2.enemy .fighter-body { transform: scaleX(-1); }
+.battle-sprite { inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 16px 9px rgba(0, 0, 0, .82)) saturate(1.08); }
+.battle-sprite.sprite-sequence { animation: fighterFrameSequence var(--sequence-duration, 400ms) steps(1, end) 1 both !important; }
+.battle-sprite.sprite-sequence.looping { animation-iteration-count: infinite !important; }
+.combatant-v2.walking:not(.acting):not(.frame-walk) .battle-sprite { animation: arcadeWalk .24s ease-in-out infinite alternate; }
+.combatant-v2:not(.walking):not(.acting):not(.hit) .battle-sprite { animation: fighterBreath 1.45s ease-in-out infinite; }
+.combatant-v2.player.acting, .combatant-v2.enemy.acting, .combatant-v2.player.dodging, .combatant-v2.enemy.dodging { animation: none; }
+.combatant-v2.player.acting .fighter-body { animation: arcadePlayerJab .36s ease; }
+.combatant-v2.player.action-kick .fighter-body { animation: arcadePlayerKick .49s ease; }
+.combatant-v2.player.action-heavy .fighter-body { animation: arcadePlayerHeavy .66s ease; }
+.combatant-v2.player.action-special .fighter-body { z-index: 9; animation: arcadePlayerSpecial 1.05s cubic-bezier(.18, .75, .2, 1); }
+.combatant-v2.enemy.acting .fighter-body { animation: arcadeEnemyJab .36s ease; }
+.combatant-v2.enemy.action-kick .fighter-body { animation: arcadeEnemyKick .49s ease; }
+.combatant-v2.enemy.action-heavy .fighter-body { animation: arcadeEnemyHeavy .66s ease; }
+.combatant-v2.enemy.action-special .fighter-body { z-index: 9; animation: arcadeEnemySpecial 1.05s cubic-bezier(.18, .75, .2, 1); }
+.combatant-v2.player.dodging .fighter-body { animation: arcadePlayerDodge .54s ease; }
+.combatant-v2.enemy.dodging .fighter-body { animation: arcadeEnemyDodge .54s ease; }
+.combatant-v2.blocking .fighter-body { filter: drop-shadow(0 0 14px #67eaff) brightness(1.12); }
+.combatant-v2.player.crouching:not(.acting):not(.frame-crouch) .fighter-body { transform: translateY(10%) scaleY(.79); }
+.combatant-v2.enemy.crouching:not(.acting):not(.frame-crouch) .fighter-body { transform: translateY(10%) scaleX(-1) scaleY(.79); }
+.combatant-v2.jumping .fighter-shadow { opacity: .35; transform: scale(.72); }
+.fighter-shadow { z-index: -1; transition: opacity .15s, transform .15s; }
+.fight-impact, .fight-miss { right: auto !important; margin-left: 0; }
+.fight-impact { top: 43%; transform-origin: center; }
+.fight-miss { top: 36%; transform: translateX(-50%); }
+.fight-console { gap: 7px; padding: 9px; border-radius: 18px; background: radial-gradient(circle at 80% 0, rgba(123, 64, 255, .13), transparent 42%), linear-gradient(145deg, #171e2e, #080c14); }
+.arcade-gamepad { display: grid; grid-template-columns: minmax(128px, .84fr) minmax(0, 1.35fr); align-items: center; gap: 9px; min-height: 151px; }
+.fight-joystick { display: flex; min-width: 128px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; touch-action: none; user-select: none; }
+.fight-joystick small { color: #69768c; font-size: .31rem; font-weight: 900; letter-spacing: .06em; text-align: center; }
+.joystick-base { position: relative; display: grid; width: 120px; height: 120px; place-items: center; border: 2px solid rgba(255, 255, 255, .1); border-radius: 50%; background: radial-gradient(circle, #202a3b 0 27%, #111824 28% 52%, #252f41 53% 58%, #0b111b 59%); box-shadow: inset 0 4px 10px rgba(255, 255, 255, .06), inset 0 -8px 17px rgba(0, 0, 0, .48), 0 9px 20px rgba(0, 0, 0, .38); }
+.joystick-ring { position: absolute; inset: 14px; border: 1px dashed rgba(102, 235, 211, .19); border-radius: 50%; pointer-events: none; }
+.joystick-thumb { position: relative; z-index: 2; display: grid; width: 56px; height: 56px; padding: 0; place-items: center; border: 2px solid rgba(112, 238, 215, .35); border-radius: 50%; background: radial-gradient(circle at 35% 26%, #53647e, #202a3b 52%, #0d131e 76%); color: #87f1dc; font-size: 1rem; box-shadow: inset 0 3px 7px rgba(255, 255, 255, .13), 0 7px 13px rgba(0, 0, 0, .48), 0 0 17px rgba(83, 231, 204, .08); transition: transform .06s linear, box-shadow .15s; touch-action: none; }
+.fight-joystick.active .joystick-thumb { border-color: rgba(117, 247, 221, .78); box-shadow: inset 0 3px 7px rgba(255, 255, 255, .18), 0 6px 12px rgba(0, 0, 0, .5), 0 0 23px rgba(83, 231, 204, .3); }
+.fight-dpad { display: grid; grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); align-content: center; justify-content: center; gap: 2px; touch-action: none; user-select: none; }
+.dpad-button { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid rgba(255, 255, 255, .13); border-radius: 10px; background: linear-gradient(145deg, #343d50, #111722); color: #dfe5ef; font-size: 1.08rem; font-weight: 1000; box-shadow: inset 0 2px rgba(255, 255, 255, .1), 0 5px 10px rgba(0, 0, 0, .32); touch-action: none; }
+.dpad-button:active { border-color: rgba(92, 237, 209, .48); background: linear-gradient(145deg, #44536b, #172235); color: #79f0d8; transform: translateY(2px); }
+.dpad-jump { grid-column: 2; grid-row: 1; border-radius: 13px 13px 6px 6px; }
+.dpad-left { grid-column: 1; grid-row: 2; border-radius: 13px 6px 6px 13px; }
+.dpad-center { grid-column: 2; grid-row: 2; display: grid; place-items: center; color: #68758c; background: #171e2a; font-size: .8rem; }
+.dpad-right { grid-column: 3; grid-row: 2; border-radius: 6px 13px 13px 6px; }
+.dpad-crouch { grid-column: 2; grid-row: 3; border-radius: 6px 6px 13px 13px; }
+.fight-controls-v2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, 66px); align-items: center; gap: 7px; }
+.fight-control { display: flex; min-width: 0; min-height: 62px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 5px 3px; border-radius: 50%; text-align: center; touch-action: manipulation; }
+.fight-control > span { display: grid; width: 29px; height: 29px; flex: 0 0 29px; grid-row: auto; place-items: center; border-radius: 50%; font-size: .65rem; }
+.fight-control b { width: 100%; align-self: auto; font-size: .48rem; line-height: 1.05; text-align: center; }
+.fight-control small { width: 100%; align-self: auto; color: #778399; font-size: .34rem; line-height: 1; text-align: center; }
+.fight-control.action-punch { border-color: rgba(72, 228, 189, .3); }
+.fight-control.action-kick { border-color: rgba(255, 197, 68, .3); }
+.fight-control.action-heavy { border-color: rgba(255, 88, 103, .33); }
+.fight-control.action-block { grid-column: 1; grid-row: 2; }
+.fight-control.special { grid-column: 2 / 4; grid-row: 2; flex-direction: row; border-radius: 22px; }
+.fight-control.special > span { margin-right: 4px; }
+.fight-control.special b { max-width: 86px; font-size: .42rem; }
+.fight-control.special small { display: none; }
+.fight-control:disabled { opacity: .42; }
+.result-stats { grid-template-columns: repeat(4, 1fr); }
+
+@keyframes fighterBreath { 50% { transform: translateY(-2px) scale(1.012); filter: brightness(1.04); } }
+@keyframes fighterFrameSequence {
+    0%, 24.99% { background-image: var(--fighter-frame-0); }
+    25%, 49.99% { background-image: var(--fighter-frame-1); }
+    50%, 74.99% { background-image: var(--fighter-frame-2); }
+    75%, 100% { background-image: var(--fighter-frame-3); }
+}
+@keyframes arcadeWalk { to { transform: translateY(-5px) rotate(-.7deg); } }
+@keyframes arcadePlayerJab { 52% { transform: translateX(18%) rotate(2deg); } }
+@keyframes arcadeEnemyJab { 0%, 100% { transform: scaleX(-1); } 52% { transform: scaleX(-1) translateX(18%) rotate(2deg); } }
+@keyframes arcadePlayerKick { 46% { transform: translate(22%, -4%) rotate(-4deg) scale(1.04); } }
+@keyframes arcadeEnemyKick { 0%, 100% { transform: scaleX(-1); } 46% { transform: scaleX(-1) translate(22%, -4%) rotate(-4deg) scale(1.04); } }
+@keyframes arcadePlayerHeavy { 22% { transform: translateX(-6%) rotate(-4deg); } 66% { transform: translateX(25%) rotate(5deg) scale(1.05); } }
+@keyframes arcadeEnemyHeavy { 0%, 100% { transform: scaleX(-1); } 22% { transform: scaleX(-1) translateX(-6%) rotate(-4deg); } 66% { transform: scaleX(-1) translateX(25%) rotate(5deg) scale(1.05); } }
+@keyframes arcadePlayerSpecial { 22% { transform: translateX(-7%) scale(.96); filter: brightness(1.55) drop-shadow(0 0 18px var(--fighter-color)); } 62% { transform: translateX(38%) scale(1.14); filter: brightness(1.8) drop-shadow(0 0 30px var(--fighter-color)); } }
+@keyframes arcadeEnemySpecial { 0%, 100% { transform: scaleX(-1); } 22% { transform: scaleX(-1) translateX(-7%) scale(.96); filter: brightness(1.55); } 62% { transform: scaleX(-1) translateX(38%) scale(1.14); filter: brightness(1.8); } }
+@keyframes arcadePlayerDodge { 50% { transform: translate(-16%, -4%) scale(.94); opacity: .72; } }
+@keyframes arcadeEnemyDodge { 0%, 100% { transform: scaleX(-1); } 50% { transform: scaleX(-1) translate(-16%, -4%) scale(.94); opacity: .72; } }
+
 @keyframes arenaLights { to { transform: translateX(7%) rotate(5deg); filter: hue-rotate(25deg); } }
 @keyframes playerJab { 50% { transform: translateX(52px) rotate(2deg); } }
 @keyframes enemyJab { 50% { transform: scaleX(-1) translateX(52px) rotate(2deg); } }
@@ -337,271 +437,27 @@ input, select, textarea {
     .fighter-card-v2 { border-radius: 14px; }
     .selected-fighter-v2 { grid-template-columns: 105px 1fr; padding: 12px; }
     .selected-art { min-height: 142px; }
-    .fight-control { grid-template-columns: 27px 1fr; min-height: 60px; padding: 6px 5px; }
-    .fight-control > span { width: 25px; height: 35px; }
-    .combatant-v2 { width: 70%; }.combatant-v2.player { left: -18%; }.combatant-v2.enemy { right: -18%; }
+    .arcade-gamepad { grid-template-columns: 126px 1fr; gap: 5px; }
+    .joystick-base { width: 111px; height: 111px; }
+    .joystick-thumb { width: 52px; height: 52px; }
+    .fight-control { min-height: 58px; padding: 4px 2px; }
+    .fight-control > span { width: 26px; height: 26px; flex-basis: 26px; }
+    .combatant-v2, .combatant-v2.player, .combatant-v2.enemy { right: auto; width: 55%; }
 }
 @media (max-width: 340px) {
     .fight-hero-v2 { grid-template-columns: 1fr 68px; padding: 14px; }
     .fight-brand-copy h1 { font-size: 1.3rem; }
     .fighter-card-copy b { font-size: .5rem; }
-    .fight-control b { font-size: .48rem; }
+    .fight-control b { font-size: .43rem; }
     .fight-control small { display: none; }
     .fight-control { min-height: 54px; }
+    .arcade-gamepad { grid-template-columns: 119px 1fr; }
+    .joystick-base { width: 104px; height: 104px; }
 }
 @media (min-width: 700px) {
     .fighter-roster-v2 { grid-template-columns: repeat(3, 1fr); }
     .ladder-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .arena-lights, .fight-control.special.ready { animation: none !important; }
-}
-
-/* ---------- V3: устойчивый мобильный экран кухни ---------- */
-#game-container {
-    height: 100vh;
-    height: 100dvh;
-    min-height: 560px;
-}
-#main-game {
-    isolation: isolate;
-    min-height: 100%;
-}
-#main-game .crypto-kitchen-art {
-    inset: 0;
-    background-position: center center;
-}
-#main-game .game-brand {
-    top: calc(8px + env(safe-area-inset-top)) !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-}
-#main-game .user-profile {
-    top: calc(59px + env(safe-area-inset-top)) !important;
-    left: 10px !important;
-    right: auto !important;
-    width: min(132px, 36vw);
-    max-width: min(132px, 36vw);
-    min-height: 41px;
-    padding: 5px 7px;
-}
-#main-game .user-avatar { flex: 0 0 30px; width: 30px; height: 30px; }
-#main-game .user-info { min-width: 0; }
-#main-game .user-info > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#main-game .user-menu-btn { flex: 0 0 24px; }
-#main-game .top-panel {
-    top: calc(59px + env(safe-area-inset-top)) !important;
-    right: 10px !important;
-    left: auto !important;
-}
-#main-game .balances-right {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(68px, 1fr));
-    gap: 4px !important;
-    width: min(166px, 46vw);
-}
-#main-game .balances-right div {
-    min-width: 0 !important;
-    overflow: hidden;
-    padding: 4px 5px !important;
-    font-size: clamp(.43rem, 1.8vw, .5rem) !important;
-    line-height: 1.15;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-#main-game .crypto-veg-legend {
-    top: calc(112px + env(safe-area-inset-top)) !important;
-    left: 10px !important;
-    right: 10px !important;
-    height: 29px;
-    padding: 2px 0;
-}
-#main-game .crypto-veg-legend span { padding: 5px 8px; }
-#main-game #rules-btn-bottom,
-#main-game #lang-btn-bottom {
-    top: calc(151px + env(safe-area-inset-top)) !important;
-    bottom: auto !important;
-    min-height: 34px;
-    padding: 7px 10px;
-    border-radius: 12px;
-    z-index: 48;
-}
-#main-game #rules-btn-bottom { left: 10px !important; right: auto !important; }
-#main-game #lang-btn-bottom { left: 92px !important; right: auto !important; }
-#main-game .quick-duel-coin {
-    top: calc(153px + env(safe-area-inset-top)) !important;
-    right: 10px !important;
-    width: 62px !important;
-    height: 62px !important;
-    border-radius: 19px;
-    z-index: 48;
-}
-#main-game .start-btn-container {
-    top: 31% !important;
-    left: 50% !important;
-    z-index: 34;
-}
-#main-game .start-btn {
-    min-height: 48px;
-    padding: 12px 24px;
-    border-radius: 16px;
-    white-space: nowrap;
-}
-#main-game .kitchen-area {
-    top: 42% !important;
-    bottom: auto !important;
-    height: 25% !important;
-    min-height: 145px;
-    z-index: 12;
-}
-#main-game .kitchen-area .stove {
-    top: 10% !important;
-    left: 22% !important;
-    right: 22% !important;
-    height: 82% !important;
-}
-#main-game .kitchen-area .pot {
-    top: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-}
-#main-game .kitchen-area .pot::before {
-    display: block !important;
-    top: 4% !important;
-    left: 9% !important;
-    right: 9% !important;
-    height: 18% !important;
-    border: 2px solid rgba(255, 218, 111, .46) !important;
-    border-radius: 50% !important;
-    background: rgba(255, 139, 47, .08) !important;
-    box-shadow: 0 0 28px rgba(255, 154, 42, .22) !important;
-}
-#main-game .kitchen-area .pot::after { display: none !important; }
-#main-game .kitchen-area .energy-display {
-    bottom: 4% !important;
-    max-width: 88%;
-    min-width: 118px;
-    padding: 5px 8px;
-    font-size: .61rem;
-}
-#main-game .kitchen-area .boost-display { bottom: -12% !important; }
-#main-game .board {
-    bottom: calc(84px + env(safe-area-inset-bottom)) !important;
-    left: 12px !important;
-    right: 12px !important;
-    width: auto !important;
-    transform: none !important;
-    gap: 6px !important;
-    padding: 10px 8px 12px !important;
-    border-radius: 24px !important;
-    clip-path: none !important;
-    background:
-        radial-gradient(circle at 50% 0, rgba(255, 177, 76, .13), transparent 48%),
-        linear-gradient(165deg, rgba(61, 35, 29, .94), rgba(12, 13, 24, .97)) !important;
-    z-index: 30 !important;
-}
-#main-game .row { gap: clamp(6px, 2.2vw, 10px) !important; }
-#main-game .hole {
-    width: clamp(37px, 11.2vw, 48px) !important;
-    height: clamp(37px, 11.2vw, 48px) !important;
-}
-#main-game .hole .veg { width: 111%; height: 111%; max-width: none; object-fit: contain; }
-#main-game .bottom-panel.offset-dock {
-    bottom: max(7px, env(safe-area-inset-bottom)) !important;
-    height: 68px !important;
-    z-index: 210;
-}
-
-/* ---------- V3: изображения бойцов как настоящие IMG ---------- */
-.fighter-sprite {
-    display: block;
-    overflow: hidden;
-    background: radial-gradient(circle, color-mix(in srgb, var(--fighter-color, #755cff) 22%, transparent), transparent 66%);
-    isolation: isolate;
-}
-.fighter-sprite-image {
-    position: absolute;
-    top: var(--frame-y, 0%);
-    left: var(--frame-x, 0%);
-    z-index: 2;
-    display: block;
-    width: 200%;
-    max-width: none;
-    height: 200%;
-    object-fit: fill;
-    opacity: 0;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-drag: none;
-    transition: opacity .18s ease, top .08s steps(1), left .08s steps(1);
-}
-.fighter-sprite.art-ready .fighter-sprite-image { opacity: 1; }
-.fighter-fallback {
-    position: absolute;
-    inset: 12%;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    border: 1px solid color-mix(in srgb, var(--fighter-color, #755cff) 42%, transparent);
-    border-radius: 50%;
-    background: color-mix(in srgb, var(--fighter-color, #755cff) 13%, #0a0f1b);
-    color: #fff;
-    font-size: clamp(1.5rem, 9vw, 3.2rem);
-    box-shadow: 0 0 25px color-mix(in srgb, var(--fighter-color, #755cff) 22%, transparent);
-}
-.fighter-sprite.art-ready .fighter-fallback { opacity: 0; }
-.card-sprite,
-.showcase-sprite,
-.battle-sprite,
-.result-sprite { background-image: none !important; }
-.combatants-v2 { z-index: 12; }
-.combatant-v2 {
-    bottom: 3px;
-    width: 64%;
-    min-width: 205px;
-    max-width: 288px;
-    aspect-ratio: 1;
-}
-.combatant-v2.player { left: -10%; }
-.combatant-v2.enemy { right: -10%; }
-.battle-sprite {
-    inset: 0;
-    z-index: 3;
-    filter: drop-shadow(0 13px 8px rgba(0, 0, 0, .78));
-}
-.fighter-shadow { z-index: 1; }
-.wolf-arena-v2::after { z-index: 18; }
-.fight-hud-v2,
-.fight-announcer-v2,
-.combo-callout { z-index: 25; }
-
-@media (max-width: 390px) {
-    #main-game .game-brand { transform: translateX(-50%) scale(.92) !important; }
-    #main-game .user-profile { max-width: 126px; }
-    #main-game .board { left: 9px !important; right: 9px !important; }
-    .combatant-v2 { width: 67%; min-width: 198px; }
-    .combatant-v2.player { left: -13%; }
-    .combatant-v2.enemy { right: -13%; }
-}
-
-@media (max-height: 700px) {
-    #main-game .crypto-veg-legend { top: calc(107px + env(safe-area-inset-top)) !important; }
-    #main-game #rules-btn-bottom,
-    #main-game #lang-btn-bottom { top: calc(141px + env(safe-area-inset-top)) !important; }
-    #main-game .quick-duel-coin { top: calc(149px + env(safe-area-inset-top)) !important; width: 56px !important; height: 56px !important; }
-    #main-game .start-btn-container { top: 36% !important; }
-    #main-game .kitchen-area { top: 38% !important; height: 25% !important; }
-    #main-game .board { bottom: calc(82px + env(safe-area-inset-bottom)) !important; padding: 7px 7px 9px !important; gap: 4px !important; }
-    #main-game .row { gap: 6px !important; }
-    #main-game .hole { width: clamp(34px, 10.5vw, 42px) !important; height: clamp(34px, 10.5vw, 42px) !important; }
-}
-
-@media (max-width: 340px) {
-    #main-game .user-profile { width: 118px; max-width: 118px; }
-    #main-game .balances-right { width: 146px; }
-    #main-game #rules-btn-bottom { padding-left: 8px; padding-right: 8px; }
-    #main-game #lang-btn-bottom { left: 84px !important; }
-    #main-game .board { padding: 5px 6px 6px !important; gap: 3px !important; }
-    #main-game .row { gap: 5px !important; }
-    #main-game .hole { width: 33px !important; height: 33px !important; }
+    .arena-lights, .fight-control.special.ready, .battle-sprite { animation: none !important; }
 }
