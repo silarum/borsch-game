@@ -11,7 +11,7 @@
     document.head.appendChild(premiumScript);
 })();
 
-// V7 запускается после загрузки основной логики арены и файтинга.
+// V7 и новый файтинг запускаются после загрузки основной игровой логики.
 // Home V8/V9/V10 временно отключены: основная версия возвращена к стабильному экрану.
 window.addEventListener('load', () => {
     if (!document.querySelector('link[data-premium-v7]')) {
@@ -26,6 +26,19 @@ window.addEventListener('load', () => {
         script.src = 'js/premium-v7.js?v=20260721a';
         script.dataset.premiumV7 = 'true';
         document.body.appendChild(script);
+    }
+    if (!document.querySelector('link[data-fight-v3]')) {
+        const fightStylesheet = document.createElement('link');
+        fightStylesheet.rel = 'stylesheet';
+        fightStylesheet.href = 'css/fight-v3.css?v=20260723a';
+        fightStylesheet.dataset.fightV3 = 'true';
+        document.head.appendChild(fightStylesheet);
+    }
+    if (!document.querySelector('script[data-fight-v3]')) {
+        const fightScript = document.createElement('script');
+        fightScript.src = 'js/fight-v3-patch.js?v=20260723a';
+        fightScript.dataset.fightV3 = 'true';
+        document.body.appendChild(fightScript);
     }
 });
 
