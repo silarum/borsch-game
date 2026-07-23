@@ -34,6 +34,36 @@ window.addEventListener('load', () => {
         fightStylesheet.dataset.fightV3 = 'true';
         document.head.appendChild(fightStylesheet);
     }
+
+    const loadTopDown = () => {
+        [['css/veggie-brawl-topdown-lobby.css?v=20260724a', 'lobby'], ['css/veggie-brawl-topdown-arena.css?v=20260724a', 'arena']].forEach(([href, key]) => {
+            if (document.querySelector(`link[data-veggie-topdown-${key}]`)) return;
+            const stylesheet = document.createElement('link');
+            stylesheet.rel = 'stylesheet';
+            stylesheet.href = href;
+            stylesheet.dataset[`veggieTopdown${key[0].toUpperCase()}${key.slice(1)}`] = 'true';
+            document.head.appendChild(stylesheet);
+        });
+        const loadScript = (src, key, next) => {
+            const selector = `script[data-veggie-topdown-${key}]`;
+            const existing = document.querySelector(selector);
+            if (existing) {
+                if (next) existing.addEventListener('load', next, { once: true });
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = src;
+            script.dataset[`veggieTopdown${key[0].toUpperCase()}${key.slice(1)}`] = 'true';
+            if (next) script.addEventListener('load', next, { once: true });
+            document.body.appendChild(script);
+        };
+        loadScript('js/veggie-brawl-topdown-core.js?v=20260724a', 'core', () => {
+            loadScript('js/veggie-brawl-topdown-engine.js?v=20260724a', 'engine', () => {
+                loadScript('js/veggie-brawl-topdown-ui.js?v=20260724a', 'ui');
+            });
+        });
+    };
+
     const loadVeggieBrawl = () => {
         if (!document.querySelector('link[data-veggie-brawl]')) {
             const brawlStylesheet = document.createElement('link');
@@ -42,13 +72,20 @@ window.addEventListener('load', () => {
             brawlStylesheet.dataset.veggieBrawl = 'true';
             document.head.appendChild(brawlStylesheet);
         }
-        if (!document.querySelector('script[data-veggie-brawl]')) {
-            const brawlScript = document.createElement('script');
-            brawlScript.src = 'js/veggie-brawl.js?v=20260723b';
-            brawlScript.dataset.veggieBrawl = 'true';
-            document.body.appendChild(brawlScript);
+        const existing = document.querySelector('script[data-veggie-brawl]');
+        if (!existing) {
+            const script = document.createElement('script');
+            script.src = 'js/veggie-brawl.js?v=20260723b';
+            script.dataset.veggieBrawl = 'true';
+            script.addEventListener('load', loadTopDown, { once: true });
+            document.body.appendChild(script);
+        } else if (window.VeggieBrawl) {
+            loadTopDown();
+        } else {
+            existing.addEventListener('load', loadTopDown, { once: true });
         }
     };
+
     const existingFightScript = document.querySelector('script[data-fight-v3]');
     if (!existingFightScript) {
         const fightScript = document.createElement('script');
