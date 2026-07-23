@@ -6,6 +6,13 @@ import { createRequire } from 'node:module';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), 'utf8');
+const assertPng = (path, label) => {
+  const url = new URL(path, root);
+  assert.ok(existsSync(url), `нет кадра ${label}`);
+  const bytes = readFileSync(url);
+  assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', `${label}: неверная сигнатура PNG`);
+  assert.equal(bytes.subarray(-8, -4).toString('ascii'), 'IEND', `${label}: PNG обрезан`);
+};
 const html = read('index.html');
 const scriptPaths = [...html.matchAll(/<script\s+src="([^"]+)"/g)]
   .map((match) => match[1])
@@ -91,6 +98,41 @@ test('Голодные волки содержат девять бойцов, п
   assert.match(fight, /stamina/);
   assert.match(fight, /combo/);
   assert.match(fight, /stunnedUntil/);
+  assert.match(fight, /data-fight-stick/);
+  assert.match(fight, /function updateJoystick/);
+  assert.match(fight, /function finishRound/);
+  assert.match(fight, /roundWins/);
+  assert.match(fight, /FIGHTER_ANIMATIONS/);
+  assert.match(fight, /AI_STYLES/);
+  assert.match(fight, /function learnPlayerAction/);
+  assert.match(fight, /function chooseEnemyAction/);
+  assert.match(fight, /function nextSignatureAction/);
+  assert.match(fight, /const gap = 22/);
+  assert.match(read('css/game-v2.css'), /width: 55%/);
+  const alphaCycles = ['jab', 'kick', 'heavy', 'block', 'hit', 'walk', 'jump', 'crouch', 'dodge', 'knockdown', 'special'];
+  for (const frame of alphaCycles.flatMap((cycle) => [0, 1, 2, 3].map((index) => `${cycle}-${String(index).padStart(2, '0')}.png`))) {
+    assertPng(`assets/fight/animation/alpha-v1/${frame}`, `Альфы ${frame}`);
+  }
+  const lunaCycles = ['punch', 'kick', 'heavy', 'block', 'hit', 'idle', 'walk', 'jump', 'crouch', 'dodge', 'knockdown', 'special'];
+  for (const frame of lunaCycles.flatMap((cycle) => [0, 1, 2, 3].map((index) => `${cycle}-${String(index).padStart(2, '0')}.png`))) {
+    assertPng(`assets/fight/animation/luna-v1/${frame}`, `Luna ${frame}`);
+  }
+  const standardCycles = ['punch', 'kick', 'heavy', 'block', 'hit', 'idle', 'walk', 'jump', 'crouch', 'dodge', 'knockdown', 'special'];
+  for (const fighterId of ['fenrir', 'she-wolf', 'khan', 'veles', 'mara', 'satoshi', 'borz']) {
+    for (const frame of standardCycles.flatMap((cycle) => [0, 1, 2, 3].map((index) => `${cycle}-${String(index).padStart(2, '0')}.png`))) {
+      assertPng(`assets/fight/animation/${fighterId}-v1/${frame}`, `${fighterId} ${frame}`);
+    }
+  }
+  for (const frame of ['intro', 'victory'].flatMap((cycle) => [0, 1, 2, 3].map((index) => `${cycle}-${String(index).padStart(2, '0')}.png`))) {
+    assertPng(`assets/fight/animation/fenrir-v1/${frame}`, `Fenrir ${frame}`);
+  }
+  assert.match(fight, /standardAnimationSet/);
+  assert.match(fight, /hitAt: 0\.55/);
+  assert.match(fight, /holdAnimationFrame\(sprite, fighter, 'block', 2\)/);
+  assert.match(fight, /setPose\(loserSide, 'idle', 'knockdown action-knockdown'/);
+  for (const school of ['Бокс', 'Тхэквондо', 'Кёкусинкай', 'Вин-чун', 'Боевое самбо', 'Капоэйра', 'Муай-тай', 'Карате сётокан', 'Вольная борьба']) {
+    assert.match(fight, new RegExp(school));
+  }
   assert.match(fight, /CLUB_LADDER/);
   assert.match(read('js/arena.js'), /start-tournament-borsch/);
   assert.match(read('js/arena.js'), /start-tournament-fight/);
@@ -103,8 +145,6 @@ test('боевые спрайты оптимизированы, а овощи п
     assert.ok(existsSync(new URL(`assets/fight/fighters/${id}.webp`, root)), `нет спрайта ${id}`);
   }
   assert.match(fight, /POSE_POSITION/);
-  assert.match(fight, /class="fighter-sprite-image"/);
-  assert.match(fight, /prepareFighterImages/);
   assert.match(fight, /spawnImpact/);
   assert.match(engine, /function getVeggieCutout/);
   assert.match(engine, /function pulsePot/);
