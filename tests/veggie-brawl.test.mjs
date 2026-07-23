@@ -40,11 +40,11 @@ test('Veggie Brawl exports three coin battle modes', () => {
 });
 
 test('arena includes pear, coins, pickups, knockout and mobile controls', () => {
-    assert.match(source, /class=\"funny-pear\"/);
+    assert.match(source, /class="funny-pear"/);
     assert.match(source, /flying-brawl-coin/);
     assert.match(source, /function knockOut/);
     assert.match(source, /function spawnPickup/);
-    assert.match(source, /data-brawl-hold=\"left\"/);
+    assert.match(source, /data-brawl-hold="left"/);
     assert.match(source, /ClubLeaguePlatform\.recordFightResult/);
 });
 
@@ -60,4 +60,5 @@ test('Veggie Brawl styles cover the complete battle UI', () => {
 test('security loader activates Veggie Brawl after the legacy fight module', () => {
     assert.match(security, /veggie-brawl\.css\?v=20260723b/);
     assert.match(security, /veggie-brawl\.js\?v=20260723b/);
+    assert.match(security, /fightScript\.addEventListener\('load', loadVeggieBrawl/);
 });
