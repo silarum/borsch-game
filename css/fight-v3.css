@@ -1,0 +1,174 @@
+/* Hungry Wolves Fight V3 — movement, distance and mobile controls */
+.wolf-arena-v3 {
+    height: clamp(370px, 96vw, 470px);
+    touch-action: none;
+}
+
+.combatants-v3 {
+    position: absolute;
+    inset: 52px 0 0;
+    z-index: 12;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.combatant-track {
+    position: absolute;
+    left: var(--fighter-x, 24%);
+    bottom: 2px;
+    width: min(64%, 288px);
+    min-width: 198px;
+    aspect-ratio: 1;
+    transform: translate(-50%, var(--fighter-y, 0px));
+    transform-origin: 50% 100%;
+    transition: left 50ms linear;
+    will-change: left, transform;
+}
+
+.combatant-v3 {
+    --face: 1;
+    position: absolute;
+    inset: 0;
+    transform: scaleX(var(--face));
+    transform-origin: 50% 92%;
+    will-change: transform, filter;
+}
+
+.combatant-v3.enemy { --face: -1; }
+.combatant-v3 .battle-sprite { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; }
+.combatant-v3 .fighter-shadow { z-index: 1; }
+.combatant-v3.airborne .fighter-shadow { opacity: .36; transform: scale(.72); }
+.combatant-v3.crouching { transform: scaleX(var(--face)) scaleY(.76) scaleX(1.06); }
+.combatant-v3.blocking { filter: drop-shadow(0 0 15px #67eaff); }
+.combatant-v3.dodging { animation: fighterDodgeV3 .54s ease; }
+.combatant-v3.stunned { filter: saturate(.35) brightness(1.45); animation: fighterStunnedV3 .15s linear 4; }
+.combatant-v3.hit { filter: brightness(2.25) saturate(.22); }
+.combatant-v3.acting.action-punch { animation: fighterJabV3 .36s ease; }
+.combatant-v3.acting.action-kick { animation: fighterKickV3 .48s ease; }
+.combatant-v3.acting.action-heavy { animation: fighterHeavyV3 .64s ease; }
+.combatant-v3.acting.action-special { z-index: 8; animation: fighterSpecialV3 1s cubic-bezier(.2,.8,.2,1); }
+
+.distance-indicator {
+    position: absolute;
+    top: 53px;
+    left: 50%;
+    z-index: 26;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 58px;
+    padding: 4px 8px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 10px;
+    background: rgba(5,8,16,.7);
+    color: #fff;
+    transform: translateX(-50%);
+    backdrop-filter: blur(8px);
+}
+.distance-indicator span { font-size: .72rem; font-weight: 1000; line-height: 1; }
+.distance-indicator small { margin-top: 2px; color: #8491a7; font-size: .31rem; font-weight: 900; letter-spacing: .08em; }
+
+.fight-console-v3 { gap: 9px; }
+.fight-mobile-controls {
+    display: grid;
+    grid-template-columns: minmax(112px, .78fr) minmax(190px, 1.35fr);
+    align-items: stretch;
+    gap: 8px;
+}
+
+.movement-pad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 53px);
+    grid-template-areas:
+        ". jump ."
+        "left crouch right";
+    gap: 5px;
+    padding: 6px;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(25,32,50,.94), rgba(8,12,21,.97));
+    box-shadow: inset 0 1px rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.24);
+    touch-action: none;
+}
+.move-control {
+    min-width: 0;
+    min-height: 0;
+    padding: 3px;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 13px;
+    background: linear-gradient(145deg, #263049, #101622);
+    color: #fff;
+    box-shadow: inset 0 1px rgba(255,255,255,.08), 0 6px 12px rgba(0,0,0,.2);
+    touch-action: none;
+    user-select: none;
+}
+.move-control:active { transform: translateY(1px) scale(.96); background: linear-gradient(145deg, #3d4e72, #172033); }
+.move-control span { display: block; font-size: 1.05rem; font-weight: 1000; line-height: 1; }
+.move-control small { display: block; margin-top: 2px; overflow: hidden; color: #8d9ab0; font-size: .34rem; text-overflow: ellipsis; white-space: nowrap; }
+.move-jump { grid-area: jump; }
+.move-left { grid-area: left; }
+.move-crouch { grid-area: crouch; }
+.move-right { grid-area: right; }
+
+.fight-attacks {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+}
+.fight-attacks .fight-control {
+    min-width: 0;
+    min-height: 53px;
+    padding: 5px 3px;
+    border-radius: 13px;
+}
+.fight-attacks .fight-control > span { width: 22px; height: 22px; font-size: .48rem; }
+.fight-attacks .fight-control > b { max-width: 100%; overflow: hidden; font-size: .43rem; text-overflow: ellipsis; white-space: nowrap; }
+.fight-attacks .fight-control > small { font-size: .32rem; }
+.fight-attacks .fight-control.special { grid-column: span 1; }
+
+.fight-help { margin-top: 0 !important; }
+.fight-help b { color: #e9edf6; }
+
+@keyframes fighterJabV3 {
+    0%,100% { transform: scaleX(var(--face)) translateX(0) rotate(0); }
+    45% { transform: scaleX(var(--face)) translateX(16%) rotate(-3deg); }
+}
+@keyframes fighterKickV3 {
+    0%,100% { transform: scaleX(var(--face)) translateX(0) rotate(0); }
+    42% { transform: scaleX(var(--face)) translateX(20%) rotate(-8deg) scale(1.04); }
+}
+@keyframes fighterHeavyV3 {
+    0%,100% { transform: scaleX(var(--face)) translateX(0) rotate(0); }
+    24% { transform: scaleX(var(--face)) translateX(-6%) rotate(5deg); }
+    58% { transform: scaleX(var(--face)) translateX(23%) rotate(-7deg) scale(1.06); }
+}
+@keyframes fighterSpecialV3 {
+    0%,100% { transform: scaleX(var(--face)) translateX(0) scale(1); filter: none; }
+    24% { transform: scaleX(var(--face)) translateX(-7%) scale(1.04); filter: drop-shadow(0 0 12px #fff); }
+    56% { transform: scaleX(var(--face)) translateX(28%) scale(1.16); filter: drop-shadow(0 0 28px var(--fighter-color,#8ef)); }
+}
+@keyframes fighterDodgeV3 {
+    0%,100% { transform: scaleX(var(--face)) translateX(0) skewX(0); opacity: 1; }
+    45% { transform: scaleX(var(--face)) translateX(-16%) skewX(8deg); opacity: .72; }
+}
+@keyframes fighterStunnedV3 {
+    0%,100% { transform: scaleX(var(--face)) translateX(0); }
+    50% { transform: scaleX(var(--face)) translateX(3%); }
+}
+
+@media (max-width: 390px) {
+    .wolf-arena-v3 { height: clamp(350px, 100vw, 425px); }
+    .combatant-track { width: 67%; min-width: 194px; }
+    .fight-mobile-controls { grid-template-columns: 108px minmax(0,1fr); gap: 6px; }
+    .movement-pad { grid-template-rows: repeat(2, 49px); gap: 4px; padding: 5px; }
+    .fight-attacks .fight-control { min-height: 49px; }
+    .move-control small, .fight-attacks .fight-control > small { display: none; }
+}
+
+@media (max-width: 340px) {
+    .fight-mobile-controls { grid-template-columns: 96px minmax(0,1fr); }
+    .movement-pad { grid-template-rows: repeat(2, 45px); }
+    .fight-attacks .fight-control { min-height: 45px; padding: 3px 2px; }
+    .fight-attacks .fight-control > b { font-size: .38rem; }
+}
